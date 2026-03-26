@@ -13,27 +13,11 @@ interface Props {
   attendance: Attendance[];
 }
 
-const mockMessages = [
+// 실제 메시지는 DB에서 가져올 예정 — 지금은 예시 1건만
+const mockMessages: { id: string; name: string; time: string; type: 'question' | 'help'; replied: boolean; message: string; replyText?: string }[] = [
   {
-    id: '1', name: '권예지', time: '오전 9:12', type: 'question' as const, replied: false,
-    message: '선생님, 1차시 LPM 관련 문제에서 "접착제 없이"라는 부분이 헷갈려요. 좀 더 설명해주실 수 있나요? 🙏',
-  },
-  {
-    id: '2', name: '김강욱', time: '오전 9:30', type: 'question' as const, replied: false,
-    message: '어제 시험 오답 해설 다시 볼 수 있나요? 분체도장 부분이요.',
-  },
-  {
-    id: '3', name: '채형우', time: '오전 10:05', type: 'help' as const, replied: false,
+    id: '1', name: '채형우', time: '오전 10:05', type: 'help', replied: false,
     message: '소파 자재 등급 부분 너무 어려워요... 추가 자료 있으면 공유 부탁드립니다! 😭',
-  },
-  {
-    id: '4', name: '곽현서', time: '오전 10:22', type: 'question' as const, replied: true,
-    message: '선생님 오늘 시험 범위가 3차시까지인가요?',
-    replyText: '네 현서야~ 3차시까지야! 목재 파트 한번 더 보고 오면 좋을 것 같아 👍',
-  },
-  {
-    id: '5', name: '이채원', time: '오전 10:45', type: 'help' as const, replied: false,
-    message: '색상 코드 외우는 팁 있을까요? 자꾸 헷갈려요 ㅠㅠ',
   },
 ];
 

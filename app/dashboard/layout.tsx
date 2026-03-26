@@ -160,7 +160,7 @@ export default function DashboardLayout({
       )}
 
       {/* 메인 */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+      <main style={{ maxWidth: 1600, margin: '0 auto', padding: '32px 40px' }}>
         {children}
       </main>
 
