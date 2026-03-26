@@ -14,18 +14,37 @@ interface AttendanceRow {
   note: string;
 }
 
-function parseStatus(raw: string): { status: AttendanceRow['status']; label: string } {
-  if (!raw || raw === '-' || raw === '미출근') return { status: 'absent', label: '미출근' };
-  if (raw.includes('지각')) return { status: 'late', label: '지각' };
-  if (raw.includes('조퇴')) return { status: 'early_leave', label: '조퇴' };
+function parseStatus(checkIn: string, raw?: string): { status: AttendanceRow['status']; label: string } {
+  if (raw === '미출근' || raw === '-' || !raw) {
+    if (!checkIn || checkIn === '-') return { status: 'absent', label: '미출근' };
+  }
+  if (raw?.includes('지각')) return { status: 'late', label: '지각' };
+  if (raw?.includes('조퇴')) return { status: 'early_leave', label: '조퇴' };
   return { status: 'present', label: '출근' };
 }
 
-function formatTime(raw: string | undefined): string {
-  if (!raw || raw === '-') return '-';
-  // "2026-03-26 08:04:27" → "08:04"
-  const match = String(raw).match(/(\d{2}:\d{2})/);
-  return match ? match[1] : String(raw);
+// Excel 시리얼 넘버 → 날짜 문자열
+function excelSerialToDate(serial: number): string {
+  // Excel epoch: 1899-12-30
+  const epoch = new Date(1899, 11, 30);
+  const d = new Date(epoch.getTime() + serial * 86400000);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// Excel 시리얼 넘버 → 시간 문자열 (HH:MM)
+function excelSerialToTime(serial: number | string | undefined): string {
+  if (!serial || serial === '-' || serial === '미출근' || serial === '') return '-';
+  const num = Number(serial);
+  if (isNaN(num)) return String(serial);
+  // 소수 부분이 시간 (0.5 = 12:00)
+  const fraction = num - Math.floor(num);
+  const totalMinutes = Math.round(fraction * 24 * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
 export default function AttendancePage() {
@@ -48,18 +67,26 @@ export default function AttendancePage() {
       const parsed: AttendanceRow[] = json
         .filter((r) => r['이름'] && r['날짜'])
         .map((r) => {
-          const { status, label } = parseStatus(r['상태 (출근/퇴근/업무/비업무'] || r['상태'] || '');
-          // 날짜: "2026-03-26 (목)" → "2026-03-26"
-          const dateRaw = String(r['날짜'] || '');
-          const dateMatch = dateRaw.match(/(\d{4}-\d{2}-\d{2})/);
-          const date = dateMatch ? dateMatch[1] : dateRaw;
+          // 날짜: Excel 시리얼 넘버 또는 문자열
+          const dateRaw = r['날짜'];
+          const date = typeof dateRaw === 'number'
+            ? excelSerialToDate(dateRaw)
+            : String(dateRaw).match(/(\d{4}-\d{2}-\d{2})/)?.[1] || String(dateRaw);
+
+          // 출퇴근시간: 시리얼 넘버 (출퇴근시간 = 출근, 출퇴근시간_1 = 퇴근)
+          const checkIn = excelSerialToTime(r['출퇴근시간']);
+          const checkOut = excelSerialToTime(r['출퇴근시간_1']);
+
+          // 상태: '출근' 컬럼 값 (출근/미출근)
+          const statusRaw = String(r['출근'] || '');
+          const { status, label } = parseStatus(checkIn, statusRaw);
 
           return {
             date,
             name: String(r['이름'] || ''),
-            department: String(r['부서'] || ''),
-            checkIn: formatTime(r['출퇴근시간'] || r['출근']),
-            checkOut: formatTime(r['퇴근'] || ''),
+            department: String(r['기본 부서'] || r['부서'] || ''),
+            checkIn,
+            checkOut,
             status,
             statusLabel: label,
             note: '',
