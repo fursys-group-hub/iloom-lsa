@@ -18,15 +18,14 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
 
   const studentsWithStats = useMemo(() => {
     return students.map((student) => {
-      const studentScores = scores.filter((s) => s.student_id === student.id);
-      const studentAttendance = attendance.filter((a) => a.student_id === student.id);
-      const avgScore = calculateAvgScore(studentScores);
-      const riskLevel = calculateRiskLevel(studentScores, studentAttendance);
-      const absentCount = studentAttendance.filter((a) => a.status === 'absent').length;
-      const lateCount = studentAttendance.filter((a) => a.status === 'late').length;
+      const ss = scores.filter((s) => s.student_id === student.id);
+      const sa = attendance.filter((a) => a.student_id === student.id);
       return {
-        ...student, avg_score: avgScore, risk_level: riskLevel,
-        absent_count: absentCount, late_count: lateCount, recent_scores: studentScores,
+        ...student,
+        avg_score: calculateAvgScore(ss),
+        risk_level: calculateRiskLevel(ss, sa),
+        absent_count: sa.filter((a) => a.status === 'absent').length,
+        late_count: sa.filter((a) => a.status === 'late').length,
       };
     });
   }, [students, scores, attendance]);
@@ -39,86 +38,134 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
     });
   }, [studentsWithStats, filter, search]);
 
+  const filterLabels: Record<string, string> = { all: '전체', high: '위험', medium: '주의', low: '양호' };
+
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-bold text-slate-900">교육생 관리</h2>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+        👥 교육생 관리
+      </h2>
 
       {/* 필터 */}
-      <div className="flex items-center gap-4">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <input
           type="text"
           placeholder="이름 검색..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-xl border border-slate-200 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-72"
+          style={{
+            width: 280,
+            padding: '12px 18px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-elevated)',
+            color: 'var(--text-primary)',
+            fontSize: 15,
+            outline: 'none',
+          }}
         />
-        <div className="flex gap-2">
+        <div style={{ display: 'flex', gap: 8 }}>
           {(['all', 'high', 'medium', 'low'] as const).map((level) => (
             <button
               key={level}
               onClick={() => setFilter(level)}
-              className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
-                filter === level
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-              }`}
+              style={{
+                padding: '10px 18px',
+                borderRadius: 'var(--radius-md)',
+                border: filter === level ? 'none' : '1px solid var(--border)',
+                background: filter === level ? 'var(--blue)' : 'transparent',
+                color: filter === level ? '#fff' : 'var(--text-tertiary)',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
             >
-              {level === 'all' ? '전체' : level === 'high' ? '위험' : level === 'medium' ? '주의' : '양호'}
+              {filterLabels[level]}
             </button>
           ))}
         </div>
       </div>
 
       {/* 테이블 */}
-      <div className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-slate-100">
-              <th className="text-left px-6 py-4 text-base font-semibold text-slate-600">이름</th>
-              <th className="text-left px-6 py-4 text-base font-semibold text-slate-600">부서</th>
-              <th className="text-center px-6 py-4 text-base font-semibold text-slate-600">평균 점수</th>
-              <th className="text-center px-6 py-4 text-base font-semibold text-slate-600">결석</th>
-              <th className="text-center px-6 py-4 text-base font-semibold text-slate-600">지각</th>
-              <th className="text-center px-6 py-4 text-base font-semibold text-slate-600">상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((s) => (
-              <tr
-                key={s.id}
-                className="border-b border-slate-50 hover:bg-slate-50 transition-all duration-200"
-              >
-                <td className="px-6 py-4">
-                  <Link
-                    href={`/dashboard/students/${s.id}`}
-                    className="flex items-center gap-3 font-medium text-slate-900 hover:text-blue-600"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-base font-semibold">
-                      {s.name[0]}
-                    </div>
-                    <span className="text-base">{s.name}</span>
-                  </Link>
-                </td>
-                <td className="px-6 py-4 text-base text-slate-600">{s.department || '-'}</td>
-                <td className="px-6 py-4 text-center text-base font-medium text-slate-900">
-                  {s.avg_score}점
-                </td>
-                <td className="px-6 py-4 text-center text-base text-slate-600">{s.absent_count}회</td>
-                <td className="px-6 py-4 text-center text-base text-slate-600">{s.late_count}회</td>
-                <td className="px-6 py-4 text-center">
-                  <RiskBadge level={s.risk_level} />
-                </td>
+      <div style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+      }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                {['이름', '부서', '평균 점수', '결석', '지각', '상태'].map((h) => (
+                  <th key={h} style={{
+                    padding: '14px 20px',
+                    textAlign: h === '이름' || h === '부서' ? 'left' : 'center',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-base text-slate-400">
-                  교육생 데이터가 없어요.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((s) => (
+                <tr
+                  key={s.id}
+                  style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <td style={{ padding: '14px 20px' }}>
+                    <Link
+                      href={`/dashboard/students/${s.id}`}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        textDecoration: 'none', color: 'var(--text-primary)',
+                      }}
+                    >
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: 'var(--blue-dim)', color: 'var(--blue-light)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 15, fontWeight: 700, flexShrink: 0,
+                      }}>
+                        {s.name[0]}
+                      </div>
+                      <span style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</span>
+                    </Link>
+                  </td>
+                  <td style={{ padding: '14px 20px', color: 'var(--text-tertiary)' }}>
+                    {s.department || '-'}
+                  </td>
+                  <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {s.avg_score}점
+                  </td>
+                  <td style={{ padding: '14px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                    {s.absent_count}회
+                  </td>
+                  <td style={{ padding: '14px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                    {s.late_count}회
+                  </td>
+                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>
+                    <RiskBadge level={s.risk_level} />
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 16 }}>
+                    교육생 데이터가 없어요.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
