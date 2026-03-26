@@ -497,10 +497,19 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* 반응형 */}
+      {/* 반응형 + 날짜 입력 크기 */}
       <style>{`
         @media (max-width: 768px) {
           .student-form-grid { grid-template-columns: 1fr !important; }
+        }
+        input[type="date"] {
+          font-size: 16px !important;
+          min-height: 44px;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          width: 24px;
+          height: 24px;
+          cursor: pointer;
         }
       `}</style>
     </div>
