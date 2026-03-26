@@ -12,6 +12,9 @@ export interface Student {
   batch_id: string;
   name: string;
   department: string | null;
+  email: string | null;
+  phone: string | null;
+  store_location: string | null;
 }
 
 export interface TestScore {

@@ -1,28 +1,170 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+interface Batch {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  sheet_id: string | null;
+}
+
+interface StudentRow {
+  id: string;
+  batch_id: string;
+  name: string;
+  department: string | null;
+  email: string | null;
+  phone: string | null;
+  store_location: string | null;
+}
 
 export default function SettingsPage() {
-  const [sheetId, setSheetId] = useState('1_2pc1Mr05DeZMPdaILpPKtOhAsD53XtIWHHJpLqBRtI');
+  // ── 기수 ──
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
+  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '', sheet_id: '' });
+  const [showBatchForm, setShowBatchForm] = useState(false);
+  const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
+  const [savingBatch, setSavingBatch] = useState(false);
+
+  // ── 교육생 ──
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [studentForm, setStudentForm] = useState({ name: '', department: '', email: '', phone: '', store_location: '' });
+  const [showStudentForm, setShowStudentForm] = useState(false);
+  const [savingStudent, setSavingStudent] = useState(false);
+
+  // ── Sheets 동기화 ──
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  // 기수 불러오기
+  const fetchBatches = useCallback(async () => {
+    try {
+      const res = await fetch('/api/batches');
+      const data = await res.json();
+      if (Array.isArray(data)) setBatches(data);
+    } catch { /* silent */ }
+  }, []);
+
+  // 교육생 불러오기
+  const fetchStudents = useCallback(async (batchId: string) => {
+    setLoadingStudents(true);
+    try {
+      const res = await fetch(`/api/students?batch_id=${batchId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) setStudents(data);
+    } catch { /* silent */ }
+    finally { setLoadingStudents(false); }
+  }, []);
+
+  useEffect(() => { fetchBatches(); }, [fetchBatches]);
+
+  useEffect(() => {
+    if (selectedBatchId) fetchStudents(selectedBatchId);
+  }, [selectedBatchId, fetchStudents]);
+
+  // 기수 저장
+  const handleBatchSave = async () => {
+    if (!batchForm.name || !batchForm.start_date || !batchForm.end_date) return;
+    setSavingBatch(true);
+    try {
+      const res = await fetch('/api/batches', {
+        method: editingBatchId ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(editingBatchId ? { id: editingBatchId } : {}),
+          name: batchForm.name,
+          start_date: batchForm.start_date,
+          end_date: batchForm.end_date,
+          sheet_id: batchForm.sheet_id || null,
+        }),
+      });
+      if (res.ok) {
+        await fetchBatches();
+        setShowBatchForm(false);
+        setEditingBatchId(null);
+        setBatchForm({ name: '', start_date: '', end_date: '', sheet_id: '' });
+      }
+    } catch { /* silent */ }
+    finally { setSavingBatch(false); }
+  };
+
+  // 기수 삭제
+  const handleBatchDelete = async (id: string) => {
+    if (!confirm('이 기수를 삭제하면 소속 교육생도 함께 삭제돼요. 계속할까요?')) return;
+    try {
+      await fetch('/api/batches', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      await fetchBatches();
+      if (selectedBatchId === id) {
+        setSelectedBatchId(null);
+        setStudents([]);
+      }
+    } catch { /* silent */ }
+  };
+
+  // 교육생 저장
+  const handleStudentSave = async () => {
+    if (!studentForm.name || !selectedBatchId) return;
+    setSavingStudent(true);
+    try {
+      const res = await fetch('/api/students', {
+        method: editingStudentId ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(editingStudentId ? { id: editingStudentId } : {}),
+          batch_id: selectedBatchId,
+          name: studentForm.name,
+          department: studentForm.department || null,
+          email: studentForm.email || null,
+          phone: studentForm.phone || null,
+          store_location: studentForm.store_location || null,
+        }),
+      });
+      if (res.ok) {
+        await fetchStudents(selectedBatchId);
+        setShowStudentForm(false);
+        setEditingStudentId(null);
+        setStudentForm({ name: '', department: '', email: '', phone: '', store_location: '' });
+      }
+    } catch { /* silent */ }
+    finally { setSavingStudent(false); }
+  };
+
+  // 교육생 삭제
+  const handleStudentDelete = async (id: string) => {
+    if (!confirm('이 교육생을 삭제할까요?')) return;
+    try {
+      await fetch('/api/students', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (selectedBatchId) await fetchStudents(selectedBatchId);
+    } catch { /* silent */ }
+  };
+
+  // Sheets 동기화
   const handleSync = async () => {
+    const batch = batches.find((b) => b.id === selectedBatchId);
+    if (!batch?.sheet_id) return;
     setSyncing(true);
     setSyncResult(null);
-
     try {
       const res = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetId }),
+        body: JSON.stringify({ sheetId: batch.sheet_id }),
       });
-
       const data = await res.json();
-      setSyncResult({
-        success: res.ok,
-        message: data.message || (res.ok ? '동기화 완료!' : '동기화 실패'),
-      });
+      setSyncResult({ success: res.ok, message: data.message || (res.ok ? '동기화 완료!' : '동기화 실패') });
     } catch {
       setSyncResult({ success: false, message: '네트워크 오류' });
     } finally {
@@ -30,66 +172,406 @@ export default function SettingsPage() {
     }
   };
 
+  const selectedBatch = batches.find((b) => b.id === selectedBatchId);
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">설정</h2>
-
-      {/* Google Sheets 연동 */}
-      <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-slate-900">Google Sheets 연동</h3>
-        <p className="text-sm text-slate-500">
-          구글 폼 응답이 기록되는 Google Sheets ID를 입력하고 동기화하세요.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+          ⚙️ 설정
+        </h2>
+        <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
+          기수와 교육생을 등록하고 관리해요
         </p>
+      </div>
 
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Sheet ID
-            </label>
-            <input
-              type="text"
-              value={sheetId}
-              onChange={(e) => setSheetId(e.target.value)}
-              placeholder="1_2pc1Mr05DeZMPdaILpPKtOhAsD53XtIWHHJpLqBRtI"
-              className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+      {/* ═══ 기수 관리 ═══ */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            📚 기수 관리
+          </h3>
+          <button
+            onClick={() => {
+              setShowBatchForm(true);
+              setEditingBatchId(null);
+              setBatchForm({ name: '', start_date: '', end_date: '', sheet_id: '' });
+            }}
+            style={primaryBtnStyle}
+          >
+            + 기수 등록
+          </button>
+        </div>
+
+        {/* 기수 등록/수정 폼 */}
+        {showBatchForm && (
+          <div style={{ marginBottom: 20, padding: 20, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={labelStyle}>기수명</label>
+                <input
+                  type="text"
+                  placeholder="입문교육 26년 3월"
+                  value={batchForm.name}
+                  onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Google Sheet ID (선택)</label>
+                <input
+                  type="text"
+                  placeholder="1_2pc1Mr05..."
+                  value={batchForm.sheet_id}
+                  onChange={(e) => setBatchForm({ ...batchForm, sheet_id: e.target.value })}
+                  style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>시작일</label>
+                <input
+                  type="date"
+                  value={batchForm.start_date}
+                  onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>종료일</label>
+                <input
+                  type="date"
+                  value={batchForm.end_date}
+                  onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => { setShowBatchForm(false); setEditingBatchId(null); }} style={smallBtnStyle}>취소</button>
+              <button onClick={handleBatchSave} disabled={savingBatch} style={{ ...smallBtnStyle, background: 'var(--blue)', color: '#fff', border: 'none' }}>
+                {savingBatch ? '...' : editingBatchId ? '수정 저장' : '등록하기'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 기수 목록 */}
+        {batches.length === 0 ? (
+          <p style={{ fontSize: 15, color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>
+            등록된 기수가 없어요. 위의 버튼으로 기수를 등록해주세요.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {batches.map((batch) => (
+              <div
+                key={batch.id}
+                onClick={() => setSelectedBatchId(batch.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '14px 18px', borderRadius: 'var(--radius-md)',
+                  background: selectedBatchId === batch.id ? 'var(--blue-dim)' : 'var(--bg-hover)',
+                  border: selectedBatchId === batch.id ? '1px solid var(--blue)' : '1px solid transparent',
+                  cursor: 'pointer', transition: 'all 0.15s ease',
+                }}
+              >
+                <div>
+                  <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    {batch.name}
+                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                    {batch.start_date} ~ {batch.end_date}
+                    {batch.sheet_id && ' · Sheets 연동됨'}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingBatchId(batch.id);
+                      setBatchForm({
+                        name: batch.name,
+                        start_date: batch.start_date,
+                        end_date: batch.end_date,
+                        sheet_id: batch.sheet_id || '',
+                      });
+                      setShowBatchForm(true);
+                    }}
+                    style={{ ...tinyBtnStyle }}
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleBatchDelete(batch.id); }}
+                    style={{ ...tinyBtnStyle, color: 'var(--red)' }}
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ═══ 교육생 관리 ═══ */}
+      {selectedBatchId && (
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                👥 {selectedBatch?.name} 교육생
+              </h3>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 2 }}>
+                {students.length}명 등록됨
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setShowStudentForm(true);
+                setEditingStudentId(null);
+                setStudentForm({ name: '', department: '', email: '', phone: '', store_location: '' });
+              }}
+              style={primaryBtnStyle}
+            >
+              + 교육생 등록
+            </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* 교육생 등록/수정 폼 */}
+          {showStudentForm && (
+            <div style={{ marginBottom: 20, padding: 20, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="student-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>이름 *</label>
+                  <input type="text" placeholder="홍길동" value={studentForm.name} onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>부서</label>
+                  <input type="text" placeholder="노원점" value={studentForm.department} onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>이메일</label>
+                  <input type="email" placeholder="hong@iloom.com" value={studentForm.email} onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>전화번호</label>
+                  <input type="tel" placeholder="010-1234-5678" value={studentForm.phone} onChange={(e) => setStudentForm({ ...studentForm, phone: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>배치 매장</label>
+                  <input type="text" placeholder="노원점, 논현점..." value={studentForm.store_location} onChange={(e) => setStudentForm({ ...studentForm, store_location: e.target.value })} style={inputStyle} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => { setShowStudentForm(false); setEditingStudentId(null); }} style={smallBtnStyle}>취소</button>
+                <button onClick={handleStudentSave} disabled={savingStudent} style={{ ...smallBtnStyle, background: 'var(--blue)', color: '#fff', border: 'none' }}>
+                  {savingStudent ? '...' : editingStudentId ? '수정 저장' : '등록하기'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 교육생 테이블 */}
+          {loadingStudents ? (
+            <p style={{ fontSize: 15, color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>불러오는 중...</p>
+          ) : students.length === 0 ? (
+            <p style={{ fontSize: 15, color: 'var(--text-muted)', textAlign: 'center', padding: 32 }}>
+              등록된 교육생이 없어요
+            </p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    {['이름', '부서', '이메일', '전화번호', '배치 매장', ''].map((h) => (
+                      <th key={h} style={{
+                        padding: '12px 16px', textAlign: h === '' ? 'right' : 'left',
+                        fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
+                      }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((s) => (
+                    <tr
+                      key={s.id}
+                      style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: '50%',
+                            background: 'var(--blue-dim)', color: 'var(--blue-light)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 13, fontWeight: 700, flexShrink: 0,
+                          }}>
+                            {s.name[0]}
+                          </div>
+                          {s.name}
+                        </div>
+                      </td>
+                      <td style={tdStyle}>{s.department || '-'}</td>
+                      <td style={tdStyle}>{s.email || '-'}</td>
+                      <td style={tdStyle}>{s.phone || '-'}</td>
+                      <td style={tdStyle}>{s.store_location || '-'}</td>
+                      <td style={{ ...tdStyle, textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => {
+                              setEditingStudentId(s.id);
+                              setStudentForm({
+                                name: s.name,
+                                department: s.department || '',
+                                email: s.email || '',
+                                phone: s.phone || '',
+                                store_location: s.store_location || '',
+                              });
+                              setShowStudentForm(true);
+                            }}
+                            style={{ ...tinyBtnStyle, opacity: 0.5 }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() => handleStudentDelete(s.id)}
+                            style={{ ...tinyBtnStyle, color: 'var(--red)', opacity: 0.5 }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ Google Sheets 동기화 ═══ */}
+      {selectedBatch?.sheet_id && (
+        <div style={card}>
+          <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
+            🔄 Google Sheets 동기화
+          </h3>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
+            {selectedBatch.name}의 시험 결과를 Google Sheets에서 가져와요
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{
+              flex: 1, padding: '10px 16px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-hover)', fontFamily: 'monospace', fontSize: 13,
+              color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {selectedBatch.sheet_id}
+            </div>
             <button
               onClick={handleSync}
-              disabled={syncing || !sheetId}
-              className="bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              disabled={syncing}
+              style={{
+                ...primaryBtnStyle,
+                opacity: syncing ? 0.6 : 1,
+                cursor: syncing ? 'not-allowed' : 'pointer',
+              }}
             >
               {syncing ? '동기화 중...' : '동기화 시작'}
             </button>
-
-            {syncResult && (
-              <p
-                className={`text-sm font-medium ${
-                  syncResult.success ? 'text-emerald-600' : 'text-red-600'
-                }`}
-              >
-                {syncResult.message}
-              </p>
-            )}
           </div>
+          {syncResult && (
+            <p style={{
+              fontSize: 14, fontWeight: 600, marginTop: 12,
+              color: syncResult.success ? 'var(--green)' : 'var(--red)',
+            }}>
+              {syncResult.message}
+            </p>
+          )}
         </div>
-      </div>
+      )}
 
-      {/* 환경변수 안내 */}
-      <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-6 space-y-3">
-        <h3 className="text-lg font-semibold text-slate-900">환경 변수 안내</h3>
-        <p className="text-sm text-slate-500">
-          아래 환경 변수들이 <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">.env.local</code>에 설정되어 있어야 합니다.
-        </p>
-        <div className="bg-slate-50 rounded-xl p-4 font-mono text-sm text-slate-700 space-y-1">
-          <p>NEXT_PUBLIC_SUPABASE_URL</p>
-          <p>NEXT_PUBLIC_SUPABASE_ANON_KEY</p>
-          <p>SUPABASE_SERVICE_ROLE_KEY</p>
-          <p>GOOGLE_SHEETS_API_KEY</p>
-        </div>
-      </div>
+      {/* 반응형 */}
+      <style>{`
+        @media (max-width: 768px) {
+          .student-form-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
+
+// ── 스타일 ──
+const card: React.CSSProperties = {
+  background: 'var(--bg-surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-lg)',
+  padding: 24,
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: '12px 16px',
+  color: 'var(--text-second)',
+  whiteSpace: 'nowrap',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: 13,
+  fontWeight: 600,
+  color: 'var(--text-muted)',
+  marginBottom: 6,
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 14px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--border)',
+  background: 'var(--bg-elevated)',
+  color: 'var(--text-primary)',
+  fontSize: 14,
+  outline: 'none',
+};
+
+const primaryBtnStyle: React.CSSProperties = {
+  padding: '10px 20px',
+  borderRadius: 'var(--radius-md)',
+  border: 'none',
+  background: 'var(--blue)',
+  color: '#fff',
+  fontSize: 14,
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'all 0.15s ease',
+};
+
+const smallBtnStyle: React.CSSProperties = {
+  padding: '8px 16px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--border)',
+  background: 'transparent',
+  color: 'var(--text-tertiary)',
+  fontSize: 14,
+  fontWeight: 500,
+  cursor: 'pointer',
+  transition: 'all 0.15s ease',
+};
+
+const tinyBtnStyle: React.CSSProperties = {
+  padding: '4px 10px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--border)',
+  background: 'transparent',
+  color: 'var(--text-tertiary)',
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: 'pointer',
+  transition: 'all 0.15s ease',
+};
