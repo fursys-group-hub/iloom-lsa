@@ -63,6 +63,17 @@ function getStatusLabel(status: string): string {
   return map[status] || status;
 }
 
+function parseNoteToTimes(note: string | null): { checkIn: string; checkOut: string } {
+  if (!note) return { checkIn: '-', checkOut: '-' };
+  // "출근 08:04 / 퇴근 17:30" 형식 파싱
+  const checkInMatch = note.match(/출근\s*([\d:]+)/);
+  const checkOutMatch = note.match(/퇴근\s*([\d:]+)/);
+  return {
+    checkIn: checkInMatch?.[1] || '-',
+    checkOut: checkOutMatch?.[1] || '-',
+  };
+}
+
 export default function AttendancePage() {
   // ── DB 데이터 ──
   const [savedData, setSavedData] = useState<SavedAttendance[]>([]);
@@ -518,7 +529,7 @@ export default function AttendancePage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {['이름', '부서', '상태', '비고', ''].map((h) => (
+                      {['이름', '부서', '출근', '퇴근', '상태', ''].map((h) => (
                         <th key={h} style={{
                           padding: '12px 16px',
                           textAlign: h === '' ? 'right' : 'left',
@@ -532,6 +543,7 @@ export default function AttendancePage() {
                   <tbody>
                     {filteredData.map((d) => {
                       const isEditing = editingId === d.id;
+                      const times = parseNoteToTimes(d.note);
                       return (
                         <tr
                           key={d.id}
@@ -545,6 +557,8 @@ export default function AttendancePage() {
                           <td style={tdStyle}>
                             {d.students?.department || '-'}
                           </td>
+                          <td style={tdStyle}>{times.checkIn}</td>
+                          <td style={tdStyle}>{times.checkOut}</td>
                           <td style={tdStyle}>
                             {isEditing ? (
                               <select value={editStatus} onChange={(e) => setEditStatus(e.target.value as StatusType)} style={selectStyle}>
@@ -554,23 +568,6 @@ export default function AttendancePage() {
                               </select>
                             ) : (
                               <StatusBadge status={d.status} label={getStatusLabel(d.status)} />
-                            )}
-                          </td>
-                          <td style={tdStyle}>
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editNote}
-                                onChange={(e) => setEditNote(e.target.value)}
-                                placeholder="비고 입력..."
-                                style={{
-                                  padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                                  border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-                                  color: 'var(--text-primary)', fontSize: 14, width: '100%', minWidth: 160,
-                                }}
-                              />
-                            ) : (
-                              <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{d.note || '-'}</span>
                             )}
                           </td>
                           <td style={{ ...tdStyle, textAlign: 'right' }}>
@@ -587,7 +584,7 @@ export default function AttendancePage() {
                               </div>
                             ) : (
                               <button
-                                onClick={() => { setEditingId(d.id); setEditStatus(d.status as StatusType); setEditNote(d.note || ''); }}
+                                onClick={() => { setEditingId(d.id); setEditStatus(d.status as StatusType); setEditNote(d.note || `출근 ${times.checkIn} / 퇴근 ${times.checkOut}`); }}
                                 style={{ ...smallBtnStyle, opacity: 0.5 }}
                                 onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}

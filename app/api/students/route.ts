@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
         batch_id: body.batch_id,
         name: body.name,
         department: body.department || null,
+        company_email: body.company_email || null,
         email: body.email || null,
         phone: body.phone || null,
         store_location: body.store_location || null,
@@ -54,6 +55,7 @@ export async function PATCH(req: NextRequest) {
       .update({
         name: body.name,
         department: body.department || null,
+        company_email: body.company_email || null,
         email: body.email || null,
         phone: body.phone || null,
         store_location: body.store_location || null,

@@ -9,7 +9,7 @@ const nav = [
   { href: '/dashboard/students', label: '교육생', icon: '👥' },
   { href: '/dashboard/attendance', label: '출결', icon: '📋' },
   { href: '/dashboard/reports', label: '리포트', icon: '📈' },
-  { href: '/dashboard/settings', label: '설정', icon: '⚙️' },
+  { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
 ];
 
 export default function DashboardLayout({

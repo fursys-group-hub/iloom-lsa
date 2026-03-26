@@ -15,16 +15,19 @@ interface StudentRow {
   batch_id: string;
   name: string;
   department: string | null;
+  company_email: string | null;
   email: string | null;
   phone: string | null;
   store_location: string | null;
 }
 
+const emptyStudentForm = { name: '', department: '', company_email: '', email: '', phone: '', store_location: '' };
+
 export default function SettingsPage() {
   // ── 기수 ──
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
-  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '', sheet_id: '' });
+  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '' });
   const [showBatchForm, setShowBatchForm] = useState(false);
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [savingBatch, setSavingBatch] = useState(false);
@@ -33,13 +36,9 @@ export default function SettingsPage() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
-  const [studentForm, setStudentForm] = useState({ name: '', department: '', email: '', phone: '', store_location: '' });
+  const [studentForm, setStudentForm] = useState(emptyStudentForm);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [savingStudent, setSavingStudent] = useState(false);
-
-  // ── Sheets 동기화 ──
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // 기수 불러오기
   const fetchBatches = useCallback(async () => {
@@ -80,14 +79,13 @@ export default function SettingsPage() {
           name: batchForm.name,
           start_date: batchForm.start_date,
           end_date: batchForm.end_date,
-          sheet_id: batchForm.sheet_id || null,
         }),
       });
       if (res.ok) {
         await fetchBatches();
         setShowBatchForm(false);
         setEditingBatchId(null);
-        setBatchForm({ name: '', start_date: '', end_date: '', sheet_id: '' });
+        setBatchForm({ name: '', start_date: '', end_date: '' });
       }
     } catch { /* silent */ }
     finally { setSavingBatch(false); }
@@ -123,6 +121,7 @@ export default function SettingsPage() {
           batch_id: selectedBatchId,
           name: studentForm.name,
           department: studentForm.department || null,
+          company_email: studentForm.company_email || null,
           email: studentForm.email || null,
           phone: studentForm.phone || null,
           store_location: studentForm.store_location || null,
@@ -132,7 +131,7 @@ export default function SettingsPage() {
         await fetchStudents(selectedBatchId);
         setShowStudentForm(false);
         setEditingStudentId(null);
-        setStudentForm({ name: '', department: '', email: '', phone: '', store_location: '' });
+        setStudentForm(emptyStudentForm);
       }
     } catch { /* silent */ }
     finally { setSavingStudent(false); }
@@ -151,51 +150,30 @@ export default function SettingsPage() {
     } catch { /* silent */ }
   };
 
-  // Sheets 동기화
-  const handleSync = async () => {
-    const batch = batches.find((b) => b.id === selectedBatchId);
-    if (!batch?.sheet_id) return;
-    setSyncing(true);
-    setSyncResult(null);
-    try {
-      const res = await fetch('/api/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetId: batch.sheet_id }),
-      });
-      const data = await res.json();
-      setSyncResult({ success: res.ok, message: data.message || (res.ok ? '동기화 완료!' : '동기화 실패') });
-    } catch {
-      setSyncResult({ success: false, message: '네트워크 오류' });
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   const selectedBatch = batches.find((b) => b.id === selectedBatchId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       <div>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          ⚙️ 설정
+          📚 기수 관리
         </h2>
         <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
           기수와 교육생을 등록하고 관리해요
         </p>
       </div>
 
-      {/* ═══ 기수 관리 ═══ */}
+      {/* ═══ 기수 목록 ═══ */}
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            📚 기수 관리
+            기수 목록
           </h3>
           <button
             onClick={() => {
               setShowBatchForm(true);
               setEditingBatchId(null);
-              setBatchForm({ name: '', start_date: '', end_date: '', sheet_id: '' });
+              setBatchForm({ name: '', start_date: '', end_date: '' });
             }}
             style={primaryBtnStyle}
           >
@@ -206,29 +184,19 @@ export default function SettingsPage() {
         {/* 기수 등록/수정 폼 */}
         {showBatchForm && (
           <div style={{ marginBottom: 20, padding: 20, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="batch-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
               <div>
-                <label style={labelStyle}>기수명</label>
+                <label style={labelStyle}>기수명 *</label>
                 <input
                   type="text"
-                  placeholder="입문교육 26년 3월"
+                  placeholder="26년 3월 입문교육"
                   value={batchForm.name}
                   onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
                   style={inputStyle}
                 />
               </div>
               <div>
-                <label style={labelStyle}>Google Sheet ID (선택)</label>
-                <input
-                  type="text"
-                  placeholder="1_2pc1Mr05..."
-                  value={batchForm.sheet_id}
-                  onChange={(e) => setBatchForm({ ...batchForm, sheet_id: e.target.value })}
-                  style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>시작일</label>
+                <label style={labelStyle}>시작일 *</label>
                 <input
                   type="date"
                   value={batchForm.start_date}
@@ -237,7 +205,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label style={labelStyle}>종료일</label>
+                <label style={labelStyle}>종료일 *</label>
                 <input
                   type="date"
                   value={batchForm.end_date}
@@ -265,7 +233,7 @@ export default function SettingsPage() {
             {batches.map((batch) => (
               <div
                 key={batch.id}
-                onClick={() => setSelectedBatchId(batch.id)}
+                onClick={() => setSelectedBatchId(selectedBatchId === batch.id ? null : batch.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '14px 18px', borderRadius: 'var(--radius-md)',
@@ -280,7 +248,6 @@ export default function SettingsPage() {
                   </p>
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
                     {batch.start_date} ~ {batch.end_date}
-                    {batch.sheet_id && ' · Sheets 연동됨'}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -292,11 +259,10 @@ export default function SettingsPage() {
                         name: batch.name,
                         start_date: batch.start_date,
                         end_date: batch.end_date,
-                        sheet_id: batch.sheet_id || '',
                       });
                       setShowBatchForm(true);
                     }}
-                    style={{ ...tinyBtnStyle }}
+                    style={tinyBtnStyle}
                   >
                     수정
                   </button>
@@ -329,7 +295,7 @@ export default function SettingsPage() {
               onClick={() => {
                 setShowStudentForm(true);
                 setEditingStudentId(null);
-                setStudentForm({ name: '', department: '', email: '', phone: '', store_location: '' });
+                setStudentForm(emptyStudentForm);
               }}
               style={primaryBtnStyle}
             >
@@ -347,11 +313,15 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>부서</label>
-                  <input type="text" placeholder="노원점" value={studentForm.department} onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })} style={inputStyle} />
+                  <input type="text" placeholder="26년 3월" value={studentForm.department} onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>이메일</label>
-                  <input type="email" placeholder="hong@iloom.com" value={studentForm.email} onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })} style={inputStyle} />
+                  <label style={labelStyle}>회사 이메일</label>
+                  <input type="email" placeholder="name@iloomstore.co.kr" value={studentForm.company_email} onChange={(e) => setStudentForm({ ...studentForm, company_email: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>개인 이메일</label>
+                  <input type="email" placeholder="name@naver.com" value={studentForm.email} onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>전화번호</label>
@@ -380,13 +350,13 @@ export default function SettingsPage() {
             </p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['이름', '부서', '이메일', '전화번호', '배치 매장', ''].map((h) => (
+                    {['이름', '부서', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
                       <th key={h} style={{
-                        padding: '12px 16px', textAlign: h === '' ? 'right' : 'left',
-                        fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
+                        padding: '12px 14px', textAlign: h === '' ? 'right' : 'left',
+                        fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
                       }}>
                         {h}
                       </th>
@@ -415,7 +385,8 @@ export default function SettingsPage() {
                         </div>
                       </td>
                       <td style={tdStyle}>{s.department || '-'}</td>
-                      <td style={tdStyle}>{s.email || '-'}</td>
+                      <td style={{ ...tdStyle, fontSize: 13 }}>{s.company_email || '-'}</td>
+                      <td style={{ ...tdStyle, fontSize: 13 }}>{s.email || '-'}</td>
                       <td style={tdStyle}>{s.phone || '-'}</td>
                       <td style={tdStyle}>{s.store_location || '-'}</td>
                       <td style={{ ...tdStyle, textAlign: 'right' }}>
@@ -426,6 +397,7 @@ export default function SettingsPage() {
                               setStudentForm({
                                 name: s.name,
                                 department: s.department || '',
+                                company_email: s.company_email || '',
                                 email: s.email || '',
                                 phone: s.phone || '',
                                 store_location: s.store_location || '',
@@ -457,50 +429,11 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ═══ Google Sheets 동기화 ═══ */}
-      {selectedBatch?.sheet_id && (
-        <div style={card}>
-          <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
-            🔄 Google Sheets 동기화
-          </h3>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
-            {selectedBatch.name}의 시험 결과를 Google Sheets에서 가져와요
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{
-              flex: 1, padding: '10px 16px', borderRadius: 'var(--radius-sm)',
-              background: 'var(--bg-hover)', fontFamily: 'monospace', fontSize: 13,
-              color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis',
-            }}>
-              {selectedBatch.sheet_id}
-            </div>
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              style={{
-                ...primaryBtnStyle,
-                opacity: syncing ? 0.6 : 1,
-                cursor: syncing ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {syncing ? '동기화 중...' : '동기화 시작'}
-            </button>
-          </div>
-          {syncResult && (
-            <p style={{
-              fontSize: 14, fontWeight: 600, marginTop: 12,
-              color: syncResult.success ? 'var(--green)' : 'var(--red)',
-            }}>
-              {syncResult.message}
-            </p>
-          )}
-        </div>
-      )}
-
       {/* 반응형 + 날짜 입력 크기 */}
       <style>{`
         @media (max-width: 768px) {
           .student-form-grid { grid-template-columns: 1fr !important; }
+          .batch-form-grid { grid-template-columns: 1fr !important; }
         }
         input[type="date"] {
           font-size: 16px !important;
@@ -525,7 +458,7 @@ const card: React.CSSProperties = {
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: '12px 16px',
+  padding: '12px 14px',
   color: 'var(--text-second)',
   whiteSpace: 'nowrap',
 };
