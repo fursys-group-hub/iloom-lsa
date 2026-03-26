@@ -20,14 +20,12 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    // 관리자 비밀번호
     if (password === '1230') {
       localStorage.setItem('iloom-auth', JSON.stringify({ name: name.trim(), role: 'admin' }));
       router.push('/dashboard');
       return;
     }
 
-    // TODO: 교육생 로그인 (추후 구현)
     setError('비밀번호가 올바르지 않아요.');
     setLoading(false);
   };
@@ -43,39 +41,40 @@ export default function LoginPage() {
     }}>
       <div style={{
         width: '100%',
-        maxWidth: 400,
+        maxWidth: 420,
         display: 'flex',
         flexDirection: 'column',
         gap: 32,
       }}>
-        {/* 로고 */}
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-            일룸 입문교육
-          </h1>
-          <p style={{ fontSize: 16, color: 'var(--text-muted)' }}>
-            교육 관리 시스템
-          </p>
-        </div>
-
         {/* 로그인 카드 */}
         <form
           onSubmit={handleLogin}
           style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: 32,
+            borderRadius: 'var(--radius-xl)',
+            padding: '40px 36px',
             display: 'flex',
             flexDirection: 'column',
-            gap: 20,
+            gap: 24,
           }}
         >
+          {/* 아이콘 + 제목 */}
+          <div style={{ textAlign: 'center', marginBottom: 4 }}>
+            <p style={{ fontSize: 48, margin: '0 0 16px' }}>📖</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+              일룸 LSA 입문교육
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--text-muted)', margin: 0 }}>
+              일룸 영업전문직 LSA 교육 관리 시스템
+            </p>
+          </div>
+
           <div>
             <label style={labelStyle}>이름</label>
             <input
               type="text"
-              placeholder="이름을 입력하세요"
+              placeholder="예: 김수지"
               value={name}
               onChange={(e) => { setName(e.target.value); setError(''); }}
               autoFocus
@@ -113,15 +112,15 @@ export default function LoginPage() {
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.15s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
             }}
           >
-            {loading ? '로그인 중...' : '로그인'}
+            {loading ? '로그인 중...' : '다음 →'}
           </button>
         </form>
-
-        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
-          일룸 가구 · 입문교육 관리 도구
-        </p>
       </div>
     </div>
   );
@@ -137,7 +136,7 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '12px 16px',
+  padding: '14px 16px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--border)',
   background: 'var(--bg-elevated)',

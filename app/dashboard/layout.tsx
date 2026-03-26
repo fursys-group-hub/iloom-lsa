@@ -86,14 +86,15 @@ export default function DashboardLayout({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-              일룸 입문교육
+              일룸 LSA 입문교육
             </span>
           </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>교육 관리 도구</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>교육 관리 시스템</p>
         </div>
 
         {/* 네비게이션 */}
-        <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {nav.map((item) => {
             const isActive =
               item.href === '/dashboard'
@@ -125,6 +126,36 @@ export default function DashboardLayout({
               </Link>
             );
           })}
+          </div>
+
+          {/* 외부 링크 */}
+          <a
+            href="https://iloom-education-settlement-production.up.railway.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 14,
+              fontWeight: 500,
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+              background: 'transparent',
+              color: 'var(--text-muted)',
+              borderTop: '1px solid var(--border)',
+              marginTop: 8,
+              paddingTop: 16,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <span style={{ fontSize: 16 }}>💰</span>
+            교육비용 정산 비서
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+          </a>
         </nav>
 
         {/* 하단 정보 */}
@@ -184,7 +215,7 @@ export default function DashboardLayout({
               <path d="M3 6h16M3 11h16M3 16h16" />
             </svg>
           </button>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 입문교육</span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</span>
         </header>
 
         {/* 콘텐츠 */}
