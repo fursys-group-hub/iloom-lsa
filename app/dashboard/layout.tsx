@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const nav = [
   { href: '/dashboard', label: '홈', icon: '🏠' },
@@ -18,7 +18,33 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authName, setAuthName] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    const auth = localStorage.getItem('iloom-auth');
+    if (!auth) {
+      router.replace('/login');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(auth);
+      if (parsed.role === 'admin') {
+        setAuthName(parsed.name);
+        setChecked(true);
+      } else {
+        router.replace('/login');
+      }
+    } catch {
+      router.replace('/login');
+    }
+  }, [router]);
+
+  if (!checked) {
+    return <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }} />;
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
@@ -105,8 +131,28 @@ export default function DashboardLayout({
         <div style={{
           padding: '16px 20px',
           borderTop: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>교육자: 수지</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>교육자: {authName || '관리자'}</p>
+          <button
+            onClick={() => { localStorage.removeItem('iloom-auth'); router.replace('/login'); }}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              color: 'var(--text-muted)',
+              fontSize: 12,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--red)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            로그아웃
+          </button>
         </div>
       </aside>
 
