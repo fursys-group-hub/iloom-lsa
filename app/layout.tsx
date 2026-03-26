@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "일룸 LSA 교육 대시보드",
-  description: "일룸 신입사원 교육 관리 및 성적 분석 대시보드",
+  title: "일룸 LSA 입문교육",
+  description: "일룸 영업전문직 LSA 교육 관리 시스템",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>",
+  },
 };
 
 export default function RootLayout({
