@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"kill 6913 2>/dev/null; rm -rf /Users/baosuji/projects/04_iloom-lsa/.next\",\"description\":\"Kill dev server and clear .next cache\"}",
+  "error": "Exit code 1\nrm: /Users/baosuji/projects/04_iloom-lsa/.next/dev: Directory not empty\nrm: /Users/baosuji/projects/04_iloom-lsa/.next: Directory not empty",
+  "timestamp": "2026-03-26T12:07:55.329Z",
+  "retry_count": 1
+}

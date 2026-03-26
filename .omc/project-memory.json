@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774525735854,
+  "projectRoot": "/Users/baosuji/projects/04_iloom-lsa",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.2.1",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.4",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.4",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app",
+      "components",
+      "lib",
+      "public"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1774525735839,
+      "keyFiles": [
+        "favicon.ico",
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "components": {
+      "path": "components",
+      "purpose": "UI components",
+      "fileCount": 2,
+      "lastAccessed": 1774525735839,
+      "keyFiles": [
+        "RiskBadge.tsx",
+        "Sidebar.tsx"
+      ]
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 4,
+      "lastAccessed": 1774525735839,
+      "keyFiles": [
+        "analysis.ts",
+        "sheets.ts",
+        "supabase.ts",
+        "types.ts"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 5,
+      "lastAccessed": 1774525735842,
+      "keyFiles": [
+        "file.svg",
+        "globe.svg",
+        "next.svg",
+        "vercel.svg",
+        "window.svg"
+      ]
+    },
+    "supabase": {
+      "path": "supabase",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1774525735843,
+      "keyFiles": [
+        "schema.sql"
+      ]
+    },
+    "프로젝트-기록": {
+      "path": "프로젝트-기록",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1774525735843,
+      "keyFiles": [
+        "2026-03-26_기획완료.md"
+      ]
+    },
+    "app/api": {
+      "path": "app/api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1774525735843,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "app/globals.css",
+      "accessCount": 4,
+      "lastAccessed": 1774526524505,
+      "type": "file"
+    },
+    {
+      "path": "app/dashboard/layout.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1774526547058,
+      "type": "file"
+    },
+    {
+      "path": "app/dashboard/DashboardClient.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1774526627236,
+      "type": "file"
+    },
+    {
+      "path": "components/RiskBadge.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1774526635271,
+      "type": "file"
+    },
+    {
+      "path": "app/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1774526051343,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
