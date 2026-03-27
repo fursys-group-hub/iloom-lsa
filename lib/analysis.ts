@@ -9,7 +9,7 @@ export function calculateRiskLevel(
   const absentCount = attendance.filter((a) => a.status === 'absent').length;
   if (absentCount >= 2) return 'high';
 
-  // 최근 3일 평균 < 60 → high
+  // 최근 3일 평균 < 60 → high (위험)
   const last3Days = getLastNDaysScores(recentScores, 3);
   if (last3Days.length > 0) {
     const avg = last3Days.reduce((sum, s) => sum + s.score, 0) / last3Days.length;
@@ -20,9 +20,13 @@ export function calculateRiskLevel(
   const lateCount = attendance.filter((a) => a.status === 'late').length;
   if (lateCount >= 3) return 'medium';
 
-  // 특정 과목 3회 연속 < 70 → medium
-  if (hasConsecutiveLowScores(recentScores, 3, 70)) return 'medium';
+  // 최근 3일 평균 < 80 → medium (주의)
+  if (last3Days.length > 0) {
+    const avg = last3Days.reduce((sum, s) => sum + s.score, 0) / last3Days.length;
+    if (avg < 80) return 'medium';
+  }
 
+  // 80점 이상 → low (양호)
   return 'low';
 }
 

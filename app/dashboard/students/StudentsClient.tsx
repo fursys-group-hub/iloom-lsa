@@ -43,7 +43,7 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-        👥 교육생 관리
+        👥 교육생
       </h2>
 
       {/* 필터 */}
@@ -98,10 +98,10 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['이름', '부서', '평균 점수', '결석', '지각', '상태'].map((h) => (
+                {['이름', '평균 점수', '결석', '지각', '상태'].map((h) => (
                   <th key={h} style={{
                     padding: '14px 20px',
-                    textAlign: h === '이름' || h === '부서' ? 'left' : 'center',
+                    textAlign: h === '이름' ? 'left' : 'center',
                     fontSize: 13,
                     fontWeight: 600,
                     color: 'var(--text-muted)',
@@ -138,9 +138,6 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
                       </div>
                       <span style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</span>
                     </Link>
-                  </td>
-                  <td style={{ padding: '14px 20px', color: 'var(--text-tertiary)' }}>
-                    {s.department || '-'}
                   </td>
                   <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {s.avg_score}점

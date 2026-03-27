@@ -245,11 +245,8 @@ export default function AttendancePage() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            📋 출결 관리
+            📋 출결
           </h2>
-          <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
-            출결 현황을 확인하고 수정할 수 있어요
-          </p>
         </div>
         <button
           onClick={() => setShowUpload(!showUpload)}
@@ -473,17 +470,6 @@ export default function AttendancePage() {
             </div>
           </div>
 
-          {/* 요약 카드 */}
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <SummaryPill icon="👥" label="전체" value={summary.total} />
-            <SummaryPill icon="✅" label="출근" value={summary.present} color="var(--green)" />
-            <SummaryPill icon="⏰" label="지각" value={summary.late} color="var(--orange)" />
-            <SummaryPill icon="❌" label="미출근" value={summary.absent} color="var(--red)" />
-            {summary.earlyLeave > 0 && (
-              <SummaryPill icon="🚪" label="조퇴" value={summary.earlyLeave} color="var(--orange)" />
-            )}
-          </div>
-
           {/* 알림: 지각/결석자 */}
           {issues.length > 0 && (
             <div style={card}>
@@ -522,14 +508,22 @@ export default function AttendancePage() {
           {/* 출결 테이블 */}
           {filteredData.length > 0 && (
             <div style={card}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
-                📊 {selectedDate} 출결 내역
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                  📊 {selectedDate}
+                </h3>
+                <div style={{ display: 'flex', gap: 16, fontSize: 14 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>전체 <strong style={{ color: 'var(--text-primary)' }}>{filteredData.length}명</strong></span>
+                  <span style={{ color: 'var(--green)' }}>출근 <strong>{filteredData.filter((d) => d.status === 'present').length}</strong></span>
+                  <span style={{ color: 'var(--orange)' }}>지각 <strong>{filteredData.filter((d) => d.status === 'late').length}</strong></span>
+                  <span style={{ color: 'var(--red)' }}>미출근 <strong>{filteredData.filter((d) => d.status === 'absent').length}</strong></span>
+                </div>
+              </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {['이름', '부서', '출근', '퇴근', '상태', ''].map((h) => (
+                      {['이름', '출근', '퇴근', '상태', ''].map((h) => (
                         <th key={h} style={{
                           padding: '12px 16px',
                           textAlign: h === '' ? 'right' : 'left',
@@ -553,9 +547,6 @@ export default function AttendancePage() {
                         >
                           <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
                             {d.students?.name || '알 수 없음'}
-                          </td>
-                          <td style={tdStyle}>
-                            {d.students?.department || '-'}
                           </td>
                           <td style={tdStyle}>{times.checkIn}</td>
                           <td style={tdStyle}>{times.checkOut}</td>

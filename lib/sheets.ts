@@ -20,15 +20,27 @@ export async function fetchSheetData(
 // 결과_db 탭 파싱
 export function parseResultRows(rows: string[][]): SheetResult[] {
   // 첫 행은 헤더, 건너뜀
-  return rows.slice(1).map((row) => ({
-    timestamp: row[0] || '',
-    session: row[1] || '',
-    name: row[2] || '',
-    score: parseFloat(row[3]) || 0,
-    max_score: parseFloat(row[4]) || 0,
-    score_100: parseFloat(row[5]) || 0,
-    wrong_note: row[6] || '',
-  }));
+  return rows.slice(1).map((row) => {
+    const score = parseFloat(row[3]) || 0;
+    const maxScore = parseFloat(row[4]) || 0;
+    const score100Raw = parseFloat(row[5]);
+    // F열(100점 만점)이 비어있으면 직접 계산: (점수/총점)*100
+    const score_100 = !isNaN(score100Raw) && score100Raw > 0
+      ? score100Raw
+      : maxScore > 0
+        ? Math.round((score / maxScore) * 10000) / 100
+        : 0;
+
+    return {
+      timestamp: row[0] || '',
+      session: row[1] || '',
+      name: row[2] || '',
+      score,
+      max_score: maxScore,
+      score_100,
+      wrong_note: row[6] || '',
+    };
+  });
 }
 
 // 오답노트 파싱 — 핵심 로직

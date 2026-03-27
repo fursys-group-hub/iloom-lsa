@@ -8,6 +8,9 @@ const nav = [
   { href: '/dashboard', label: '홈', icon: '🏠' },
   { href: '/dashboard/students', label: '교육생', icon: '👥' },
   { href: '/dashboard/attendance', label: '출결', icon: '📋' },
+  { href: '/dashboard/tests', label: '테스트', icon: '📝' },
+  { href: '/dashboard/curriculum', label: '교육', icon: '📖', disabled: true },
+  { href: '/dashboard/practice', label: '실습', icon: '🔧', disabled: true },
   { href: '/dashboard/reports', label: '리포트', icon: '📈' },
   { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
 ];
@@ -96,10 +99,32 @@ export default function DashboardLayout({
         <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {nav.map((item) => {
-            const isActive =
+            const isDisabled = 'disabled' in item && item.disabled;
+            const isActive = !isDisabled && (
               item.href === '/dashboard'
                 ? pathname === '/dashboard'
-                : pathname.startsWith(item.href);
+                : pathname.startsWith(item.href)
+            );
+
+            if (isDisabled) {
+              return (
+                <div
+                  key={item.href}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                    fontSize: 15, fontWeight: 500,
+                    color: 'var(--text-muted)', opacity: 0.5,
+                    cursor: 'default',
+                  }}
+                >
+                  <span style={{ fontSize: 16 }}>{item.icon}</span>
+                  {item.label}
+                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.href}

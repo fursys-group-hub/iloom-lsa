@@ -18,47 +18,29 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
 
   const [
     { data: scores },
-    { data: wrongAnswers },
     { data: attendance },
     { data: memos },
     { data: coaching },
+    { data: responses },
+    { data: questions },
   ] = await Promise.all([
-    supabase
-      .from('test_scores')
-      .select('*')
-      .eq('student_id', id)
-      .order('test_date'),
-    supabase
-      .from('wrong_answers')
-      .select('*')
-      .eq('student_id', id)
-      .order('test_date', { ascending: false }),
-    supabase
-      .from('attendance')
-      .select('*')
-      .eq('student_id', id)
-      .order('date'),
-    supabase
-      .from('student_memos')
-      .select('*')
-      .eq('student_id', id)
-      .order('date', { ascending: false }),
-    supabase
-      .from('coaching_reports')
-      .select('*')
-      .eq('student_id', id)
-      .order('test_date', { ascending: false })
-      .limit(5),
+    supabase.from('test_scores').select('*').eq('student_id', id).order('test_date'),
+    supabase.from('attendance').select('*').eq('student_id', id).order('date'),
+    supabase.from('student_memos').select('*').eq('student_id', id).order('date', { ascending: false }),
+    supabase.from('coaching_reports').select('*').eq('student_id', id).order('test_date', { ascending: false }).limit(5),
+    supabase.from('test_responses').select('*').eq('student_id', id).order('session,question_id'),
+    supabase.from('questions').select('*'),
   ]);
 
   return (
     <StudentDetailClient
       student={student}
       scores={scores || []}
-      wrongAnswers={wrongAnswers || []}
       attendance={attendance || []}
       memos={memos || []}
       coachingReports={coaching || []}
+      responses={responses || []}
+      questions={questions || []}
     />
   );
 }
