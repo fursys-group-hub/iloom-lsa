@@ -31,24 +31,26 @@ export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#2C2C2E" />
         <XAxis
           dataKey="date"
           tickFormatter={formatDate}
-          tick={{ fontSize: 13, fill: '#64748b' }}
-          axisLine={{ stroke: '#e2e8f0' }}
+          tick={{ fontSize: 13, fill: '#8E8E93' }}
+          axisLine={{ stroke: '#2C2C2E' }}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 13, fill: '#64748b' }}
-          axisLine={{ stroke: '#e2e8f0' }}
+          tick={{ fontSize: 13, fill: '#8E8E93' }}
+          axisLine={{ stroke: '#2C2C2E' }}
         />
         <Tooltip
           contentStyle={{
             borderRadius: 12,
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            border: '1px solid #3A3A3C',
+            background: '#1C1C1E',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
             fontSize: 13,
+            color: '#EBEBF5CC',
           }}
           labelFormatter={(label) => formatDate(String(label))}
         />

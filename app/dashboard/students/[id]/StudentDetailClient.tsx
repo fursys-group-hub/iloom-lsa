@@ -38,6 +38,7 @@ interface Props {
   coachingReports: CoachingReport[];
   responses: TestResponse[];
   questions: Question[];
+  allScores: TestScore[];
 }
 
 const card: React.CSSProperties = {
@@ -50,11 +51,14 @@ const sectionTitle: React.CSSProperties = {
 };
 
 export default function StudentDetailClient({
-  student, scores, attendance, memos, coachingReports, responses, questions,
+  student, scores, allScores, attendance, memos, coachingReports, responses, questions,
 }: Props) {
   const avgScore = useMemo(() => calculateAvgScore(scores), [scores]);
   const riskLevel = useMemo(() => calculateRiskLevel(scores, attendance), [scores, attendance]);
   const dailyAverages = useMemo(() => calculateDailyAverages(scores), [scores]);
+
+  // 반 평균 (차시별)
+  const classAverages = useMemo(() => calculateDailyAverages(allScores), [allScores]);
 
   const absentCount = attendance.filter((a) => a.status === 'absent').length;
   const lateCount = attendance.filter((a) => a.status === 'late').length;
@@ -216,7 +220,18 @@ export default function StudentDetailClient({
       {/* 점수 추이 (1열) */}
       <div style={card}>
         <h3 style={sectionTitle}>📈 차시별 점수 추이</h3>
-        {dailyAverages.length > 0 ? <ScoreTrendChart data={dailyAverages} /> : <p style={emptyStyle}>데이터 없음</p>}
+        {dailyAverages.length > 0 ? (
+          <ScoreTrendChart
+            data={dailyAverages.map((d) => {
+              const classAvg = classAverages.find((c) => c.date === d.date);
+              return { ...d, classAvg: classAvg?.avg ?? 0 };
+            })}
+            lines={[
+              { key: 'avg', color: '#3b82f6', name: student.name },
+              { key: 'classAvg', color: '#6b7280', name: '반 평균' },
+            ]}
+          />
+        ) : <p style={emptyStyle}>데이터 없음</p>}
       </div>
 
       {/* 2열: 카테고리별 학습 현황 + 차시별 오답 */}

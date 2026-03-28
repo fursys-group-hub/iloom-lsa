@@ -18,6 +18,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
 
   const [
     { data: scores },
+    { data: allScores },
     { data: attendance },
     { data: memos },
     { data: coaching },
@@ -25,6 +26,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     { data: questions },
   ] = await Promise.all([
     supabase.from('test_scores').select('*').eq('student_id', id).order('test_date'),
+    supabase.from('test_scores').select('*'),
     supabase.from('attendance').select('*').eq('student_id', id).order('date'),
     supabase.from('student_memos').select('*').eq('student_id', id).order('date', { ascending: false }),
     supabase.from('coaching_reports').select('*').eq('student_id', id).order('test_date', { ascending: false }).limit(5),
@@ -36,6 +38,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     <StudentDetailClient
       student={student}
       scores={scores || []}
+      allScores={allScores || []}
       attendance={attendance || []}
       memos={memos || []}
       coachingReports={coaching || []}
