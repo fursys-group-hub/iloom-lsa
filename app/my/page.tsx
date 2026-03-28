@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 
 interface TestScore { id: string; test_date: string; subject: string; score: number; }
 interface TestResponse { id: string; session: string; question_id: string; is_correct: boolean; earned_score: number; max_score: number; user_answer: string; }
@@ -164,31 +165,21 @@ export default function MyPage() {
         </div>
       )}
 
-      {/* 차시별 점수 추이 */}
+      {/* 차시별 점수 추이 — 라인 차트 */}
       <div style={card}>
-        <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>📈 차시별 점수</h3>
+        <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>📈 차시별 점수 추이</h3>
         {sessionScores.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {sessionScores.map(s => {
-              const color = s.score >= 80 ? 'var(--green)' : s.score >= 60 ? 'var(--orange)' : 'var(--red)';
-              const diff = Math.round((s.score - s.classAvg) * 10) / 10;
-              return (
-                <div key={s.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 16, padding: '14px 16px',
-                  borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)',
-                }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--blue-light)', minWidth: 60 }}>{s.subject}</span>
-                  <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'var(--bg-hover)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${s.score}%`, borderRadius: 4, background: color }} />
-                  </div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color, minWidth: 55, textAlign: 'right' }}>{s.score}점</span>
-                  <span style={{ fontSize: 13, color: diff >= 0 ? 'var(--green)' : 'var(--red)', minWidth: 80, textAlign: 'right' }}>
-                    반 평균 {diff >= 0 ? '+' : ''}{diff}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          <ScoreTrendChart
+            data={sessionScores.map(s => ({
+              date: s.test_date,
+              avg: s.score,
+              classAvg: s.classAvg,
+            }))}
+            lines={[
+              { key: 'avg', color: '#3b82f6', name: studentName },
+              { key: 'classAvg', color: '#6b7280', name: '반 평균' },
+            ]}
+          />
         ) : (
           <p style={{ padding: '20px 0', textAlign: 'center', color: 'var(--text-muted)' }}>시험 데이터가 없어요</p>
         )}

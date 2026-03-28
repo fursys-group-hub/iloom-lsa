@@ -18,6 +18,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [authName, setAuthName] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -39,11 +40,19 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
+
+      {/* 모바일 오버레이 */}
+      {sidebarOpen && (
+        <div className="mobile-overlay" onClick={() => setSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.6)' }} />
+      )}
+
       {/* 사이드바 */}
-      <aside style={{
+      <aside className={`my-sidebar ${sidebarOpen ? 'my-sidebar-open' : ''}`} style={{
         width: 220, flexShrink: 0, background: 'var(--bg-surface)',
         borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50,
+        transition: 'transform 0.2s ease',
       }}>
         <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</div>
@@ -72,7 +81,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
             }
 
             return (
-              <Link key={item.href} href={item.href} style={{
+              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
                 borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, textDecoration: 'none',
                 transition: 'all 0.15s ease',
@@ -101,11 +110,45 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* 메인 */}
-      <div style={{ flex: 1, marginLeft: 220 }}>
-        <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
-          {children}
+      <div className="my-main" style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+
+        {/* 모바일 헤더 */}
+        <header className="my-mobile-header" style={{
+          display: 'none', alignItems: 'center', gap: 12, padding: '0 20px', height: 56,
+          background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)',
+        }}>
+          <button onClick={() => setSidebarOpen(true)} style={{
+            padding: 8, borderRadius: 'var(--radius-sm)', background: 'transparent',
+            border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer',
+          }}>
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h16M3 11h16M3 16h16" />
+            </svg>
+          </button>
+          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</span>
+        </header>
+
+        <main style={{ flex: 1, overflow: 'auto' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
+            {children}
+          </div>
         </main>
       </div>
+
+      {/* 반응형 CSS */}
+      <style>{`
+        @media (max-width: 768px) {
+          .my-sidebar { transform: translateX(-100%); }
+          .my-sidebar.my-sidebar-open { transform: translateX(0); }
+          .my-main { margin-left: 0 !important; }
+          .my-mobile-header { display: flex !important; }
+          .mobile-overlay { display: block; }
+        }
+        @media (min-width: 769px) {
+          .my-sidebar { transform: translateX(0) !important; }
+          .mobile-overlay { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
