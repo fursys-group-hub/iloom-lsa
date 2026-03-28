@@ -312,10 +312,6 @@ export default function SettingsPage() {
                   <input type="text" placeholder="홍길동" value={studentForm.name} onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>부서</label>
-                  <input type="text" placeholder="26년 3월" value={studentForm.department} onChange={(e) => setStudentForm({ ...studentForm, department: e.target.value })} style={inputStyle} />
-                </div>
-                <div>
                   <label style={labelStyle}>회사 이메일</label>
                   <input type="email" placeholder="name@iloomstore.co.kr" value={studentForm.company_email} onChange={(e) => setStudentForm({ ...studentForm, company_email: e.target.value })} style={inputStyle} />
                 </div>
@@ -353,7 +349,7 @@ export default function SettingsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['이름', '부서', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
+                    {['이름', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
                       <th key={h} style={{
                         padding: '12px 14px', textAlign: h === '' ? 'right' : 'left',
                         fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
@@ -384,7 +380,6 @@ export default function SettingsPage() {
                           {s.name}
                         </div>
                       </td>
-                      <td style={tdStyle}>{s.department || '-'}</td>
                       <td style={{ ...tdStyle, fontSize: 13 }}>{s.company_email || '-'}</td>
                       <td style={{ ...tdStyle, fontSize: 13 }}>{s.email || '-'}</td>
                       <td style={tdStyle}>{s.phone || '-'}</td>
