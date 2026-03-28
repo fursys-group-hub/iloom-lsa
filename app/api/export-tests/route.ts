@@ -31,7 +31,8 @@ export async function GET() {
       fetchAll('questions'),
     ]);
 
-    const studentMap = new Map(students.map((s: { id: string }) => [s.id, s]));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const studentMap = new Map(students.map((s: any) => [s.id, s]));
 
     // 차시 목록
     const sessions = [...new Set(responses.map((r: { session: string }) => r.session))].sort((a, b) => {
