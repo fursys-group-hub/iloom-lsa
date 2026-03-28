@@ -9,7 +9,7 @@ const nav = [
   { href: '/dashboard/students', label: '교육생', icon: '👥' },
   { href: '/dashboard/attendance', label: '출결', icon: '📋' },
   { href: '/dashboard/tests', label: '테스트', icon: '📝' },
-  { href: '/dashboard/curriculum', label: '교육', icon: '📖', disabled: true },
+  { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
   { href: '/dashboard/practice', label: '실습', icon: '🔧', disabled: true },
   { href: '/dashboard/reports', label: '리포트', icon: '📈' },
   { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
