@@ -57,6 +57,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
   const [editValue, setEditValue] = useState('');
   const [editMode, setEditMode] = useState('');
   const [editScore, setEditScore] = useState(0);
+  const [editExplanation, setEditExplanation] = useState('');
   const [saving, setSaving] = useState(false);
 
   // 서술형 수동 채점
@@ -178,7 +179,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
       const res = await fetch('/api/questions', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId: questionDbId, correct_answer: editValue, scoring_mode: editMode, max_score: editScore }),
+        body: JSON.stringify({ questionId: questionDbId, correct_answer: editValue, scoring_mode: editMode, max_score: editScore, explanation: editExplanation }),
       });
       const data = await res.json();
       setSyncResult(data.message);
@@ -670,6 +671,22 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                       }}
                                     />
                                   </div>
+                                  {/* 해설 */}
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                                    <span style={{ fontSize: 13, color: 'var(--text-muted)', flexShrink: 0, marginTop: 10 }}>해설:</span>
+                                    <textarea
+                                      value={editExplanation}
+                                      onChange={(e) => setEditExplanation(e.target.value)}
+                                      rows={2}
+                                      placeholder="해설을 입력하세요"
+                                      style={{
+                                        flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+                                        border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+                                        color: 'var(--text-primary)', fontSize: 14, outline: 'none',
+                                        resize: 'vertical', lineHeight: 1.5,
+                                      }}
+                                    />
+                                  </div>
                                   {/* 버튼 */}
                                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                                     <button
@@ -697,7 +714,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                 </div>
                               ) : (
                                 <div
-                                  onClick={() => { setEditingQ(q.id); setEditValue(q.correct_answer); setEditMode(q.scoring_mode); setEditScore(q.max_score); }}
+                                  onClick={() => { setEditingQ(q.id); setEditValue(q.correct_answer); setEditMode(q.scoring_mode); setEditScore(q.max_score); setEditExplanation(q.explanation || ''); }}
                                   style={{
                                     display: 'flex', alignItems: 'center', gap: 8,
                                     padding: '10px 14px', borderRadius: 'var(--radius-sm)',

@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 // 정답 수정 + 재채점
 export async function PATCH(req: NextRequest) {
   try {
-    const { questionId: id, correct_answer, scoring_mode, max_score } = await req.json();
+    const { questionId: id, correct_answer, scoring_mode, max_score, explanation } = await req.json();
 
     if (!id) {
       return Response.json({ message: 'questionId가 필요합니다.' }, { status: 400 });
@@ -34,6 +34,7 @@ export async function PATCH(req: NextRequest) {
     if (correct_answer !== undefined) updateFields.correct_answer = correct_answer;
     if (scoring_mode !== undefined) updateFields.scoring_mode = scoring_mode;
     if (max_score !== undefined) updateFields.max_score = max_score;
+    if (explanation !== undefined) updateFields.explanation = explanation;
 
     const { data: question, error: qError } = await supabase
       .from('questions')
