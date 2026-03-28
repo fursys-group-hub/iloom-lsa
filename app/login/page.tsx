@@ -88,9 +88,6 @@ export default function LoginPage() {
             value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }}
             style={inputStyle}
           />
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
-            교육생 초기 비밀번호: 0000
-          </p>
         </div>
 
         {error && <p style={{ fontSize: 14, color: 'var(--red)', margin: 0 }}>{error}</p>}

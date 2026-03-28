@@ -19,9 +19,10 @@ interface StudentRow {
   email: string | null;
   phone: string | null;
   store_location: string | null;
+  password: string | null;
 }
 
-const emptyStudentForm = { name: '', department: '', company_email: '', email: '', phone: '', store_location: '' };
+const emptyStudentForm = { name: '', department: '', company_email: '', email: '', phone: '', store_location: '', password: '0000' };
 
 export default function SettingsPage() {
   // ── 기수 ──
@@ -327,6 +328,10 @@ export default function SettingsPage() {
                   <label style={labelStyle}>배치 매장</label>
                   <input type="text" placeholder="노원점, 논현점..." value={studentForm.store_location} onChange={(e) => setStudentForm({ ...studentForm, store_location: e.target.value })} style={inputStyle} />
                 </div>
+                <div>
+                  <label style={labelStyle}>비밀번호 (숫자 4자리)</label>
+                  <input type="text" placeholder="0000" maxLength={4} value={studentForm.password} onChange={(e) => setStudentForm({ ...studentForm, password: e.target.value.replace(/[^0-9]/g, '').slice(0, 4) })} style={inputStyle} />
+                </div>
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button onClick={() => { setShowStudentForm(false); setEditingStudentId(null); }} style={smallBtnStyle}>취소</button>
@@ -349,7 +354,7 @@ export default function SettingsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['이름', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
+                    {['이름', '비밀번호', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
                       <th key={h} style={{
                         padding: '12px 14px', textAlign: h === '' ? 'right' : 'left',
                         fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
@@ -380,6 +385,7 @@ export default function SettingsPage() {
                           {s.name}
                         </div>
                       </td>
+                      <td style={{ ...tdStyle, fontFamily: 'monospace', letterSpacing: 2 }}>{s.password || '0000'}</td>
                       <td style={{ ...tdStyle, fontSize: 13 }}>{s.company_email || '-'}</td>
                       <td style={{ ...tdStyle, fontSize: 13 }}>{s.email || '-'}</td>
                       <td style={tdStyle}>{s.phone || '-'}</td>
@@ -396,6 +402,7 @@ export default function SettingsPage() {
                                 email: s.email || '',
                                 phone: s.phone || '',
                                 store_location: s.store_location || '',
+                                password: s.password || '0000',
                               });
                               setShowStudentForm(true);
                             }}
