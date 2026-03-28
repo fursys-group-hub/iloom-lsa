@@ -1,30 +1,62 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance } from '@/lib/types';
 import { calculateRiskLevel, calculateDailyAverages, calculateAvgScore } from '@/lib/analysis';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import RiskBadge from '@/components/RiskBadge';
 
+interface Insight {
+  id: string;
+  session: string;
+  content: string;
+  created_at: string;
+}
+
 interface Props {
   students: Student[];
   scores: TestScore[];
   attendance: Attendance[];
+  batchId?: string;
 }
 
-// 실제 메시지는 DB에서 가져올 예정 — 지금은 예시 1건만
-const mockMessages: { id: string; name: string; time: string; type: 'question' | 'help'; replied: boolean; message: string; replyText?: string }[] = [
-  {
-    id: '1', name: '채형우', time: '오전 10:05', type: 'help', replied: false,
-    message: '소파 자재 등급 부분 너무 어려워요... 추가 자료 있으면 공유 부탁드립니다! 😭',
-  },
-];
-
-export default function DashboardClient({ students, scores, attendance }: Props) {
+export default function DashboardClient({ students, scores, attendance, batchId }: Props) {
   const today = new Date().toISOString().split('T')[0];
-  const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyText, setReplyText] = useState('');
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [generating, setGenerating] = useState(false);
+  const [genResult, setGenResult] = useState<string | null>(null);
+
+  // 인사이트 불러오기
+  useEffect(() => {
+    fetch(`/api/insights${batchId ? `?batchId=${batchId}` : ''}`)
+      .then((r) => r.json())
+      .then((d) => setInsights(d.insights || []))
+      .catch(() => {});
+  }, [batchId]);
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setGenResult(null);
+    try {
+      const res = await fetch('/api/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batchId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGenResult('분석 완료!');
+        setInsights((prev) => [{ id: 'new', session: '전체', content: data.content, created_at: new Date().toISOString() }, ...prev]);
+      } else {
+        setGenResult(data.message || '생성 실패');
+      }
+    } catch {
+      setGenResult('생성 중 오류 발생');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const todayAttendance = useMemo(() => {
     const recs = attendance.filter((a) => a.date === today);
@@ -99,124 +131,77 @@ export default function DashboardClient({ students, scores, attendance }: Props)
         {/* ─── 왼쪽: 메시징 ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-          {/* 교육생 메시지 */}
-          <div style={{ ...cardStyle, minHeight: 500, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          {/* AI 교육 인사이트 */}
+          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                💬 교육생 메시지
+                🤖 AI 교육 인사이트
               </h3>
-              <span style={{ fontSize: 13, fontWeight: 600, padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>
-                {mockMessages.filter((m) => !m.replied).length}건 미답변
-              </span>
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                style={{
+                  padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                  border: generating ? 'none' : '1px solid var(--border)',
+                  background: generating ? 'var(--bg-elevated)' : 'transparent',
+                  color: generating ? 'var(--text-muted)' : 'var(--text-tertiary)',
+                  fontSize: 13, fontWeight: 600, cursor: generating ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {generating ? '⏳ 분석 중...' : '✨ 새 분석 생성'}
+              </button>
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto' }}>
-              {mockMessages.map((msg) => (
-                <div key={msg.id} className="animate-fade-in-up">
-                  {/* 학생 메시지 */}
-                  <div style={{ display: 'flex', gap: 12 }}>
+            {genResult && (
+              <div style={{
+                padding: '10px 14px', borderRadius: 'var(--radius-sm)', marginBottom: 12,
+                background: genResult.includes('완료') ? 'rgba(48,209,88,0.1)' : 'rgba(255,69,58,0.1)',
+                color: genResult.includes('완료') ? 'var(--green)' : 'var(--red)',
+                fontSize: 13,
+              }}>
+                {genResult}
+              </div>
+            )}
+
+            {insights.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {insights.slice(0, 3).map((insight, idx) => (
+                  <details key={insight.id} open={idx === 0}>
+                    <summary style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      cursor: 'pointer', fontSize: 14, fontWeight: 600,
+                      color: 'var(--text-primary)', transition: 'background 0.15s ease',
+                    }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <span>📊 {insight.session} 분석</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        {new Date(insight.created_at).toLocaleDateString('ko')}
+                      </span>
+                    </summary>
                     <div style={{
-                      width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 15, fontWeight: 700,
-                      background: msg.type === 'help' ? 'var(--red-dim)' : 'var(--blue-dim)',
-                      color: msg.type === 'help' ? 'var(--red)' : 'var(--blue-light)',
+                      padding: '14px 16px', marginTop: 4,
+                      borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)',
+                      fontSize: 14, color: 'var(--text-second)',
+                      lineHeight: 1.8, whiteSpace: 'pre-wrap',
                     }}>
-                      {msg.name[0]}
+                      {insight.content}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{msg.name}</span>
-                        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{msg.time}</span>
-                        {msg.type === 'help' && (
-                          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)' }}>
-                            도움 요청
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        onClick={() => { setReplyingTo(replyingTo === msg.id ? null : msg.id); setReplyText(''); }}
-                        style={{
-                          background: 'var(--bubble-assistant)',
-                          color: 'var(--text-primary)',
-                          padding: '14px 18px',
-                          borderRadius: '16px 16px 16px 6px',
-                          fontSize: 17,
-                          lineHeight: 1.65,
-                          maxWidth: '85%',
-                          cursor: 'pointer',
-                          transition: 'background 0.15s ease',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bubble-assistant)'; }}
-                      >
-                        {msg.message}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 내 답변 */}
-                  {msg.replied && msg.replyText && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-                      <div style={{
-                        background: 'var(--bubble-user)',
-                        color: '#fff',
-                        padding: '14px 18px',
-                        borderRadius: '16px 16px 6px 16px',
-                        fontSize: 17,
-                        lineHeight: 1.65,
-                        maxWidth: '75%',
-                      }}>
-                        {msg.replyText}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 답변 입력 */}
-                  {replyingTo === msg.id && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-                      <div style={{ width: '80%', display: 'flex', gap: 8 }}>
-                        <input
-                          type="text"
-                          value={replyText}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          placeholder={`${msg.name}에게 답변...`}
-                          autoFocus
-                          style={{
-                            flex: 1,
-                            padding: '12px 18px',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--border)',
-                            background: 'var(--bg-elevated)',
-                            color: 'var(--text-primary)',
-                            fontSize: 15,
-                            outline: 'none',
-                            transition: 'border 0.2s',
-                          }}
-                          onFocus={(e) => { e.target.style.border = '1px solid var(--blue)'; }}
-                          onBlur={(e) => { e.target.style.border = '1px solid var(--border)'; }}
-                          onKeyDown={(e) => { if (e.key === 'Escape') { setReplyingTo(null); setReplyText(''); } }}
-                        />
-                        <button style={{
-                          padding: '12px 20px',
-                          borderRadius: 'var(--radius-md)',
-                          border: 'none',
-                          background: 'var(--blue)',
-                          color: '#fff',
-                          fontSize: 15,
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          flexShrink: 0,
-                        }}>
-                          전송
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </details>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: '32px 0', textAlign: 'center' }}>
+                <p style={{ fontSize: 15, color: 'var(--text-muted)', marginBottom: 12 }}>
+                  아직 분석 결과가 없어요
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                  위의 &quot;새 분석 생성&quot; 버튼을 눌러보세요
+                </p>
+              </div>
+            )}
           </div>
 
           {/* 주의 교육생 */}
