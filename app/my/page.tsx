@@ -29,13 +29,16 @@ export default function MyPage() {
     if (!studentId) return;
     setLoading(true);
     try {
-      const [scRes, allScRes, respRes, qRes] = await Promise.all([
-        fetch(`/api/scores?studentId=${studentId}`).then(r => r.json()),
+      // 내 점수 먼저 (가벼움)
+      const scRes = await fetch(`/api/scores?studentId=${studentId}`).then(r => r.json());
+      setScores(scRes.scores || []);
+
+      // 나머지는 병렬 (반 평균용 전체 점수는 scores만, questions/responses는 학생것만)
+      const [allScRes, respRes, qRes] = await Promise.all([
         fetch('/api/scores').then(r => r.json()),
         fetch(`/api/test-responses?studentId=${studentId}`).then(r => r.json()),
-        fetch('/api/questions').then(r => r.json()),
+        fetch(`/api/questions?limit=600`).then(r => r.json()),
       ]);
-      setScores(scRes.scores || []);
       setAllScores(allScRes.scores || []);
       setResponses(respRes.responses || []);
       setQuestions(qRes.questions || []);
