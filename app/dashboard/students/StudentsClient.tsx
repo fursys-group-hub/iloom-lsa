@@ -46,46 +46,7 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
         👥 교육생
       </h2>
 
-      {/* 상태 기준 안내 */}
-      <details style={{ cursor: 'pointer' }}>
-        <summary style={{
-          fontSize: 14, color: 'var(--text-muted)',
-          padding: '10px 16px', borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-        }}>
-          ℹ️ 상태 판별 기준 보기
-        </summary>
-        <div style={{
-          marginTop: 8, padding: '16px 20px', borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          fontSize: 14, color: 'var(--text-second)', lineHeight: 1.8,
-        }}>
-          <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8, fontSize: 15 }}>상태 판별 기준</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div>
-              <span style={{ color: 'var(--red)', fontWeight: 700 }}>● 위험</span>
-              <span style={{ color: 'var(--text-muted)', margin: '0 8px' }}>—</span>
-              결석 2회 이상 또는 최근 3회 시험 평균 60점 미만
-            </div>
-            <div>
-              <span style={{ color: 'var(--orange)', fontWeight: 700 }}>● 주의</span>
-              <span style={{ color: 'var(--text-muted)', margin: '0 8px' }}>—</span>
-              지각 3회 이상 또는 최근 3회 시험 평균 80점 미만
-            </div>
-            <div>
-              <span style={{ color: 'var(--green)', fontWeight: 700 }}>● 양호</span>
-              <span style={{ color: 'var(--text-muted)', margin: '0 8px' }}>—</span>
-              최근 3회 시험 평균 80점 이상 + 출결 양호
-            </div>
-          </div>
-          <div style={{ marginTop: 12, fontSize: 13, color: 'var(--text-muted)' }}>
-            ※ 평균 점수는 전체 차시 평균이고, 상태는 <b>최근 3회 시험</b> 기준으로 판별돼요.
-          </div>
-        </div>
-      </details>
-
-      {/* 필터 */}
+      {/* 필터 + 상태 기준 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <input
           type="text"
@@ -124,6 +85,28 @@ export default function StudentsClient({ students, scores, attendance }: Props) 
             </button>
           ))}
         </div>
+        {/* 상태 기준 토글 */}
+        <details style={{ cursor: 'pointer', marginLeft: 'auto' }}>
+          <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>
+            ℹ️ 기준
+          </summary>
+          <div style={{
+            position: 'absolute', right: 40, marginTop: 8,
+            padding: '14px 18px', borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)',
+            lineHeight: 1.8, zIndex: 10, width: 340,
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div><span style={{ color: 'var(--red)', fontWeight: 700 }}>● 위험</span> — 결석 2회+ 또는 최근 3회 평균 60점 미만</div>
+              <div><span style={{ color: 'var(--orange)', fontWeight: 700 }}>● 주의</span> — 지각 3회+ 또는 최근 3회 평균 80점 미만</div>
+              <div><span style={{ color: 'var(--green)', fontWeight: 700 }}>● 양호</span> — 최근 3회 평균 80점 이상 + 출결 양호</div>
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+              ※ 평균 점수 = 전체 차시 평균 / 상태 = 최근 3회 기준
+            </div>
+          </div>
+        </details>
       </div>
 
       {/* 테이블 */}
