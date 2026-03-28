@@ -55,14 +55,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const studentId = new URL(req.url).searchParams.get('studentId');
     const supabase = createServerClient();
-    const { data, error } = await supabase
-      .from('attendance')
+    let query = supabase.from('attendance')
       .select('*, students(name, department)')
       .order('date', { ascending: false })
       .limit(1000);
+    if (studentId) query = query.eq('student_id', studentId);
+    const { data, error } = await query;
 
     if (error) throw error;
     return NextResponse.json(data);

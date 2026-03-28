@@ -1,9 +1,20 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+const nav = [
+  { href: '/my', label: '홈', icon: '🏠', exact: true },
+  { href: '/my/attendance', label: '출결', icon: '📋' },
+  { href: '/my/tests', label: '테스트', icon: '📝' },
+  { href: '/my/notes', label: '교육일지', icon: '📓' },
+  { href: '/my/practice', label: '실습일지', icon: '🔧', disabled: true },
+  { href: '/my/ask', label: '질문하기', icon: '💬', disabled: true },
+];
+
 export default function MyLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const router = useRouter();
   const [authName, setAuthName] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
@@ -27,35 +38,74 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
   if (!checked) return <div style={{ minHeight: '100vh', background: 'var(--bg-main)' }} />;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
-      {/* 상단 바 */}
-      <header style={{
-        padding: '16px 24px', borderBottom: '1px solid var(--border)',
-        background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
+      {/* 사이드바 */}
+      <aside style={{
+        width: 220, flexShrink: 0, background: 'var(--bg-surface)',
+        borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
+        position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20 }}>📖</span>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</span>
+        <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</div>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{authName}님</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{authName}</span>
+
+        <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {nav.map((item) => {
+            const isDisabled = 'disabled' in item && item.disabled;
+            const isActive = !isDisabled && (
+              item.exact ? pathname === item.href : pathname.startsWith(item.href) && (item.exact || item.href !== '/my')
+            );
+
+            if (isDisabled) {
+              return (
+                <div key={item.href} style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500,
+                  color: 'var(--text-muted)', opacity: 0.5, cursor: 'default',
+                }}>
+                  <span style={{ fontSize: 16 }}>{item.icon}</span>
+                  {item.label}
+                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+                </div>
+              );
+            }
+
+            return (
+              <Link key={item.href} href={item.href} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, textDecoration: 'none',
+                transition: 'all 0.15s ease',
+                background: isActive ? 'var(--blue)' : 'transparent',
+                color: isActive ? '#fff' : 'var(--text-tertiary)',
+              }}>
+                <span style={{ fontSize: 16 }}>{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
           <button
             onClick={() => { localStorage.removeItem('iloom-auth'); router.replace('/login'); }}
             style={{
-              padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+              padding: '8px 14px', borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)', background: 'transparent',
-              color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer',
+              color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', width: '100%',
             }}
           >
             로그아웃
           </button>
         </div>
-      </header>
+      </aside>
 
-      {/* 콘텐츠 */}
-      <main style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
-        {children}
-      </main>
+      {/* 메인 */}
+      <div style={{ flex: 1, marginLeft: 220 }}>
+        <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
