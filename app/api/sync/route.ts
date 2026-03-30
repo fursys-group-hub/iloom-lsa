@@ -4,7 +4,8 @@ import { fetchSheetData, parseResultRows } from '@/lib/sheets';
 
 export async function POST(req: NextRequest) {
   try {
-    const { sheetId } = await req.json();
+    const { sheetId, date } = await req.json();
+    // date: 'today' | 'YYYY-MM-DD' | undefined(전체)
     const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
 
     if (!apiKey) {
@@ -23,7 +24,27 @@ export async function POST(req: NextRequest) {
       fetchSheetData(sheetId, '상세_로그!A:L', apiKey),
     ]);
 
-    const results = parseResultRows(resultRows);
+    // 날짜 필터 적용
+    const filterDate = date === 'today'
+      ? new Date().toISOString().split('T')[0]
+      : date || null; // 'YYYY-MM-DD' 또는 null(전체)
+
+    const filterByDate = (rows: string[][], headerRow: boolean = true): string[][] => {
+      if (!filterDate) return rows;
+      const header = headerRow ? [rows[0]] : [];
+      const data = headerRow ? rows.slice(1) : rows;
+      const filtered = data.filter((row) => {
+        const timestamp = row[0] || '';
+        return timestamp.startsWith(filterDate);
+      });
+      return [...header, ...filtered];
+    };
+
+    const filteredResultRows = filterByDate(resultRows);
+    const filteredDetailRows = filterByDate(detailRows);
+
+    const results = parseResultRows(filteredResultRows);
+    const dateLabel = filterDate || '전체';
 
     // 2. 기수 확인/생성
     const { data: batch } = await supabase
@@ -102,7 +123,7 @@ export async function POST(req: NextRequest) {
 
     // 6. 상세_로그 → test_responses (배치 upsert, 100개씩)
     const respBatch: Record<string, unknown>[] = [];
-    for (const row of detailRows.slice(1)) {
+    for (const row of filteredDetailRows.slice(1)) {
       const name = row[2] || '';
       const studentId = studentMap.get(name);
       if (!studentId) continue;
@@ -129,7 +150,7 @@ export async function POST(req: NextRequest) {
     }
 
     return Response.json({
-      message: `동기화 완료! 문제 ${questionBatch.length}개, 학생 ${studentMap.size}명, 점수 ${scoreBatch.length}건, 응답 ${respBatch.length}건`,
+      message: `동기화 완료! (${dateLabel}) 문제 ${questionBatch.length}개, 학생 ${studentMap.size}명, 점수 ${scoreBatch.length}건, 응답 ${respBatch.length}건`,
       syncedQuestions: questionBatch.length,
       syncedStudents: studentMap.size,
       syncedScores: scoreBatch.length,

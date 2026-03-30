@@ -198,7 +198,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
   };
 
   // 동기화
-  const handleSync = async () => {
+  const handleSync = async (date?: string) => {
     if (!sheetId) {
       setSyncResult('기수에 Google Sheet ID가 설정되지 않았어요.');
       return;
@@ -209,7 +209,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
       const res = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetId }),
+        body: JSON.stringify({ sheetId, date }),
       });
       const data = await res.json();
       setSyncResult(data.message);
@@ -242,7 +242,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
             📥 Excel 다운로드
           </a>
           <button
-            onClick={handleSync}
+            onClick={() => { handleSync('today'); }}
             disabled={syncing}
             style={{
               padding: '10px 20px', borderRadius: 'var(--radius-md)',
@@ -253,7 +253,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
               transition: 'all 0.15s ease',
             }}
           >
-            {syncing ? '⏳ 동기화 중...' : '🔄 Google Sheets 동기화'}
+            {syncing ? '⏳ 동기화 중...' : '🔄 오늘 시험 동기화'}
           </button>
         </div>
       </div>
