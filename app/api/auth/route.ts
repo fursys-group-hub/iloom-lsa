@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 관리자 체크 (이름: 김수지, 비밀번호: 1230)
-  if (name.trim() === '김수지' && password === '1230') {
+  if (name.trim() === '김수지' && password === '4851') {
     return Response.json({ role: 'admin', name: '김수지' });
   }
 
