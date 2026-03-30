@@ -200,7 +200,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
   };
 
   // 동기화
-  const handleSync = async (date?: string) => {
+  const handleSync = async (date?: string, mode?: string) => {
     if (!sheetId) {
       setSyncResult('기수에 Google Sheet ID가 설정되지 않았어요.');
       return;
@@ -211,7 +211,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
       const res = await fetch('/api/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetId, date }),
+        body: JSON.stringify({ sheetId, date, mode }),
       });
       const data = await res.json();
       setSyncResult(data.message);
@@ -256,6 +256,20 @@ export default function TestsClient({ batches, students, scores }: Props) {
             }}
           >
             {syncing ? '⏳ 동기화 중...' : '🔄 오늘 시험 동기화'}
+          </button>
+          <button
+            onClick={() => { handleSync('today', 'new_only'); }}
+            disabled={syncing}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-md)',
+              border: syncing ? 'none' : '1px solid var(--green)',
+              background: syncing ? 'var(--bg-elevated)' : 'transparent',
+              color: syncing ? 'var(--text-muted)' : 'var(--green)',
+              fontSize: 14, fontWeight: 600, cursor: syncing ? 'not-allowed' : 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            {syncing ? '⏳ 동기화 중...' : '➕ 새 응답만 추가'}
           </button>
         </div>
       </div>

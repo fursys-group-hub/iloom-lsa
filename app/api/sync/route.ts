@@ -4,8 +4,9 @@ import { fetchSheetData, parseResultRows } from '@/lib/sheets';
 
 export async function POST(req: NextRequest) {
   try {
-    const { sheetId, date } = await req.json();
+    const { sheetId, date, mode } = await req.json();
     // date: 'today' | 'YYYY-MM-DD' | undefined(전체)
+    // mode: 'full'(기본, 덮어쓰기) | 'new_only'(새 응답만 추가, 기존 건드리지 않음)
     const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
 
     if (!apiKey) {
@@ -116,12 +117,30 @@ export async function POST(req: NextRequest) {
         subject: result.session, score: result.score_100, max_score: 100,
       });
     }
-    for (let i = 0; i < scoreBatch.length; i += 50) {
-      await supabase.from('test_scores')
-        .upsert(scoreBatch.slice(i, i + 50), { onConflict: 'student_id,test_date,subject' });
+
+    let skippedScores = 0;
+    let skippedResponses = 0;
+
+    if (mode === 'new_only') {
+      // 새 응답만 추가 모드: 이미 있는 건 건너뛰기
+      for (let i = 0; i < scoreBatch.length; i += 50) {
+        const batch = scoreBatch.slice(i, i + 50);
+        for (const item of batch) {
+          const { data: existing } = await supabase.from('test_scores')
+            .select('id').eq('student_id', item.student_id).eq('test_date', item.test_date).eq('subject', item.subject).single();
+          if (existing) { skippedScores++; continue; }
+          await supabase.from('test_scores').insert(item);
+        }
+      }
+    } else {
+      // 기본 모드: 덮어쓰기
+      for (let i = 0; i < scoreBatch.length; i += 50) {
+        await supabase.from('test_scores')
+          .upsert(scoreBatch.slice(i, i + 50), { onConflict: 'student_id,test_date,subject' });
+      }
     }
 
-    // 6. 상세_로그 → test_responses (배치 upsert, 100개씩)
+    // 6. 상세_로그 → test_responses
     const respBatch: Record<string, unknown>[] = [];
     for (const row of filteredDetailRows.slice(1)) {
       const name = row[2] || '';
@@ -150,17 +169,36 @@ export async function POST(req: NextRequest) {
         submitted_at: row[0] || '',
       });
     }
-    for (let i = 0; i < respBatch.length; i += 100) {
-      await supabase.from('test_responses')
-        .upsert(respBatch.slice(i, i + 100), { onConflict: 'student_id,session,question_id,test_date' });
+
+    if (mode === 'new_only') {
+      for (let i = 0; i < respBatch.length; i += 100) {
+        const batch = respBatch.slice(i, i + 100);
+        for (const item of batch) {
+          const { data: existing } = await supabase.from('test_responses')
+            .select('id').eq('student_id', item.student_id).eq('session', item.session)
+            .eq('question_id', item.question_id).eq('test_date', item.test_date).single();
+          if (existing) { skippedResponses++; continue; }
+          await supabase.from('test_responses').insert(item);
+        }
+      }
+    } else {
+      for (let i = 0; i < respBatch.length; i += 100) {
+        await supabase.from('test_responses')
+          .upsert(respBatch.slice(i, i + 100), { onConflict: 'student_id,session,question_id,test_date' });
+      }
     }
 
+    const modeLabel = mode === 'new_only' ? '새 응답만' : '전체';
+    const skipMsg = mode === 'new_only' ? ` (기존 건너뜀: 점수 ${skippedScores}건, 응답 ${skippedResponses}건)` : '';
+
     return Response.json({
-      message: `동기화 완료! (${dateLabel}) 문제 ${questionBatch.length}개, 학생 ${studentMap.size}명, 점수 ${scoreBatch.length}건, 응답 ${respBatch.length}건`,
+      message: `동기화 완료! (${dateLabel}, ${modeLabel}) 문제 ${questionBatch.length}개, 학생 ${studentMap.size}명, 점수 ${scoreBatch.length - skippedScores}건, 응답 ${respBatch.length - skippedResponses}건${skipMsg}`,
       syncedQuestions: questionBatch.length,
       syncedStudents: studentMap.size,
-      syncedScores: scoreBatch.length,
-      syncedResponses: respBatch.length,
+      syncedScores: scoreBatch.length - skippedScores,
+      syncedResponses: respBatch.length - skippedResponses,
+      skippedScores,
+      skippedResponses,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : '알 수 없는 오류';
