@@ -7,8 +7,12 @@ interface StudentNote {
   student_id: string;
   title: string;
   content: string;
+  content_type?: 'steps' | 'blocks' | 'text';
   tags: string[];
   confidence: string | null;
+  participation_score?: number | null;
+  best_learning?: boolean;
+  one_word?: string | null;
   created_at: string;
   students: { name: string } | null;
 }
@@ -264,6 +268,16 @@ export default function EducationLogsPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {/* 참여점수 */}
+                        {note.participation_score != null && (
+                          <span style={{
+                            padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                            background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
+                            color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
+                          }}>
+                            {note.participation_score}/3
+                          </span>
+                        )}
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 4 }}>
                             {note.tags.slice(0, 3).map(tag => (
@@ -291,6 +305,12 @@ export default function EducationLogsPage() {
                     {/* 펼친 내용 */}
                     {isExpanded && (
                       <div style={{ padding: '16px 20px 20px', borderTop: '1px solid var(--border)' }}>
+                        {/* 한마디 */}
+                        {note.one_word && (
+                          <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', marginBottom: 16, fontSize: 14, color: 'var(--text-second)' }}>
+                            {note.one_word}
+                          </div>
+                        )}
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
                             {note.tags.map(tag => (
@@ -303,7 +323,7 @@ export default function EducationLogsPage() {
                             ))}
                           </div>
                         )}
-                        <NoteContentRenderer content={note.content} />
+                        <NoteContentRenderer content={note.content} contentType={note.content_type} />
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'right', marginTop: 12 }}>
                           작성: {new Date(note.created_at).toLocaleString('ko-KR')}
                         </div>
@@ -327,7 +347,48 @@ export default function EducationLogsPage() {
 }
 
 // ── 블록 렌더러 ──
-function NoteContentRenderer({ content }: { content: string }) {
+function NoteContentRenderer({ content, contentType }: { content: string; contentType?: string }) {
+  // STEP 구조 (노션 임포트)
+  if (contentType === 'steps') {
+    try {
+      const steps = JSON.parse(content);
+      const stepSections = [
+        { key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝', completed: steps.step1_completed },
+        { key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡', completed: steps.step2_completed },
+        { key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯', completed: steps.step3_completed },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {stepSections.map(({ key, label, icon, completed }) => {
+            const text = steps[key] as string;
+            if (!text) return (
+              <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
+              </div>
+            );
+            return (
+              <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+                <div style={{
+                  padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  background: completed ? 'rgba(48,209,88,0.06)' : 'var(--bg-elevated)',
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                  {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+                </div>
+                <div style={{ padding: '12px 16px', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                  {text}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    } catch { /* fallback */ }
+  }
+
+  // 기존 블록 배열 구조
   let blocks: { id: string; type: string; content: string; items: string[]; headers: string[]; rows: string[][] }[] | null = null;
   try {
     const parsed = JSON.parse(content);
@@ -346,23 +407,14 @@ function NoteContentRenderer({ content }: { content: string }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {blocks.map(block => {
         if (block.type === 'text') {
-          return (
-            <div key={block.id} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-              {block.content}
-            </div>
-          );
+          return <div key={block.id} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{block.content}</div>;
         }
         if (block.type === 'numbered-list') {
           return (
             <div key={block.id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {block.items.filter(i => i.trim()).map((item, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{
-                    minWidth: 22, height: 22, borderRadius: '50%',
-                    background: 'var(--blue-dim)', color: 'var(--blue-light)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, flexShrink: 0, marginTop: 2,
-                  }}>{idx + 1}</span>
+                  <span style={{ minWidth: 22, height: 22, borderRadius: '50%', background: 'var(--blue-dim)', color: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0, marginTop: 2 }}>{idx + 1}</span>
                   <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7 }}>{item}</span>
                 </div>
               ))}
@@ -373,46 +425,14 @@ function NoteContentRenderer({ content }: { content: string }) {
           return (
             <div key={block.id} style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <thead>
-                  <tr>
-                    {block.headers.map((h, i) => (
-                      <th key={i} style={{
-                        padding: '8px 12px', textAlign: 'left',
-                        borderBottom: '2px solid var(--border)',
-                        background: 'var(--bg-hover)', color: 'var(--text-muted)',
-                        fontSize: 12, fontWeight: 700,
-                      }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {block.rows.map((row, ri) => (
-                    <tr key={ri}>
-                      {row.map((cell, ci) => (
-                        <td key={ci} style={{
-                          padding: '8px 12px', borderBottom: '1px solid var(--border)',
-                          color: 'var(--text-second)', fontSize: 13,
-                        }}>{cell}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
+                <thead><tr>{block.headers.map((h, i) => <th key={i} style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '2px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700 }}>{h}</th>)}</tr></thead>
+                <tbody>{block.rows.map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', color: 'var(--text-second)', fontSize: 13 }}>{cell}</td>)}</tr>)}</tbody>
               </table>
             </div>
           );
         }
         if (block.type === 'quote') {
-          return (
-            <div key={block.id} style={{
-              borderLeft: '3px solid var(--blue)',
-              fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7,
-              fontStyle: 'italic', whiteSpace: 'pre-wrap',
-              background: 'var(--bg-hover)', padding: '10px 14px',
-              borderRadius: '0 var(--radius-md) var(--radius-md) 0',
-            }}>
-              {block.content}
-            </div>
-          );
+          return <div key={block.id} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7, whiteSpace: 'pre-wrap', background: 'var(--bg-hover)', padding: '10px 14px', borderRadius: 'var(--radius-md)' }}>{block.content}</div>;
         }
         return null;
       })}

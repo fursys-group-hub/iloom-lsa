@@ -19,17 +19,35 @@ function unpackContent(row: Record<string, unknown>): Record<string, unknown> {
   const content = row.content as string;
   try {
     const parsed = JSON.parse(content);
-    if (parsed && typeof parsed === 'object' && (parsed.blocks || parsed.text)) {
-      const meta = parsed.meta || {};
-      return {
-        ...row,
-        content: parsed.blocks ? JSON.stringify(parsed.blocks) : parsed.text,
-        tags: meta.tags || [],
-        confidence: meta.confidence || null,
-      };
+    if (parsed && typeof parsed === 'object') {
+      // 새 형식: steps + meta (노션 임포트)
+      if (parsed.steps) {
+        const meta = parsed.meta || {};
+        return {
+          ...row,
+          content: JSON.stringify(parsed.steps),
+          content_type: 'steps',
+          tags: meta.tags || [],
+          confidence: meta.confidence || null,
+          participation_score: meta.participation_score ?? null,
+          best_learning: meta.best_learning ?? false,
+          one_word: meta.one_word || null,
+        };
+      }
+      // 기존 형식: blocks + meta
+      if (parsed.blocks || parsed.text) {
+        const meta = parsed.meta || {};
+        return {
+          ...row,
+          content: parsed.blocks ? JSON.stringify(parsed.blocks) : parsed.text,
+          content_type: parsed.blocks ? 'blocks' : 'text',
+          tags: meta.tags || [],
+          confidence: meta.confidence || null,
+        };
+      }
     }
   } catch { /* plain text */ }
-  return { ...row, tags: [], confidence: null };
+  return { ...row, content_type: 'text', tags: [], confidence: null };
 }
 
 // 노트 조회
