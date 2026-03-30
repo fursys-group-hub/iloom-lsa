@@ -119,10 +119,10 @@ export default function TestsClient({ batches, students, scores }: Props) {
     }
   }, [selectedSession, fetchSessionData]);
 
-  // 학생별 성적 (responses 기반)
+  // 학생별 성적 (responses 기반) — 미응시 포함
   const selectedScores = useMemo(() => {
     if (!selectedSession) return [];
-    return students
+    const tested = students
       .map((student) => {
         const score = scores.find(
           (s) => s.student_id === student.id && s.subject === selectedSession
@@ -130,12 +130,14 @@ export default function TestsClient({ batches, students, scores }: Props) {
         const studentResp = responses.filter((r) => r.student_id === student.id);
         const wrongCount = studentResp.filter((r) => !r.is_correct).length;
         const totalCount = studentResp.length;
-        // 제출 시간 (첫 번째 응답의 submitted_at)
         const submittedAt = studentResp[0]?.submitted_at || '';
-        return { student, score: score?.score ?? null, wrongCount, totalCount, submittedAt };
-      })
-      .filter((s) => s.score !== null)
-      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+        const took = score !== undefined || totalCount > 0;
+        return { student, score: score?.score ?? null, wrongCount, totalCount, submittedAt, took };
+      });
+    // 응시자 점수순 + 미응시자 이름순
+    const tookExam = tested.filter(s => s.took).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    const notTook = tested.filter(s => !s.took).sort((a, b) => a.student.name.localeCompare(b.student.name));
+    return [...tookExam, ...notTook];
   }, [selectedSession, students, scores, responses]);
 
   // 서술형 수동 채점 저장
@@ -300,7 +302,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <Row label="평균" value={`${stat.avg}점`} color="var(--blue-light)" />
                   <Row label="최고/최저" value={`${stat.max} / ${stat.min}`} />
-                  <Row label="응시" value={`${stat.count}명`} />
+                  <Row label="응시" value={`${stat.count}/${students.length}명`} color={stat.count < students.length ? 'var(--orange)' : undefined} />
                 </div>
               </button>
             ))}
@@ -373,6 +375,31 @@ export default function TestsClient({ batches, students, scores }: Props) {
                       return na !== nb ? na - nb : a.question_id.localeCompare(b.question_id);
                     })
                   : [];
+
+                // 미응시
+                if (!row.took) {
+                  return (
+                    <div key={row.student.id} style={{
+                      display: 'grid', gridTemplateColumns: '50px 1fr 120px 90px 70px 70px',
+                      alignItems: 'center', padding: '14px 20px',
+                      borderBottom: '1px solid var(--border)', opacity: 0.5,
+                    }}>
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Avatar name={row.student.name} />
+                        <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{row.student.name}</span>
+                        <span style={{
+                          fontSize: 12, fontWeight: 600, padding: '2px 10px',
+                          borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.1)', color: 'var(--red)',
+                        }}>미응시</span>
+                      </div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
+                      <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={row.student.id}>
