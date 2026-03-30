@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 // ── 타입 ──
 interface Note { id: string; title: string; content: string; tags: string[]; confidence: string | null; created_at: string; }
 
-type BlockType = 'text' | 'numbered-list' | 'table' | 'quote';
+type BlockType = 'heading' | 'text' | 'numbered-list' | 'table' | 'quote';
 interface Block {
   id: string;
   type: BlockType;
@@ -34,6 +34,7 @@ const CONFIDENCE = [
 ];
 
 const BLOCK_TYPES: { type: BlockType; label: string; icon: string }[] = [
+  { type: 'heading', label: '제목', icon: 'H' },
   { type: 'text', label: '텍스트', icon: 'T' },
   { type: 'numbered-list', label: '번호 리스트', icon: '1.' },
   { type: 'table', label: '표', icon: '▦' },
@@ -54,7 +55,7 @@ function newBlock(type: BlockType): Block {
 
 function blocksHaveContent(blocks: Block[]): boolean {
   return blocks.some(b => {
-    if (b.type === 'text' || b.type === 'quote') return b.content.trim().length > 0;
+    if (b.type === 'heading' || b.type === 'text' || b.type === 'quote') return b.content.trim().length > 0;
     if (b.type === 'numbered-list') return b.items.some(i => i.trim().length > 0);
     if (b.type === 'table') return b.rows.some(r => r.some(c => c.trim().length > 0));
     return false;
@@ -305,6 +306,9 @@ export default function MyNotesPage() {
 
                     {/* 블록 에디터 */}
                     <div style={{ padding: 12 }}>
+                      {block.type === 'heading' && (
+                        <HeadingEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
+                      )}
                       {block.type === 'text' && (
                         <TextBlockEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
                       )}
@@ -481,17 +485,108 @@ export default function MyNotesPage() {
   );
 }
 
+// ── 인라인 서식 파서 ──
+// **볼드**, *기울임*, __밑줄__, ~~취소선~~, `코드`
+
+function renderInlineFormat(text: string, searchQuery?: string): React.ReactNode {
+  // 검색어 하이라이트 + 인라인 서식 처리
+  const formatRegex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(__(.+?)__)|(\~\~(.+?)\~\~)|(`(.+?)`)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+
+  const highlightText = (t: string) => {
+    if (!searchQuery?.trim()) return t;
+    const q = searchQuery.trim();
+    const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const segs = t.split(regex);
+    return segs.map((seg, i) =>
+      regex.test(seg)
+        ? <mark key={i} style={{ background: 'var(--blue-dim)', color: 'var(--blue-light)', borderRadius: 2, padding: '0 2px' }}>{seg}</mark>
+        : seg
+    );
+  };
+
+  while ((match = formatRegex.exec(text)) !== null) {
+    // 매치 전 텍스트
+    if (match.index > lastIndex) {
+      parts.push(<span key={key++}>{highlightText(text.slice(lastIndex, match.index))}</span>);
+    }
+
+    if (match[2]) {
+      // **볼드**
+      parts.push(<strong key={key++}>{highlightText(match[2])}</strong>);
+    } else if (match[4]) {
+      // *기울임*
+      parts.push(<em key={key++}>{highlightText(match[4])}</em>);
+    } else if (match[6]) {
+      // __밑줄__
+      parts.push(<span key={key++} style={{ textDecoration: 'underline' }}>{highlightText(match[6])}</span>);
+    } else if (match[8]) {
+      // ~~취소선~~
+      parts.push(<del key={key++} style={{ color: 'var(--text-muted)' }}>{highlightText(match[8])}</del>);
+    } else if (match[10]) {
+      // `코드`
+      parts.push(
+        <code key={key++} style={{
+          background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4,
+          fontFamily: 'monospace', fontSize: '0.9em', color: 'var(--blue-light)',
+        }}>{highlightText(match[10])}</code>
+      );
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // 나머지 텍스트
+  if (lastIndex < text.length) {
+    parts.push(<span key={key++}>{highlightText(text.slice(lastIndex))}</span>);
+  }
+
+  return parts.length > 0 ? parts : highlightText(text);
+}
+
 // ── 블록 에디터 컴포넌트 ──
+
+function HeadingEditor({ block, onChange }: { block: Block; onChange: (p: Partial<Block>) => void }) {
+  return (
+    <input
+      value={block.content}
+      onChange={e => onChange({ content: e.target.value })}
+      placeholder="섹션 제목을 입력하세요..."
+      style={{
+        ...inputStyle, border: 'none', background: 'transparent', padding: 0,
+        fontSize: 18, fontWeight: 700, color: 'var(--text-primary)',
+      }}
+    />
+  );
+}
 
 function TextBlockEditor({ block, onChange }: { block: Block; onChange: (p: Partial<Block>) => void }) {
   return (
-    <textarea
-      value={block.content}
-      onChange={e => onChange({ content: e.target.value })}
-      placeholder="내용을 입력하세요..."
-      rows={4}
-      style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.7, border: 'none', background: 'transparent', padding: 0 }}
-    />
+    <div>
+      <textarea
+        value={block.content}
+        onChange={e => onChange({ content: e.target.value })}
+        placeholder="내용을 입력하세요... (**볼드**, *기울임*, __밑줄__, `코드`)"
+        rows={4}
+        style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.7, border: 'none', background: 'transparent', padding: 0 }}
+      />
+      {/* 서식 미리보기 */}
+      {block.content.trim() && /[*_~`]/.test(block.content) && (
+        <div style={{
+          marginTop: 8, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+          background: 'var(--bg-hover)', fontSize: 14, color: 'var(--text-second)',
+          lineHeight: 1.7, borderLeft: '2px solid var(--blue)',
+        }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>미리보기</div>
+          {block.content.split('\n').map((line, i) => (
+            <div key={i}>{renderInlineFormat(line)}</div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -679,24 +774,13 @@ function QuoteEditor({ block, onChange }: { block: Block; onChange: (p: Partial<
 function BlockRenderer({ content, searchQuery }: { content: string; searchQuery: string }) {
   const blocks = parseContent(content);
 
-  // 검색어 하이라이트
-  const highlight = (text: string) => {
-    if (!searchQuery.trim()) return text;
-    const q = searchQuery.trim();
-    const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    const parts = text.split(regex);
-    return parts.map((part, i) =>
-      regex.test(part)
-        ? <mark key={i} style={{ background: 'var(--blue-dim)', color: 'var(--blue-light)', borderRadius: 2, padding: '0 2px' }}>{part}</mark>
-        : part
-    );
-  };
-
   // 기존 플레인텍스트 (하위 호환)
   if (!blocks) {
     return (
-      <div style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-        {highlight(content)}
+      <div style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.8 }}>
+        {content.split('\n').map((line, i) => (
+          <div key={i}>{line.trim() ? renderInlineFormat(line, searchQuery) : <br />}</div>
+        ))}
       </div>
     );
   }
@@ -704,10 +788,23 @@ function BlockRenderer({ content, searchQuery }: { content: string; searchQuery:
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {blocks.map(block => {
+        if (block.type === 'heading') {
+          return (
+            <h3 key={block.id} style={{
+              fontSize: 18, fontWeight: 700, color: 'var(--text-primary)',
+              margin: 0, paddingBottom: 8, borderBottom: '2px solid var(--border)',
+            }}>
+              {renderInlineFormat(block.content, searchQuery)}
+            </h3>
+          );
+        }
+
         if (block.type === 'text') {
           return (
-            <div key={block.id} style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-              {highlight(block.content)}
+            <div key={block.id} style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.8 }}>
+              {block.content.split('\n').map((line, i) => (
+                <div key={i}>{line.trim() ? renderInlineFormat(line, searchQuery) : <br />}</div>
+              ))}
             </div>
           );
         }
@@ -724,7 +821,7 @@ function BlockRenderer({ content, searchQuery }: { content: string; searchQuery:
                     fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 2,
                   }}>{idx + 1}</span>
                   <span style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7 }}>
-                    {highlight(item)}
+                    {renderInlineFormat(item, searchQuery)}
                   </span>
                 </div>
               ))}
@@ -744,7 +841,7 @@ function BlockRenderer({ content, searchQuery }: { content: string; searchQuery:
                         borderBottom: '2px solid var(--border)',
                         background: 'var(--bg-hover)', color: 'var(--text-muted)',
                         fontSize: 13, fontWeight: 700,
-                      }}>{highlight(h)}</th>
+                      }}>{renderInlineFormat(h, searchQuery)}</th>
                     ))}
                   </tr>
                 </thead>
@@ -755,7 +852,7 @@ function BlockRenderer({ content, searchQuery }: { content: string; searchQuery:
                         <td key={ci} style={{
                           padding: '10px 14px', borderBottom: '1px solid var(--border)',
                           color: 'var(--text-second)', fontSize: 14,
-                        }}>{highlight(cell)}</td>
+                        }}>{renderInlineFormat(cell, searchQuery)}</td>
                       ))}
                     </tr>
                   ))}
@@ -770,10 +867,12 @@ function BlockRenderer({ content, searchQuery }: { content: string; searchQuery:
             <div key={block.id} style={{
               borderLeft: '3px solid var(--blue)', paddingLeft: 16,
               fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7,
-              fontStyle: 'italic', whiteSpace: 'pre-wrap',
+              fontStyle: 'italic',
               background: 'var(--bg-hover)', padding: '12px 16px', borderRadius: '0 var(--radius-md) var(--radius-md) 0',
             }}>
-              {highlight(block.content)}
+              {block.content.split('\n').map((line, i) => (
+                <div key={i}>{line.trim() ? renderInlineFormat(line, searchQuery) : <br />}</div>
+              ))}
             </div>
           );
         }
