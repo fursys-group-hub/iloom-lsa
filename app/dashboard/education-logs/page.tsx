@@ -269,7 +269,7 @@ export default function EducationLogsPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         {/* 참여점수 */}
-                        {note.participation_score != null && (
+                        {note.participation_score != null && note.participation_score > 0 && (
                           <span style={{
                             padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
                             background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
@@ -305,12 +305,6 @@ export default function EducationLogsPage() {
                     {/* 펼친 내용 */}
                     {isExpanded && (
                       <div style={{ padding: '16px 20px 20px', borderTop: '1px solid var(--border)' }}>
-                        {/* 한마디 */}
-                        {note.one_word && (
-                          <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', marginBottom: 16, fontSize: 14, color: 'var(--text-second)' }}>
-                            {note.one_word}
-                          </div>
-                        )}
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
                             {note.tags.map(tag => (
@@ -346,9 +340,117 @@ export default function EducationLogsPage() {
   );
 }
 
+// ── 인라인 서식 (볼드, 기울임) ──
+function renderInline(text: string): React.ReactNode {
+  const regex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)/g;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match;
+  let k = 0;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) parts.push(<span key={k++}>{text.slice(last, match.index)}</span>);
+    if (match[2]) parts.push(<strong key={k++}>{match[2]}</strong>);
+    else if (match[4]) parts.push(<em key={k++}>{match[4]}</em>);
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(<span key={k++}>{text.slice(last)}</span>);
+  return parts.length > 0 ? parts : text;
+}
+
+// ── 마크다운 라인 렌더러 (관리자 STEP용) ──
+function renderMdLines(text: string): React.ReactNode {
+  // 멀티라인 테이블 셀 병합
+  const rawLines = text.split('\n');
+  const lines: string[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const t = rawLines[i].trim();
+    if (t.startsWith('|') && !t.endsWith('|')) {
+      let merged = rawLines[i];
+      while (i + 1 < rawLines.length && !merged.trim().endsWith('|')) {
+        i++;
+        merged += ' ' + rawLines[i].trim();
+      }
+      lines.push(merged);
+    } else {
+      lines.push(rawLines[i]);
+    }
+  }
+  const els: React.ReactNode[] = [];
+  let bullets: { text: string; indent: number }[] = [];
+  let tblRows: string[][] = [];
+  let k = 0;
+
+  const flushB = () => {
+    if (!bullets.length) return;
+    els.push(
+      <div key={k++} style={{ display: 'flex', flexDirection: 'column', gap: 3, margin: '3px 0' }}>
+        {bullets.map((b, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, paddingLeft: b.indent * 16 }}>
+            <span style={{ minWidth: 5, height: 5, borderRadius: '50%', flexShrink: 0, marginTop: 7, background: b.indent > 0 ? 'var(--text-muted)' : 'var(--blue-light)' }} />
+            <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.55 }}>{renderInline(b.text)}</span>
+          </div>
+        ))}
+      </div>
+    );
+    bullets = [];
+  };
+  const flushT = () => {
+    if (!tblRows.length) return;
+    const data = tblRows.filter(r => !r.every(c => /^[-:\s]+$/.test(c)));
+    if (!data.length) { tblRows = []; return; }
+    els.push(
+      <div key={k++} style={{ overflowX: 'auto', margin: '8px 0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead><tr>{data[0].map((h, i) => <th key={i} style={{ padding: '8px 10px', textAlign: 'left', whiteSpace: 'nowrap', borderBottom: '2px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700 }}>{renderInline(h.trim())}</th>)}</tr></thead>
+          <tbody>{data.slice(1).map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)', color: 'var(--text-second)', fontSize: 13, lineHeight: 1.5 }}>{renderInline(cell.trim())}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+    );
+    tblRows = [];
+  };
+
+  for (const line of lines) {
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      flushB();
+      tblRows.push(line.trim().slice(1, -1).split('|').map(c => c.trim()));
+      continue;
+    }
+    if (tblRows.length) flushT();
+
+    const bm = line.match(/^(\s*)[•\-]\s*(.+)/);
+    if (bm && !line.trim().startsWith('---')) { flushT(); bullets.push({ text: bm[2], indent: Math.floor(bm[1].length / 2) }); continue; }
+    flushB();
+
+    const t = line.trim();
+    if (!t) { els.push(<div key={k++} style={{ height: 6 }} />); continue; }
+
+    const hm = t.match(/^(#{1,4})\s+(.+)/);
+    if (hm) {
+      const lv = hm[1].length;
+      els.push(<div key={k++} style={{ fontSize: lv <= 2 ? 16 : 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: lv <= 2 ? 10 : 6, paddingBottom: lv <= 2 ? 4 : 0, borderBottom: lv <= 2 ? '2px solid var(--border)' : 'none' }}>{renderInline(hm[2])}</div>);
+      continue;
+    }
+    const nm = t.match(/^(\d+)\.\s+(.+)/);
+    if (nm) {
+      els.push(
+        <div key={k++} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, margin: '2px 0' }}>
+          <span style={{ minWidth: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: 2, background: 'var(--blue-dim)', color: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{nm[1]}</span>
+          <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7 }}>{renderInline(nm[2])}</span>
+        </div>
+      );
+      continue;
+    }
+
+    const isTitle = t.length <= 40 && !/[.,;:!?]$/.test(t) && !t.startsWith('**');
+    els.push(<div key={k++} style={{ fontSize: 14, fontWeight: isTitle ? 700 : 400, color: isTitle ? 'var(--text-primary)' : 'var(--text-second)', lineHeight: 1.55, marginTop: isTitle ? 6 : 0 }}>{renderInline(t)}</div>);
+  }
+  flushB(); flushT();
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{els}</div>;
+}
+
 // ── 블록 렌더러 ──
 function NoteContentRenderer({ content, contentType }: { content: string; contentType?: string }) {
-  // STEP 구조 (노션 임포트)
+  // STEP 구조 (노션 임포트 + 앱 작성)
   if (contentType === 'steps') {
     try {
       const steps = JSON.parse(content);
@@ -377,8 +479,8 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                   {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
                 </div>
-                <div style={{ padding: '12px 16px', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-                  {text}
+                <div style={{ padding: '12px 16px' }}>
+                  {renderMdLines(text)}
                 </div>
               </div>
             );

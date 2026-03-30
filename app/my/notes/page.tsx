@@ -3,7 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 // ── 타입 ──
-interface Note { id: string; title: string; content: string; tags: string[]; confidence: string | null; created_at: string; }
+interface Note {
+  id: string; title: string; content: string;
+  content_type?: 'steps' | 'blocks' | 'text';
+  tags: string[]; confidence: string | null;
+  participation_score?: number | null;
+  best_learning?: boolean;
+  one_word?: string | null;
+  created_at: string;
+}
 
 type BlockType = 'heading' | 'text' | 'numbered-list' | 'table' | 'quote';
 interface Block {
@@ -70,36 +78,82 @@ function parseContent(content: string): Block[] | null {
   return null;
 }
 
+// ── STEP 정의 ──
+const STEP_DEFS = [
+  {
+    key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝',
+    desc: '오늘의 배움 쌓기',
+    placeholder: '오늘 학습한 상세 내용을 자유롭게 적어주세요.\n\n현장 스케치: 매장의 실제 제품 사진을 찍어서 올려두면 나중에 훨씬 기억하기 좋습니다.',
+  },
+  {
+    key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡',
+    desc: '나를 지켜주는 무기',
+    placeholder: '고객님이 반드시 물어볼 핵심 스펙이나 수치를 적어보세요.\n\n"확인해 볼게요"보다 "이 제품은 ~입니다"라는 즉각적인 답변이 고객의 마음을 엽니다.\n한 달 뒤, 상담 중에 갑자기 기억이 안 날 때 꺼내 볼 수 있는 나만의 컨닝 페이퍼!',
+  },
+  {
+    key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯',
+    desc: '내일 바로 써먹기',
+    placeholder: '오늘의 가구 One-Pick: 오늘 배운 제품 중 고객에게 가장 추천하고 싶은 하나와 그 이유\n\n내일의 나에게: 오늘 놓쳤거나 내일 출근해서 가장 먼저 확인해야 할 한 가지는?',
+  },
+] as const;
+
 // ── 메인 ──
 export default function MyNotesPage() {
   const [studentId, setStudentId] = useState('');
+  const [studentName, setStudentName] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [blocks, setBlocks] = useState<Block[]>([newBlock('text')]);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [pledge, setPledge] = useState(''); // 오늘의 다짐
+  const [step1, setStep1] = useState('');
+  const [step2, setStep2] = useState('');
+  const [step3, setStep3] = useState('');
+  const [step1Completed, setStep1Completed] = useState(false);
+  const [step2Completed, setStep2Completed] = useState(false);
+  const [step3Completed, setStep3Completed] = useState(false);
   const [tags, setTags] = useState('');
   const [confidence, setConfidence] = useState('');
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState('');
 
-  const DRAFT_KEY = 'iloom-note-draft';
+  const DRAFT_KEY = 'iloom-note-draft-v2';
+
+  const resetForm = () => {
+    setPledge(''); setStep1(''); setStep2(''); setStep3('');
+    setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
+    setTags(''); setConfidence(''); setEditingNoteId(null); setSaveError('');
+  };
+
+  // 오늘 이미 작성한 노트가 있는지 확인
+  const todayNote = notes.find(n => {
+    const noteDate = n.created_at.slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    return noteDate === today;
+  });
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
-    if (auth) setStudentId(JSON.parse(auth).studentId);
+    if (auth) {
+      const parsed = JSON.parse(auth);
+      setStudentId(parsed.studentId);
+      setStudentName(parsed.name || '');
+    }
 
     // 임시저장 복원
     const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) {
       try {
         const d = JSON.parse(draft);
-        if (d.title || d.tags || d.confidence || (d.blocks && blocksHaveContent(d.blocks))) {
-          setTitle(d.title || '');
-          setBlocks(d.blocks || [newBlock('text')]);
-          setTags(d.tags || '');
-          setConfidence(d.confidence || '');
+        if (d.pledge || d.step1 || d.step2 || d.step3) {
+          setPledge(d.pledge || '');
+          setStep1(d.step1 || ''); setStep2(d.step2 || ''); setStep3(d.step3 || '');
+          setStep1Completed(d.step1Completed || false);
+          setStep2Completed(d.step2Completed || false);
+          setStep3Completed(d.step3Completed || false);
+          setTags(d.tags || ''); setConfidence(d.confidence || '');
           setShowForm(true);
         }
       } catch { /* */ }
@@ -108,17 +162,18 @@ export default function MyNotesPage() {
 
   // 작성 중 자동 임시저장 (2초 디바운스)
   useEffect(() => {
-    if (!showForm) return;
+    if (!showForm || editingNoteId) return;
     const timer = setTimeout(() => {
-      const hasContent = title.trim() || tags.trim() || confidence || blocksHaveContent(blocks);
+      const hasContent = pledge.trim() || step1.trim() || step2.trim() || step3.trim();
       if (hasContent) {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({ title, blocks, tags, confidence }));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          pledge, step1, step2, step3, step1Completed, step2Completed, step3Completed, tags, confidence,
+        }));
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [showForm, title, blocks, tags, confidence]);
+  }, [showForm, editingNoteId, pledge, step1, step2, step3, step1Completed, step2Completed, step3Completed, tags, confidence]);
 
-  // 저장 완료 또는 폼 닫을 때 임시저장 삭제
   const clearDraft = () => localStorage.removeItem(DRAFT_KEY);
 
   const fetchNotes = useCallback(async () => {
@@ -134,52 +189,105 @@ export default function MyNotesPage() {
 
   useEffect(() => { fetchNotes(); }, [fetchNotes]);
 
-  // 블록 조작
-  const updateBlock = (id: string, patch: Partial<Block>) => {
-    setBlocks(prev => prev.map(b => b.id === id ? { ...b, ...patch } : b));
-  };
-  const addBlock = (type: BlockType) => {
-    setBlocks(prev => [...prev, newBlock(type)]);
-  };
-  const removeBlock = (id: string) => {
-    setBlocks(prev => prev.length <= 1 ? prev : prev.filter(b => b.id !== id));
-  };
-  const moveBlock = (id: string, dir: -1 | 1) => {
-    setBlocks(prev => {
-      const idx = prev.findIndex(b => b.id === id);
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= prev.length) return prev;
-      const arr = [...prev];
-      [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
-      return arr;
-    });
+  // 수정 모드 진입
+  const startEdit = (note: Note) => {
+    setEditingNoteId(note.id);
+    // title이 "날짜 이름 / 교육일지" 형식이면 다짐은 비움, 아니면 title이 다짐
+    const isAutoTitle = /^\d{4}-\d{2}-\d{2}\s.+\/\s교육일지$/.test(note.title);
+    setPledge(isAutoTitle ? '' : note.title);
+    setTags(note.tags?.join(', ') || '');
+    setConfidence(note.confidence || '');
+    setSaveError('');
+
+    if (note.content_type === 'steps') {
+      try {
+        const steps = JSON.parse(note.content);
+        setStep1(steps.step1 || ''); setStep2(steps.step2 || ''); setStep3(steps.step3 || '');
+        setStep1Completed(steps.step1_completed || false);
+        setStep2Completed(steps.step2_completed || false);
+        setStep3Completed(steps.step3_completed || false);
+      } catch {
+        setStep1(note.content); setStep2(''); setStep3('');
+        setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
+      }
+    } else {
+      // blocks/text → step1에 텍스트로 넣기
+      try {
+        const parsed = JSON.parse(note.content);
+        if (Array.isArray(parsed)) {
+          setStep1(parsed.map(b => b.content || b.items?.join('\n') || '').join('\n\n'));
+        } else {
+          setStep1(note.content);
+        }
+      } catch {
+        setStep1(note.content);
+      }
+      setStep2(''); setStep3('');
+      setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
+    }
+    setShowForm(true);
+    setExpandedNoteId(null);
   };
 
+  const stepsHaveContent = step1.trim() || step2.trim() || step3.trim();
+
+  // 자동 제목 생성: YYYY-MM-DD 이름 / 교육일지
+  const autoTitle = (() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d} ${studentName || '교육생'} / 교육일지`;
+  })();
+
   const handleSave = async () => {
-    if (!title.trim() || !blocksHaveContent(blocks)) return;
+    if (!stepsHaveContent) return;
     setSaving(true);
+    setSaveError('');
+
+    const stepsData = {
+      step1: step1.trim(), step2: step2.trim(), step3: step3.trim(),
+      step1_completed: step1Completed && !!step1.trim(),
+      step2_completed: step2Completed && !!step2.trim(),
+      step3_completed: step3Completed && !!step3.trim(),
+    };
+
     try {
-      await fetch('/api/notes', {
-        method: 'POST',
+      const isEdit = !!editingNoteId;
+      const res = await fetch('/api/notes', {
+        method: isEdit ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_id: studentId, title,
-          content: JSON.stringify(blocks),
-          tags: tags ? tags.split(',').map(t => t.trim()) : [],
+          ...(isEdit ? { id: editingNoteId } : { student_id: studentId }),
+          title: pledge.trim() || autoTitle,
+          content: JSON.stringify(stepsData),
+          content_type: 'steps',
+          tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
           confidence: confidence || null,
+          one_word: pledge.trim() || null,
         }),
       });
+      const result = await res.json();
+      if (!res.ok) {
+        setSaveError(result.message || '저장에 실패했어요');
+        setSaving(false);
+        return;
+      }
       setShowForm(false);
-      setTitle(''); setBlocks([newBlock('text')]); setTags(''); setConfidence('');
+      resetForm();
       clearDraft();
       fetchNotes();
-    } catch { /* */ }
+    } catch { setSaveError('네트워크 오류가 발생했어요'); }
     setSaving(false);
   };
+
+  // one_word를 pledge/다짐으로 API에 전달하기 위해 packContent 호환
+  // (API의 packContent에서 extraMeta.one_word로 저장됨)
 
   const handleDelete = async (id: string) => {
     if (!confirm('정말 삭제할까요?')) return;
     await fetch(`/api/notes?id=${id}`, { method: 'DELETE' });
+    if (editingNoteId === id) { setShowForm(false); resetForm(); }
     fetchNotes();
   };
 
@@ -188,32 +296,56 @@ export default function MyNotesPage() {
     ? notes.filter(n => {
         const q = searchQuery.toLowerCase();
         if (n.title.toLowerCase().includes(q)) return true;
-        if (n.content.toLowerCase().includes(q)) return true;
         if (n.tags?.some(t => t.toLowerCase().includes(q))) return true;
+        if (n.one_word?.toLowerCase().includes(q)) return true;
+        // steps 타입이면 steps 내부 텍스트도 검색
+        if (n.content_type === 'steps') {
+          try {
+            const steps = JSON.parse(n.content);
+            if ([steps.step1, steps.step2, steps.step3].some(s => s && s.toLowerCase().includes(q))) return true;
+          } catch { /* */ }
+        }
+        if (n.content.toLowerCase().includes(q)) return true;
         return false;
       })
     : notes;
 
   if (loading) return <div style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</div>;
 
-  const canSave = title.trim() && blocksHaveContent(blocks);
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📓 교육일지</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          style={{
-            padding: '10px 20px', borderRadius: 'var(--radius-md)',
-            border: showForm ? 'none' : '1px solid var(--border)',
-            background: showForm ? 'var(--red)' : 'transparent',
-            color: showForm ? '#fff' : 'var(--text-tertiary)',
-            fontSize: 14, fontWeight: 600, cursor: 'pointer',
-          }}
-        >
-          {showForm ? '✕ 닫기' : '✏️ 새 교육일지'}
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {/* 오늘 이미 작성했으면 "수정" 버튼, 아니면 "새 교육일지" */}
+          {!showForm && todayNote && (
+            <button
+              onClick={() => startEdit(todayNote)}
+              style={{
+                padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--blue)', background: 'var(--blue-dim)',
+                color: 'var(--blue-light)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              ✏️ 오늘 일지 수정
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (showForm) { setShowForm(false); resetForm(); }
+              else { resetForm(); setShowForm(true); }
+            }}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-md)',
+              border: showForm ? 'none' : '1px solid var(--border)',
+              background: showForm ? 'var(--red)' : 'transparent',
+              color: showForm ? '#fff' : 'var(--text-tertiary)',
+              fontSize: 14, fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            {showForm ? '✕ 닫기' : '✏️ 새 교육일지'}
+          </button>
+        </div>
       </div>
 
       {/* 검색 */}
@@ -232,19 +364,21 @@ export default function MyNotesPage() {
         </div>
       )}
 
-      {/* 작성 폼 */}
+      {/* 작성 폼 — STEP 구조 */}
       {showForm && (
         <div style={card}>
           <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>
-            ✨ 오늘의 교육일지
+            {editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* 오늘의 다짐 (선택) */}
             <div>
-              <label style={labelStyle}>오늘 한마디</label>
-              <input value={title} onChange={e => setTitle(e.target.value)}
-                placeholder="오늘의 학습을 한 문장으로!" style={{ ...inputStyle, fontSize: 16, fontWeight: 600 }} />
+              <label style={labelStyle}>오늘의 다짐 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>
+              <input value={pledge} onChange={e => setPledge(e.target.value)}
+                placeholder="오늘의 각오나 다짐을 한 문장으로! (안 쓰면 자동 제목)" style={{ ...inputStyle, fontSize: 15 }} />
             </div>
 
+            {/* 오늘의 자신감 */}
             <div>
               <label style={labelStyle}>오늘의 자신감</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -265,96 +399,122 @@ export default function MyNotesPage() {
               </div>
             </div>
 
+            {/* 태그 */}
             <div>
               <label style={labelStyle}>태그</label>
               <input value={tags} onChange={e => setTags(e.target.value)}
                 placeholder="소재, 색상, 규격 (쉼표로 구분)" style={inputStyle} />
             </div>
 
-            {/* 블록 에디터 */}
-            <div>
-              <label style={labelStyle}>핵심 필기</label>
+            {/* STEP 1/2/3 에디터 */}
+            {STEP_DEFS.map(({ key, label, icon, desc, placeholder }) => {
+              const val = key === 'step1' ? step1 : key === 'step2' ? step2 : step3;
+              const setVal = key === 'step1' ? setStep1 : key === 'step2' ? setStep2 : setStep3;
+              const completed = key === 'step1' ? step1Completed : key === 'step2' ? step2Completed : step3Completed;
+              const setCompleted = key === 'step1' ? setStep1Completed : key === 'step2' ? setStep2Completed : setStep3Completed;
+              const textareaId = `step-textarea-${key}`;
 
-              {/* 블록 목록 */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {blocks.map((block, idx) => (
-                  <div key={block.id} style={{
-                    border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-elevated)', overflow: 'hidden',
+              const insertFormat = (prefix: string, suffix?: string) => {
+                const el = document.getElementById(textareaId) as HTMLTextAreaElement | null;
+                if (!el) return;
+                const start = el.selectionStart;
+                const end = el.selectionEnd;
+                const selected = val.slice(start, end);
+                const before = val.slice(0, start);
+                const after = val.slice(end);
+                if (suffix !== undefined) {
+                  // 감싸기 (볼드)
+                  setVal(before + prefix + (selected || '텍스트') + suffix + after);
+                } else {
+                  // 줄 시작에 삽입 (불릿, 제목)
+                  const lineStart = before.lastIndexOf('\n') + 1;
+                  const newVal = val.slice(0, lineStart) + prefix + val.slice(lineStart);
+                  setVal(newVal);
+                }
+                setTimeout(() => el.focus(), 50);
+              };
+
+              return (
+                <div key={key} style={{
+                  border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+                  background: 'var(--bg-elevated)', overflow: 'hidden',
+                }}>
+                  {/* STEP 헤더 */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    background: completed && val.trim() ? 'rgba(48,209,88,0.06)' : 'var(--bg-hover)',
+                    borderBottom: '1px solid var(--border)',
                   }}>
-                    {/* 블록 헤더 */}
-                    <div style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '6px 12px', background: 'var(--bg-hover)', borderBottom: '1px solid var(--border)',
-                    }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
-                        {BLOCK_TYPES.find(t => t.type === block.type)?.icon}{' '}
-                        {BLOCK_TYPES.find(t => t.type === block.type)?.label}
-                      </span>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        {idx > 0 && (
-                          <MiniBtn onClick={() => moveBlock(block.id, -1)}>↑</MiniBtn>
-                        )}
-                        {idx < blocks.length - 1 && (
-                          <MiniBtn onClick={() => moveBlock(block.id, 1)}>↓</MiniBtn>
-                        )}
-                        {blocks.length > 1 && (
-                          <MiniBtn onClick={() => removeBlock(block.id)} color="var(--red)">✕</MiniBtn>
-                        )}
-                      </div>
+                    <div>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 8 }}>{desc}</span>
                     </div>
-
-                    {/* 블록 에디터 */}
-                    <div style={{ padding: 12 }}>
-                      {block.type === 'heading' && (
-                        <HeadingEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
-                      )}
-                      {block.type === 'text' && (
-                        <TextBlockEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
-                      )}
-                      {block.type === 'numbered-list' && (
-                        <NumberedListEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
-                      )}
-                      {block.type === 'table' && (
-                        <TableEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
-                      )}
-                      {block.type === 'quote' && (
-                        <QuoteEditor block={block} onChange={patch => updateBlock(block.id, patch)} />
-                      )}
-                    </div>
+                    {val.trim() && (
+                      <button
+                        onClick={() => setCompleted(!completed)}
+                        style={{
+                          padding: '4px 14px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                          border: completed ? 'none' : '1px solid var(--border)',
+                          background: completed ? 'var(--green)' : 'transparent',
+                          color: completed ? '#fff' : 'var(--text-muted)',
+                          fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {completed ? '✓ 완료' : '완료 체크'}
+                      </button>
+                    )}
                   </div>
-                ))}
-              </div>
+                  {/* 서식 도구 바 */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 4, padding: '6px 16px',
+                    borderBottom: '1px solid var(--border)', background: 'var(--bg-hover)',
+                  }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', marginRight: 4 }}>서식:</span>
+                    <FormatBtn label="● 목록" title="줄 앞에 - 추가" onClick={() => insertFormat('- ')} />
+                    <FormatBtn label="B 굵게" title="선택한 텍스트를 굵게" onClick={() => insertFormat('**', '**')} />
+                    <FormatBtn label="# 제목" title="줄을 제목으로" onClick={() => insertFormat('### ')} />
+                    <FormatBtn label="1. 번호" title="줄 앞에 번호 추가" onClick={() => insertFormat('1. ')} />
+                  </div>
+                  {/* STEP 텍스트 입력 */}
+                  <textarea
+                    id={textareaId}
+                    value={val}
+                    onChange={e => setVal(e.target.value)}
+                    placeholder={placeholder}
+                    rows={5}
+                    style={{
+                      ...inputStyle, resize: 'vertical', lineHeight: 1.6,
+                      border: 'none', borderRadius: 0, background: 'transparent',
+                      padding: '14px 16px', minHeight: 120,
+                    }}
+                  />
+                </div>
+              );
+            })}
 
-              {/* 블록 추가 툴바 */}
+            {/* 에러 메시지 */}
+            {saveError && (
               <div style={{
-                display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap',
+                padding: '10px 16px', borderRadius: 'var(--radius-md)',
+                background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                fontSize: 14, fontWeight: 600,
               }}>
-                {BLOCK_TYPES.map(bt => (
-                  <button key={bt.type} onClick={() => addBlock(bt.type)} style={{
-                    padding: '8px 14px', borderRadius: 'var(--radius-md)',
-                    border: '1px dashed var(--border)', background: 'transparent',
-                    color: 'var(--text-muted)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.color = 'var(--blue-light)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-                  >
-                    + {bt.icon} {bt.label}
-                  </button>
-                ))}
+                {saveError}
               </div>
-            </div>
+            )}
 
-            <button onClick={handleSave} disabled={saving || !canSave}
+            {/* 저장 버튼 */}
+            <button onClick={handleSave} disabled={saving || !stepsHaveContent}
               style={{
                 padding: '14px', borderRadius: 'var(--radius-md)', border: 'none',
-                background: canSave ? 'var(--blue)' : 'var(--bg-elevated)',
-                color: canSave ? '#fff' : 'var(--text-muted)',
-                fontSize: 16, fontWeight: 600, cursor: canSave ? 'pointer' : 'not-allowed',
+                background: stepsHaveContent ? 'var(--blue)' : 'var(--bg-elevated)',
+                color: stepsHaveContent ? '#fff' : 'var(--text-muted)',
+                fontSize: 16, fontWeight: 600,
+                cursor: stepsHaveContent ? 'pointer' : 'not-allowed',
               }}
             >
-              {saving ? '저장 중...' : '저장하기'}
+              {saving ? '저장 중...' : editingNoteId ? '수정 완료' : '저장하기'}
             </button>
           </div>
         </div>
@@ -399,12 +559,51 @@ export default function MyNotesPage() {
                   <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                     {note.title}
                   </div>
-                  {/* 자신감 */}
-                  {conf && (
-                    <div style={{ fontSize: 13 }}>
-                      {conf.icon} {conf.label}
-                    </div>
-                  )}
+                  {/* 자신감 + 메타 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    {conf && (
+                      <span style={{ fontSize: 13 }}>
+                        {conf.icon} {conf.label}
+                      </span>
+                    )}
+                    {note.participation_score != null && note.participation_score > 0 && (
+                      <span style={{
+                        padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                        background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
+                        color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
+                      }}>
+                        참여 {note.participation_score}/3
+                      </span>
+                    )}
+                    {note.best_learning && (
+                      <span style={{ fontSize: 12 }}>⭐ 우수</span>
+                    )}
+                  </div>
+                  {/* STEP 완료 현황 (steps 타입만) */}
+                  {note.content_type === 'steps' && (() => {
+                    try {
+                      const steps = JSON.parse(note.content);
+                      const done = [steps.step1_completed, steps.step2_completed, steps.step3_completed].filter(Boolean).length;
+                      return (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {['📝', '💡', '🎯'].map((icon, i) => {
+                            const completed = [steps.step1_completed, steps.step2_completed, steps.step3_completed][i];
+                            return (
+                              <span key={i} style={{
+                                fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
+                                background: completed ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)',
+                                color: completed ? 'var(--green)' : 'var(--text-muted)',
+                                opacity: completed ? 1 : 0.5,
+                              }}>
+                                {icon}
+                              </span>
+                            );
+                          })}
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{done}/3</span>
+                        </div>
+                      );
+                    } catch { return null; }
+                  })()}
                   {/* 태그 */}
                   {note.tags && note.tags.length > 0 && (
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -449,6 +648,27 @@ export default function MyNotesPage() {
                         {conf.icon} {conf.label}
                       </span>
                     )}
+                    {note.participation_score != null && (
+                      <span style={{
+                        padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                        background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : 'rgba(255,159,10,0.12)',
+                        color: note.participation_score >= 3 ? 'var(--green)' : 'var(--orange)',
+                      }}>
+                        참여 {note.participation_score}/3
+                      </span>
+                    )}
+                    {note.best_learning && (
+                      <span style={{
+                        padding: '4px 12px', borderRadius: 'var(--radius-pill)',
+                        background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 13, fontWeight: 600,
+                      }}>
+                        ⭐ 우수학습
+                      </span>
+                    )}
+                    <button onClick={(e) => { e.stopPropagation(); startEdit(note); }}
+                      style={{ padding: '4px 10px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 13, cursor: 'pointer' }}>
+                      수정
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(note.id); }}
                       style={{ padding: '4px 8px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer' }}>
                       삭제
@@ -465,7 +685,7 @@ export default function MyNotesPage() {
                     ))}
                   </div>
                 )}
-                <BlockRenderer content={note.content} searchQuery={searchQuery} />
+                <BlockRenderer content={note.content} contentType={note.content_type} searchQuery={searchQuery} />
               </div>
             );
           })()}
@@ -503,7 +723,7 @@ function renderInlineFormat(text: string, searchQuery?: string): React.ReactNode
     const segs = t.split(regex);
     return segs.map((seg, i) =>
       regex.test(seg)
-        ? <mark key={i} style={{ background: 'var(--blue-dim)', color: 'var(--blue-light)', borderRadius: 2, padding: '0 2px' }}>{seg}</mark>
+        ? <mark key={i} style={{ background: 'rgba(255,230,0,0.35)', color: 'var(--text-primary)', borderRadius: 3, padding: '1px 3px', fontWeight: 600 }}>{seg}</mark>
         : seg
     );
   };
@@ -771,7 +991,221 @@ function QuoteEditor({ block, onChange }: { block: Block; onChange: (p: Partial<
 
 // ── 블록 렌더러 (저장된 노트 표시용) ──
 
-function BlockRenderer({ content, searchQuery }: { content: string; searchQuery: string }) {
+// ── 마크다운 라인 렌더러 (STEP 내용용) ──
+function renderMarkdownLines(text: string, searchQuery: string): React.ReactNode {
+  // 멀티라인 테이블 셀 병합: |로 시작하지만 |로 안 끝나는 줄 → 다음 줄과 합침
+  const rawLines = text.split('\n');
+  const lines: string[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const t = rawLines[i].trim();
+    if (t.startsWith('|') && !t.endsWith('|')) {
+      // |로 시작했지만 |로 안 끝남 → 다음 줄들과 합쳐서 |로 끝날 때까지
+      let merged = rawLines[i];
+      while (i + 1 < rawLines.length && !merged.trim().endsWith('|')) {
+        i++;
+        merged += ' ' + rawLines[i].trim();
+      }
+      lines.push(merged);
+    } else {
+      lines.push(rawLines[i]);
+    }
+  }
+  const elements: React.ReactNode[] = [];
+  let bulletGroup: { text: string; indent: number }[] = [];
+  let tableRows: string[][] = [];
+  let key = 0;
+
+  const flushBullets = () => {
+    if (bulletGroup.length === 0) return;
+    elements.push(
+      <div key={key++} style={{ display: 'flex', flexDirection: 'column', gap: 3, margin: '3px 0' }}>
+        {bulletGroup.map((b, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, paddingLeft: b.indent * 16 }}>
+            <span style={{
+              minWidth: 5, height: 5, borderRadius: '50%', flexShrink: 0, marginTop: 7,
+              background: b.indent > 0 ? 'var(--text-muted)' : 'var(--blue-light)',
+            }} />
+            <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.55 }}>
+              {renderInlineFormat(b.text, searchQuery)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+    bulletGroup = [];
+  };
+
+  const flushTable = () => {
+    if (tableRows.length === 0) return;
+    const dataRows = tableRows.filter(row => !row.every(cell => /^[-:\s]+$/.test(cell)));
+    if (dataRows.length === 0) { tableRows = []; return; }
+    const headers = dataRows[0];
+    const body = dataRows.slice(1);
+    elements.push(
+      <div key={key++} style={{ overflowX: 'auto', margin: '6px 0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr>
+              {headers.map((h, i) => (
+                <th key={i} style={{
+                  padding: '6px 10px', textAlign: 'left', whiteSpace: 'nowrap',
+                  borderBottom: '2px solid var(--border)', background: 'var(--bg-hover)',
+                  color: 'var(--text-muted)', fontSize: 12, fontWeight: 700,
+                }}>{renderInlineFormat(h.trim(), searchQuery)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {body.map((row, ri) => (
+              <tr key={ri}>
+                {row.map((cell, ci) => (
+                  <td key={ci} style={{
+                    padding: '6px 10px', borderBottom: '1px solid var(--border)',
+                    color: 'var(--text-second)', fontSize: 13, lineHeight: 1.4,
+                  }}>{renderInlineFormat(cell.trim(), searchQuery)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+    tableRows = [];
+  };
+
+  for (const line of lines) {
+    // 마크다운 표: | col1 | col2 |
+    if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+      flushBullets();
+      const cells = line.trim().slice(1, -1).split('|').map(c => c.trim());
+      tableRows.push(cells);
+      continue;
+    }
+    if (tableRows.length > 0) flushTable();
+
+    // 불릿 라인: - 또는 • 로 시작 (띄어쓰기 있든 없든)
+    const bulletMatch = line.match(/^(\s*)[•\-]\s*(.+)/);
+    if (bulletMatch && !line.trim().startsWith('---')) {
+      flushTable();
+      const indent = Math.floor(bulletMatch[1].length / 2);
+      bulletGroup.push({ text: bulletMatch[2], indent });
+      continue;
+    }
+
+    flushBullets();
+
+    const trimmed = line.trim();
+    if (!trimmed) {
+      elements.push(<div key={key++} style={{ height: 6 }} />);
+      continue;
+    }
+
+    // ### 마크다운 제목
+    const headingMatch = trimmed.match(/^(#{1,4})\s+(.+)/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      elements.push(
+        <div key={key++} style={{
+          fontSize: level <= 2 ? 16 : level === 3 ? 15 : 14,
+          fontWeight: 700, color: 'var(--text-primary)',
+          marginTop: level <= 2 ? 10 : 6,
+          paddingBottom: level <= 2 ? 4 : 0,
+          borderBottom: level <= 2 ? '2px solid var(--border)' : 'none',
+        }}>
+          {renderInlineFormat(headingMatch[2], searchQuery)}
+        </div>
+      );
+      continue;
+    }
+
+    // 번호 리스트: 1. 2. 3.
+    const numMatch = trimmed.match(/^(\d+)[.)]\s+(.+)/);
+    if (numMatch) {
+      elements.push(
+        <div key={key++} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <span style={{
+            minWidth: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+            background: 'var(--blue-dim)', color: 'var(--blue-light)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 700,
+          }}>{numMatch[1]}</span>
+          <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.5 }}>
+            {renderInlineFormat(numMatch[2], searchQuery)}
+          </span>
+        </div>
+      );
+      continue;
+    }
+
+    // 섹션 제목 감지: 짧은 줄 + 마침표 없음 → 볼드
+    const isTitle = trimmed.length <= 40 && !/[.,;:!?]$/.test(trimmed) && !/^[•\-]/.test(trimmed);
+    if (isTitle && !trimmed.startsWith('**')) {
+      elements.push(
+        <div key={key++} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 6 }}>
+          {renderInlineFormat(trimmed, searchQuery)}
+        </div>
+      );
+    } else {
+      elements.push(
+        <div key={key++} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>
+          {renderInlineFormat(trimmed, searchQuery)}
+        </div>
+      );
+    }
+  }
+  flushBullets();
+  flushTable();
+
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{elements}</div>;
+}
+
+function StepsRenderer({ content, searchQuery }: { content: string; searchQuery: string }) {
+  try {
+    const steps = JSON.parse(content);
+    const stepSections = [
+      { key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝', completed: steps.step1_completed },
+      { key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡', completed: steps.step2_completed },
+      { key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯', completed: steps.step3_completed },
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {stepSections.map(({ key, label, icon, completed }) => {
+          const text = steps[key] as string;
+          if (!text) return (
+            <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
+            </div>
+          );
+          return (
+            <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+              <div style={{
+                padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: completed ? 'rgba(48,209,88,0.06)' : 'var(--bg-elevated)',
+              }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+              </div>
+              <div style={{ padding: '12px 16px' }}>
+                {renderMarkdownLines(text, searchQuery)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  } catch {
+    return <div style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{content}</div>;
+  }
+}
+
+function BlockRenderer({ content, contentType, searchQuery }: { content: string; contentType?: string; searchQuery: string }) {
+  // STEP 구조 (노션 임포트)
+  if (contentType === 'steps') {
+    return <StepsRenderer content={content} searchQuery={searchQuery} />;
+  }
+
   const blocks = parseContent(content);
 
   // 기존 플레인텍스트 (하위 호환)
@@ -891,6 +1325,26 @@ function MiniBtn({ onClick, children, color }: { onClick: () => void; children: 
       padding: '2px 6px', border: 'none', background: 'transparent',
       color: color || 'var(--text-muted)', fontSize: 12, cursor: 'pointer',
     }}>{children}</button>
+  );
+}
+
+function FormatBtn({ label, title, onClick }: { label: string; title: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      style={{
+        padding: '3px 10px', borderRadius: 'var(--radius-sm)',
+        border: '1px solid var(--border)', background: 'transparent',
+        color: 'var(--text-tertiary)', fontSize: 12, fontWeight: 600,
+        cursor: 'pointer', transition: 'all 0.15s ease',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.color = 'var(--blue-light)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+    >
+      {label}
+    </button>
   );
 }
 

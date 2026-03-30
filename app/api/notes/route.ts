@@ -4,7 +4,20 @@ import { createServerClient, getSupabase } from '@/lib/supabase';
 // content JSON 구조: { blocks: Block[], meta: { tags, confidence } }
 // 하위호환: 기존 plain text도 지원
 
-function packContent(content: string, tags?: string[], confidence?: string | null): string {
+function packContent(
+  content: string,
+  tags?: string[],
+  confidence?: string | null,
+  contentType?: string,
+  extraMeta?: Record<string, unknown>,
+): string {
+  // steps 형식: STEP 1/2/3 구조
+  if (contentType === 'steps') {
+    try {
+      const steps = JSON.parse(content);
+      return JSON.stringify({ steps, meta: { tags: tags || [], confidence: confidence || null, ...extraMeta } });
+    } catch { /* fallback to text */ }
+  }
   try {
     const parsed = JSON.parse(content);
     // 이미 블록 배열이면 meta와 합쳐서 저장
@@ -20,17 +33,24 @@ function unpackContent(row: Record<string, unknown>): Record<string, unknown> {
   try {
     const parsed = JSON.parse(content);
     if (parsed && typeof parsed === 'object') {
-      // 새 형식: steps + meta (노션 임포트)
+      // 새 형식: steps + meta (노션 임포트 + 앱 작성)
       if (parsed.steps) {
         const meta = parsed.meta || {};
+        const steps = parsed.steps;
+        // 참여점수 자동 계산: 작성 완료된 STEP 수 (0~3)
+        const autoScore = [
+          steps.step1_completed && steps.step1?.trim(),
+          steps.step2_completed && steps.step2?.trim(),
+          steps.step3_completed && steps.step3?.trim(),
+        ].filter(Boolean).length;
         return {
           ...row,
           content: JSON.stringify(parsed.steps),
           content_type: 'steps',
           tags: meta.tags || [],
           confidence: meta.confidence || null,
-          participation_score: meta.participation_score ?? null,
-          best_learning: meta.best_learning ?? false,
+          participation_score: autoScore,
+          best_learning: autoScore >= 3,
           one_word: meta.one_word || null,
         };
       }
@@ -68,16 +88,29 @@ export async function GET(req: NextRequest) {
 
 // 노트 생성
 export async function POST(req: NextRequest) {
-  const { student_id, title, content, tags, confidence } = await req.json();
+  const { student_id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word } = await req.json();
 
   if (!student_id || !title || !content) {
     return Response.json({ message: '제목과 내용을 입력해주세요.' }, { status: 400 });
   }
 
+  // 하루 1개 제한: 오늘 이미 작성한 노트가 있으면 거부
   const supabase = createServerClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: existing } = await supabase
+    .from('student_notes')
+    .select('id')
+    .eq('student_id', student_id)
+    .gte('created_at', `${today}T00:00:00`)
+    .lt('created_at', `${today}T23:59:59.999`);
+  if (existing && existing.length > 0) {
+    return Response.json({ message: '오늘은 이미 교육일지를 작성했어요! 수정하려면 기존 일지를 눌러주세요.' }, { status: 409 });
+  }
+
+  const extraMeta = { participation_score, best_learning, one_word };
   const { data, error } = await supabase
     .from('student_notes')
-    .insert({ student_id, title, content: packContent(content, tags, confidence) })
+    .insert({ student_id, title, content: packContent(content, tags, confidence, content_type, extraMeta) })
     .select('*')
     .single();
 
@@ -87,12 +120,13 @@ export async function POST(req: NextRequest) {
 
 // 노트 수정
 export async function PATCH(req: NextRequest) {
-  const { id, title, content, tags, confidence } = await req.json();
+  const { id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word } = await req.json();
 
   const supabase = createServerClient();
+  const extraMeta = { participation_score, best_learning, one_word };
   const { error } = await supabase
     .from('student_notes')
-    .update({ title, content: packContent(content, tags, confidence), updated_at: new Date().toISOString() })
+    .update({ title, content: packContent(content, tags, confidence, content_type, extraMeta), updated_at: new Date().toISOString() })
     .eq('id', id);
 
   if (error) return Response.json({ message: error.message }, { status: 500 });
