@@ -69,9 +69,11 @@ export async function PATCH(req: NextRequest) {
     const affectedStudentSessions = new Set<string>();
 
     for (const resp of responses) {
+      // 학생 답안: 쉼표 또는 파이프로 구분
       const userAnswers = (resp.user_answer || '')
-        .split(',')
-        .map((a: string) => a.trim().toLowerCase());
+        .split(/[,|]/)
+        .map((a: string) => a.trim().toLowerCase())
+        .filter((a: string) => a.length > 0);
 
       let isCorrect = false;
       const mode = resp.scoring_mode || question.scoring_mode || '';

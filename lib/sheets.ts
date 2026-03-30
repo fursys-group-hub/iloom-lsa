@@ -23,10 +23,11 @@ export function parseResultRows(rows: string[][]): SheetResult[] {
   return rows.slice(1).map((row) => {
     const score = parseFloat(row[3]) || 0;
     const maxScore = parseFloat(row[4]) || 0;
-    const score100Raw = parseFloat(row[5]);
-    // F열(100점 만점)이 비어있으면 직접 계산: (점수/총점)*100
-    const score_100 = !isNaN(score100Raw) && score100Raw > 0
-      ? score100Raw
+    const f열 = (row[5] || '').trim();
+    // F열이 순수 숫자인 경우만 사용 (텍스트가 섞여있으면 무시)
+    const isNumeric = f열 !== '' && !isNaN(Number(f열)) && !/[가-힣a-zA-Z>\/]/.test(f열);
+    const score_100 = isNumeric && Number(f열) > 0
+      ? Number(f열)
       : maxScore > 0
         ? Math.round((score / maxScore) * 10000) / 100
         : 0;
