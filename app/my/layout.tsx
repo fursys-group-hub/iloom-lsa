@@ -11,6 +11,7 @@ const nav = [
   { href: '/my/notes', label: '교육일지', icon: '📓' },
   { href: '/my/practice', label: '실습일지', icon: '🔧', disabled: true },
   { href: '/my/ask', label: '질문하기', icon: '💬', disabled: true },
+  { href: '/my/training', label: '심화교육', icon: '🏪', disabled: true },
 ];
 
 export default function MyLayout({ children }: { children: React.ReactNode }) {

@@ -81,8 +81,102 @@ export interface StudentNote {
 export interface Profile {
   id: string;
   name: string;
-  role: 'educator' | 'manager' | 'student';
+  role: 'admin' | 'manager' | 'student';
   student_id: string | null;
+  manager_id: string | null;
+  store_name: string | null;
+}
+
+export interface Manager {
+  id: string;
+  name: string;
+  password: string;
+  store_name: string | null;
+  created_at: string;
+}
+
+export interface WeeklyEvaluation {
+  id: string;
+  student_id: string;
+  manager_id: string;
+  week_number: number;
+  rp_area: string | null;
+  status: 'completed' | 'not_completed' | 'partial';
+  strength_tags: string[];
+  improvement_tags: string[];
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 평가 태그 상수
+export const STRENGTH_TAG_OPTIONS = [
+  '고객 라포형성 우수',
+  '제품 지식 풍부',
+  '자신감 있는 상담',
+  '주문서 작성 정확',
+  'SCT 활용 능숙',
+  '업셀링 적극적',
+  '차분하고 친절한 응대',
+  '자가 학습 의지 높음',
+  '고객 니즈 파악 우수',
+  '빠르고 정확한 상담',
+] as const;
+
+export const IMPROVEMENT_TAG_OPTIONS = [
+  '제품 디테일 미흡',
+  '자신감 부족',
+  '주문서 작성 누락',
+  '소재/컬러 미숙지',
+  'SCT 활용 미숙',
+  '프로모션 등록 누락',
+  '사이즈 숙지 필요',
+  '업셀링 보완 필요',
+  '옵션/액세서리 미숙지',
+  '상담 흐름 개선 필요',
+] as const;
+
+export const RP_AREA_OPTIONS = [
+  '학생방',
+  '다이닝',
+  '소파',
+  '침실',
+  '옷장',
+  '거실',
+  '헤이븐',
+  '홈라이브러리',
+  '서재',
+  '학생방 업셀링',
+] as const;
+
+export interface Benchmark {
+  id: string;
+  student_id: string;
+  week_number: number;
+  target_name: string;
+  target_role: string | null;
+  store_name: string | null;
+  learnings: string;
+  action_plan: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FinalEvaluation {
+  id: string;
+  student_id: string;
+  manager_id: string;
+  overall_rating: number;
+  summary: string;
+  strengths: string | null;
+  areas_to_develop: string | null;
+  recommended_position: string | null;
+  store_fit_score: number;
+  independence_score: number;
+  customer_score: number;
+  product_score: number;
+  created_at: string;
+  updated_at: string;
 }
 
 // 학생 + 집계 데이터

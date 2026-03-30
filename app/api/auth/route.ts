@@ -8,13 +8,33 @@ export async function POST(req: NextRequest) {
     return Response.json({ message: '이름과 비밀번호를 입력해주세요.' }, { status: 400 });
   }
 
-  // 관리자 체크 (이름: 김수지, 비밀번호: 1230)
+  // 슈퍼관리자 체크
   if (name.trim() === '김수지' && password === '4851') {
     return Response.json({ role: 'admin', name: '김수지' });
   }
 
-  // 학생 체크
   const supabase = getSupabase();
+
+  // 매장 교육관리자 / 교육TF 체크
+  const { data: manager } = await supabase
+    .from('managers')
+    .select('id, name, password, store_name')
+    .eq('name', name.trim())
+    .single();
+
+  if (manager) {
+    if (manager.password !== password) {
+      return Response.json({ message: '비밀번호가 올바르지 않아요.' }, { status: 401 });
+    }
+    return Response.json({
+      role: 'manager',
+      name: manager.name,
+      managerId: manager.id,
+      storeName: manager.store_name,
+    });
+  }
+
+  // 학생 체크
   const { data: student } = await supabase
     .from('students')
     .select('id, name, password')

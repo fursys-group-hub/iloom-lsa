@@ -82,3 +82,62 @@ CREATE TABLE student_notes (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 매장 교육관리자 (교육TF 포함)
+CREATE TABLE managers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL DEFAULT '0000',
+  store_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 주차별 평가
+CREATE TABLE weekly_evaluations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id),
+  manager_id UUID REFERENCES managers(id),
+  week_number INTEGER NOT NULL CHECK (week_number BETWEEN 1 AND 12),
+  rp_area TEXT,
+  status TEXT CHECK (status IN ('completed','not_completed','partial')) DEFAULT 'completed',
+  strength_tags TEXT[] DEFAULT '{}',
+  improvement_tags TEXT[] DEFAULT '{}',
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(student_id, week_number)
+);
+
+-- 벤치마킹 기록 (교육생 작성)
+CREATE TABLE benchmarks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id),
+  week_number INTEGER NOT NULL CHECK (week_number BETWEEN 1 AND 12),
+  target_name TEXT NOT NULL,
+  target_role TEXT,
+  store_name TEXT,
+  learnings TEXT NOT NULL,
+  action_plan TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(student_id, week_number)
+);
+
+-- 교육 총평 (관리자 작성)
+CREATE TABLE final_evaluations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id),
+  manager_id UUID REFERENCES managers(id),
+  overall_rating INTEGER CHECK (overall_rating BETWEEN 1 AND 5),
+  summary TEXT NOT NULL,
+  strengths TEXT,
+  areas_to_develop TEXT,
+  recommended_position TEXT,
+  store_fit_score INTEGER CHECK (store_fit_score BETWEEN 1 AND 5),
+  independence_score INTEGER CHECK (independence_score BETWEEN 1 AND 5),
+  customer_score INTEGER CHECK (customer_score BETWEEN 1 AND 5),
+  product_score INTEGER CHECK (product_score BETWEEN 1 AND 5),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(student_id, manager_id)
+);
