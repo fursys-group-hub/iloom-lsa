@@ -134,12 +134,18 @@ export async function POST(req: NextRequest) {
 
       const testDate = formatDate((row[0] || '').split(' ')[0]);
 
+      const isCorrect = row[7] === 'O';
+      const maxScore = parseFloat(row[9]) || 1;
+      let earnedScore = parseFloat(row[8]) || 0;
+      // 자동 보정: 정답인데 0점이면 max_score로 복원
+      if (isCorrect && earnedScore === 0) earnedScore = maxScore;
+
       respBatch.push({
         student_id: studentId, batch_id: batchId,
         session, question_id: questionId, test_date: testDate,
-        user_answer: row[5] || '', is_correct: row[7] === 'O',
-        earned_score: parseFloat(row[8]) || 0,
-        max_score: parseFloat(row[9]) || 1,
+        user_answer: row[5] || '', is_correct: isCorrect,
+        earned_score: earnedScore,
+        max_score: maxScore,
         scoring_mode: row[10] || '',
         submitted_at: row[0] || '',
       });
