@@ -79,3 +79,25 @@ export async function POST(req: NextRequest) {
 
   return Response.json(data);
 }
+
+// DELETE: 평가 삭제
+export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return Response.json({ message: '삭제할 평가 ID가 필요해요.' }, { status: 400 });
+  }
+
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from('weekly_evaluations')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return Response.json({ message: error.message }, { status: 500 });
+  }
+
+  return Response.json({ success: true });
+}

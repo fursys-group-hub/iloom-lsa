@@ -344,7 +344,7 @@ export default function EvaluationsPage() {
             />
           </div>
 
-          {/* 저장 버튼 */}
+          {/* 저장 / 삭제 버튼 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <button
               onClick={handleSave}
@@ -358,6 +358,28 @@ export default function EvaluationsPage() {
             >
               {saving ? '저장 중...' : existingEval ? '평가 수정' : '평가 저장'}
             </button>
+            {existingEval && (
+              <button
+                onClick={async () => {
+                  if (!confirm(`${selectedWeek}주차 평가를 삭제할까요?`)) return;
+                  const res = await fetch(`/api/evaluations?id=${existingEval.id}`, { method: 'DELETE' });
+                  if (res.ok) {
+                    setSaveMessage('삭제 완료');
+                    const evalsRes = await fetch('/api/evaluations');
+                    setEvaluations(await evalsRes.json());
+                  } else {
+                    setSaveMessage('삭제 실패');
+                  }
+                }}
+                style={{
+                  padding: '14px 24px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--red)', background: 'transparent',
+                  color: 'var(--red)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                삭제
+              </button>
+            )}
             {saveMessage && (
               <span style={{
                 fontSize: 14, fontWeight: 600,
