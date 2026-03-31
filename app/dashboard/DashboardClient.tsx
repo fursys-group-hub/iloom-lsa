@@ -7,13 +7,6 @@ import { calculateRiskLevel, calculateDailyAverages, calculateAvgScore } from '@
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import RiskBadge from '@/components/RiskBadge';
 
-interface Insight {
-  id: string;
-  session: string;
-  content: string;
-  created_at: string;
-}
-
 interface BatchInfo {
   id: string;
   name: string;
@@ -48,10 +41,6 @@ function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: s
 export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance }: Props) {
   const today = new Date().toISOString().split('T')[0];
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
-  const [insights, setInsights] = useState<Insight[]>([]);
-  const [generating, setGenerating] = useState(false);
-  const [genResult, setGenResult] = useState<string | null>(null);
-
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
 
   // 선택된 기수의 학생만 필터
@@ -59,37 +48,6 @@ export default function DashboardClient({ batches, students: allStudents, scores
   const studentIds = useMemo(() => new Set(students.map(s => s.id)), [students]);
   const scores = useMemo(() => allScores.filter(s => studentIds.has(s.student_id)), [allScores, studentIds]);
   const attendance = useMemo(() => allAttendance.filter(a => studentIds.has(a.student_id)), [allAttendance, studentIds]);
-
-  // 인사이트 불러오기
-  useEffect(() => {
-    fetch(`/api/insights${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`)
-      .then((r) => r.json())
-      .then((d) => setInsights(d.insights || []))
-      .catch(() => {});
-  }, [selectedBatchId]);
-
-  const handleGenerate = async () => {
-    setGenerating(true);
-    setGenResult(null);
-    try {
-      const res = await fetch('/api/insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batchId: selectedBatchId }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setGenResult('분석 완료!');
-        setInsights((prev) => [{ id: 'new', session: '전체', content: data.content, created_at: new Date().toISOString() }, ...prev]);
-      } else {
-        setGenResult(data.message || '생성 실패');
-      }
-    } catch {
-      setGenResult('생성 중 오류 발생');
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   const todayAttendance = useMemo(() => {
     const recs = attendance.filter((a) => a.date === today);
@@ -219,79 +177,6 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
         {/* ─── 왼쪽: 메시징 ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-          {/* AI 교육 인사이트 */}
-          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                🤖 AI 교육 인사이트
-              </h3>
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                style={{
-                  padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                  border: generating ? 'none' : '1px solid var(--border)',
-                  background: generating ? 'var(--bg-elevated)' : 'transparent',
-                  color: generating ? 'var(--text-muted)' : 'var(--text-tertiary)',
-                  fontSize: 13, fontWeight: 600, cursor: generating ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {generating ? '⏳ 분석 중...' : '✨ 새 분석 생성'}
-              </button>
-            </div>
-
-            {genResult && (
-              <div style={{
-                padding: '10px 14px', borderRadius: 'var(--radius-sm)', marginBottom: 12,
-                background: genResult.includes('완료') ? 'rgba(48,209,88,0.1)' : 'rgba(255,69,58,0.1)',
-                color: genResult.includes('완료') ? 'var(--green)' : 'var(--red)',
-                fontSize: 13,
-              }}>
-                {genResult}
-              </div>
-            )}
-
-            {insights.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {insights.slice(0, 3).map((insight, idx) => (
-                  <details key={insight.id} open={idx === 0}>
-                    <summary style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer', fontSize: 14, fontWeight: 600,
-                      color: 'var(--text-primary)', transition: 'background 0.15s ease',
-                    }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <span>📊 {insight.session} 분석</span>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        {new Date(insight.created_at).toLocaleDateString('ko')}
-                      </span>
-                    </summary>
-                    <div style={{
-                      padding: '14px 16px', marginTop: 4,
-                      borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)',
-                      fontSize: 14, color: 'var(--text-second)',
-                      lineHeight: 1.8, whiteSpace: 'pre-wrap',
-                    }}>
-                      {insight.content}
-                    </div>
-                  </details>
-                ))}
-              </div>
-            ) : (
-              <div style={{ padding: '32px 0', textAlign: 'center' }}>
-                <p style={{ fontSize: 15, color: 'var(--text-muted)', marginBottom: 12 }}>
-                  아직 분석 결과가 없어요
-                </p>
-                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                  위의 &quot;새 분석 생성&quot; 버튼을 눌러보세요
-                </p>
-              </div>
-            )}
-          </div>
 
           {/* 주의 교육생 */}
           <div style={cardStyle}>
