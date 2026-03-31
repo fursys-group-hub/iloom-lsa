@@ -259,54 +259,55 @@ export default function EducationLogsPage() {
                           </p>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {/* 1. 우수학습 — 고정 폭 68px */}
-                        <span style={{
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                          width: 68,
-                          background: note.best_learning ? 'rgba(48,209,88,0.15)' : 'transparent',
-                          color: note.best_learning ? 'var(--green)' : 'transparent',
-                        }}>
-                          {note.best_learning ? '⭐ 우수' : ''}
-                        </span>
-                        {/* 2. 참여점수 — 고정 폭 44px */}
-                        <span style={{
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          padding: '4px 0', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                          width: 44,
-                          background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
-                          color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
-                        }}>
-                          {note.participation_score || 0}/3
-                        </span>
-                        {/* 3. 이해도 — 고정 폭 72px */}
-                        <span style={{
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          padding: '4px 0', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                          width: 72,
-                          background: conf ? conf.bg : 'transparent',
-                          color: conf ? conf.color : 'transparent',
-                        }}>
-                          {conf ? `${conf.emoji} ${conf.label}` : ''}
-                        </span>
+                      <div style={{ display: 'grid', gridTemplateColumns: '68px 44px 78px 120px 20px', gap: 6, alignItems: 'center' }}>
+                        {/* 1. 우수학습 */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          {note.best_learning ? (
+                            <span style={{
+                              padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                              background: 'rgba(48,209,88,0.15)', color: 'var(--green)', whiteSpace: 'nowrap',
+                            }}>⭐ 우수</span>
+                          ) : null}
+                        </div>
+                        {/* 2. 참여점수 */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <span style={{
+                            padding: '4px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                            background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                            color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
+                          }}>
+                            {note.participation_score || 0}/3
+                          </span>
+                        </div>
+                        {/* 3. 이해도 */}
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          {conf ? (
+                            <span style={{
+                              padding: '4px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                              background: conf.bg, color: conf.color, whiteSpace: 'nowrap',
+                            }}>{conf.emoji} {conf.label}</span>
+                          ) : null}
+                        </div>
                         {/* 4. 태그 */}
-                        {note.tags && note.tags.length > 0 && (
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {note.tags.slice(0, 3).map(tag => (
-                              <span key={tag} style={{
-                                padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                                fontSize: 12, fontWeight: 500, background: 'var(--bg-hover)',
-                                color: 'var(--text-tertiary)', border: '1px solid var(--border)',
-                              }}>
-                                {tag}
-                              </span>
-                            ))}
-                            {note.tags.length > 3 && (
-                              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>+{note.tags.length - 3}</span>
-                            )}
-                          </div>
-                        )}
+                        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', overflow: 'hidden' }}>
+                          {note.tags && note.tags.length > 0 && (
+                            <>
+                              {note.tags.slice(0, 2).map(tag => (
+                                <span key={tag} style={{
+                                  padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                                  fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
+                                  color: 'var(--text-tertiary)', border: '1px solid var(--border)',
+                                  whiteSpace: 'nowrap',
+                                }}>
+                                  {tag}
+                                </span>
+                              ))}
+                              {note.tags.length > 2 && (
+                                <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>+{note.tags.length - 2}</span>
+                              )}
+                            </>
+                          )}
+                        </div>
                         <span style={{
                           fontSize: 14, color: 'var(--text-muted)',
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
