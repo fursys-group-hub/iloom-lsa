@@ -105,6 +105,18 @@ export default function EducationLogsPage() {
     return counts;
   }, [notesByDate]);
 
+  // 참여도 요약 (STEP 1/3, 2/3, 3/3 분포 — 자율학습 제외)
+  const participationSummary = useMemo(() => {
+    const counts = { 0: 0, 1: 0, 2: 0, 3: 0 };
+    notesByDate.forEach(n => {
+      if (n.tags?.includes('자율학습')) return;
+      const score = n.participation_score || 0;
+      const key = Math.min(score, 3) as 0 | 1 | 2 | 3;
+      counts[key]++;
+    });
+    return counts;
+  }, [notesByDate]);
+
   if (loading) {
     return <p style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center', padding: 48 }}>불러오는 중...</p>;
   }
@@ -228,8 +240,32 @@ export default function EducationLogsPage() {
                 )}
               </div>
 
+              {/* 참여도 분포 */}
+              <div style={{ ...card, flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>참여도 분포</h3>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {([
+                    { key: 3, label: '3/3', color: 'var(--green)', bg: 'rgba(48,209,88,0.12)', icon: '🔥' },
+                    { key: 2, label: '2/3', color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '💪' },
+                    { key: 1, label: '1/3', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '📝' },
+                  ] as const).map(item => (
+                    <div key={item.key} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                      background: item.bg,
+                    }}>
+                      <span>{item.icon}</span>
+                      <span style={{ fontSize: 13, color: item.color, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: 18, fontWeight: 700, color: item.color }}>
+                        {participationSummary[item.key]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* 이해도 분포 */}
-              <div style={{ ...card, flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ ...card, flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>이해도 분포</h3>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                   {Object.entries(confidenceMap)
