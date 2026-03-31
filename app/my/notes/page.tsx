@@ -343,18 +343,25 @@ export default function MyNotesPage() {
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {isSelfStudyMode ? '📚 자율학습 노트' : editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
             </h3>
-            <button
-              onClick={() => setIsSelfStudyMode(!isSelfStudyMode)}
-              style={{
-                padding: '6px 16px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
-                border: isSelfStudyMode ? '2px solid var(--purple)' : '1px solid var(--border)',
-                background: isSelfStudyMode ? 'rgba(191,90,242,0.15)' : 'transparent',
-                color: isSelfStudyMode ? 'var(--purple)' : 'var(--text-tertiary)',
-                fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease',
-              }}
-            >
-              {isSelfStudyMode ? '📚 자율학습 ON' : '📚 자율학습'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {!isSelfStudyMode && (
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 200, textAlign: 'right', lineHeight: 1.3 }}>
+                  따로 공부한 내용은 자율학습으로!
+                </span>
+              )}
+              <button
+                onClick={() => setIsSelfStudyMode(!isSelfStudyMode)}
+                style={{
+                  padding: '6px 16px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                  border: isSelfStudyMode ? '2px solid var(--purple)' : '1px solid var(--border)',
+                  background: isSelfStudyMode ? 'rgba(191,90,242,0.15)' : 'transparent',
+                  color: isSelfStudyMode ? 'var(--purple)' : 'var(--text-tertiary)',
+                  fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease', whiteSpace: 'nowrap',
+                }}
+              >
+                {isSelfStudyMode ? '📚 자율학습 ON' : '📚 자율학습'}
+              </button>
+            </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* 오늘의 다짐 (선택) */}
