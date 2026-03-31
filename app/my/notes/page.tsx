@@ -442,7 +442,7 @@ export default function MyNotesPage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: val.trim() ? (isSelfStudyMode ? 'rgba(191,90,242,0.06)' : 'rgba(48,209,88,0.06)') : 'var(--bg-hover)',
+                    background: val.trim() ? (isSelfStudyMode ? 'rgba(191,90,242,0.06)' : 'var(--step-filled-bg)') : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -452,7 +452,7 @@ export default function MyNotesPage() {
                     {val.trim() && (
                       <span style={{
                         padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                        background: isSelfStudyMode ? 'var(--purple)' : 'var(--green)', color: '#fff',
+                        background: isSelfStudyMode ? 'var(--purple)' : 'var(--step-filled-badge-bg)', color: '#fff',
                         fontSize: 12, fontWeight: 600,
                       }}>✓ 작성됨</span>
                     )}
@@ -1188,7 +1188,7 @@ function StepsRenderer({ content, searchQuery }: { content: string; searchQuery:
             <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
               <div style={{
                 padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: completed ? 'rgba(48,209,88,0.06)' : 'var(--bg-elevated)',
+                background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
               }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                 {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}

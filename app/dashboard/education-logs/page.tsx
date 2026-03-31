@@ -549,7 +549,7 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
               <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
                 <div style={{
                   padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: completed ? 'rgba(48,209,88,0.06)' : 'var(--bg-elevated)',
+                  background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
                 }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                   {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
