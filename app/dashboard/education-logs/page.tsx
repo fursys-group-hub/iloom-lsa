@@ -43,6 +43,7 @@ export default function EducationLogsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState('');
   const [filterStudentId, setFilterStudentId] = useState('');
+  const [filterType, setFilterType] = useState<'' | 'best' | 'incomplete'>('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -76,8 +77,10 @@ export default function EducationLogsPage() {
   const notesByDate = useMemo(() => {
     let filtered = notes.filter(n => n.created_at.slice(0, 10) === selectedDate);
     if (filterStudentId) filtered = filtered.filter(n => n.student_id === filterStudentId);
+    if (filterType === 'best') filtered = filtered.filter(n => n.best_learning);
+    if (filterType === 'incomplete') filtered = filtered.filter(n => (n.participation_score || 0) < 3);
     return filtered;
-  }, [notes, selectedDate, filterStudentId]);
+  }, [notes, selectedDate, filterStudentId, filterType]);
 
   // 제출/미제출 현황 (날짜 기준)
   const submissionStatus = useMemo(() => {
@@ -140,21 +143,43 @@ export default function EducationLogsPage() {
               ))}
             </div>
 
-            {/* 학생 필터 */}
-            <select
-              value={filterStudentId}
-              onChange={e => { setFilterStudentId(e.target.value); setExpandedNoteId(null); }}
-              style={{
-                padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-                color: 'var(--text-primary)', fontSize: 14, cursor: 'pointer',
-              }}
-            >
-              <option value="">전체 교육생</option>
-              {students.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {/* 필터 버튼 */}
+              {([
+                { key: '', label: '전체' },
+                { key: 'best', label: '⭐ 우수' },
+                { key: 'incomplete', label: '미완료' },
+              ] as const).map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => { setFilterType(filterType === f.key ? '' : f.key as '' | 'best' | 'incomplete'); setExpandedNoteId(null); }}
+                  style={{
+                    padding: '6px 14px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                    border: filterType === f.key ? 'none' : '1px solid var(--border)',
+                    background: filterType === f.key ? (f.key === 'best' ? 'rgba(48,209,88,0.15)' : f.key === 'incomplete' ? 'rgba(255,159,10,0.12)' : 'var(--blue)') : 'transparent',
+                    color: filterType === f.key ? (f.key === 'best' ? 'var(--green)' : f.key === 'incomplete' ? 'var(--orange)' : '#fff') : 'var(--text-tertiary)',
+                    fontSize: 13, fontWeight: 600,
+                  }}
+                >
+                  {f.label}
+                </button>
               ))}
-            </select>
+              {/* 학생 필터 */}
+              <select
+                value={filterStudentId}
+                onChange={e => { setFilterStudentId(e.target.value); setExpandedNoteId(null); }}
+                style={{
+                  padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+                  color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer',
+                }}
+              >
+                <option value="">전체 교육생</option>
+                {students.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* 요약 카드: 제출 현황 + 이해도 */}
