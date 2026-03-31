@@ -37,11 +37,11 @@ function unpackContent(row: Record<string, unknown>): Record<string, unknown> {
       if (parsed.steps) {
         const meta = parsed.meta || {};
         const steps = parsed.steps;
-        // 참여점수 자동 계산: 작성 완료된 STEP 수 (0~3)
+        // 참여점수 자동 계산: 내용이 있는 STEP 수 (0~3)
         const autoScore = [
-          steps.step1_completed && steps.step1?.trim(),
-          steps.step2_completed && steps.step2?.trim(),
-          steps.step3_completed && steps.step3?.trim(),
+          steps.step1?.trim(),
+          steps.step2?.trim(),
+          steps.step3?.trim(),
         ].filter(Boolean).length;
         return {
           ...row,
