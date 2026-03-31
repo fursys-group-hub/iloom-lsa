@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
         name: body.name,
         start_date: body.start_date,
         end_date: body.end_date,
+        advanced_start: body.advanced_start || null,
+        advanced_end: body.advanced_end || null,
         sheet_id: body.sheet_id || null,
         subject_columns: body.subject_columns || {},
       })
@@ -53,6 +55,8 @@ export async function PATCH(req: NextRequest) {
         name: body.name,
         start_date: body.start_date,
         end_date: body.end_date,
+        advanced_start: body.advanced_start || null,
+        advanced_end: body.advanced_end || null,
         sheet_id: body.sheet_id || null,
       })
       .eq('id', body.id);

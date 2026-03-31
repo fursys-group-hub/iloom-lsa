@@ -7,6 +7,8 @@ interface Batch {
   name: string;
   start_date: string;
   end_date: string;
+  advanced_start: string | null;
+  advanced_end: string | null;
   sheet_id: string | null;
 }
 
@@ -28,7 +30,7 @@ export default function SettingsPage() {
   // ── 기수 ──
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
-  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '' });
+  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
   const [showBatchForm, setShowBatchForm] = useState(false);
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [savingBatch, setSavingBatch] = useState(false);
@@ -80,13 +82,15 @@ export default function SettingsPage() {
           name: batchForm.name,
           start_date: batchForm.start_date,
           end_date: batchForm.end_date,
+          advanced_start: batchForm.advanced_start || null,
+          advanced_end: batchForm.advanced_end || null,
         }),
       });
       if (res.ok) {
         await fetchBatches();
         setShowBatchForm(false);
         setEditingBatchId(null);
-        setBatchForm({ name: '', start_date: '', end_date: '' });
+        setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
       }
     } catch { /* silent */ }
     finally { setSavingBatch(false); }
@@ -174,7 +178,7 @@ export default function SettingsPage() {
             onClick={() => {
               setShowBatchForm(true);
               setEditingBatchId(null);
-              setBatchForm({ name: '', start_date: '', end_date: '' });
+              setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
             }}
             style={primaryBtnStyle}
           >
@@ -185,34 +189,37 @@ export default function SettingsPage() {
         {/* 기수 등록/수정 폼 */}
         {showBatchForm && (
           <div style={{ marginBottom: 20, padding: 20, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="batch-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={labelStyle}>기수명 *</label>
-                <input
-                  type="text"
-                  placeholder="26년 3월 입문교육"
-                  value={batchForm.name}
-                  onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
-                  style={inputStyle}
-                />
+            {/* 기수명 */}
+            <div>
+              <label style={labelStyle}>기수명 *</label>
+              <input
+                type="text"
+                placeholder="26년 3월"
+                value={batchForm.name}
+                onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
+                style={inputStyle}
+              />
+            </div>
+            {/* 입문교육 일정 */}
+            <div>
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>입문</span>
+                입문교육 일정 *
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="date" value={batchForm.start_date} onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })} style={inputStyle} />
+                <input type="date" value={batchForm.end_date} onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })} style={inputStyle} />
               </div>
-              <div>
-                <label style={labelStyle}>시작일 *</label>
-                <input
-                  type="date"
-                  value={batchForm.start_date}
-                  onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })}
-                  style={inputStyle}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>종료일 *</label>
-                <input
-                  type="date"
-                  value={batchForm.end_date}
-                  onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })}
-                  style={inputStyle}
-                />
+            </div>
+            {/* 심화교육 일정 */}
+            <div>
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.15)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
+                심화교육 일정 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span>
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <input type="date" value={batchForm.advanced_start} onChange={(e) => setBatchForm({ ...batchForm, advanced_start: e.target.value })} style={inputStyle} placeholder="매장 배치 시작일" />
+                <input type="date" value={batchForm.advanced_end} onChange={(e) => setBatchForm({ ...batchForm, advanced_end: e.target.value })} style={inputStyle} placeholder="심화교육 종료일" />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -244,11 +251,23 @@ export default function SettingsPage() {
                 }}
               >
                 <div>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                    {batch.name}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      {batch.name}
+                    </p>
+                    {(() => {
+                      const today = new Date().toISOString().slice(0, 10);
+                      if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(48,209,88,0.12)', color: 'var(--green)' }}>입문교육 진행중</span>;
+                      if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>심화교육 진행중</span>;
+                      if (batch.advanced_end && today > batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>완료</span>;
+                      if (today > batch.end_date && (!batch.advanced_start || today < batch.advanced_start)) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(255,159,10,0.12)', color: 'var(--orange)' }}>매장 배치 대기</span>;
+                      if (today < batch.start_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>예정</span>;
+                      return null;
+                    })()}
+                  </div>
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {batch.start_date} ~ {batch.end_date}
+                    입문 {batch.start_date} ~ {batch.end_date}
+                    {batch.advanced_start && ` · 심화 ${batch.advanced_start} ~ ${batch.advanced_end}`}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -260,6 +279,8 @@ export default function SettingsPage() {
                         name: batch.name,
                         start_date: batch.start_date,
                         end_date: batch.end_date,
+                        advanced_start: batch.advanced_start || '',
+                        advanced_end: batch.advanced_end || '',
                       });
                       setShowBatchForm(true);
                     }}

@@ -14,26 +14,59 @@ interface Insight {
   created_at: string;
 }
 
+interface BatchInfo {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  advanced_start: string | null;
+  advanced_end: string | null;
+}
+
 interface Props {
+  batches: BatchInfo[];
   students: Student[];
   scores: TestScore[];
   attendance: Attendance[];
-  batchId?: string;
 }
 
-export default function DashboardClient({ students, scores, attendance, batchId }: Props) {
+function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: string } {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today >= batch.start_date && today <= batch.end_date)
+    return { label: '입문교육 진행중', color: 'var(--green)', bg: 'rgba(48,209,88,0.12)' };
+  if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end)
+    return { label: '심화교육 진행중', color: 'var(--purple)', bg: 'rgba(191,90,242,0.15)' };
+  if (batch.advanced_end && today > batch.advanced_end)
+    return { label: '완료', color: 'var(--text-muted)', bg: 'var(--bg-hover)' };
+  if (today > batch.end_date)
+    return { label: '매장 배치 대기', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)' };
+  if (today < batch.start_date)
+    return { label: '예정', color: 'var(--blue-light)', bg: 'var(--blue-dim)' };
+  return { label: '', color: '', bg: '' };
+}
+
+export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance }: Props) {
   const today = new Date().toISOString().split('T')[0];
+  const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
   const [insights, setInsights] = useState<Insight[]>([]);
   const [generating, setGenerating] = useState(false);
   const [genResult, setGenResult] = useState<string | null>(null);
 
+  const selectedBatch = batches.find(b => b.id === selectedBatchId);
+
+  // 선택된 기수의 학생만 필터
+  const students = useMemo(() => allStudents.filter(s => s.batch_id === selectedBatchId), [allStudents, selectedBatchId]);
+  const studentIds = useMemo(() => new Set(students.map(s => s.id)), [students]);
+  const scores = useMemo(() => allScores.filter(s => studentIds.has(s.student_id)), [allScores, studentIds]);
+  const attendance = useMemo(() => allAttendance.filter(a => studentIds.has(a.student_id)), [allAttendance, studentIds]);
+
   // 인사이트 불러오기
   useEffect(() => {
-    fetch(`/api/insights${batchId ? `?batchId=${batchId}` : ''}`)
+    fetch(`/api/insights${selectedBatchId ? `?batchId=${selectedBatchId}` : ''}`)
       .then((r) => r.json())
       .then((d) => setInsights(d.insights || []))
       .catch(() => {});
-  }, [batchId]);
+  }, [selectedBatchId]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -42,7 +75,7 @@ export default function DashboardClient({ students, scores, attendance, batchId 
       const res = await fetch('/api/insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batchId }),
+        body: JSON.stringify({ batchId: selectedBatchId }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -107,15 +140,71 @@ export default function DashboardClient({ students, scores, attendance, batchId 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
 
-      {/* 인사 */}
-      <div>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          안녕하세요, 수지님 👋
-        </h2>
-        <p style={{ fontSize: 17, color: 'var(--text-tertiary)', marginTop: 4 }}>
-          오늘의 교육 현황이에요
-        </p>
+      {/* 인사 + 기수 선택 */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            안녕하세요, 수지님 👋
+          </h2>
+          <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
+            오늘의 교육 현황이에요
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <select
+            value={selectedBatchId}
+            onChange={e => setSelectedBatchId(e.target.value)}
+            style={{
+              padding: '10px 16px', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border)', background: 'var(--bg-surface)',
+              color: 'var(--text-primary)', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              minWidth: 180,
+            }}
+          >
+            {batches.map(b => (
+              <option key={b.id} value={b.id}>{b.name} 기수</option>
+            ))}
+          </select>
+          {selectedBatch && (() => {
+            const status = getBatchStatus(selectedBatch);
+            return (
+              <span style={{
+                padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                fontSize: 13, fontWeight: 700, background: status.bg, color: status.color,
+                whiteSpace: 'nowrap',
+              }}>
+                {status.label}
+              </span>
+            );
+          })()}
+        </div>
       </div>
+
+      {/* 교육 일정 타임라인 */}
+      {selectedBatch && (
+        <div style={{
+          display: 'flex', gap: 12, padding: '16px 20px', borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>입문</span>
+            <span style={{ fontSize: 14, color: today >= selectedBatch.start_date && today <= selectedBatch.end_date ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: today >= selectedBatch.start_date && today <= selectedBatch.end_date ? 600 : 400 }}>
+              {selectedBatch.start_date} ~ {selectedBatch.end_date}
+            </span>
+          </div>
+          <div style={{ width: 1, background: 'var(--border)' }} />
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>심화</span>
+            {selectedBatch.advanced_start ? (
+              <span style={{ fontSize: 14, color: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 600 : 400 }}>
+                {selectedBatch.advanced_start} ~ {selectedBatch.advanced_end}
+              </span>
+            ) : (
+              <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>미정</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 요약 카드 */}
       <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>

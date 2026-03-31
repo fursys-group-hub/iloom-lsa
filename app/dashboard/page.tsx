@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     { data: scores },
     { data: attendance },
   ] = await Promise.all([
-    supabase.from('batches').select('id').order('start_date', { ascending: false }).limit(1),
+    supabase.from('batches').select('*').order('start_date', { ascending: false }),
     supabase.from('students').select('*').order('name'),
     supabase.from('test_scores').select('*').order('test_date', { ascending: false }).limit(500),
     supabase.from('attendance').select('*'),
@@ -20,10 +20,10 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
+      batches={batches || []}
       students={students || []}
       scores={scores || []}
       attendance={attendance || []}
-      batchId={batches?.[0]?.id}
     />
   );
 }
