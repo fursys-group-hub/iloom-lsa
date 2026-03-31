@@ -111,6 +111,7 @@ export default function MyNotesPage() {
   const [step3, setStep3] = useState('');
   const [tags, setTags] = useState('');
   const [confidence, setConfidence] = useState('');
+  const [isSelfStudyMode, setIsSelfStudyMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
@@ -120,7 +121,7 @@ export default function MyNotesPage() {
 
   const resetForm = () => {
     setPledge(''); setStep1(''); setStep2(''); setStep3('');
-    setTags(''); setConfidence(''); setEditingNoteId(null); setSaveError('');
+    setTags(''); setConfidence(''); setIsSelfStudyMode(false); setEditingNoteId(null); setSaveError('');
   };
 
 
@@ -182,8 +183,10 @@ export default function MyNotesPage() {
     // title이 "날짜 이름 / 교육일지" 형식이면 다짐은 비움, 아니면 title이 다짐
     const isAutoTitle = /^\d{4}-\d{2}-\d{2}\s.+\/\s교육일지$/.test(note.title);
     setPledge(isAutoTitle ? '' : note.title);
-    setTags(note.tags?.join(', ') || '');
-    setConfidence(note.confidence || '');
+    const selfStudy = note.tags?.includes('자율학습') || false;
+    setIsSelfStudyMode(selfStudy);
+    setTags((note.tags || []).filter(t => t !== '자율학습').join(', '));
+    setConfidence(selfStudy ? '' : (note.confidence || ''));
     setSaveError('');
 
     if (note.content_type === 'steps') {
@@ -241,11 +244,11 @@ export default function MyNotesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...(isEdit ? { id: editingNoteId } : { student_id: studentId }),
-          title: pledge.trim() || autoTitle,
+          title: pledge.trim() || (isSelfStudyMode ? autoTitle.replace('교육일지', '자율학습') : autoTitle),
           content: JSON.stringify(stepsData),
           content_type: 'steps',
-          tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
-          confidence: confidence || null,
+          tags: [...(tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []), ...(isSelfStudyMode ? ['자율학습'] : [])],
+          confidence: isSelfStudyMode ? null : (confidence || null),
           one_word: pledge.trim() || null,
         }),
       });
@@ -335,38 +338,55 @@ export default function MyNotesPage() {
 
       {/* 작성 폼 — STEP 구조 */}
       {showForm && (
-        <div style={card}>
-          <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>
-            {editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
-          </h3>
+        <div style={{ ...card, ...(isSelfStudyMode ? { border: '1px solid rgba(191,90,242,0.4)', background: 'rgba(191,90,242,0.04)' } : {}) }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              {isSelfStudyMode ? '📚 자율학습 노트' : editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
+            </h3>
+            <button
+              onClick={() => setIsSelfStudyMode(!isSelfStudyMode)}
+              style={{
+                padding: '6px 16px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                border: isSelfStudyMode ? '2px solid var(--purple)' : '1px solid var(--border)',
+                background: isSelfStudyMode ? 'rgba(191,90,242,0.15)' : 'transparent',
+                color: isSelfStudyMode ? 'var(--purple)' : 'var(--text-tertiary)',
+                fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease',
+              }}
+            >
+              {isSelfStudyMode ? '📚 자율학습 ON' : '📚 자율학습'}
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* 오늘의 다짐 (선택) */}
             <div>
-              <label style={labelStyle}>오늘의 다짐 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>
+              <label style={labelStyle}>{isSelfStudyMode ? '학습 주제' : '오늘의 다짐'} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>
               <input value={pledge} onChange={e => setPledge(e.target.value)}
-                placeholder="오늘의 각오나 다짐을 한 문장으로! (안 쓰면 자동 제목)" style={{ ...inputStyle, fontSize: 15 }} />
+                placeholder={isSelfStudyMode ? '무엇을 공부했나요? (안 쓰면 자동 제목)' : '오늘의 각오나 다짐을 한 문장으로! (안 쓰면 자동 제목)'}
+                style={{ ...inputStyle, fontSize: 15 }} />
             </div>
 
-            {/* 오늘의 자신감 */}
-            <div>
-              <label style={labelStyle}>오늘의 자신감</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                {CONFIDENCE.map(opt => (
-                  <button key={opt.value}
-                    onClick={() => setConfidence(confidence === opt.value ? '' : opt.value)}
-                    style={{
-                      padding: '12px 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'center',
-                      border: confidence === opt.value ? '2px solid var(--blue)' : '1px solid var(--border)',
-                      background: confidence === opt.value ? 'var(--blue-dim)' : 'var(--bg-elevated)',
-                    }}
-                  >
-                    <div style={{ fontSize: 24, marginBottom: 4 }}>{opt.icon}</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{opt.label}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</div>
-                  </button>
-                ))}
+            {/* 오늘의 자신감 (자율학습이면 숨김) */}
+            {!isSelfStudyMode && (
+              <div>
+                <label style={labelStyle}>오늘의 자신감</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                  {CONFIDENCE.map(opt => (
+                    <button key={opt.value}
+                      onClick={() => setConfidence(confidence === opt.value ? '' : opt.value)}
+                      style={{
+                        padding: '12px 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'center',
+                        border: confidence === opt.value ? '2px solid var(--blue)' : '1px solid var(--border)',
+                        background: confidence === opt.value ? 'var(--blue-dim)' : 'var(--bg-elevated)',
+                      }}
+                    >
+                      <div style={{ fontSize: 24, marginBottom: 4 }}>{opt.icon}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{opt.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 태그 */}
             <div>
@@ -375,8 +395,8 @@ export default function MyNotesPage() {
                 placeholder="소재, 색상, 규격 (쉼표로 구분)" style={inputStyle} />
             </div>
 
-            {/* STEP 1/2/3 에디터 */}
-            {STEP_DEFS.map(({ key, label, icon, desc, placeholder }) => {
+            {/* STEP 1/2/3 에디터 (자율학습이면 STEP 1만) */}
+            {(isSelfStudyMode ? [STEP_DEFS[0]] : STEP_DEFS).map(({ key, label, icon, desc, placeholder }) => {
               const val = key === 'step1' ? step1 : key === 'step2' ? step2 : step3;
               const setVal = key === 'step1' ? setStep1 : key === 'step2' ? setStep2 : setStep3;
               const textareaId = `step-textarea-${key}`;
@@ -401,26 +421,31 @@ export default function MyNotesPage() {
                 setTimeout(() => el.focus(), 50);
               };
 
+              const stepLabel = isSelfStudyMode ? '📚 학습 내용' : `${icon} ${label}`;
+              const stepDesc = isSelfStudyMode ? '자유롭게 정리해보세요' : desc;
+              const stepPlaceholder = isSelfStudyMode ? '공부한 내용을 자유롭게 정리해주세요.\n\n표, 목록, 제목 등 서식을 활용하면 나중에 찾아보기 좋아요!' : placeholder;
+
               return (
                 <div key={key} style={{
-                  border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+                  border: isSelfStudyMode ? '1px solid rgba(191,90,242,0.3)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)',
                   background: 'var(--bg-elevated)', overflow: 'hidden',
                 }}>
                   {/* STEP 헤더 */}
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: val.trim() ? 'rgba(48,209,88,0.06)' : 'var(--bg-hover)',
+                    background: val.trim() ? (isSelfStudyMode ? 'rgba(191,90,242,0.06)' : 'rgba(48,209,88,0.06)') : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
-                      <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{desc}</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{stepLabel}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stepDesc}</span>
                     </div>
                     {val.trim() && (
                       <span style={{
                         padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                        background: 'var(--green)', color: '#fff',
+                        background: isSelfStudyMode ? 'var(--purple)' : 'var(--green)', color: '#fff',
                         fontSize: 12, fontWeight: 600,
                       }}>✓ 작성됨</span>
                     )}
@@ -441,7 +466,7 @@ export default function MyNotesPage() {
                     id={textareaId}
                     value={val}
                     onChange={e => setVal(e.target.value)}
-                    placeholder={placeholder}
+                    placeholder={stepPlaceholder}
                     rows={5}
                     style={{
                       ...inputStyle, resize: 'vertical', lineHeight: 1.6,
