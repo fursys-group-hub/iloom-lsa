@@ -253,41 +253,44 @@ export default function EducationLogsPage() {
                             <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
                               {note.students?.name || '알 수 없음'}
                             </span>
-                            {conf && (
-                              <span style={{
-                                padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                                fontSize: 12, fontWeight: 600, background: conf.bg, color: conf.color,
-                              }}>
-                                {conf.emoji} {conf.label}
-                              </span>
-                            )}
                           </div>
                           <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
                             {note.title}
                           </p>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {/* 참여점수 — 고정 폭 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {/* 1. 우수학습 — 고정 폭 68px */}
                         <span style={{
-                          padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                          minWidth: 48, textAlign: 'center',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '4px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                          width: 68,
+                          background: note.best_learning ? 'rgba(48,209,88,0.15)' : 'transparent',
+                          color: note.best_learning ? 'var(--green)' : 'transparent',
+                        }}>
+                          {note.best_learning ? '⭐ 우수' : ''}
+                        </span>
+                        {/* 2. 참여점수 — 고정 폭 44px */}
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '4px 0', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                          width: 44,
                           background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
                           color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                         }}>
                           {note.participation_score || 0}/3
                         </span>
-                        {/* 우수학습 — 고정 폭 */}
+                        {/* 3. 이해도 — 고정 폭 72px */}
                         <span style={{
-                          padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
-                          minWidth: 80, textAlign: 'center',
-                          background: note.best_learning ? 'rgba(48,209,88,0.15)' : 'transparent',
-                          color: note.best_learning ? 'var(--green)' : 'transparent',
-                          visibility: note.best_learning ? 'visible' : 'hidden',
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '4px 0', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                          width: 72,
+                          background: conf ? conf.bg : 'transparent',
+                          color: conf ? conf.color : 'transparent',
                         }}>
-                          ⭐ 우수
+                          {conf ? `${conf.emoji} ${conf.label}` : ''}
                         </span>
-                        {/* 태그 */}
+                        {/* 4. 태그 */}
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 4 }}>
                             {note.tags.slice(0, 3).map(tag => (
