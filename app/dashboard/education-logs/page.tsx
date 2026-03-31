@@ -258,19 +258,6 @@ export default function EducationLogsPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'nowrap' }}>
-                        {/* 참여점수 + 우수 통합 */}
-                        <span style={{
-                          padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                          background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
-                          color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
-                        </span>
-                        {/* 이해도 이모지 */}
-                        {conf && (
-                          <span title={conf.label} style={{ fontSize: 15, lineHeight: 1 }}>{conf.emoji}</span>
-                        )}
                         {/* 태그 — 첫 번째만 */}
                         {note.tags && note.tags.length > 0 && (
                           <span className="note-tag-desktop" style={{
@@ -280,6 +267,19 @@ export default function EducationLogsPage() {
                             whiteSpace: 'nowrap',
                           }}>{note.tags[0]}{note.tags.length > 1 ? ` +${note.tags.length - 1}` : ''}</span>
                         )}
+                        {/* 이해도 이모지 */}
+                        {conf && (
+                          <span title={conf.label} style={{ fontSize: 15, lineHeight: 1 }}>{conf.emoji}</span>
+                        )}
+                        {/* 참여점수 + 우수 통합 */}
+                        <span style={{
+                          padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                          background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                          color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
+                        </span>
                         <span style={{
                           fontSize: 14, color: 'var(--text-muted)',
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
