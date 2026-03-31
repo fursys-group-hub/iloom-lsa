@@ -43,6 +43,14 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
 
+  /* 경고 강조 (다크: 기존 dim 스타일 유지) */
+  --red-solid-bg: var(--red-dim);
+  --red-solid-text: var(--red);
+  --orange-solid-bg: var(--orange-dim);
+  --orange-solid-text: var(--orange);
+  --green-solid-bg: var(--green-dim);
+  --green-solid-text: var(--green);
+
   /* STEP 완료 */
   --step-filled-bg: rgba(48, 209, 88, 0.06);
   --step-filled-badge-bg: #30D158;
@@ -60,8 +68,8 @@
 body.light {
   --bg-main: #F7F8FA;
   --bg-surface: #FFFFFF;
-  --bg-elevated: #F0F2F5;
-  --bg-hover: #E8EBF0;
+  --bg-elevated: #F7F8FA;
+  --bg-hover: #F2F3F5;
 
   --border: rgba(0, 0, 0, 0.05);
   --border-light: rgba(0, 0, 0, 0.03);
@@ -71,17 +79,28 @@ body.light {
   --text-tertiary: #6B7280;
   --text-muted: #9CA3AF;
 
-  /* 액센트: 높은 채도 — 생기 있게 */
+  /* 액센트: 높은 채도 */
   --blue: #1D4ED8;
   --blue-light: #2563EB;
   --blue-dim: rgba(29, 78, 216, 0.10);
   --green: #059669;
-  --green-dim: rgba(5, 150, 105, 0.10);
+  --green-dim: rgba(5, 150, 105, 0.12);
   --orange: #D97706;
-  --orange-dim: rgba(217, 119, 6, 0.10);
+  --orange-dim: rgba(217, 119, 6, 0.12);
   --red: #DC2626;
-  --red-dim: rgba(220, 38, 38, 0.10);
+  --red-dim: rgba(220, 38, 38, 0.12);
   --purple: #7C3AED;
+
+  /* 라이트 전용: 경고 강조 (filled 스타일) */
+  --red-solid: #DC2626;
+  --red-solid-bg: #DC2626;
+  --red-solid-text: #FFFFFF;
+  --orange-solid: #D97706;
+  --orange-solid-bg: #D97706;
+  --orange-solid-text: #FFFFFF;
+  --green-solid: #059669;
+  --green-solid-bg: #059669;
+  --green-solid-text: #FFFFFF;
 
   --bubble-assistant: #EEF0F4;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.04);

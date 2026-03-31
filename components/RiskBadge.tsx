@@ -3,9 +3,9 @@ interface Props {
 }
 
 const config = {
-  high: { label: '위험', bg: 'var(--red-dim)', color: 'var(--red)' },
-  medium: { label: '주의', bg: 'var(--orange-dim)', color: 'var(--orange)' },
-  low: { label: '양호', bg: 'var(--green-dim)', color: 'var(--green)' },
+  high: { label: '위험', solidBg: 'var(--red-solid-bg)', solidText: 'var(--red-solid-text)' },
+  medium: { label: '주의', solidBg: 'var(--orange-solid-bg)', solidText: 'var(--orange-solid-text)' },
+  low: { label: '양호', solidBg: 'var(--green-solid-bg)', solidText: 'var(--green-solid-text)' },
 };
 
 export default function RiskBadge({ level }: Props) {
@@ -19,8 +19,8 @@ export default function RiskBadge({ level }: Props) {
         borderRadius: 'var(--radius-pill)',
         fontSize: 12,
         fontWeight: 600,
-        background: c.bg,
-        color: c.color,
+        background: c.solidBg,
+        color: c.solidText,
       }}
     >
       {c.label}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance } from '@/lib/types';
 import { calculateRiskLevel, calculateDailyAverages, calculateAvgScore } from '@/lib/analysis';
@@ -200,7 +200,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{
                         width: 40, height: 40, borderRadius: '50%',
-                        background: 'var(--red-dim)', color: 'var(--red)',
+                        background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 15, fontWeight: 700, flexShrink: 0,
                       }}>

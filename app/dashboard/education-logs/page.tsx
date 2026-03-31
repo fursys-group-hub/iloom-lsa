@@ -229,8 +229,8 @@ export default function EducationLogsPage() {
                       {submissionStatus.notSubmitted.map(s => (
                         <span key={s.id} style={{
                           padding: '4px 10px', borderRadius: 'var(--radius-pill)',
-                          background: 'var(--red-dim)', color: 'var(--red)',
-                          fontSize: 13, fontWeight: 500,
+                          background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
+                          fontSize: 13, fontWeight: 600,
                         }}>
                           {s.name}
                         </span>
