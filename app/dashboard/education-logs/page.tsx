@@ -267,25 +267,27 @@ export default function EducationLogsPage() {
                           </p>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {/* 참여점수 */}
-                        {note.participation_score != null && note.participation_score > 0 && (
-                          <span style={{
-                            padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                            background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
-                            color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
-                          }}>
-                            {note.participation_score}/3
-                          </span>
-                        )}
-                        {note.best_learning && (
-                          <span style={{
-                            padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
-                            background: 'rgba(255,159,10,0.12)', color: 'var(--orange)',
-                          }}>
-                            ⭐ 우수학습
-                          </span>
-                        )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {/* 참여점수 — 고정 폭 */}
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                          minWidth: 48, textAlign: 'center',
+                          background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                          color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
+                        }}>
+                          {note.participation_score || 0}/3
+                        </span>
+                        {/* 우수학습 — 고정 폭 */}
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
+                          minWidth: 80, textAlign: 'center',
+                          background: note.best_learning ? 'rgba(48,209,88,0.15)' : 'transparent',
+                          color: note.best_learning ? 'var(--green)' : 'transparent',
+                          visibility: note.best_learning ? 'visible' : 'hidden',
+                        }}>
+                          ⭐ 우수
+                        </span>
+                        {/* 태그 */}
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 4 }}>
                             {note.tags.slice(0, 3).map(tag => (
