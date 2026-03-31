@@ -37,6 +37,12 @@ const card: React.CSSProperties = {
   borderRadius: 'var(--radius-lg)', padding: 24,
 };
 
+// UTC → 한국시간(KST) 날짜 문자열 (YYYY-MM-DD)
+function toKSTDate(utcStr: string): string {
+  const d = new Date(utcStr);
+  return new Date(d.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 export default function EducationLogsPage() {
   const [notes, setNotes] = useState<StudentNote[]>([]);
   const [students, setStudents] = useState<StudentBasic[]>([]);
@@ -57,7 +63,7 @@ export default function EducationLogsPage() {
         setNotes(notesData.notes);
         // 최신 날짜 자동 선택
         if (notesData.notes.length > 0 && !selectedDate) {
-          const dates = [...new Set(notesData.notes.map((n: StudentNote) => n.created_at.slice(0, 10)))].sort().reverse();
+          const dates = [...new Set(notesData.notes.map((n: StudentNote) => toKSTDate(n.created_at)))].sort().reverse();
           setSelectedDate(dates[0] as string);
         }
       }
@@ -70,12 +76,12 @@ export default function EducationLogsPage() {
 
   // 날짜 목록 (created_at에서 YYYY-MM-DD 추출)
   const availableDates = useMemo(() => {
-    return [...new Set(notes.map(n => n.created_at.slice(0, 10)))].sort().reverse();
+    return [...new Set(notes.map(n => toKSTDate(n.created_at)))].sort().reverse();
   }, [notes]);
 
   // 선택된 날짜의 노트
   const notesByDate = useMemo(() => {
-    let filtered = notes.filter(n => n.created_at.slice(0, 10) === selectedDate);
+    let filtered = notes.filter(n => toKSTDate(n.created_at) === selectedDate);
     if (filterStudentId) filtered = filtered.filter(n => n.student_id === filterStudentId);
     if (filterType === 'best') filtered = filtered.filter(n => n.best_learning);
     if (filterType === 'incomplete') filtered = filtered.filter(n => (n.participation_score || 0) < 3);
@@ -84,7 +90,7 @@ export default function EducationLogsPage() {
 
   // 제출/미제출 현황 (날짜 기준)
   const submissionStatus = useMemo(() => {
-    const submittedIds = new Set(notes.filter(n => n.created_at.slice(0, 10) === selectedDate).map(n => n.student_id));
+    const submittedIds = new Set(notes.filter(n => toKSTDate(n.created_at) === selectedDate).map(n => n.student_id));
     const submitted = students.filter(s => submittedIds.has(s.id));
     const notSubmitted = students.filter(s => !submittedIds.has(s.id));
     return { submitted, notSubmitted };
