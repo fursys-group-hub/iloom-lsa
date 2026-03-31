@@ -79,27 +79,24 @@ body.light {
   --text-tertiary: #6B7280;
   --text-muted: #9CA3AF;
 
-  /* 액센트: 높은 채도 */
-  --blue: #1D4ED8;
-  --blue-light: #2563EB;
-  --blue-dim: rgba(29, 78, 216, 0.10);
-  --green: #059669;
-  --green-dim: rgba(5, 150, 105, 0.12);
-  --orange: #D97706;
-  --orange-dim: rgba(217, 119, 6, 0.12);
-  --red: #DC2626;
-  --red-dim: rgba(220, 38, 38, 0.12);
-  --purple: #7C3AED;
+  /* 액센트: 밝고 선명하게 */
+  --blue: #3B82F6;
+  --blue-light: #60A5FA;
+  --blue-dim: rgba(59, 130, 246, 0.10);
+  --green: #22C55E;
+  --green-dim: rgba(34, 197, 94, 0.10);
+  --orange: #F59E0B;
+  --orange-dim: rgba(245, 158, 11, 0.10);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, 0.10);
+  --purple: #A855F7;
 
   /* 라이트 전용: 경고 강조 (filled 스타일) */
-  --red-solid: #DC2626;
-  --red-solid-bg: #DC2626;
+  --red-solid-bg: #EF4444;
   --red-solid-text: #FFFFFF;
-  --orange-solid: #D97706;
-  --orange-solid-bg: #D97706;
+  --orange-solid-bg: #F59E0B;
   --orange-solid-text: #FFFFFF;
-  --green-solid: #059669;
-  --green-solid-bg: #059669;
+  --green-solid-bg: #22C55E;
   --green-solid-text: #FFFFFF;
 
   --bubble-assistant: #EEF0F4;
@@ -107,9 +104,9 @@ body.light {
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 
   /* STEP: 파란 톤 */
-  --step-filled-bg: rgba(29, 78, 216, 0.05);
-  --step-filled-badge-bg: #1D4ED8;
-  --step-border: rgba(29, 78, 216, 0.15);
+  --step-filled-bg: rgba(59, 130, 246, 0.06);
+  --step-filled-badge-bg: #3B82F6;
+  --step-border: rgba(59, 130, 246, 0.15);
 }
 
 html {
