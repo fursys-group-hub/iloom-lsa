@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
 
   if (studentId && !all) query = query.eq('student_id', studentId);
 
-  const { data, error } = await query.limit(all ? 500 : 100);
+  const { data, error } = await query.limit(all ? 2000 : 100);
   if (error) return Response.json({ message: error.message }, { status: 500 });
   return Response.json({ notes: (data || []).map(unpackContent) });
 }
