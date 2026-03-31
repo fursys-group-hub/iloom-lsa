@@ -94,18 +94,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ message: '제목과 내용을 입력해주세요.' }, { status: 400 });
   }
 
-  // 하루 1개 제한: 오늘 이미 작성한 노트가 있으면 거부
   const supabase = createServerClient();
-  const today = new Date().toISOString().slice(0, 10);
-  const { data: existing } = await supabase
-    .from('student_notes')
-    .select('id')
-    .eq('student_id', student_id)
-    .gte('created_at', `${today}T00:00:00`)
-    .lt('created_at', `${today}T23:59:59.999`);
-  if (existing && existing.length > 0) {
-    return Response.json({ message: '오늘은 이미 교육일지를 작성했어요! 수정하려면 기존 일지를 눌러주세요.' }, { status: 409 });
-  }
 
   const extraMeta = { participation_score, best_learning, one_word };
   const { data, error } = await supabase

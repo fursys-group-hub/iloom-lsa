@@ -251,32 +251,43 @@ export default function EducationLogsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {notesByDate.map(note => {
                 const isExpanded = expandedNoteId === note.id;
-                const conf = note.confidence ? confidenceMap[note.confidence] : null;
+                const isSelfStudy = note.tags?.includes('자율학습');
+                const conf = (!isSelfStudy && note.confidence) ? confidenceMap[note.confidence] : null;
                 return (
-                  <div key={note.id} style={{ ...card, padding: 0, overflow: 'hidden' }}>
+                  <div key={note.id} style={{ ...card, padding: 0, overflow: 'hidden', ...(isSelfStudy ? { borderColor: 'rgba(191,90,242,0.3)' } : {}) }}>
                     {/* 헤더 */}
                     <div
                       onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         padding: '16px 20px', cursor: 'pointer', transition: 'background 0.15s ease',
+                        ...(isSelfStudy ? { background: 'rgba(191,90,242,0.04)' } : {}),
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                      onMouseEnter={e => { e.currentTarget.style.background = isSelfStudy ? 'rgba(191,90,242,0.08)' : 'var(--bg-hover)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = isSelfStudy ? 'rgba(191,90,242,0.04)' : 'transparent'; }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
                         <div style={{
                           width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                          background: conf?.bg || 'var(--blue-dim)', color: conf?.color || 'var(--blue-light)',
+                          background: isSelfStudy ? 'rgba(191,90,242,0.15)' : (conf?.bg || 'var(--blue-dim)'),
+                          color: isSelfStudy ? 'var(--purple)' : (conf?.color || 'var(--blue-light)'),
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 700,
                         }}>
-                          {note.students?.name?.[0] || '?'}
+                          {isSelfStudy ? '📚' : (note.students?.name?.[0] || '?')}
                         </div>
                         <div style={{ minWidth: 0 }}>
-                          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {note.students?.name || '알 수 없음'}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {note.students?.name || '알 수 없음'}
+                            </span>
+                            {isSelfStudy && (
+                              <span style={{
+                                padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
+                                background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
+                              }}>자율학습</span>
+                            )}
+                          </div>
                           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {note.title}
                           </p>
@@ -285,29 +296,33 @@ export default function EducationLogsPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0 }}>
                         {/* 슬롯1: 태그 (가변, 모바일 숨김) */}
                         <div className="note-tag-desktop" style={{ display: 'flex', gap: 4, marginRight: 8 }}>
-                          {note.tags && note.tags.length > 0 && (
+                          {note.tags && note.tags.filter(t => t !== '자율학습').length > 0 && (
                             <span style={{
                               padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                              fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
-                              color: 'var(--text-tertiary)', border: '1px solid var(--border)',
+                              fontSize: 11, fontWeight: 500,
+                              background: isSelfStudy ? 'rgba(191,90,242,0.1)' : 'var(--bg-hover)',
+                              color: isSelfStudy ? 'var(--purple)' : 'var(--text-tertiary)',
+                              border: isSelfStudy ? '1px solid rgba(191,90,242,0.2)' : '1px solid var(--border)',
                               whiteSpace: 'nowrap',
-                            }}>{note.tags[0]}{note.tags.length > 1 ? ` +${note.tags.length - 1}` : ''}</span>
+                            }}>{note.tags.filter(t => t !== '자율학습')[0]}{note.tags.filter(t => t !== '자율학습').length > 1 ? ` +${note.tags.filter(t => t !== '자율학습').length - 1}` : ''}</span>
                           )}
                         </div>
-                        {/* 슬롯2: 이해도 (고정 28px) */}
+                        {/* 슬롯2: 이해도 (고정 28px) — 자율학습이면 빈칸 */}
                         <div style={{ width: 28, textAlign: 'center', flexShrink: 0 }}>
-                          {conf && <span title={conf.label} style={{ fontSize: 15 }}>{conf.emoji}</span>}
+                          {!isSelfStudy && conf && <span title={conf.label} style={{ fontSize: 15 }}>{conf.emoji}</span>}
                         </div>
-                        {/* 슬롯3: 점수 + 우수 (고정 66px) */}
+                        {/* 슬롯3: 점수 + 우수 (고정 66px) — 자율학습이면 빈칸 */}
                         <div style={{ width: 66, textAlign: 'center', flexShrink: 0 }}>
-                          <span style={{
-                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                            background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
-                            color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
-                            whiteSpace: 'nowrap',
-                          }}>
-                            {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
-                          </span>
+                          {!isSelfStudy && (
+                            <span style={{
+                              padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                              background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                              color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
+                              whiteSpace: 'nowrap',
+                            }}>
+                              {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
+                            </span>
+                          )}
                         </div>
                         {/* 슬롯4: 화살표 (고정 20px) */}
                         <div style={{ width: 20, textAlign: 'center', flexShrink: 0 }}>

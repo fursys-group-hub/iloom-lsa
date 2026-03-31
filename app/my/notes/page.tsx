@@ -109,9 +109,6 @@ export default function MyNotesPage() {
   const [step1, setStep1] = useState('');
   const [step2, setStep2] = useState('');
   const [step3, setStep3] = useState('');
-  const [step1Completed, setStep1Completed] = useState(false);
-  const [step2Completed, setStep2Completed] = useState(false);
-  const [step3Completed, setStep3Completed] = useState(false);
   const [tags, setTags] = useState('');
   const [confidence, setConfidence] = useState('');
   const [saving, setSaving] = useState(false);
@@ -123,16 +120,9 @@ export default function MyNotesPage() {
 
   const resetForm = () => {
     setPledge(''); setStep1(''); setStep2(''); setStep3('');
-    setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
     setTags(''); setConfidence(''); setEditingNoteId(null); setSaveError('');
   };
 
-  // 오늘 이미 작성한 노트가 있는지 확인
-  const todayNote = notes.find(n => {
-    const noteDate = n.created_at.slice(0, 10);
-    const today = new Date().toISOString().slice(0, 10);
-    return noteDate === today;
-  });
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -150,9 +140,6 @@ export default function MyNotesPage() {
         if (d.pledge || d.step1 || d.step2 || d.step3) {
           setPledge(d.pledge || '');
           setStep1(d.step1 || ''); setStep2(d.step2 || ''); setStep3(d.step3 || '');
-          setStep1Completed(d.step1Completed || false);
-          setStep2Completed(d.step2Completed || false);
-          setStep3Completed(d.step3Completed || false);
           setTags(d.tags || ''); setConfidence(d.confidence || '');
           setShowForm(true);
         }
@@ -167,12 +154,12 @@ export default function MyNotesPage() {
       const hasContent = pledge.trim() || step1.trim() || step2.trim() || step3.trim();
       if (hasContent) {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({
-          pledge, step1, step2, step3, step1Completed, step2Completed, step3Completed, tags, confidence,
+          pledge, step1, step2, step3, tags, confidence,
         }));
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [showForm, editingNoteId, pledge, step1, step2, step3, step1Completed, step2Completed, step3Completed, tags, confidence]);
+  }, [showForm, editingNoteId, pledge, step1, step2, step3, tags, confidence]);
 
   const clearDraft = () => localStorage.removeItem(DRAFT_KEY);
 
@@ -203,12 +190,8 @@ export default function MyNotesPage() {
       try {
         const steps = JSON.parse(note.content);
         setStep1(steps.step1 || ''); setStep2(steps.step2 || ''); setStep3(steps.step3 || '');
-        setStep1Completed(steps.step1_completed || false);
-        setStep2Completed(steps.step2_completed || false);
-        setStep3Completed(steps.step3_completed || false);
       } catch {
         setStep1(note.content); setStep2(''); setStep3('');
-        setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
       }
     } else {
       // blocks/text → step1에 텍스트로 넣기
@@ -223,7 +206,6 @@ export default function MyNotesPage() {
         setStep1(note.content);
       }
       setStep2(''); setStep3('');
-      setStep1Completed(false); setStep2Completed(false); setStep3Completed(false);
     }
     setShowForm(true);
     setExpandedNoteId(null);
@@ -247,9 +229,9 @@ export default function MyNotesPage() {
 
     const stepsData = {
       step1: step1.trim(), step2: step2.trim(), step3: step3.trim(),
-      step1_completed: step1Completed && !!step1.trim(),
-      step2_completed: step2Completed && !!step2.trim(),
-      step3_completed: step3Completed && !!step3.trim(),
+      step1_completed: !!step1.trim(),
+      step2_completed: !!step2.trim(),
+      step3_completed: !!step3.trim(),
     };
 
     try {
@@ -317,19 +299,6 @@ export default function MyNotesPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📓 교육일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
-          {/* 오늘 이미 작성했으면 "수정" 버튼, 아니면 "새 교육일지" */}
-          {!showForm && todayNote && (
-            <button
-              onClick={() => startEdit(todayNote)}
-              style={{
-                padding: '10px 20px', borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--blue)', background: 'var(--blue-dim)',
-                color: 'var(--blue-light)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              ✏️ 오늘 일지 수정
-            </button>
-          )}
           <button
             onClick={() => {
               if (showForm) { setShowForm(false); resetForm(); }
@@ -410,8 +379,6 @@ export default function MyNotesPage() {
             {STEP_DEFS.map(({ key, label, icon, desc, placeholder }) => {
               const val = key === 'step1' ? step1 : key === 'step2' ? step2 : step3;
               const setVal = key === 'step1' ? setStep1 : key === 'step2' ? setStep2 : setStep3;
-              const completed = key === 'step1' ? step1Completed : key === 'step2' ? step2Completed : step3Completed;
-              const setCompleted = key === 'step1' ? setStep1Completed : key === 'step2' ? setStep2Completed : setStep3Completed;
               const textareaId = `step-textarea-${key}`;
 
               const insertFormat = (prefix: string, suffix?: string) => {
@@ -443,26 +410,19 @@ export default function MyNotesPage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: completed && val.trim() ? 'rgba(48,209,88,0.06)' : 'var(--bg-hover)',
+                    background: val.trim() ? 'rgba(48,209,88,0.06)' : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
-                    <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
-                      <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 8 }}>{desc}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{desc}</span>
                     </div>
                     {val.trim() && (
-                      <button
-                        onClick={() => setCompleted(!completed)}
-                        style={{
-                          padding: '4px 14px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
-                          border: completed ? 'none' : '1px solid var(--border)',
-                          background: completed ? 'var(--green)' : 'transparent',
-                          color: completed ? '#fff' : 'var(--text-muted)',
-                          fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease',
-                        }}
-                      >
-                        {completed ? '✓ 완료' : '완료 체크'}
-                      </button>
+                      <span style={{
+                        padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                        background: 'var(--green)', color: '#fff',
+                        fontSize: 12, fontWeight: 600,
+                      }}>✓ 작성됨</span>
                     )}
                   </div>
                   {/* 서식 도구 바 */}
@@ -533,67 +493,79 @@ export default function MyNotesPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
             {filteredNotes.map(note => {
               const isSelected = expandedNoteId === note.id;
-              const conf = note.confidence ? CONFIDENCE.find(o => o.value === note.confidence) : null;
+              const isSelfStudy = note.tags?.includes('자율학습');
+              const conf = (!isSelfStudy && note.confidence) ? CONFIDENCE.find(o => o.value === note.confidence) : null;
               const dateObj = new Date(note.created_at);
               const month = dateObj.getMonth() + 1;
               const day = dateObj.getDate();
               const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
               const dayName = dayNames[dateObj.getDay()];
+              const displayTags = (note.tags || []).filter(t => t !== '자율학습');
               return (
                 <button
                   key={note.id}
                   onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
                   style={{
                     padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
-                    background: isSelected ? 'var(--blue-dim)' : 'var(--bg-surface)',
+                    border: isSelected ? '2px solid var(--blue)' : isSelfStudy ? '1px solid rgba(191,90,242,0.4)' : '1px solid var(--border)',
+                    background: isSelected ? 'var(--blue-dim)' : isSelfStudy ? 'rgba(191,90,242,0.06)' : 'var(--bg-surface)',
                     cursor: 'pointer', transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', gap: 10,
                   }}
                 >
-                  {/* 날짜 */}
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {month}/{day} ({dayName})
+                  {/* 날짜 + 자율학습 배지 */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {month}/{day} ({dayName})
+                    </span>
+                    {isSelfStudy && (
+                      <span style={{
+                        padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
+                        background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
+                      }}>📚 자율학습</span>
+                    )}
                   </div>
                   {/* 제목 */}
                   <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
                     {note.title}
                   </div>
-                  {/* 자신감 + 메타 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    {conf && (
-                      <span style={{ fontSize: 13 }}>
-                        {conf.icon} {conf.label}
-                      </span>
-                    )}
-                    {note.participation_score != null && note.participation_score > 0 && (
-                      <span style={{
-                        padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                        background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
-                        color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
-                      }}>
-                        참여 {note.participation_score}/3
-                      </span>
-                    )}
-                    {note.best_learning && (
-                      <span style={{ fontSize: 12 }}>⭐ 우수</span>
-                    )}
-                  </div>
-                  {/* STEP 완료 현황 (steps 타입만) */}
-                  {note.content_type === 'steps' && (() => {
+                  {/* 자신감 + 메타 (자율학습이면 숨김) */}
+                  {!isSelfStudy && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      {conf && (
+                        <span style={{ fontSize: 13 }}>
+                          {conf.icon} {conf.label}
+                        </span>
+                      )}
+                      {note.participation_score != null && note.participation_score > 0 && (
+                        <span style={{
+                          padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                          background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
+                          color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
+                        }}>
+                          참여 {note.participation_score}/3
+                        </span>
+                      )}
+                      {note.best_learning && (
+                        <span style={{ fontSize: 12 }}>⭐ 우수</span>
+                      )}
+                    </div>
+                  )}
+                  {/* STEP 완료 현황 (steps 타입, 자율학습 제외) */}
+                  {!isSelfStudy && note.content_type === 'steps' && (() => {
                     try {
                       const steps = JSON.parse(note.content);
-                      const done = [steps.step1_completed, steps.step2_completed, steps.step3_completed].filter(Boolean).length;
+                      const filled = [!!steps.step1?.trim(), !!steps.step2?.trim(), !!steps.step3?.trim()];
+                      const done = filled.filter(Boolean).length;
                       return (
                         <div style={{ display: 'flex', gap: 4 }}>
                           {['📝', '💡', '🎯'].map((icon, i) => {
-                            const completed = [steps.step1_completed, steps.step2_completed, steps.step3_completed][i];
+                            const completed = filled[i];
                             return (
                               <span key={i} style={{
-                                fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
+                                fontSize: 15, padding: '2px 6px', borderRadius: 'var(--radius-pill)',
                                 background: completed ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)',
-                                color: completed ? 'var(--green)' : 'var(--text-muted)',
-                                opacity: completed ? 1 : 0.5,
+                                opacity: completed ? 1 : 0.3,
                               }}>
                                 {icon}
                               </span>
@@ -604,17 +576,19 @@ export default function MyNotesPage() {
                       );
                     } catch { return null; }
                   })()}
-                  {/* 태그 */}
-                  {note.tags && note.tags.length > 0 && (
+                  {/* 태그 (자율학습 태그는 배지로 이미 표시했으므로 제외) */}
+                  {displayTags.length > 0 && (
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                      {note.tags.slice(0, 3).map(tag => (
+                      {displayTags.slice(0, 3).map(tag => (
                         <span key={tag} style={{
                           padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                          background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 600,
+                          background: isSelfStudy ? 'rgba(191,90,242,0.12)' : 'var(--blue-dim)',
+                          color: isSelfStudy ? 'var(--purple)' : 'var(--blue-light)',
+                          fontSize: 11, fontWeight: 600,
                         }}>{tag}</span>
                       ))}
-                      {note.tags.length > 3 && (
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{note.tags.length - 3}</span>
+                      {displayTags.length > 3 && (
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{displayTags.length - 3}</span>
                       )}
                     </div>
                   )}
@@ -627,14 +601,23 @@ export default function MyNotesPage() {
           {expandedNoteId && (() => {
             const note = filteredNotes.find(n => n.id === expandedNoteId);
             if (!note) return null;
-            const conf = note.confidence ? CONFIDENCE.find(o => o.value === note.confidence) : null;
+            const isSelfStudy = note.tags?.includes('자율학습');
+            const conf = (!isSelfStudy && note.confidence) ? CONFIDENCE.find(o => o.value === note.confidence) : null;
             return (
-              <div style={card}>
+              <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid rgba(191,90,242,0.3)', background: 'rgba(191,90,242,0.04)' } : {}) }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
-                      {note.title}
-                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                        {note.title}
+                      </h3>
+                      {isSelfStudy && (
+                        <span style={{
+                          padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                          background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
+                        }}>📚 자율학습</span>
+                      )}
+                    </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                       {new Date(note.created_at).toLocaleDateString('ko', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
@@ -648,7 +631,7 @@ export default function MyNotesPage() {
                         {conf.icon} {conf.label}
                       </span>
                     )}
-                    {note.participation_score != null && (
+                    {!isSelfStudy && note.participation_score != null && (
                       <span style={{
                         padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
                         background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : 'rgba(255,159,10,0.12)',
@@ -657,7 +640,7 @@ export default function MyNotesPage() {
                         참여 {note.participation_score}/3
                       </span>
                     )}
-                    {note.best_learning && (
+                    {!isSelfStudy && note.best_learning && (
                       <span style={{
                         padding: '4px 12px', borderRadius: 'var(--radius-pill)',
                         background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 13, fontWeight: 600,
