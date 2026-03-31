@@ -51,8 +51,33 @@
   --radius-pill: 9999px;
 }
 
+/* 라이트모드 */
+body.light {
+  --bg-main: #F5F5F7;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F2F2F7;
+  --bg-hover: #E5E5EA;
+  --border: #D1D1D6;
+  --border-light: #C7C7CC;
+  --text-primary: #1C1C1E;
+  --text-second: #3A3A3C;
+  --text-tertiary: #636366;
+  --text-muted: #8E8E93;
+  --blue-dim: rgba(0, 122, 255, 0.1);
+  --green-dim: rgba(48, 209, 88, 0.1);
+  --orange-dim: rgba(255, 159, 10, 0.1);
+  --red-dim: rgba(255, 69, 58, 0.1);
+  --bubble-assistant: #E9E9EB;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+}
+
 html {
   color-scheme: dark;
+}
+
+html:has(body.light) {
+  color-scheme: light;
 }
 
 body {
