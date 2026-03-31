@@ -1,6 +1,7 @@
 /**
- * 노션 교육일지 마크다운 → Supabase DB 임포트 스크립트
- * 사용법: node scripts/import-education-logs.js
+ * 노션 임포트 교육일지 재임포트 (3/23~3/30만)
+ * 기존 해당 날짜 데이터 삭제 후 다시 임포트
+ * 3/31 이후 앱에서 작성한 건 건드리지 않음
  */
 
 const fs = require('fs');
@@ -20,13 +21,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// import-education-logs.js의 extractStep과 동일
 function extractStep(content, stepLabel) {
-  // aside 밖의 STEP 헤더만 매칭 (aside 안의 [STEP 1] 참조 무시)
-  // 모든 ### [STEP N] 위치를 찾고, aside 안에 있는 건 제외
   const stepNum = stepLabel.replace('STEP ', '');
   const headerRegex = new RegExp(`^### *💡? *\\[STEP ${stepNum}\\]`, 'im');
-
-  // aside 영역 찾기
   const asideRanges = [];
   let searchFrom = 0;
   while (true) {
@@ -37,43 +35,26 @@ function extractStep(content, stepLabel) {
     asideRanges.push([openIdx, closeIdx]);
     searchFrom = closeIdx + 8;
   }
-
   const isInsideAside = (pos) => asideRanges.some(([s, e]) => pos >= s && pos <= e);
-
-  // 모든 매칭 위치에서 aside 밖인 것 찾기
   let stepIdx = -1;
   let searchPos = 0;
   while (true) {
     const match = content.slice(searchPos).search(headerRegex);
     if (match === -1) break;
     const absPos = searchPos + match;
-    if (!isInsideAside(absPos)) {
-      stepIdx = absPos;
-      break;
-    }
+    if (!isInsideAside(absPos)) { stepIdx = absPos; break; }
     searchPos = absPos + 10;
   }
-
   if (stepIdx === -1) return '';
-
   const afterStep = content.slice(stepIdx);
-  // 다음 STEP 헤더까지
   const nextStepMatch = afterStep.slice(10).search(/\n### *💡?\s*\[STEP/i);
   const section = nextStepMatch > 0 ? afterStep.slice(0, nextStepMatch + 10) : afterStep;
-
-  // <aside> 블록들 추출 (안내문 aside 제외 — 학생 내용만)
   const asideMatches = [...section.matchAll(/<aside>([\s\S]*?)<\/aside>/g)];
-  // 안내문 포함된 aside는 제외
   const studentAsides = asideMatches.filter(m => {
     const text = m[1].trim();
     return text && !text.includes('속성 체크') && !text.includes('반가워요');
   });
-
-  if (studentAsides.length > 0) {
-    return studentAsides[studentAsides.length - 1][1].trim();
-  }
-
-  // fallback: aside 비어있으면 텍스트 직접 추출 (안내문 제외)
+  if (studentAsides.length > 0) return studentAsides[studentAsides.length - 1][1].trim();
   const lines = section.split('\n');
   const contentLines = lines.filter(l => {
     const t = l.trim();
@@ -93,8 +74,6 @@ function extractStep(content, stepLabel) {
 
 function parseMarkdown(content, filename) {
   const lines = content.split('\n');
-
-  // 속성 추출
   const props = {};
   for (const line of lines.slice(0, 20)) {
     const match = line.match(/^(.+?):\s*(.+)$/);
@@ -102,14 +81,11 @@ function parseMarkdown(content, filename) {
       props[match[1].trim()] = match[2].trim();
     }
   }
-
-  // 파일명에서 날짜, 이름 추출
   const titleMatch = filename.match(/^(\d{4}-\d{2}-\d{2})\s+(.+?)\s+(?:교육일지|소재|키즈|스터디)/);
   if (!titleMatch) return null;
   const date = titleMatch[1];
   const name = titleMatch[2];
 
-  // 자신감
   let confidence = null;
   const confLine = lines.find(l => l.includes('오늘의 자신감'));
   if (confLine) {
@@ -122,19 +98,15 @@ function parseMarkdown(content, filename) {
   const step1 = extractStep(content, 'STEP 1');
   const step2 = extractStep(content, 'STEP 2');
   const step3 = extractStep(content, 'STEP 3');
-
   const tags = props['태그'] ? props['태그'].split(',').map(t => t.trim()).filter(Boolean) : [];
 
   return {
     date, name,
-    title: lines[0]?.replace(/^#\s*/, '') || `${date} ${name} / 교육일지`,
+    title: `${date} ${name} / 교육일지`,
     tags, confidence,
     step1_completed: props['STEP1'] === 'Yes',
     step2_completed: props['STEP2'] === 'Yes',
     step3_completed: props['STEP3'] === 'Yes',
-    participation_score: parseInt(props['참여점수']) || 0,
-    best_learning: props['베스트학습'] === 'Yes',
-    one_word: props['오늘 한마디!'] || null,
     step1_content: step1,
     step2_content: step2,
     step3_content: step3,
@@ -142,12 +114,11 @@ function parseMarkdown(content, filename) {
 }
 
 async function main() {
-  console.log('📓 교육일지 임포트 시작...\n');
+  console.log('📓 교육일지 재임포트 시작 (3/23~3/30)...\n');
 
+  // 1. 마크다운 파싱
   const files = fs.readdirSync(MD_DIR)
     .filter(f => f.endsWith('.md') && !f.startsWith('교육일지 기본') && /^\d{4}-\d{2}-\d{2}/.test(f));
-
-  console.log(`📁 마크다운 파일 ${files.length}개 발견`);
 
   const entries = [];
   for (const file of files) {
@@ -155,29 +126,48 @@ async function main() {
     const parsed = parseMarkdown(content, file);
     if (parsed) entries.push(parsed);
   }
-  console.log(`✅ 파싱 완료: ${entries.length}개`);
+  console.log(`📁 파싱 완료: ${entries.length}개`);
 
-  // 중복 제거 (같은 학생+같은 날짜 → 참여점수 높은 것)
+  // 중복 제거
   const deduped = new Map();
   for (const entry of entries) {
     const key = `${entry.date}_${entry.name}`;
     const existing = deduped.get(key);
-    if (!existing || entry.participation_score > existing.participation_score) {
+    if (!existing || (entry.step1_content.length > (existing.step1_content || '').length)) {
       deduped.set(key, entry);
     }
   }
   const finalEntries = [...deduped.values()];
   console.log(`🔄 중복 제거 후: ${finalEntries.length}개`);
 
-  // 학생 매핑
+  // 2. 학생 매핑
   const { data: students } = await supabase.from('students').select('id, name');
   const studentMap = new Map();
   for (const s of students || []) studentMap.set(s.name, s.id);
-  console.log(`👥 DB 학생 ${studentMap.size}명 매핑\n`);
+  console.log(`👥 DB 학생 ${studentMap.size}명 매핑`);
 
-  // DB insert (기존 데이터 없으므로 insert)
+  // 3. 기존 3/23~3/30 데이터 삭제
+  const { data: oldNotes, error: fetchErr } = await supabase
+    .from('student_notes')
+    .select('id, created_at')
+    .gte('created_at', '2026-03-23T00:00:00')
+    .lt('created_at', '2026-03-31T00:00:00');
+
+  if (fetchErr) { console.log('❌ 조회 실패:', fetchErr.message); return; }
+  console.log(`🗑️ 삭제 대상: ${oldNotes.length}건 (3/23~3/30)`);
+
+  if (oldNotes.length > 0) {
+    const ids = oldNotes.map(n => n.id);
+    const { error: delErr } = await supabase
+      .from('student_notes')
+      .delete()
+      .in('id', ids);
+    if (delErr) { console.log('❌ 삭제 실패:', delErr.message); return; }
+    console.log(`✅ ${ids.length}건 삭제 완료`);
+  }
+
+  // 4. 재임포트
   let success = 0, skipped = 0;
-
   for (const entry of finalEntries) {
     const studentId = studentMap.get(entry.name);
     if (!studentId) {
@@ -186,7 +176,6 @@ async function main() {
       continue;
     }
 
-    // content를 기존 API의 pack 형식에 맞춤
     const contentObj = JSON.stringify({
       steps: {
         step1: entry.step1_content,
@@ -199,9 +188,6 @@ async function main() {
       meta: {
         tags: entry.tags,
         confidence: entry.confidence,
-        participation_score: entry.participation_score,
-        best_learning: entry.best_learning,
-        one_word: entry.one_word,
       },
     });
 
@@ -223,7 +209,7 @@ async function main() {
     }
   }
 
-  console.log(`\n🎉 임포트 완료! 성공: ${success}건, 스킵: ${skipped}건`);
+  console.log(`\n🎉 재임포트 완료! 성공: ${success}건, 스킵: ${skipped}건`);
 }
 
 main().catch(console.error);

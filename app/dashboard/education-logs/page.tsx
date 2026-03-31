@@ -441,8 +441,7 @@ function renderMdLines(text: string): React.ReactNode {
       continue;
     }
 
-    const isTitle = t.length <= 40 && !/[.,;:!?]$/.test(t) && !t.startsWith('**');
-    els.push(<div key={k++} style={{ fontSize: 14, fontWeight: isTitle ? 700 : 400, color: isTitle ? 'var(--text-primary)' : 'var(--text-second)', lineHeight: 1.55, marginTop: isTitle ? 6 : 0 }}>{renderInline(t)}</div>);
+    els.push(<div key={k++} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.55 }}>{renderInline(t)}</div>);
   }
   flushB(); flushT();
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{els}</div>;

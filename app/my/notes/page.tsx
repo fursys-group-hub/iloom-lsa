@@ -1137,21 +1137,12 @@ function renderMarkdownLines(text: string, searchQuery: string): React.ReactNode
       continue;
     }
 
-    // 섹션 제목 감지: 짧은 줄 + 마침표 없음 → 볼드
-    const isTitle = trimmed.length <= 40 && !/[.,;:!?]$/.test(trimmed) && !/^[•\-]/.test(trimmed);
-    if (isTitle && !trimmed.startsWith('**')) {
-      elements.push(
-        <div key={key++} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginTop: 6 }}>
-          {renderInlineFormat(trimmed, searchQuery)}
-        </div>
-      );
-    } else {
-      elements.push(
-        <div key={key++} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>
-          {renderInlineFormat(trimmed, searchQuery)}
-        </div>
-      );
-    }
+    // 일반 텍스트 (### 헤딩만 제목, 나머지는 본문)
+    elements.push(
+      <div key={key++} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>
+        {renderInlineFormat(trimmed, searchQuery)}
+      </div>
+    );
   }
   flushBullets();
   flushTable();
