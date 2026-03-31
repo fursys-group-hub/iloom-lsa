@@ -96,6 +96,25 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServerClient();
 
+  // 교육일지(자율학습 아님)는 하루 1개 제한
+  const isSelfStudy = Array.isArray(tags) && tags.includes('자율학습');
+  if (!isSelfStudy) {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: existing } = await supabase
+      .from('student_notes')
+      .select('id, content')
+      .eq('student_id', student_id)
+      .gte('created_at', `${today}T00:00:00`)
+      .lt('created_at', `${today}T23:59:59.999`);
+    // 오늘 교육일지(자율학습 제외)가 이미 있으면 거부
+    const hasRegularNote = existing?.some(n => {
+      try { const p = JSON.parse(n.content); return !(p.meta?.tags || []).includes('자율학습'); } catch { return true; }
+    });
+    if (hasRegularNote) {
+      return Response.json({ message: '오늘은 이미 교육일지를 작성했어요! 수정하려면 기존 일지를 눌러주세요.' }, { status: 409 });
+    }
+  }
+
   const extraMeta = { participation_score, best_learning, one_word };
   const { data, error } = await supabase
     .from('student_notes')
