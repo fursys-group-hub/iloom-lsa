@@ -94,3 +94,9 @@ body {
 .animate-fade-in-up {
   animation: fadeInUp 0.25s ease forwards;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .note-tag-desktop { display: none !important; }
+}

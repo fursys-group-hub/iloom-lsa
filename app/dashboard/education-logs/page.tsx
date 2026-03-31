@@ -239,56 +239,47 @@ export default function EducationLogsPage() {
                       onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
                         <div style={{
-                          width: 40, height: 40, borderRadius: '50%',
+                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                           background: conf?.bg || 'var(--blue-dim)', color: conf?.color || 'var(--blue-light)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 15, fontWeight: 700,
+                          fontSize: 14, fontWeight: 700,
                         }}>
                           {note.students?.name?.[0] || '?'}
                         </div>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
-                              {note.students?.name || '알 수 없음'}
-                            </span>
-                          </div>
-                          <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {note.students?.name || '알 수 없음'}
+                          </span>
+                          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {note.title}
                           </p>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                        {/* 태그 */}
-                        {note.tags && note.tags.length > 0 && (
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {note.tags.slice(0, 2).map(tag => (
-                              <span key={tag} style={{
-                                padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                                fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
-                                color: 'var(--text-tertiary)', border: '1px solid var(--border)',
-                                whiteSpace: 'nowrap',
-                              }}>{tag}</span>
-                            ))}
-                            {note.tags.length > 2 && (
-                              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{note.tags.length - 2}</span>
-                            )}
-                          </div>
-                        )}
-                        {/* 이해도 아이콘 */}
-                        {conf && (
-                          <span title={conf.label} style={{ fontSize: 16, lineHeight: 1 }}>{conf.emoji}</span>
-                        )}
-                        {/* 참여점수 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'nowrap' }}>
+                        {/* 참여점수 + 우수 통합 */}
                         <span style={{
                           padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
                           background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
                           color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                           whiteSpace: 'nowrap',
                         }}>
-                          {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
+                          {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
                         </span>
+                        {/* 이해도 이모지 */}
+                        {conf && (
+                          <span title={conf.label} style={{ fontSize: 15, lineHeight: 1 }}>{conf.emoji}</span>
+                        )}
+                        {/* 태그 — 첫 번째만 */}
+                        {note.tags && note.tags.length > 0 && (
+                          <span className="note-tag-desktop" style={{
+                            padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                            fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
+                            color: 'var(--text-tertiary)', border: '1px solid var(--border)',
+                            whiteSpace: 'nowrap',
+                          }}>{note.tags[0]}{note.tags.length > 1 ? ` +${note.tags.length - 1}` : ''}</span>
+                        )}
                         <span style={{
                           fontSize: 14, color: 'var(--text-muted)',
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
