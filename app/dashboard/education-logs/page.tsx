@@ -257,34 +257,42 @@ export default function EducationLogsPage() {
                           </p>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, flexWrap: 'nowrap' }}>
-                        {/* 태그 — 첫 번째만 */}
-                        {note.tags && note.tags.length > 0 && (
-                          <span className="note-tag-desktop" style={{
-                            padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                            fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
-                            color: 'var(--text-tertiary)', border: '1px solid var(--border)',
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0 }}>
+                        {/* 슬롯1: 태그 (가변, 모바일 숨김) */}
+                        <div className="note-tag-desktop" style={{ display: 'flex', gap: 4, marginRight: 8 }}>
+                          {note.tags && note.tags.length > 0 && (
+                            <span style={{
+                              padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                              fontSize: 11, fontWeight: 500, background: 'var(--bg-hover)',
+                              color: 'var(--text-tertiary)', border: '1px solid var(--border)',
+                              whiteSpace: 'nowrap',
+                            }}>{note.tags[0]}{note.tags.length > 1 ? ` +${note.tags.length - 1}` : ''}</span>
+                          )}
+                        </div>
+                        {/* 슬롯2: 이해도 (고정 28px) */}
+                        <div style={{ width: 28, textAlign: 'center', flexShrink: 0 }}>
+                          {conf && <span title={conf.label} style={{ fontSize: 15 }}>{conf.emoji}</span>}
+                        </div>
+                        {/* 슬롯3: 점수 + 우수 (고정 66px) */}
+                        <div style={{ width: 66, textAlign: 'center', flexShrink: 0 }}>
+                          <span style={{
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
+                            background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                            color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                             whiteSpace: 'nowrap',
-                          }}>{note.tags[0]}{note.tags.length > 1 ? ` +${note.tags.length - 1}` : ''}</span>
-                        )}
-                        {/* 이해도 이모지 */}
-                        {conf && (
-                          <span title={conf.label} style={{ fontSize: 15, lineHeight: 1 }}>{conf.emoji}</span>
-                        )}
-                        {/* 참여점수 + 우수 통합 */}
-                        <span style={{
-                          padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                          background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
-                          color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
-                        </span>
-                        <span style={{
-                          fontSize: 14, color: 'var(--text-muted)',
-                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                          transition: 'transform 0.2s ease',
-                        }}>▾</span>
+                          }}>
+                            {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
+                          </span>
+                        </div>
+                        {/* 슬롯4: 화살표 (고정 20px) */}
+                        <div style={{ width: 20, textAlign: 'center', flexShrink: 0 }}>
+                          <span style={{
+                            fontSize: 14, color: 'var(--text-muted)',
+                            display: 'inline-block',
+                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease',
+                          }}>▾</span>
+                        </div>
                       </div>
                     </div>
 
