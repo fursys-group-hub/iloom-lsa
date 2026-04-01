@@ -65,6 +65,7 @@ export default function EducationLogsPage() {
   const [commentInput, setCommentInput] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
   const commentEndRef = useRef<HTMLDivElement>(null);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   // 코멘트 불러오기 (펼친 노트)
   const fetchComments = useCallback(async (noteId: string) => {
@@ -93,6 +94,7 @@ export default function EducationLogsPage() {
       if (res.ok) {
         setCommentInput('');
         await fetchComments(noteId);
+        setCommentCounts(prev => ({ ...prev, [noteId]: (prev[noteId] || 0) + 1 }));
         setTimeout(() => commentEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
       }
     } catch { /* silent */ }
@@ -105,6 +107,7 @@ export default function EducationLogsPage() {
     try {
       await fetch(`/api/note-comments?id=${commentId}`, { method: 'DELETE' });
       await fetchComments(noteId);
+      setCommentCounts(prev => ({ ...prev, [noteId]: Math.max((prev[noteId] || 1) - 1, 0) }));
     } catch { /* silent */ }
   }, [fetchComments]);
 
@@ -139,6 +142,21 @@ export default function EducationLogsPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // 노트 목록이 바뀌면 코멘트 수 조회
+  useEffect(() => {
+    if (notes.length === 0) return;
+    const ids = notes.map(n => n.id).join(',');
+    fetch(`/api/note-comments?note_ids=${ids}`)
+      .then(r => r.json())
+      .then((data: NoteComment[]) => {
+        if (!Array.isArray(data)) return;
+        const counts: Record<string, number> = {};
+        data.forEach(c => { counts[c.note_id] = (counts[c.note_id] || 0) + 1; });
+        setCommentCounts(counts);
+      })
+      .catch(() => {});
+  }, [notes]);
 
   // 날짜 목록 (created_at에서 YYYY-MM-DD 추출)
   const availableDates = useMemo(() => {
@@ -449,7 +467,19 @@ export default function EducationLogsPage() {
                             </span>
                           )}
                         </div>
-                        {/* 슬롯4: 화살표 (고정 20px) */}
+                        {/* 슬롯4: 코멘트 뱃지 */}
+                        <div style={{ width: 36, textAlign: 'center', flexShrink: 0 }}>
+                          {(commentCounts[note.id] || 0) > 0 && (
+                            <span style={{
+                              padding: '2px 7px', borderRadius: 'var(--radius-pill)',
+                              background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
+                              fontSize: 11, fontWeight: 700,
+                            }}>
+                              💬{commentCounts[note.id]}
+                            </span>
+                          )}
+                        </div>
+                        {/* 슬롯5: 화살표 (고정 20px) */}
                         <div style={{ width: 20, textAlign: 'center', flexShrink: 0 }}>
                           <span style={{
                             fontSize: 14, color: 'var(--text-muted)',

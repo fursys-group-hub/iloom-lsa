@@ -129,6 +129,7 @@ export default function MyNotesPage() {
   const [commentInput, setCommentInput] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
   const commentEndRef = useRef<HTMLDivElement>(null);
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
   const fetchComments = useCallback(async (noteId: string) => {
     try {
@@ -220,6 +221,21 @@ export default function MyNotesPage() {
   }, [studentId]);
 
   useEffect(() => { fetchNotes(); }, [fetchNotes]);
+
+  // 노트 목록이 바뀌면 코멘트 수 조회
+  useEffect(() => {
+    if (notes.length === 0) return;
+    const ids = notes.map(n => n.id).join(',');
+    fetch(`/api/note-comments?note_ids=${ids}`)
+      .then(r => r.json())
+      .then((data: NoteComment[]) => {
+        if (!Array.isArray(data)) return;
+        const counts: Record<string, number> = {};
+        data.forEach(c => { counts[c.note_id] = (counts[c.note_id] || 0) + 1; });
+        setCommentCounts(counts);
+      })
+      .catch(() => {});
+  }, [notes]);
 
   // 노트 펼칠 때 코멘트 불러오기
   useEffect(() => {
@@ -678,6 +694,19 @@ export default function MyNotesPage() {
                       )}
                     </div>
                   )}
+                  {/* 코멘트 뱃지 */}
+                  {(commentCounts[note.id] || 0) > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                        background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
+                        fontSize: 11, fontWeight: 700,
+                        display: 'flex', alignItems: 'center', gap: 3,
+                      }}>
+                        💬 {commentCounts[note.id]}
+                      </span>
+                    </div>
+                  )}
                 </button>
               );
             })}
@@ -756,51 +785,46 @@ export default function MyNotesPage() {
                 )}
                 <BlockRenderer content={note.content} contentType={note.content_type} searchQuery={searchQuery} />
 
-                {/* 코멘트 영역 */}
+                {/* 코멘트 영역 — 관리자 코멘트가 있을 때만 표시 */}
+                {comments.length > 0 && (
                 <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                     <span style={{ fontSize: 14 }}>💬</span>
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
-                      코멘트 {comments.length > 0 ? `(${comments.length})` : ''}
+                      코멘트 ({comments.length})
                     </span>
                   </div>
 
                   {/* 코멘트 목록 */}
-                  {comments.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
-                      {comments.map(c => (
-                        <div
-                          key={c.id}
-                          style={{
-                            display: 'flex', flexDirection: 'column',
-                            alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start',
-                          }}
-                        >
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                            <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
-                            <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                          <div style={{
-                            maxWidth: '80%', padding: '10px 14px',
-                            borderRadius: c.author_role === 'student' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                            background: c.author_role === 'student' ? 'var(--blue)' : 'var(--bg-elevated)',
-                            color: c.author_role === 'student' ? '#fff' : 'var(--text-primary)',
-                            fontSize: 14, lineHeight: 1.5,
-                            whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                          }}>
-                            {c.content}
-                          </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
+                    {comments.map(c => (
+                      <div
+                        key={c.id}
+                        style={{
+                          display: 'flex', flexDirection: 'column',
+                          alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start',
+                        }}
+                      >
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                          <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                      ))}
-                      <div ref={commentEndRef} />
-                    </div>
-                  ) : (
-                    <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
-                      아직 코멘트가 없어요
-                    </p>
-                  )}
+                        <div style={{
+                          maxWidth: '80%', padding: '10px 14px',
+                          borderRadius: c.author_role === 'student' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                          background: c.author_role === 'student' ? 'var(--blue)' : 'var(--bg-elevated)',
+                          color: c.author_role === 'student' ? '#fff' : 'var(--text-primary)',
+                          fontSize: 14, lineHeight: 1.5,
+                          whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                        }}>
+                          {c.content}
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={commentEndRef} />
+                  </div>
 
-                  {/* 입력란 */}
+                  {/* 답글 입력란 */}
                   <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
                     <textarea
                       value={commentInput}
@@ -841,6 +865,7 @@ export default function MyNotesPage() {
                     </button>
                   </div>
                 </div>
+                )}
               </div>
             );
           })()}
