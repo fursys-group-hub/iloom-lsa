@@ -144,3 +144,13 @@ CREATE TABLE final_evaluations (
   updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(student_id, manager_id)
 );
+
+-- 교육일지 코멘트 (관리자↔교육생 대화)
+CREATE TABLE note_comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  note_id UUID NOT NULL REFERENCES student_notes(id) ON DELETE CASCADE,
+  author_role TEXT NOT NULL CHECK (author_role IN ('admin', 'student')),
+  author_name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);

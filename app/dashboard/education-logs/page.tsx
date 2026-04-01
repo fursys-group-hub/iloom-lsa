@@ -1,6 +1,15 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+
+interface NoteComment {
+  id: string;
+  note_id: string;
+  author_role: 'admin' | 'student';
+  author_name: string;
+  content: string;
+  created_at: string;
+}
 
 interface StudentNote {
   id: string;
@@ -52,6 +61,62 @@ export default function EducationLogsPage() {
   const [filterStudentId, setFilterStudentId] = useState('');
   const [filterType, setFilterType] = useState<'' | 'best' | 'incomplete'>('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
+  const [comments, setComments] = useState<NoteComment[]>([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [sendingComment, setSendingComment] = useState(false);
+  const commentEndRef = useRef<HTMLDivElement>(null);
+
+  // 코멘트 불러오기 (펼친 노트)
+  const fetchComments = useCallback(async (noteId: string) => {
+    try {
+      const res = await fetch(`/api/note-comments?note_id=${noteId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) setComments(data);
+    } catch { /* silent */ }
+  }, []);
+
+  // 코멘트 보내기
+  const sendComment = useCallback(async (noteId: string) => {
+    if (!commentInput.trim() || sendingComment) return;
+    setSendingComment(true);
+    try {
+      const res = await fetch('/api/note-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note_id: noteId,
+          author_role: 'admin',
+          author_name: '관리자',
+          content: commentInput.trim(),
+        }),
+      });
+      if (res.ok) {
+        setCommentInput('');
+        await fetchComments(noteId);
+        setTimeout(() => commentEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    } catch { /* silent */ }
+    setSendingComment(false);
+  }, [commentInput, sendingComment, fetchComments]);
+
+  // 코멘트 삭제
+  const deleteComment = useCallback(async (commentId: string, noteId: string) => {
+    if (!confirm('이 코멘트를 삭제할까요?')) return;
+    try {
+      await fetch(`/api/note-comments?id=${commentId}`, { method: 'DELETE' });
+      await fetchComments(noteId);
+    } catch { /* silent */ }
+  }, [fetchComments]);
+
+  // 노트 펼칠 때 코멘트 불러오기
+  useEffect(() => {
+    if (expandedNoteId) {
+      fetchComments(expandedNoteId);
+      setCommentInput('');
+    } else {
+      setComments([]);
+    }
+  }, [expandedNoteId, fetchComments]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -414,6 +479,117 @@ export default function EducationLogsPage() {
                         <NoteContentRenderer content={note.content} contentType={note.content_type} />
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'right', marginTop: 12 }}>
                           작성: {new Date(note.created_at).toLocaleString('ko-KR')}
+                        </div>
+
+                        {/* 코멘트 영역 */}
+                        <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                            <span style={{ fontSize: 14 }}>💬</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                              코멘트 {comments.length > 0 ? `(${comments.length})` : ''}
+                            </span>
+                          </div>
+
+                          {/* 코멘트 목록 */}
+                          {comments.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
+                              {comments.map(c => (
+                                <div
+                                  key={c.id}
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: c.author_role === 'admin' ? 'flex-end' : 'flex-start',
+                                  }}
+                                >
+                                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                                    <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                                    <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                  </div>
+                                  <div
+                                    style={{
+                                      maxWidth: '80%',
+                                      padding: '10px 14px',
+                                      borderRadius: c.author_role === 'admin' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                      background: c.author_role === 'admin' ? 'var(--blue)' : 'var(--bg-elevated)',
+                                      color: c.author_role === 'admin' ? '#fff' : 'var(--text-primary)',
+                                      fontSize: 14, lineHeight: 1.5,
+                                      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                                      position: 'relative',
+                                    }}
+                                    onMouseEnter={e => {
+                                      const del = e.currentTarget.querySelector('.del-btn') as HTMLElement;
+                                      if (del) del.style.opacity = '1';
+                                    }}
+                                    onMouseLeave={e => {
+                                      const del = e.currentTarget.querySelector('.del-btn') as HTMLElement;
+                                      if (del) del.style.opacity = '0';
+                                    }}
+                                  >
+                                    {c.content}
+                                    {c.author_role === 'admin' && (
+                                      <button
+                                        className="del-btn"
+                                        onClick={() => deleteComment(c.id, note.id)}
+                                        style={{
+                                          position: 'absolute', top: -6, right: -6,
+                                          width: 20, height: 20, borderRadius: '50%',
+                                          background: 'var(--red)', color: '#fff',
+                                          border: 'none', fontSize: 11, cursor: 'pointer',
+                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          opacity: 0, transition: 'opacity 0.15s ease',
+                                        }}
+                                      >
+                                        ×
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                              <div ref={commentEndRef} />
+                            </div>
+                          )}
+
+                          {/* 입력란 */}
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                            <textarea
+                              value={commentInput}
+                              onChange={e => setCommentInput(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  sendComment(note.id);
+                                }
+                              }}
+                              placeholder="코멘트를 남겨보세요... (Enter로 전송)"
+                              rows={1}
+                              style={{
+                                flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                                border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+                                color: 'var(--text-primary)', fontSize: 14, outline: 'none',
+                                resize: 'none', minHeight: 42, maxHeight: 120,
+                                fontFamily: 'inherit',
+                              }}
+                              onInput={e => {
+                                const t = e.currentTarget;
+                                t.style.height = 'auto';
+                                t.style.height = Math.min(t.scrollHeight, 120) + 'px';
+                              }}
+                            />
+                            <button
+                              onClick={() => sendComment(note.id)}
+                              disabled={!commentInput.trim() || sendingComment}
+                              style={{
+                                padding: '10px 18px', borderRadius: 'var(--radius-md)',
+                                border: 'none', background: commentInput.trim() ? 'var(--blue)' : 'var(--bg-hover)',
+                                color: commentInput.trim() ? '#fff' : 'var(--text-muted)',
+                                fontSize: 14, fontWeight: 600, cursor: commentInput.trim() ? 'pointer' : 'default',
+                                transition: 'all 0.15s ease', flexShrink: 0,
+                              }}
+                            >
+                              {sendingComment ? '...' : '전송'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}

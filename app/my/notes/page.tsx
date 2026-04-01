@@ -3,6 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 // ── 타입 ──
+interface NoteComment {
+  id: string;
+  note_id: string;
+  author_role: 'admin' | 'student';
+  author_name: string;
+  content: string;
+  created_at: string;
+}
+
 interface Note {
   id: string; title: string; content: string;
   content_type?: 'steps' | 'blocks' | 'text';
@@ -116,6 +125,41 @@ export default function MyNotesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [comments, setComments] = useState<NoteComment[]>([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [sendingComment, setSendingComment] = useState(false);
+  const commentEndRef = useRef<HTMLDivElement>(null);
+
+  const fetchComments = useCallback(async (noteId: string) => {
+    try {
+      const res = await fetch(`/api/note-comments?note_id=${noteId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) setComments(data);
+    } catch { /* silent */ }
+  }, []);
+
+  const sendStudentComment = useCallback(async (noteId: string) => {
+    if (!commentInput.trim() || sendingComment || !studentName) return;
+    setSendingComment(true);
+    try {
+      const res = await fetch('/api/note-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note_id: noteId,
+          author_role: 'student',
+          author_name: studentName,
+          content: commentInput.trim(),
+        }),
+      });
+      if (res.ok) {
+        setCommentInput('');
+        await fetchComments(noteId);
+        setTimeout(() => commentEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    } catch { /* silent */ }
+    setSendingComment(false);
+  }, [commentInput, sendingComment, studentName, fetchComments]);
 
   const DRAFT_KEY = 'iloom-note-draft-v2';
 
@@ -176,6 +220,16 @@ export default function MyNotesPage() {
   }, [studentId]);
 
   useEffect(() => { fetchNotes(); }, [fetchNotes]);
+
+  // 노트 펼칠 때 코멘트 불러오기
+  useEffect(() => {
+    if (expandedNoteId) {
+      fetchComments(expandedNoteId);
+      setCommentInput('');
+    } else {
+      setComments([]);
+    }
+  }, [expandedNoteId, fetchComments]);
 
   // 수정 모드 진입
   const startEdit = (note: Note) => {
@@ -701,6 +755,92 @@ export default function MyNotesPage() {
                   </div>
                 )}
                 <BlockRenderer content={note.content} contentType={note.content_type} searchQuery={searchQuery} />
+
+                {/* 코멘트 영역 */}
+                <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                    <span style={{ fontSize: 14 }}>💬</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+                      코멘트 {comments.length > 0 ? `(${comments.length})` : ''}
+                    </span>
+                  </div>
+
+                  {/* 코멘트 목록 */}
+                  {comments.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
+                      {comments.map(c => (
+                        <div
+                          key={c.id}
+                          style={{
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start',
+                          }}
+                        >
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                            <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                          <div style={{
+                            maxWidth: '80%', padding: '10px 14px',
+                            borderRadius: c.author_role === 'student' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                            background: c.author_role === 'student' ? 'var(--blue)' : 'var(--bg-elevated)',
+                            color: c.author_role === 'student' ? '#fff' : 'var(--text-primary)',
+                            fontSize: 14, lineHeight: 1.5,
+                            whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                          }}>
+                            {c.content}
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={commentEndRef} />
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
+                      아직 코멘트가 없어요
+                    </p>
+                  )}
+
+                  {/* 입력란 */}
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                    <textarea
+                      value={commentInput}
+                      onChange={e => setCommentInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendStudentComment(note.id);
+                        }
+                      }}
+                      placeholder="답글을 남겨보세요... (Enter로 전송)"
+                      rows={1}
+                      style={{
+                        flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border)', background: 'var(--bg-elevated)',
+                        color: 'var(--text-primary)', fontSize: 14, outline: 'none',
+                        resize: 'none', minHeight: 42, maxHeight: 120,
+                        fontFamily: 'inherit', boxSizing: 'border-box',
+                      }}
+                      onInput={e => {
+                        const t = e.currentTarget;
+                        t.style.height = 'auto';
+                        t.style.height = Math.min(t.scrollHeight, 120) + 'px';
+                      }}
+                    />
+                    <button
+                      onClick={() => sendStudentComment(note.id)}
+                      disabled={!commentInput.trim() || sendingComment}
+                      style={{
+                        padding: '10px 18px', borderRadius: 'var(--radius-md)',
+                        border: 'none', background: commentInput.trim() ? 'var(--blue)' : 'var(--bg-hover)',
+                        color: commentInput.trim() ? '#fff' : 'var(--text-muted)',
+                        fontSize: 14, fontWeight: 600, cursor: commentInput.trim() ? 'pointer' : 'default',
+                        transition: 'all 0.15s ease', flexShrink: 0,
+                      }}
+                    >
+                      {sendingComment ? '...' : '전송'}
+                    </button>
+                  </div>
+                </div>
               </div>
             );
           })()}
