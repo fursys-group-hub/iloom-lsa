@@ -22,6 +22,9 @@ interface StudentRow {
   phone: string | null;
   store_location: string | null;
   password: string | null;
+  is_dropped: boolean;
+  dropped_at: string | null;
+  drop_reason: string | null;
 }
 
 const emptyStudentForm = { name: '', department: '', company_email: '', email: '', phone: '', store_location: '', password: '0000' };
@@ -42,6 +45,9 @@ export default function SettingsPage() {
   const [studentForm, setStudentForm] = useState(emptyStudentForm);
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [savingStudent, setSavingStudent] = useState(false);
+  const [dropModal, setDropModal] = useState<{ student: StudentRow; show: boolean } | null>(null);
+  const [dropDate, setDropDate] = useState(new Date().toISOString().slice(0, 10));
+  const [dropReason, setDropReason] = useState('');
 
   // 기수 불러오기
   const fetchBatches = useCallback(async () => {
@@ -153,6 +159,55 @@ export default function SettingsPage() {
       });
       if (selectedBatchId) await fetchStudents(selectedBatchId);
     } catch { /* silent */ }
+  };
+
+  // 퇴사 처리
+  const handleDrop = async (student: StudentRow) => {
+    if (student.is_dropped) {
+      // 복구
+      const res = await fetch('/api/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: student.id, is_dropped: false }),
+      });
+      if (res.ok && selectedBatchId) await fetchStudents(selectedBatchId);
+    } else {
+      setDropReason('');
+      setDropDate(new Date().toISOString().slice(0, 10));
+      setDropModal({ student, show: true });
+    }
+  };
+
+  const confirmDrop = async () => {
+    if (!dropModal) return;
+    const res = await fetch('/api/students', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: dropModal.student.id,
+        is_dropped: true,
+        dropped_at: dropDate,
+        drop_reason: dropReason || null,
+      }),
+    });
+    if (res.ok) {
+      setDropModal(null);
+      if (selectedBatchId) await fetchStudents(selectedBatchId);
+    }
+  };
+
+  // 비밀번호 초기화
+  const handleResetPassword = async (student: StudentRow) => {
+    if (!confirm(`${student.name}님의 비밀번호를 '0000'으로 초기화할까요?`)) return;
+    const res = await fetch('/api/students', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: student.id, password: '0000' }),
+    });
+    if (res.ok) {
+      alert(`${student.name}님의 비밀번호가 '0000'으로 초기화되었어요.`);
+      if (selectedBatchId) await fetchStudents(selectedBatchId);
+    }
   };
 
   const selectedBatch = batches.find((b) => b.id === selectedBatchId);
@@ -375,9 +430,9 @@ export default function SettingsPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['이름', '비밀번호', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', ''].map((h) => (
+                    {['이름', '비밀번호', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', '관리'].map((h) => (
                       <th key={h} style={{
-                        padding: '12px 14px', textAlign: h === '' ? 'right' : 'left',
+                        padding: '12px 14px', textAlign: h === '관리' ? 'right' : 'left',
                         fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
                       }}>
                         {h}
@@ -389,7 +444,10 @@ export default function SettingsPage() {
                   {students.map((s) => (
                     <tr
                       key={s.id}
-                      style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease' }}
+                      style={{
+                        borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease',
+                        opacity: s.is_dropped ? 0.5 : 1,
+                      }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
@@ -397,13 +455,20 @@ export default function SettingsPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{
                             width: 32, height: 32, borderRadius: '50%',
-                            background: 'var(--blue-dim)', color: 'var(--blue-light)',
+                            background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)',
+                            color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue-light)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 13, fontWeight: 700, flexShrink: 0,
                           }}>
                             {s.name[0]}
                           </div>
-                          {s.name}
+                          <span style={{ textDecoration: s.is_dropped ? 'line-through' : 'none' }}>{s.name}</span>
+                          {s.is_dropped && (
+                            <span style={{
+                              padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
+                              background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                            }}>퇴사{s.dropped_at ? ` ${s.dropped_at.slice(5)}` : ''}</span>
+                          )}
                         </div>
                       </td>
                       <td style={{ ...tdStyle, fontFamily: 'monospace', letterSpacing: 2 }}>{s.password || '0000'}</td>
@@ -413,6 +478,27 @@ export default function SettingsPage() {
                       <td style={tdStyle}>{s.store_location || '-'}</td>
                       <td style={{ ...tdStyle, textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => handleResetPassword(s)}
+                            title="비밀번호 초기화"
+                            style={{ ...tinyBtnStyle, opacity: 0.5, fontSize: 13, padding: '4px 8px' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}
+                          >
+                            🔑
+                          </button>
+                          <button
+                            onClick={() => handleDrop(s)}
+                            style={{
+                              ...tinyBtnStyle,
+                              border: 'none',
+                              background: s.is_dropped ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.08)',
+                              color: s.is_dropped ? 'var(--green)' : 'var(--red)',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {s.is_dropped ? '복구' : '퇴사'}
+                          </button>
                           <button
                             onClick={() => {
                               setEditingStudentId(s.id);
@@ -449,6 +535,64 @@ export default function SettingsPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* 퇴사 처리 모달 */}
+      {dropModal?.show && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          onClick={() => setDropModal(null)}
+        >
+          <div
+            style={{
+              background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
+              padding: 32, width: 420, maxWidth: '90vw',
+              boxShadow: 'var(--shadow-lg)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+              퇴사 처리
+            </h3>
+            <p style={{ fontSize: 15, color: 'var(--text-second)', margin: '0 0 24px' }}>
+              <span style={{ fontWeight: 700, color: 'var(--red)' }}>{dropModal.student.name}</span>님을 퇴사 처리할까요?
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={{ ...labelStyle }}>퇴사일</label>
+                <input
+                  type="date"
+                  value={dropDate}
+                  onChange={e => setDropDate(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={{ ...labelStyle }}>사유 (선택)</label>
+                <input
+                  type="text"
+                  placeholder="예: 개인사유, 적응 어려움 등"
+                  value={dropReason}
+                  onChange={e => setDropReason(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 28 }}>
+              <button onClick={() => setDropModal(null)} style={smallBtnStyle}>취소</button>
+              <button
+                onClick={confirmDrop}
+                style={{ ...smallBtnStyle, background: 'var(--red)', color: '#fff', border: 'none' }}
+              >
+                퇴사 처리
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -306,8 +306,9 @@ export default function EducationLogsPage() {
                 const isExpanded = expandedNoteId === note.id;
                 const isSelfStudy = note.tags?.includes('자율학습');
                 const conf = (!isSelfStudy && note.confidence) ? confidenceMap[note.confidence] : null;
+                const isDropped = students.find(s => s.id === note.student_id)?.is_dropped || false;
                 return (
-                  <div key={note.id} style={{ ...card, padding: 0, overflow: 'hidden', ...(isSelfStudy ? { borderColor: 'rgba(191,90,242,0.3)' } : {}) }}>
+                  <div key={note.id} style={{ ...card, padding: 0, overflow: 'hidden', opacity: isDropped ? 0.4 : 1, ...(isSelfStudy ? { borderColor: 'rgba(191,90,242,0.3)' } : {}), ...(isDropped ? { borderColor: 'var(--border)' } : {}) }}>
                     {/* 헤더 */}
                     <div
                       onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}
@@ -331,9 +332,15 @@ export default function EducationLogsPage() {
                         </div>
                         <div style={{ minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: isDropped ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isDropped ? 'line-through' : 'none' }}>
                               {note.students?.name || '알 수 없음'}
                             </span>
+                            {isDropped && (
+                              <span style={{
+                                padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
+                                background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                              }}>퇴사</span>
+                            )}
                             {isSelfStudy && (
                               <span style={{
                                 padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,

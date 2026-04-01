@@ -155,6 +155,7 @@ export default function DashboardLayout({
           </div>
 
           {/* 외부 링크 */}
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: 8, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <a
             href="https://iloom-education-settlement-production.up.railway.app"
             target="_blank"
@@ -171,9 +172,6 @@ export default function DashboardLayout({
               transition: 'all 0.15s ease',
               background: 'transparent',
               color: 'var(--text-muted)',
-              borderTop: '1px solid var(--border)',
-              marginTop: 8,
-              paddingTop: 16,
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -182,6 +180,31 @@ export default function DashboardLayout({
             교육비용 정산 비서
             <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
           </a>
+          <a
+            href="https://iloom-saleschatbot.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 14,
+              fontWeight: 500,
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+              background: 'transparent',
+              color: 'var(--text-muted)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <span style={{ fontSize: 16 }}>💬</span>
+            영업지원 챗봇
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+          </a>
+          </div>
         </nav>
 
         {/* 하단 정보 */}
