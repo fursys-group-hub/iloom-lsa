@@ -195,6 +195,4 @@ body {
 
   /* 교육일지 노트 카드 간결화 */
   .note-subtitle { display: none !important; }
-  .score-text { display: none !important; }
-  .note-score-slot { width: auto !important; }
 }

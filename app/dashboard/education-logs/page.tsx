@@ -481,7 +481,7 @@ export default function EducationLogsPage() {
                               color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                               whiteSpace: 'nowrap',
                             }}>
-                              {note.best_learning ? '⭐' : ''}<span className="score-text"> {note.participation_score || 0}/3</span>
+                              {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
                             </span>
                           )}
                         </div>
