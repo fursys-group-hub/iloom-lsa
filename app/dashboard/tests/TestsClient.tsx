@@ -241,7 +241,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
               textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
             }}
           >
-            📥 Excel 다운로드
+            📥<span className="btn-label"> Excel 다운로드</span>
           </a>
           <button
             onClick={() => { handleSync('today'); }}
@@ -255,7 +255,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
               transition: 'all 0.15s ease',
             }}
           >
-            {syncing ? '⏳ 동기화 중...' : '🔄 오늘 시험 동기화'}
+            {syncing ? '⏳' : '🔄'}<span className="btn-label"> {syncing ? '동기화 중...' : '오늘 시험 동기화'}</span>
           </button>
           <button
             onClick={() => { handleSync('today', 'new_only'); }}
@@ -269,7 +269,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
               transition: 'all 0.15s ease',
             }}
           >
-            {syncing ? '⏳ 동기화 중...' : '➕ 새 응답만 추가'}
+            {syncing ? '⏳' : '➕'}<span className="btn-label"> {syncing ? '동기화 중...' : '새 응답만 추가'}</span>
           </button>
         </div>
       </div>

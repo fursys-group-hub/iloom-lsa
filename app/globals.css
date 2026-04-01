@@ -179,4 +179,13 @@ body {
   /* 모달 가로 제한 */
   [style*="width: 420px"],
   [style*="width: 480px"] { width: 92vw !important; }
+
+  /* 긴 버튼 → 이모지만 표시 */
+  .btn-label { display: none !important; }
+
+  /* 버튼/뱃지 줄바꿈 방지 */
+  button, a { white-space: nowrap; }
+
+  /* 버튼 패딩 축소 */
+  button, a[style*="padding"] { padding: 8px 12px !important; font-size: 13px !important; }
 }

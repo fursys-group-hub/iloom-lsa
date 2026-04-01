@@ -262,7 +262,7 @@ export default function AttendancePage() {
             transition: 'all 0.15s ease',
           }}
         >
-          📎 Excel 업로드
+          📎<span className="btn-label"> Excel 업로드</span>
         </button>
       </div>
 
