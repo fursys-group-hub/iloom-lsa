@@ -270,7 +270,7 @@ export default function DashboardLayout({
 
         {/* 콘텐츠 */}
         <main style={{ flex: 1, overflow: 'auto' }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>
+          <div className="content-wrapper" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>
             {children}
           </div>
         </main>
@@ -293,6 +293,9 @@ export default function DashboardLayout({
           }
           .mobile-overlay {
             display: block;
+          }
+          .content-wrapper {
+            padding: 16px 12px !important;
           }
         }
         @media (min-width: 769px) {

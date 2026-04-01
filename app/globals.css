@@ -158,7 +158,25 @@ body {
 }
 
 /* 모바일 반응형 */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   body { font-size: 14px; }
   .note-tag-desktop { display: none !important; }
+
+  /* 제목 크기 축소 */
+  h2 { font-size: 22px !important; }
+  h3 { font-size: 17px !important; }
+
+  /* 테이블 가로 스크롤 보장 */
+  table { font-size: 13px !important; min-width: 600px; }
+  th, td { padding: 8px 10px !important; }
+
+  /* 카드 내부 패딩 축소 */
+  [style*="padding: 24px"] { padding: 14px !important; }
+
+  /* 필터 버튼 줄 — 가로 스크롤 */
+  .filter-row { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
+
+  /* 모달 가로 제한 */
+  [style*="width: 420px"],
+  [style*="width: 480px"] { width: 92vw !important; }
 }

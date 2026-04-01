@@ -152,7 +152,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main style={{ flex: 1, overflow: 'auto' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
+          <div className="my-content-wrapper" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
             {children}
           </div>
         </main>
@@ -166,6 +166,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
           .my-main { margin-left: 0 !important; }
           .my-mobile-header { display: flex !important; }
           .mobile-overlay { display: block; }
+          .my-content-wrapper { padding: 16px 12px !important; }
         }
         @media (min-width: 769px) {
           .my-sidebar { transform: translateX(0) !important; }

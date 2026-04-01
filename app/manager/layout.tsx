@@ -119,7 +119,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
           <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>매장 교육 관리</span>
         </header>
         <main style={{ flex: 1, overflow: 'auto' }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>{children}</div>
+          <div className="mgr-content-wrapper" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>{children}</div>
         </main>
       </div>
 
@@ -129,6 +129,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
           .sidebar.sidebar-open { transform: translateX(0); }
           .main-area { margin-left: 0 !important; }
           .mobile-header { display: flex !important; }
+          .mgr-content-wrapper { padding: 16px 12px !important; }
         }
         @media (min-width: 769px) {
           .sidebar { transform: translateX(0) !important; }
