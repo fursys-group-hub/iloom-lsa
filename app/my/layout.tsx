@@ -94,6 +94,27 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          {/* 외부 링크 */}
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: 8, paddingTop: 8 }}>
+            <a
+              href="https://iloom-saleschatbot.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                fontSize: 14, fontWeight: 500, textDecoration: 'none',
+                transition: 'all 0.15s ease',
+                background: 'transparent', color: 'var(--text-muted)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <span style={{ fontSize: 16 }}>💬</span>
+              영업지원 챗봇
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+            </a>
+          </div>
         </nav>
 
         <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
