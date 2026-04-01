@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 
 const nav = [
   { href: '/my', label: '홈', icon: '🏠', exact: true },
+  { href: '/my/announcements', label: '공지사항', icon: '📢' },
   { href: '/my/attendance', label: '출결', icon: '📋' },
   { href: '/my/tests', label: '테스트', icon: '📝' },
   { href: '/my/notes', label: '교육일지', icon: '📓' },

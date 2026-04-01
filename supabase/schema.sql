@@ -145,6 +145,16 @@ CREATE TABLE final_evaluations (
   UNIQUE(student_id, manager_id)
 );
 
+-- 공지사항 (관리자 → 기수별)
+CREATE TABLE announcements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id UUID REFERENCES batches(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  priority TEXT CHECK (priority IN ('normal', 'important', 'urgent')) DEFAULT 'normal',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- 교육일지 코멘트 (관리자↔교육생 대화)
 CREATE TABLE note_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

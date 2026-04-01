@@ -6,6 +6,7 @@ import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 interface TestScore { id: string; test_date: string; subject: string; score: number; }
 interface TestResponse { id: string; session: string; question_id: string; is_correct: boolean; earned_score: number; max_score: number; user_answer: string; }
 interface Question { question_id: string; session: string; question_text: string; correct_answer: string; category: string; series: string; detail: string; explanation: string; }
+interface Announcement { id: string; title: string; content: string; priority: 'normal' | 'important' | 'urgent'; created_at: string; }
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
@@ -20,11 +21,41 @@ export default function MyPage() {
   const [responses, setResponses] = useState<TestResponse[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [batchId, setBatchId] = useState('');
+  const [announcePopup, setAnnouncePopup] = useState<Announcement[]>([]);
+  const [popupIndex, setPopupIndex] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
-    if (auth) { const p = JSON.parse(auth); setStudentId(p.studentId); setStudentName(p.name); }
+    if (auth) {
+      const p = JSON.parse(auth);
+      setStudentId(p.studentId);
+      setStudentName(p.name);
+      if (p.batchId) setBatchId(p.batchId);
+    }
   }, []);
+
+  // 로그인 시 새 공지 팝업
+  useEffect(() => {
+    if (!batchId) return;
+    const lastSeen = localStorage.getItem('iloom-announce-seen') || '';
+    fetch(`/api/announcements?batch_id=${batchId}`)
+      .then(r => r.json())
+      .then((data: Announcement[]) => {
+        if (!Array.isArray(data) || data.length === 0) return;
+        // 마지막으로 본 시간 이후의 공지만
+        const unseen = lastSeen
+          ? data.filter(a => new Date(a.created_at) > new Date(lastSeen))
+          : data.slice(0, 3); // 처음이면 최신 3개까지
+        if (unseen.length > 0) {
+          setAnnouncePopup(unseen);
+          setPopupIndex(0);
+          setShowPopup(true);
+        }
+      })
+      .catch(() => {});
+  }, [batchId]);
 
   const fetchData = useCallback(async () => {
     if (!studentId) return;
@@ -102,8 +133,109 @@ export default function MyPage() {
 
   if (loading) return <div style={{ padding: 48, textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</div>;
 
+  const closePopup = () => {
+    // 마지막으로 본 시간 저장
+    if (announcePopup.length > 0) {
+      localStorage.setItem('iloom-announce-seen', announcePopup[0].created_at);
+    }
+    setShowPopup(false);
+  };
+
+  const PRIORITY_STYLE: Record<string, { color: string; bg: string; icon: string; label: string }> = {
+    normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢', label: '공지' },
+    important: { color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '⚠️', label: '중요' },
+    urgent: { color: 'var(--red)', bg: 'rgba(255,69,58,0.12)', icon: '🚨', label: '긴급' },
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+      {/* 공지사항 팝업 */}
+      {showPopup && announcePopup.length > 0 && (() => {
+        const a = announcePopup[popupIndex];
+        const ps = PRIORITY_STYLE[a.priority] || PRIORITY_STYLE.normal;
+        return (
+          <div
+            style={{
+              position: 'fixed', inset: 0, zIndex: 1000,
+              background: 'rgba(0,0,0,0.7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            onClick={closePopup}
+          >
+            <div
+              style={{
+                background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
+                padding: '32px', width: 480, maxWidth: '90vw', maxHeight: '80vh',
+                boxShadow: 'var(--shadow-lg)', overflowY: 'auto',
+                borderTop: `4px solid ${ps.color}`,
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <span style={{
+                  padding: '3px 10px', borderRadius: 'var(--radius-pill)',
+                  background: ps.bg, color: ps.color,
+                  fontSize: 12, fontWeight: 700,
+                }}>
+                  {ps.icon} {ps.label}
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  {new Date(a.created_at).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </span>
+                {announcePopup.length > 1 && (
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                    {popupIndex + 1} / {announcePopup.length}
+                  </span>
+                )}
+              </div>
+              <h3 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+                {a.title}
+              </h3>
+              <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: '0 0 24px', whiteSpace: 'pre-wrap' }}>
+                {a.content}
+              </p>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                {popupIndex > 0 && (
+                  <button
+                    onClick={() => setPopupIndex(popupIndex - 1)}
+                    style={{
+                      padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border)', background: 'transparent',
+                      color: 'var(--text-tertiary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    이전
+                  </button>
+                )}
+                {popupIndex < announcePopup.length - 1 ? (
+                  <button
+                    onClick={() => setPopupIndex(popupIndex + 1)}
+                    style={{
+                      padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                      border: 'none', background: 'var(--blue)', color: '#fff',
+                      fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    다음 공지
+                  </button>
+                ) : (
+                  <button
+                    onClick={closePopup}
+                    style={{
+                      padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                      border: 'none', background: 'var(--blue)', color: '#fff',
+                      fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    확인
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 프로필 */}
       <div style={card}>

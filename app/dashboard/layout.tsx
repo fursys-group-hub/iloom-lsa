@@ -12,6 +12,7 @@ const nav = [
   { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
   { href: '/dashboard/practice', label: '실습', icon: '🔧', disabled: true },
   { href: '/dashboard/reports', label: '리포트', icon: '📈' },
+  { href: '/dashboard/announcements', label: '공지사항', icon: '📢' },
   { href: '/dashboard/overview', label: '심화교육', icon: '🏪' },
   { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
 ];

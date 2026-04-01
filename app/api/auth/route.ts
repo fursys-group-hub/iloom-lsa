@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   // 학생 체크
   const { data: student } = await supabase
     .from('students')
-    .select('id, name, password, is_dropped')
+    .select('id, name, password, is_dropped, batch_id')
     .eq('name', name.trim())
     .single();
 
@@ -53,5 +53,5 @@ export async function POST(req: NextRequest) {
     return Response.json({ message: '퇴사 처리된 계정이에요. 관리자에게 문의해주세요.' }, { status: 403 });
   }
 
-  return Response.json({ role: 'student', name: student.name, studentId: student.id });
+  return Response.json({ role: 'student', name: student.name, studentId: student.id, batchId: student.batch_id });
 }
