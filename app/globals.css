@@ -188,4 +188,8 @@ body {
 
   /* 버튼 패딩 축소 */
   button, a[style*="padding"] { padding: 8px 12px !important; font-size: 13px !important; }
+
+  /* 날짜 선택: 버튼 → 드롭다운 */
+  .date-buttons-desktop { display: none !important; }
+  .date-select-mobile { display: block !important; }
 }

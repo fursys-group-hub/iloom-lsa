@@ -229,7 +229,8 @@ export default function EducationLogsPage() {
         <>
           {/* 날짜 선택 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {/* 데스크탑: 버튼 */}
+            <div className="date-buttons-desktop" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {availableDates.slice(0, 14).map(date => (
                 <button
                   key={date}
@@ -247,6 +248,23 @@ export default function EducationLogsPage() {
                 </button>
               ))}
             </div>
+            {/* 모바일: 드롭다운 */}
+            <select
+              className="date-select-mobile"
+              value={selectedDate}
+              onChange={e => { setSelectedDate(e.target.value); setExpandedNoteId(null); }}
+              style={{
+                display: 'none',
+                padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)', background: 'var(--bg-surface)',
+                color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
+                outline: 'none', flex: 1,
+              }}
+            >
+              {availableDates.map(date => (
+                <option key={date} value={date}>{date.slice(5)}</option>
+              ))}
+            </select>
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               {/* 필터 버튼 */}
