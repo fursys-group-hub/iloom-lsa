@@ -16,6 +16,9 @@ export interface Student {
   company_email: string | null;
   phone: string | null;
   store_location: string | null;
+  is_dropped: boolean;
+  dropped_at: string | null;
+  drop_reason: string | null;
 }
 
 export interface TestScore {

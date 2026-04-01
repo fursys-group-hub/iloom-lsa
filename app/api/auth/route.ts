@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   // 학생 체크
   const { data: student } = await supabase
     .from('students')
-    .select('id, name, password')
+    .select('id, name, password, is_dropped')
     .eq('name', name.trim())
     .single();
 
@@ -47,6 +47,10 @@ export async function POST(req: NextRequest) {
 
   if (student.password !== password) {
     return Response.json({ message: '비밀번호가 올바르지 않아요.' }, { status: 401 });
+  }
+
+  if (student.is_dropped) {
+    return Response.json({ message: '퇴사 처리된 계정이에요. 관리자에게 문의해주세요.' }, { status: 403 });
   }
 
   return Response.json({ role: 'student', name: student.name, studentId: student.id });

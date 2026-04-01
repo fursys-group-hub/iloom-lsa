@@ -21,6 +21,7 @@ interface StudentBasic {
   id: string;
   name: string;
   department: string | null;
+  is_dropped: boolean;
 }
 
 const confidenceMap: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
@@ -88,13 +89,16 @@ export default function EducationLogsPage() {
     return filtered;
   }, [notes, selectedDate, filterStudentId, filterType]);
 
-  // 제출/미제출 현황 (날짜 기준)
+  // 재학 중인 학생만 (퇴사자 제외)
+  const activeStudents = useMemo(() => students.filter(s => !s.is_dropped), [students]);
+
+  // 제출/미제출 현황 (날짜 기준, 퇴사자 제외)
   const submissionStatus = useMemo(() => {
     const submittedIds = new Set(notes.filter(n => toKSTDate(n.created_at) === selectedDate).map(n => n.student_id));
-    const submitted = students.filter(s => submittedIds.has(s.id));
-    const notSubmitted = students.filter(s => !submittedIds.has(s.id));
+    const submitted = activeStudents.filter(s => submittedIds.has(s.id));
+    const notSubmitted = activeStudents.filter(s => !submittedIds.has(s.id));
     return { submitted, notSubmitted };
-  }, [notes, selectedDate, students]);
+  }, [notes, selectedDate, activeStudents]);
 
   // 이해도 요약
   const confidenceSummary = useMemo(() => {
@@ -193,9 +197,16 @@ export default function EducationLogsPage() {
                 }}
               >
                 <option value="">전체 교육생</option>
-                {students.map(s => (
+                {activeStudents.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
+                {students.filter(s => s.is_dropped).length > 0 && (
+                  <optgroup label="── 퇴사자 ──">
+                    {students.filter(s => s.is_dropped).map(s => (
+                      <option key={s.id} value={s.id}>{s.name} (퇴사)</option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
             </div>
           </div>

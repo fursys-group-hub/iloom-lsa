@@ -162,8 +162,20 @@ export default function StudentDetailClient({
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--blue-dim)', color: 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 700 }}>{student.name[0]}</div>
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{student.name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{student.name}</h2>
+                {student.is_dropped && (
+                  <span style={{
+                    padding: '4px 12px', borderRadius: 'var(--radius-pill)',
+                    fontSize: 13, fontWeight: 700,
+                    background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                  }}>퇴사 ({student.dropped_at})</span>
+                )}
+              </div>
               {student.store_location && <p style={{ fontSize: 15, color: 'var(--text-muted)', marginTop: 2 }}>{student.store_location}</p>}
+              {student.is_dropped && student.drop_reason && (
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>사유: {student.drop_reason}</p>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>

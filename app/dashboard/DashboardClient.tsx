@@ -43,8 +43,9 @@ export default function DashboardClient({ batches, students: allStudents, scores
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
 
-  // 선택된 기수의 학생만 필터
-  const students = useMemo(() => allStudents.filter(s => s.batch_id === selectedBatchId), [allStudents, selectedBatchId]);
+  // 선택된 기수의 학생만 필터 (퇴사자 제외)
+  const students = useMemo(() => allStudents.filter(s => s.batch_id === selectedBatchId && !s.is_dropped), [allStudents, selectedBatchId]);
+  const droppedStudents = useMemo(() => allStudents.filter(s => s.batch_id === selectedBatchId && s.is_dropped), [allStudents, selectedBatchId]);
   const studentIds = useMemo(() => new Set(students.map(s => s.id)), [students]);
   const scores = useMemo(() => allScores.filter(s => studentIds.has(s.student_id)), [allScores, studentIds]);
   const attendance = useMemo(() => allAttendance.filter(a => studentIds.has(a.student_id)), [allAttendance, studentIds]);
@@ -165,11 +166,14 @@ export default function DashboardClient({ batches, students: allStudents, scores
       )}
 
       {/* 요약 카드 */}
-      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-        <StatCard icon="👥" label="전체 인원" value={todayAttendance.total} unit="명" />
+      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: droppedStudents.length > 0 ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: 16 }}>
+        <StatCard icon="👥" label="교육 인원" value={todayAttendance.total} unit="명" />
         <StatCard icon="✅" label="출석" value={todayAttendance.present} unit="명" accent="var(--green)" />
         <StatCard icon="⏰" label="지각" value={todayAttendance.late} unit="명" accent="var(--orange)" />
         <StatCard icon="❌" label="결석" value={todayAttendance.absent} unit="명" accent="var(--red)" />
+        {droppedStudents.length > 0 && (
+          <StatCard icon="🚪" label="퇴사" value={droppedStudents.length} unit="명" accent="var(--text-muted)" />
+        )}
       </div>
 
       {/* 2컬럼 */}

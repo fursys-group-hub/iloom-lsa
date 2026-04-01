@@ -50,16 +50,23 @@ export async function PATCH(req: NextRequest) {
     const supabase = createServerClient();
     const body = await req.json();
 
+    const updateData: Record<string, unknown> = {};
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.department !== undefined) updateData.department = body.department || null;
+    if (body.company_email !== undefined) updateData.company_email = body.company_email || null;
+    if (body.email !== undefined) updateData.email = body.email || null;
+    if (body.phone !== undefined) updateData.phone = body.phone || null;
+    if (body.store_location !== undefined) updateData.store_location = body.store_location || null;
+    if (body.password !== undefined) updateData.password = body.password;
+    if (body.is_dropped !== undefined) {
+      updateData.is_dropped = body.is_dropped;
+      updateData.dropped_at = body.is_dropped ? (body.dropped_at || new Date().toISOString().slice(0, 10)) : null;
+      updateData.drop_reason = body.is_dropped ? (body.drop_reason || null) : null;
+    }
+
     const { error } = await supabase
       .from('students')
-      .update({
-        name: body.name,
-        department: body.department || null,
-        company_email: body.company_email || null,
-        email: body.email || null,
-        phone: body.phone || null,
-        store_location: body.store_location || null,
-      })
+      .update(updateData)
       .eq('id', body.id);
 
     if (error) throw error;

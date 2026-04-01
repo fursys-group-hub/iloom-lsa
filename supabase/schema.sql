@@ -17,6 +17,9 @@ CREATE TABLE students (
   batch_id UUID REFERENCES batches(id),
   name TEXT NOT NULL,
   department TEXT,
+  is_dropped BOOLEAN DEFAULT FALSE,
+  dropped_at DATE,
+  drop_reason TEXT,
   UNIQUE(batch_id, name)
 );
 
