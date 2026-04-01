@@ -449,7 +449,7 @@ export default function EducationLogsPage() {
                               }}>자율학습</span>
                             )}
                           </div>
-                          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p className="note-subtitle" style={{ fontSize: 13, color: 'var(--text-muted)', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {note.title}
                           </p>
                         </div>
@@ -473,7 +473,7 @@ export default function EducationLogsPage() {
                           {!isSelfStudy && conf && <span title={conf.label} style={{ fontSize: 15 }}>{conf.emoji}</span>}
                         </div>
                         {/* 슬롯3: 점수 + 우수 (고정 66px) — 자율학습이면 빈칸 */}
-                        <div style={{ width: 66, textAlign: 'center', flexShrink: 0 }}>
+                        <div className="note-score-slot" style={{ width: 66, textAlign: 'center', flexShrink: 0 }}>
                           {!isSelfStudy && (
                             <span style={{
                               padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
@@ -481,7 +481,7 @@ export default function EducationLogsPage() {
                               color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                               whiteSpace: 'nowrap',
                             }}>
-                              {note.best_learning ? '⭐' : ''} {note.participation_score || 0}/3
+                              {note.best_learning ? '⭐' : ''}<span className="score-text"> {note.participation_score || 0}/3</span>
                             </span>
                           )}
                         </div>
