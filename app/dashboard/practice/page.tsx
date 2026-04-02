@@ -287,7 +287,7 @@ export default function DashboardPracticePage() {
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>📊 제출 현황</div>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--blue)' }}>{submissionStatus.submitted.length}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>제출</div>
                   </div>
                   <div>
@@ -342,7 +342,7 @@ export default function DashboardPracticePage() {
                       style={{
                         width: '100%', textAlign: 'left', cursor: 'pointer',
                         padding: '16px 20px', borderRadius: isExpanded ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
-                        border: isExpanded ? '2px solid var(--green)' : '1px solid rgba(48,209,88,0.3)',
+                        border: isExpanded ? '2px solid var(--blue)' : '1px solid rgba(10,132,255,0.3)',
                         borderBottom: isExpanded ? '1px solid var(--border)' : undefined,
                         background: isExpanded ? 'rgba(48,209,88,0.08)' : 'var(--bg-surface)',
                         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
@@ -350,7 +350,7 @@ export default function DashboardPracticePage() {
                       {/* 아바타 + 이름 */}
                       <div style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                        background: 'rgba(48,209,88,0.15)', color: 'var(--green)',
+                        background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 13, fontWeight: 700,
                       }}>
@@ -361,7 +361,7 @@ export default function DashboardPracticePage() {
                       </span>
                       {/* 실적 뱃지 */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, flexWrap: 'wrap' }}>
-                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(48,209,88,0.12)', color: 'var(--green)', fontWeight: 600 }}>🗣️ 상담 {statsData.stats_consult}</span>}
+                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>🗣️ 상담 {statsData.stats_consult}</span>}
                         {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.12)', color: 'var(--blue-light)', fontWeight: 600 }}>📋 견적 {statsData.stats_estimate}</span>}
                         {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontWeight: 600 }}>✅ 수주 {statsData.stats_order}</span>}
                         {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.12)', color: 'var(--purple)', fontWeight: 600 }}>💰 {statsData.stats_amount.toLocaleString()}원</span>}
@@ -378,7 +378,7 @@ export default function DashboardPracticePage() {
                                 {['👥', '💎', '📈', '📝'].map((icon, i) => (
                                   <span key={i} style={{
                                     fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)',
-                                    background: filled[i] ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)',
+                                    background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
                                     opacity: filled[i] ? 1 : 0.3,
                                   }}>{icon}</span>
                                 ))}
@@ -401,7 +401,7 @@ export default function DashboardPracticePage() {
                     {/* 펼친 상세 */}
                     {isExpanded && (
                       <div style={{
-                        padding: 20, border: '2px solid var(--green)', borderTop: 'none',
+                        padding: 20, border: '2px solid var(--blue)', borderTop: 'none',
                         borderRadius: '0 0 var(--radius-md) var(--radius-md)',
                         background: 'rgba(48,209,88,0.03)',
                       }}>
@@ -504,7 +504,7 @@ export default function DashboardPracticePage() {
                                   <div style={{
                                     maxWidth: '80%', padding: '10px 14px',
                                     borderRadius: c.author_role === 'admin' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                                    background: c.author_role === 'admin' ? 'var(--green)' : 'var(--bg-elevated)',
+                                    background: c.author_role === 'admin' ? 'var(--blue)' : 'var(--bg-elevated)',
                                     color: c.author_role === 'admin' ? '#fff' : 'var(--text-primary)',
                                     fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                                   }}>{c.content}</div>
@@ -534,7 +534,7 @@ export default function DashboardPracticePage() {
                               disabled={!commentInput.trim() || sendingComment}
                               style={{
                                 padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
-                                background: commentInput.trim() ? 'var(--green)' : 'var(--bg-hover)',
+                                background: commentInput.trim() ? 'var(--blue)' : 'var(--bg-hover)',
                                 color: commentInput.trim() ? '#fff' : 'var(--text-muted)',
                                 fontSize: 14, fontWeight: 600, cursor: commentInput.trim() ? 'pointer' : 'default', flexShrink: 0,
                               }}>

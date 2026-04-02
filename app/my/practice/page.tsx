@@ -324,9 +324,9 @@ export default function MyPracticePage() {
               }}
               style={{
                 padding: '10px 20px', borderRadius: 'var(--radius-md)',
-                border: showForm ? 'none' : '1px solid rgba(48,209,88,0.4)',
+                border: showForm ? 'none' : '1px solid rgba(10,132,255,0.4)',
                 background: showForm ? 'var(--red)' : 'rgba(48,209,88,0.08)',
-                color: showForm ? '#fff' : 'var(--green)',
+                color: showForm ? '#fff' : 'var(--blue)',
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
@@ -351,7 +351,7 @@ export default function MyPracticePage() {
 
       {/* ── 작성 폼 ── */}
       {showForm && (
-        <div style={{ ...card, border: '1px solid rgba(48,209,88,0.4)', background: 'rgba(48,209,88,0.03)' }}>
+        <div style={{ ...card, border: '1px solid rgba(10,132,255,0.4)', background: 'rgba(48,209,88,0.03)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {editingNoteId ? '✏️ 실습일지 수정' : '✨ 오늘의 실습일지'}
@@ -364,7 +364,7 @@ export default function MyPracticePage() {
               padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: 20,
               background: 'rgba(48,209,88,0.08)', border: '1px solid rgba(48,209,88,0.2)',
             }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--green)', marginBottom: 6 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>
                 🐣 신입 LSA님, 매장은 여러분의 가장 큰 교실입니다!
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6 }}>
@@ -442,7 +442,7 @@ export default function MyPracticePage() {
                     {val.trim() && (
                       <span style={{
                         padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                        background: 'var(--green)', color: '#fff', fontSize: 12, fontWeight: 600,
+                        background: 'var(--blue)', color: '#fff', fontSize: 12, fontWeight: 600,
                       }}>✓ 작성됨</span>
                     )}
                   </div>
@@ -515,7 +515,7 @@ export default function MyPracticePage() {
             <button onClick={handleSave} disabled={saving || !hasContent}
               style={{
                 padding: '14px', borderRadius: 'var(--radius-md)', border: 'none',
-                background: hasContent ? 'var(--green)' : 'var(--bg-elevated)',
+                background: hasContent ? 'var(--blue)' : 'var(--bg-elevated)',
                 color: hasContent ? '#fff' : 'var(--text-muted)',
                 fontSize: 16, fontWeight: 600,
                 cursor: hasContent ? 'pointer' : 'not-allowed',
@@ -557,7 +557,7 @@ export default function MyPracticePage() {
                   onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
                   style={{
                     padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--green)' : '1px solid rgba(48,209,88,0.4)',
+                    border: isSelected ? '2px solid var(--blue)' : '1px solid rgba(10,132,255,0.4)',
                     background: isSelected ? 'rgba(48,209,88,0.1)' : 'rgba(48,209,88,0.04)',
                     cursor: 'pointer', transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', gap: 10,
@@ -567,12 +567,12 @@ export default function MyPracticePage() {
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{month}/{day} ({dayName})</span>
                     <span style={{
                       padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
-                      background: 'rgba(48,209,88,0.15)', color: 'var(--green)',
+                      background: 'var(--blue-dim)', color: 'var(--blue)',
                     }}>🏪 실습일지</span>
                   </div>
                   {/* 실적 요약 */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {statsData.stats_consult > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(48,209,88,0.12)', color: 'var(--green)' }}>🗣️ {statsData.stats_consult}</span>}
+                    {statsData.stats_consult > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>🗣️ {statsData.stats_consult}</span>}
                     {statsData.stats_estimate > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.12)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
                     {statsData.stats_order > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
                     {statsData.stats_amount > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.12)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
@@ -594,7 +594,7 @@ export default function MyPracticePage() {
                           {['👥', '💎', '📈', '📝'].map((icon, i) => (
                             <span key={i} style={{
                               fontSize: 14, padding: '2px 6px', borderRadius: 'var(--radius-pill)',
-                              background: filled[i] ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)',
+                              background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
                               opacity: filled[i] ? 1 : 0.3,
                             }}>{icon}</span>
                           ))}
@@ -629,7 +629,7 @@ export default function MyPracticePage() {
                       <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{note.title}</h3>
                       <span style={{
                         padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                        background: 'rgba(48,209,88,0.15)', color: 'var(--green)',
+                        background: 'var(--blue-dim)', color: 'var(--blue)',
                       }}>🏪 실습일지</span>
                     </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
@@ -735,7 +735,7 @@ export default function MyPracticePage() {
                         disabled={!commentInput.trim() || sendingComment}
                         style={{
                           padding: '10px 18px', borderRadius: 'var(--radius-md)', border: 'none',
-                          background: commentInput.trim() ? 'var(--green)' : 'var(--bg-hover)',
+                          background: commentInput.trim() ? 'var(--blue)' : 'var(--bg-hover)',
                           color: commentInput.trim() ? '#fff' : 'var(--text-muted)',
                           fontSize: 14, fontWeight: 600, cursor: commentInput.trim() ? 'pointer' : 'default', flexShrink: 0,
                         }}>
@@ -793,7 +793,7 @@ function PracticeStepsRenderer({ content }: { content: string }) {
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>}
-                  <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>
+                  <span style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600 }}>✓ 완료</span>
                 </div>
               </div>
               <div style={{ padding: '12px 16px', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
