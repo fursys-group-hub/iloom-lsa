@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     id: q.id as string,
     student_id: q.student_id as string,
     title: q.title as string,
-    status: q.status as 'open' | 'answered' | 'resolved',
+    status: q.status as 'open' | 'answered',
     created_at: q.created_at as string,
     updated_at: q.updated_at as string,
     student_name: ((q.students as Record<string, unknown>)?.name as string) || '알 수 없음',
