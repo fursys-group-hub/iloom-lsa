@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 
 /* ── 타입 ── */
-interface StudentItem { id: string; name: string; store_location: string | null; }
+interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
 interface EvalData {
   student_id: string; week_number: number; rp_area: string | null;
   status: string; strength_tags: string[]; improvement_tags: string[]; comment: string | null;
@@ -106,8 +106,10 @@ export default function OverviewPage() {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  const stores = [...new Set(students.map((s) => s.store_location).filter(Boolean))] as string[];
-  const filteredStudents = filterStore ? students.filter((s) => s.store_location === filterStore) : students;
+  // 퇴사자 제외
+  const activeStudents = students.filter(s => !s.is_dropped);
+  const stores = [...new Set(activeStudents.map((s) => s.store_location).filter(Boolean))] as string[];
+  const filteredStudents = filterStore ? activeStudents.filter((s) => s.store_location === filterStore) : activeStudents;
   const selectedStudent = students.find((s) => s.id === selectedStudentId);
   const studentEvals = evaluations.filter((e) => e.student_id === selectedStudentId).sort((a, b) => a.week_number - b.week_number);
   const studentFinals = finals.filter((f) => f.student_id === selectedStudentId);
@@ -123,7 +125,7 @@ export default function OverviewPage() {
 
       {/* 요약 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <SumCard label="전체 교육생" value={students.length} unit="명" color="var(--blue)" />
+        <SumCard label="전체 교육생" value={activeStudents.length} unit="명" color="var(--blue)" />
         <SumCard label="주차 평가" value={evaluations.length} unit="건" color="var(--green)" />
         <SumCard label="총평 완료" value={new Set(finals.map((f) => f.student_id)).size} unit="명" color="var(--purple)" />
         <SumCard label="벤치마킹" value={benchmarks.length} unit="건" color="var(--orange)" />

@@ -245,7 +245,8 @@ export default function MyNotesPage() {
     try {
       const res = await fetch(`/api/notes?studentId=${studentId}`);
       const data = await res.json();
-      setNotes(data.notes || []);
+      // 실습일지는 별도 페이지이므로 제외
+      setNotes((data.notes || []).filter((n: Note) => !n.tags?.includes('실습일지')));
     } catch { /* */ }
     setLoading(false);
   }, [studentId]);

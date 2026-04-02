@@ -77,6 +77,7 @@ function parseNoteToTimes(note: string | null): { checkIn: string; checkOut: str
 export default function AttendancePage() {
   // ── DB 데이터 ──
   const [savedData, setSavedData] = useState<SavedAttendance[]>([]);
+  const [droppedIds, setDroppedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -96,8 +97,15 @@ export default function AttendancePage() {
   // DB 데이터 불러오기
   const fetchAttendance = useCallback(async () => {
     try {
-      const res = await fetch('/api/attendance');
+      const [res, studentsRes] = await Promise.all([
+        fetch('/api/attendance'),
+        fetch('/api/students'),
+      ]);
       const data = await res.json();
+      const studentsData = await studentsRes.json();
+      if (Array.isArray(studentsData)) {
+        setDroppedIds(new Set(studentsData.filter((s: { is_dropped: boolean }) => s.is_dropped).map((s: { id: string }) => s.id)));
+      }
       if (Array.isArray(data)) {
         setSavedData(data);
         // 첫 로드 시 가장 최근 날짜 선택
@@ -136,8 +144,8 @@ export default function AttendancePage() {
 
   // 문제 있는 교육생
   const issues = useMemo(() => {
-    return filteredData.filter((d) => d.status !== 'present');
-  }, [filteredData]);
+    return filteredData.filter((d) => d.status !== 'present' && !droppedIds.has(d.student_id));
+  }, [filteredData, droppedIds]);
 
   // DB 레코드 수정 저장
   const handleEditSave = async (record: SavedAttendance) => {
@@ -538,15 +546,17 @@ export default function AttendancePage() {
                     {filteredData.map((d) => {
                       const isEditing = editingId === d.id;
                       const times = parseNoteToTimes(d.note);
+                      const isDropped = droppedIds.has(d.student_id);
                       return (
                         <tr
                           key={d.id}
-                          style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease' }}
+                          style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease', opacity: isDropped ? 0.4 : 1 }}
                           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                         >
                           <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
                             {d.students?.name || '알 수 없음'}
+                            {isDropped && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.12)', color: 'var(--red)', fontWeight: 700 }}>퇴사</span>}
                           </td>
                           <td style={tdStyle}>{times.checkIn}</td>
                           <td style={tdStyle}>{times.checkOut}</td>

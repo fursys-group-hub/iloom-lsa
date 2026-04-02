@@ -68,6 +68,9 @@ export default function TestsClient({ batches, students, scores }: Props) {
   const sheetId = batches[0]?.sheet_id || '';
   const batchId = batches[0]?.id || '';
 
+  // 퇴사자 제외
+  const activeStudents = useMemo(() => students.filter(s => !s.is_dropped), [students]);
+
   // 차시 목록
   const sessions = useMemo(() => {
     const sessionSet = new Set(scores.map((s) => s.subject));
@@ -122,7 +125,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
   // 학생별 성적 (responses 기반) — 미응시 포함
   const selectedScores = useMemo(() => {
     if (!selectedSession) return [];
-    const tested = students
+    const tested = activeStudents
       .map((student) => {
         const score = scores.find(
           (s) => s.student_id === student.id && s.subject === selectedSession
@@ -138,7 +141,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
     const tookExam = tested.filter(s => s.took).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
     const notTook = tested.filter(s => !s.took).sort((a, b) => a.student.name.localeCompare(b.student.name));
     return [...tookExam, ...notTook];
-  }, [selectedSession, students, scores, responses]);
+  }, [selectedSession, activeStudents, scores, responses]);
 
   // 서술형 수동 채점 저장
   const handleSaveGrading = async (questionId: string) => {
@@ -316,7 +319,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <Row label="평균" value={`${stat.avg}점`} color="var(--blue-light)" />
                   <Row label="최고/최저" value={`${stat.max} / ${stat.min}`} />
-                  <Row label="응시" value={`${stat.count}/${students.length}명`} color={stat.count < students.length ? 'var(--orange)' : undefined} />
+                  <Row label="응시" value={`${stat.count}/${activeStudents.length}명`} color={stat.count < activeStudents.length ? 'var(--orange)' : undefined} />
                 </div>
               </button>
             ))}

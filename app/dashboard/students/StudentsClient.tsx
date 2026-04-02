@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance } from '@/lib/types';
 import { calculateRiskLevel, calculateAvgScore } from '@/lib/analysis';
@@ -17,59 +17,7 @@ export default function StudentsClient({ students: initialStudents, scores, atte
   const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showDropped, setShowDropped] = useState(false);
   const [search, setSearch] = useState('');
-  const [dropModal, setDropModal] = useState<{ student: Student; show: boolean } | null>(null);
-  const [dropReason, setDropReason] = useState('');
-  const [dropDate, setDropDate] = useState(new Date().toISOString().slice(0, 10));
-
-  const toggleDrop = useCallback(async (student: Student) => {
-    if (student.is_dropped) {
-      // 복구
-      const res = await fetch('/api/students', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: student.id, is_dropped: false }),
-      });
-      if (res.ok) {
-        setStudents(prev => prev.map(s => s.id === student.id ? { ...s, is_dropped: false, dropped_at: null, drop_reason: null } : s));
-      }
-    } else {
-      // 퇴사 모달 열기
-      setDropReason('');
-      setDropDate(new Date().toISOString().slice(0, 10));
-      setDropModal({ student, show: true });
-    }
-  }, []);
-
-  const resetPassword = useCallback(async (student: Student) => {
-    if (!confirm(`${student.name}님의 비밀번호를 '0000'으로 초기화할까요?`)) return;
-    const res = await fetch('/api/students', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: student.id, password: '0000' }),
-    });
-    if (res.ok) alert(`${student.name}님의 비밀번호가 '0000'으로 초기화되었어요.`);
-  }, []);
-
-  const confirmDrop = useCallback(async () => {
-    if (!dropModal) return;
-    const res = await fetch('/api/students', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: dropModal.student.id,
-        is_dropped: true,
-        dropped_at: dropDate,
-        drop_reason: dropReason || null,
-      }),
-    });
-    if (res.ok) {
-      setStudents(prev => prev.map(s => s.id === dropModal.student.id
-        ? { ...s, is_dropped: true, dropped_at: dropDate, drop_reason: dropReason || null }
-        : s
-      ));
-      setDropModal(null);
-    }
-  }, [dropModal, dropDate, dropReason]);
+  // 퇴사처리/비밀번호 관리는 기수관리 페이지에서만 가능
 
   const studentsWithStats = useMemo(() => {
     return students.map((student) => {
@@ -196,7 +144,7 @@ export default function StudentsClient({ students: initialStudents, scores, atte
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['이름', '평균 점수', '결석', '지각', '상태', '관리'].map((h) => (
+                {['이름', '평균 점수', '결석', '지각', '상태'].map((h) => (
                   <th key={h} style={{
                     padding: '14px 20px',
                     textAlign: h === '이름' ? 'left' : 'center',
@@ -269,34 +217,6 @@ export default function StudentsClient({ students: initialStudents, scores, atte
                       <RiskBadge level={s.risk_level} />
                     )}
                   </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                      <button
-                        onClick={(e) => { e.preventDefault(); resetPassword(s); }}
-                        title="비밀번호 초기화"
-                        style={{
-                          padding: '6px 10px', borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border)', cursor: 'pointer', fontSize: 13,
-                          background: 'transparent', color: 'var(--text-muted)',
-                          transition: 'all 0.15s ease',
-                        }}
-                      >
-                        🔑
-                      </button>
-                      <button
-                        onClick={(e) => { e.preventDefault(); toggleDrop(s); }}
-                        style={{
-                          padding: '6px 14px', borderRadius: 'var(--radius-sm)',
-                          border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                          background: s.is_dropped ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.08)',
-                          color: s.is_dropped ? 'var(--green)' : 'var(--red)',
-                          transition: 'all 0.15s ease',
-                        }}
-                      >
-                        {s.is_dropped ? '복구' : '퇴사 처리'}
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
@@ -311,90 +231,6 @@ export default function StudentsClient({ students: initialStudents, scores, atte
         </div>
       </div>
 
-      {/* 퇴사 처리 모달 */}
-      {dropModal?.show && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'rgba(0,0,0,0.7)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-          onClick={() => setDropModal(null)}
-        >
-          <div
-            style={{
-              background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
-              padding: '32px', width: 420, maxWidth: '90vw',
-              boxShadow: 'var(--shadow-lg)',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-              퇴사 처리
-            </h3>
-            <p style={{ fontSize: 15, color: 'var(--text-second)', margin: '0 0 24px' }}>
-              <span style={{ fontWeight: 700, color: 'var(--red)' }}>{dropModal.student.name}</span>님을 퇴사 처리할까요?
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', display: 'block', marginBottom: 6 }}>
-                  퇴사일
-                </label>
-                <input
-                  type="date"
-                  value={dropDate}
-                  onChange={e => setDropDate(e.target.value)}
-                  style={{
-                    width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border)', background: 'var(--bg-surface)',
-                    color: 'var(--text-primary)', fontSize: 15,
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', display: 'block', marginBottom: 6 }}>
-                  사유 (선택)
-                </label>
-                <input
-                  type="text"
-                  placeholder="예: 개인사유, 적응 어려움 등"
-                  value={dropReason}
-                  onChange={e => setDropReason(e.target.value)}
-                  style={{
-                    width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border)', background: 'var(--bg-surface)',
-                    color: 'var(--text-primary)', fontSize: 15,
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 28 }}>
-              <button
-                onClick={() => setDropModal(null)}
-                style={{
-                  padding: '12px 24px', borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border)', background: 'transparent',
-                  color: 'var(--text-tertiary)', fontSize: 15, fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                취소
-              </button>
-              <button
-                onClick={confirmDrop}
-                style={{
-                  padding: '12px 24px', borderRadius: 'var(--radius-md)',
-                  border: 'none', background: 'var(--red)', color: '#fff',
-                  fontSize: 15, fontWeight: 600, cursor: 'pointer',
-                }}
-              >
-                퇴사 처리
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

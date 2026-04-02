@@ -195,10 +195,12 @@ export default function EducationLogsPage() {
       ]);
       const [notesData, studentsData] = await Promise.all([notesRes.json(), studentsRes.json()]);
       if (notesData?.notes) {
-        setNotes(notesData.notes);
+        // 실습일지는 별도 페이지이므로 제외
+        const filtered = notesData.notes.filter((n: StudentNote) => !n.tags?.includes('실습일지'));
+        setNotes(filtered);
         // 최신 날짜 자동 선택
-        if (notesData.notes.length > 0 && !selectedDate) {
-          const dates = [...new Set(notesData.notes.map((n: StudentNote) => toKSTDate(n.created_at)))].sort().reverse();
+        if (filtered.length > 0 && !selectedDate) {
+          const dates = [...new Set(filtered.map((n: StudentNote) => toKSTDate(n.created_at)))].sort().reverse();
           setSelectedDate(dates[0] as string);
         }
       }
@@ -296,23 +298,26 @@ export default function EducationLogsPage() {
           {/* 날짜 선택 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             {/* 데스크탑: 버튼 */}
-            <div className="date-buttons-desktop" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {availableDates.slice(0, 14).map(date => (
-                <button
-                  key={date}
-                  onClick={() => { setSelectedDate(date); setExpandedNoteId(null); }}
-                  style={{
-                    padding: '12px 20px', borderRadius: 'var(--radius-md)',
-                    border: selectedDate === date ? 'none' : '1px solid var(--border)',
-                    background: selectedDate === date ? 'var(--blue)' : 'transparent',
-                    color: selectedDate === date ? '#fff' : 'var(--text-tertiary)',
-                    fontSize: 15, fontWeight: 600, cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {date.slice(5)}
-                </button>
-              ))}
+            <div className="date-buttons-desktop" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {availableDates.slice(0, 14).map(date => {
+                const d = new Date(date + 'T00:00:00');
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                return (
+                  <button
+                    key={date}
+                    onClick={() => { setSelectedDate(date); setExpandedNoteId(null); }}
+                    style={{
+                      padding: '8px 16px', borderRadius: 'var(--radius-md)',
+                      border: selectedDate === date ? '2px solid var(--blue)' : '1px solid var(--border)',
+                      background: selectedDate === date ? 'var(--blue)' : 'var(--bg-surface)',
+                      color: selectedDate === date ? '#fff' : 'var(--text-tertiary)',
+                      fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    {d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})
+                  </button>
+                );
+              })}
             </div>
             {/* 모바일: 드롭다운 */}
             <select
@@ -378,90 +383,76 @@ export default function EducationLogsPage() {
             </div>
           </div>
 
-          {/* 요약 카드: 제출 현황 + 이해도 */}
+          {/* 요약 카드 */}
           {selectedDate && !filterStudentId && (
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
               {/* 제출 현황 */}
-              <div style={{ ...card, flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>제출 현황</h3>
-                <div style={{ display: 'flex', gap: 16 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>제출</div>
+              <div style={{ ...card, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>📊 제출 현황</div>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>제출</div>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: submissionStatus.notSubmitted.length > 0 ? 'var(--red)' : 'var(--green)' }}>
+                  <div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: submissionStatus.notSubmitted.length > 0 ? 'var(--red)' : 'var(--green)' }}>
                       {submissionStatus.notSubmitted.length}
                     </div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>미제출</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>미제출</div>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)' }}>{students.length}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>전체</div>
+                  <div>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{activeStudents.length}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>전체</div>
                   </div>
                 </div>
                 {submissionStatus.notSubmitted.length > 0 && (
-                  <div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>미제출 학생</div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {submissionStatus.notSubmitted.map(s => (
-                        <span key={s.id} style={{
-                          padding: '4px 10px', borderRadius: 'var(--radius-pill)',
-                          background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
-                          fontSize: 13, fontWeight: 600,
-                        }}>
-                          {s.name}
-                        </span>
-                      ))}
-                    </div>
+                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                    미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}
                   </div>
                 )}
               </div>
-
-              {/* 참여도 분포 */}
-              <div style={{ ...card, flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>참여도 분포</h3>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  {([
-                    { key: 3, label: '3/3', color: 'var(--green)', bg: 'rgba(48,209,88,0.12)', icon: '🔥' },
-                    { key: 2, label: '2/3', color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '💪' },
-                    { key: 1, label: '1/3', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '📝' },
-                  ] as const).map(item => (
-                    <div key={item.key} style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px 14px', borderRadius: 'var(--radius-md)',
-                      background: item.bg,
-                    }}>
-                      <span>{item.icon}</span>
-                      <span style={{ fontSize: 13, color: item.color, fontWeight: 600 }}>{item.label}</span>
-                      <span style={{ fontSize: 18, fontWeight: 700, color: item.color }}>
-                        {participationSummary[item.key]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              {/* 참여도: 3/3 */}
+              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>🔥 완벽 참여 (3/3)</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{participationSummary[3]}</div>
               </div>
-
-              {/* 이해도 분포 */}
-              <div style={{ ...card, flex: '1 1 220px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>이해도 분포</h3>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {Object.entries(confidenceMap)
-                    .filter(([key]) => ['confident', 'understood', 'confused', 'help_needed'].includes(key))
-                    .map(([key, info]) => (
-                    <div key={key} style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px 14px', borderRadius: 'var(--radius-md)',
-                      background: info.bg,
-                    }}>
-                      <span>{info.emoji}</span>
-                      <span style={{ fontSize: 13, color: info.color, fontWeight: 600 }}>{info.label}</span>
-                      <span style={{ fontSize: 18, fontWeight: 700, color: info.color }}>
-                        {(confidenceSummary[key] || 0) + (key === 'confused' ? (confidenceSummary['half'] || 0) : key === 'help_needed' ? (confidenceSummary['need_help'] || 0) : 0)}
-                      </span>
+              {/* 참여도: 2/3 */}
+              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>💪 거의 다 (2/3)</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--blue-light)' }}>{participationSummary[2]}</div>
+              </div>
+              {/* 참여도: 1/3 */}
+              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>📝 시작 (1/3)</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--orange)' }}>{participationSummary[1]}</div>
+              </div>
+              {/* 추가 설명 필요한 교육생 */}
+              <div style={{ ...card, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>🤔 추가 설명이 필요한 교육생</div>
+                {(() => {
+                  const needHelp = notesByDate.filter(n => {
+                    if (n.tags?.includes('자율학습')) return false;
+                    return ['confused', 'half', 'help_needed', 'need_help'].includes(n.confidence || '');
+                  });
+                  if (needHelp.length === 0) return (
+                    <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>없음 👍</div>
+                  );
+                  return (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {needHelp.map(n => {
+                        const c = n.confidence ? confidenceMap[n.confidence] : null;
+                        return (
+                          <span key={n.id} style={{
+                            padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
+                            background: c?.bg || 'rgba(255,159,10,0.12)', color: c?.color || 'var(--orange)',
+                          }}>
+                            {c?.emoji} {n.students?.name || '?'}
+                          </span>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -474,110 +465,98 @@ export default function EducationLogsPage() {
                 const isSelfStudy = note.tags?.includes('자율학습');
                 const conf = (!isSelfStudy && note.confidence) ? confidenceMap[note.confidence] : null;
                 const isDropped = students.find(s => s.id === note.student_id)?.is_dropped || false;
+                const displayTags = (note.tags || []).filter(t => t !== '자율학습');
                 return (
-                  <div key={note.id} style={{ ...card, padding: 0, overflow: 'hidden', opacity: isDropped ? 0.4 : 1, ...(isSelfStudy ? { borderColor: 'rgba(191,90,242,0.3)' } : {}), ...(isDropped ? { borderColor: 'var(--border)' } : {}) }}>
-                    {/* 헤더 */}
-                    <div
+                  <div key={note.id} style={{ opacity: isDropped ? 0.4 : 1 }}>
+                    {/* 헤더 (한 줄) */}
+                    <button
                       onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}
                       style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '16px 20px', cursor: 'pointer', transition: 'background 0.15s ease',
-                        ...(isSelfStudy ? { background: 'rgba(191,90,242,0.04)' } : {}),
+                        width: '100%', textAlign: 'left', cursor: 'pointer',
+                        padding: '16px 20px',
+                        borderRadius: isExpanded ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
+                        border: isExpanded ? '2px solid var(--blue)' : isSelfStudy ? '1px solid rgba(191,90,242,0.3)' : '1px solid var(--border)',
+                        borderBottom: isExpanded ? '1px solid var(--border)' : undefined,
+                        background: isExpanded ? 'var(--blue-dim)' : isSelfStudy ? 'rgba(191,90,242,0.04)' : 'var(--bg-surface)',
+                        display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = isSelfStudy ? 'rgba(191,90,242,0.08)' : 'var(--bg-hover)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = isSelfStudy ? 'rgba(191,90,242,0.04)' : 'transparent'; }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                        <div style={{
-                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                          background: isSelfStudy ? 'rgba(191,90,242,0.15)' : (conf?.bg || 'var(--blue-dim)'),
-                          color: isSelfStudy ? 'var(--purple)' : (conf?.color || 'var(--blue-light)'),
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 14, fontWeight: 700,
-                        }}>
-                          {isSelfStudy ? '📚' : (note.students?.name?.[0] || '?')}
-                        </div>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 15, fontWeight: 600, color: isDropped ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isDropped ? 'line-through' : 'none' }}>
-                              {note.students?.name || '알 수 없음'}
-                            </span>
-                            {isDropped && (
-                              <span style={{
-                                padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
-                                background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
-                              }}>퇴사</span>
-                            )}
-                            {isSelfStudy && (
-                              <span style={{
-                                padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
-                                background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
-                              }}>자율학습</span>
-                            )}
-                          </div>
-                          <p className="note-subtitle" style={{ fontSize: 13, color: 'var(--text-muted)', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {note.title}
-                          </p>
-                        </div>
+                      {/* 아바타 + 이름 */}
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                        background: isSelfStudy ? 'rgba(191,90,242,0.15)' : (conf?.bg || 'var(--blue-dim)'),
+                        color: isSelfStudy ? 'var(--purple)' : (conf?.color || 'var(--blue-light)'),
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 700,
+                      }}>
+                        {isSelfStudy ? '📚' : (note.students?.name?.[0] || '?')}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 0, flexShrink: 0 }}>
-                        {/* 슬롯1: 태그 (가변, 모바일 숨김) */}
-                        <div className="note-tag-desktop" style={{ display: 'flex', gap: 4, marginRight: 8 }}>
-                          {note.tags && note.tags.filter(t => t !== '자율학습').length > 0 && (
-                            <span style={{
-                              padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                              fontSize: 11, fontWeight: 500,
-                              background: isSelfStudy ? 'rgba(191,90,242,0.1)' : 'var(--bg-hover)',
-                              color: isSelfStudy ? 'var(--purple)' : 'var(--text-tertiary)',
-                              border: isSelfStudy ? '1px solid rgba(191,90,242,0.2)' : '1px solid var(--border)',
-                              whiteSpace: 'nowrap',
-                            }}>{note.tags.filter(t => t !== '자율학습')[0]}{note.tags.filter(t => t !== '자율학습').length > 1 ? ` +${note.tags.filter(t => t !== '자율학습').length - 1}` : ''}</span>
-                          )}
-                        </div>
-                        {/* 슬롯2: 이해도 (고정 28px) — 자율학습이면 빈칸 */}
-                        <div style={{ width: 28, textAlign: 'center', flexShrink: 0 }}>
-                          {!isSelfStudy && conf && <span title={conf.label} style={{ fontSize: 15 }}>{conf.emoji}</span>}
-                        </div>
-                        {/* 슬롯3: 점수 + 우수 (고정 66px) — 자율학습이면 빈칸 */}
-                        <div className="note-score-slot" style={{ width: 66, textAlign: 'center', flexShrink: 0 }}>
-                          {!isSelfStudy && (
-                            <span style={{
-                              padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                              background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
-                              color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
-                              whiteSpace: 'nowrap',
-                            }}>
-                              {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
-                            </span>
-                          )}
-                        </div>
-                        {/* 슬롯4: 코멘트 뱃지 */}
-                        <div style={{ width: 36, textAlign: 'center', flexShrink: 0 }}>
-                          {(commentCounts[note.id] || 0) > 0 && (
-                            <span style={{
-                              padding: '2px 7px', borderRadius: 'var(--radius-pill)',
-                              background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
-                              fontSize: 11, fontWeight: 700,
-                            }}>
-                              💬{commentCounts[note.id]}
-                            </span>
-                          )}
-                        </div>
-                        {/* 슬롯5: 화살표 (고정 20px) */}
-                        <div style={{ width: 20, textAlign: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: isDropped ? 'var(--text-muted)' : 'var(--text-primary)', minWidth: 50, textDecoration: isDropped ? 'line-through' : 'none' }}>
+                        {note.students?.name || '?'}
+                      </span>
+                      {/* 제목 + 뱃지 */}
+                      <div style={{ display: 'flex', gap: 6, flex: 1, alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
+                        <span className="note-subtitle" style={{ fontSize: 13, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 }}>
+                          {note.one_word || note.title}
+                        </span>
+                        {isDropped && (
+                          <span style={{ padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'rgba(255,69,58,0.12)', color: 'var(--red)' }}>퇴사</span>
+                        )}
+                        {isSelfStudy && (
+                          <span style={{ padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>자율학습</span>
+                        )}
+                        {displayTags.length > 0 && (
                           <span style={{
-                            fontSize: 14, color: 'var(--text-muted)',
-                            display: 'inline-block',
-                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease',
-                          }}>▾</span>
-                        </div>
+                            padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600,
+                            background: isSelfStudy ? 'rgba(191,90,242,0.1)' : 'var(--bg-hover)',
+                            color: isSelfStudy ? 'var(--purple)' : 'var(--text-tertiary)',
+                          }}>{displayTags[0]}{displayTags.length > 1 ? ` +${displayTags.length - 1}` : ''}</span>
+                        )}
                       </div>
-                    </div>
+                      {/* 우측: STEP 아이콘 + 점수 + 코멘트 + 화살표 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        {/* STEP 완료 아이콘 */}
+                        {!isSelfStudy && note.content_type === 'steps' && (() => {
+                          try {
+                            const steps = JSON.parse(note.content);
+                            const filled = [!!steps.step1?.trim(), !!steps.step2?.trim(), !!steps.step3?.trim()];
+                            return (
+                              <div style={{ display: 'flex', gap: 3 }}>
+                                {['📝', '💡', '🎯'].map((icon, i) => (
+                                  <span key={i} style={{ fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)', opacity: filled[i] ? 1 : 0.3 }}>{icon}</span>
+                                ))}
+                              </div>
+                            );
+                          } catch { return null; }
+                        })()}
+                        {/* 이해도 이모지 */}
+                        {!isSelfStudy && conf && <span title={conf.label} style={{ fontSize: 14 }}>{conf.emoji}</span>}
+                        {/* 참여 점수 */}
+                        {!isSelfStudy && (
+                          <span style={{
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                            background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                            color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
+                          }}>
+                            {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
+                          </span>
+                        )}
+                        {/* 코멘트 */}
+                        {(commentCounts[note.id] || 0) > 0 && (
+                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>💬 {commentCounts[note.id]}</span>
+                        )}
+                        <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
+                      </div>
+                    </button>
 
                     {/* 펼친 내용 */}
                     {isExpanded && (
-                      <div style={{ padding: '16px 20px 20px', borderTop: '1px solid var(--border)' }}>
+                      <div style={{
+                        padding: '16px 20px 20px',
+                        border: '2px solid var(--blue)', borderTop: 'none',
+                        borderRadius: '0 0 var(--radius-md) var(--radius-md)',
+                        background: 'var(--bg-surface)',
+                      }}>
                         {note.tags && note.tags.length > 0 && (
                           <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
                             {note.tags.map(tag => (

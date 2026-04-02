@@ -38,12 +38,12 @@ function unpackContent(row: Record<string, unknown>): Record<string, unknown> {
       if (parsed.steps) {
         const meta = parsed.meta || {};
         const steps = parsed.steps;
-        // 참여점수 자동 계산: 내용이 있는 STEP 수 (0~3)
-        const autoScore = [
-          steps.step1?.trim(),
-          steps.step2?.trim(),
-          steps.step3?.trim(),
-        ].filter(Boolean).length;
+        const isPractice = (meta.tags || []).includes('실습일지');
+        // 참여점수 자동 계산: 실습일지는 4개 섹션, 교육일지는 3개 STEP
+        const autoScore = isPractice
+          ? [steps.step1?.trim(), steps.step2?.trim(), steps.step3?.trim(), steps.step4?.trim()].filter(Boolean).length
+          : [steps.step1?.trim(), steps.step2?.trim(), steps.step3?.trim()].filter(Boolean).length;
+        const maxScore = isPractice ? 4 : 3;
         return {
           ...row,
           content: JSON.stringify(parsed.steps),
@@ -51,7 +51,8 @@ function unpackContent(row: Record<string, unknown>): Record<string, unknown> {
           tags: meta.tags || [],
           confidence: meta.confidence || null,
           participation_score: autoScore,
-          best_learning: autoScore >= 3,
+          participation_max: maxScore,
+          best_learning: autoScore >= maxScore,
           one_word: meta.one_word || null,
         };
       }
@@ -97,8 +98,9 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServerClient();
 
-  // 교육일지(자율학습 아님)는 하루 1개 제한
+  // 하루 1개 제한: 교육일지/실습일지 각각 독립, 자율학습은 무제한
   const isSelfStudy = Array.isArray(tags) && tags.includes('자율학습');
+  const isPractice = Array.isArray(tags) && tags.includes('실습일지');
   if (!isSelfStudy) {
     const { start, end } = getKSTDayRange();
     const { data: existing } = await supabase
@@ -107,12 +109,19 @@ export async function POST(req: NextRequest) {
       .eq('student_id', student_id)
       .gte('created_at', start)
       .lt('created_at', end);
-    // 오늘 교육일지(자율학습 제외)가 이미 있으면 거부
-    const hasRegularNote = existing?.some(n => {
-      try { const p = JSON.parse(n.content); return !(p.meta?.tags || []).includes('자율학습'); } catch { return true; }
+    const hasSameType = existing?.some(n => {
+      try {
+        const p = JSON.parse(n.content);
+        const noteTags = p.meta?.tags || [];
+        if (noteTags.includes('자율학습')) return false;
+        // 실습일지끼리, 교육일지끼리만 충돌
+        const noteIsPractice = noteTags.includes('실습일지');
+        return isPractice ? noteIsPractice : !noteIsPractice;
+      } catch { return !isPractice; }
     });
-    if (hasRegularNote) {
-      return Response.json({ message: '오늘은 이미 교육일지를 작성했어요! 수정하려면 기존 일지를 눌러주세요.' }, { status: 409 });
+    if (hasSameType) {
+      const label = isPractice ? '실습일지' : '교육일지';
+      return Response.json({ message: `오늘은 이미 ${label}를 작성했어요! 수정하려면 기존 일지를 눌러주세요.` }, { status: 409 });
     }
   }
 
