@@ -213,7 +213,7 @@ export default function AdminQuestionsPage() {
                     </div>
                     <span style={{
                       padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                      fontSize: 10, fontWeight: 600, background: st.bg, color: st.color,
+                      fontSize: 11, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
                       {st.dot} {st.label}
                     </span>
@@ -316,7 +316,7 @@ export default function AdminQuestionsPage() {
                     }}>
                       {selectedQ.title}
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, marginLeft: 4 }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, marginLeft: 4 }}>
                       {new Date(selectedQ.created_at).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -404,7 +404,7 @@ export default function AdminQuestionsPage() {
                           </div>
                         )}
                         <div style={{
-                          fontSize: 10, color: 'var(--text-muted)', marginTop: 3,
+                          fontSize: 11, color: 'var(--text-muted)', marginTop: 3,
                           textAlign: isAdmin ? 'right' : 'left', paddingInline: 4,
                         }}>
                           {new Date(r.created_at).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}

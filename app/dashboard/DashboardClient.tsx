@@ -450,17 +450,20 @@ export default function DashboardClient({ batches, students: allStudents, scores
                     <Link key={q.id} href="/dashboard/questions" style={{
                       padding: '10px 14px', borderRadius: 'var(--radius-md)',
                       background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 8,
-                      textDecoration: 'none',
-                    }}>
+                      textDecoration: 'none', transition: 'background 0.15s ease',
+                    }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                    >
                       <span style={{
                         padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                        fontSize: 10, fontWeight: 700, background: st.bg, color: st.color, flexShrink: 0,
+                        fontSize: 11, fontWeight: 700, background: st.bg, color: st.color, flexShrink: 0,
                       }}>{st.label}</span>
                       <span style={{
                         width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, fontWeight: 700,
+                        fontSize: 11, fontWeight: 700,
                       }}>{(q.student_name || '?')[0]}</span>
                       <span style={{ fontSize: 14, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {q.title}
@@ -498,11 +501,15 @@ export default function DashboardClient({ batches, students: allStudents, scores
                     <div key={a.id} style={{
                       padding: '10px 14px', borderRadius: 'var(--radius-md)',
                       background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 8,
-                    }}>
+                      transition: 'background 0.15s ease', cursor: 'default',
+                    }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                    >
                       {priorityStyle && (
                         <span style={{
                           padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                          fontSize: 10, fontWeight: 700, background: priorityStyle.bg, color: priorityStyle.color,
+                          fontSize: 11, fontWeight: 700, background: priorityStyle.bg, color: priorityStyle.color,
                           flexShrink: 0,
                         }}>{priorityStyle.label}</span>
                       )}

@@ -123,7 +123,7 @@ export default function DashboardLayout({
                 >
                   <span style={{ fontSize: 15 }}>{item.icon}</span>
                   {item.label}
-                  <span style={{ fontSize: 10, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
                 </div>
               );
             }
@@ -178,7 +178,7 @@ export default function DashboardLayout({
             >
               <span style={{ fontSize: 13 }}>💰</span>
               교육비용 정산 비서
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>
             <a
               href="https://iloom-saleschatbot.vercel.app/"
@@ -196,7 +196,7 @@ export default function DashboardLayout({
             >
               <span style={{ fontSize: 13 }}>💬</span>
               영업지원 챗봇
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>
           </div>
           {/* 교육자 + 로그아웃 */}

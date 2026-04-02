@@ -449,7 +449,7 @@ export default function AskPage() {
                           </div>
                         )}
                         <div style={{
-                          fontSize: 10, color: 'var(--text-muted)', marginTop: 3,
+                          fontSize: 11, color: 'var(--text-muted)', marginTop: 3,
                           textAlign: isMe ? 'right' : 'left', paddingInline: 4,
                         }}>
                           {new Date(r.created_at).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
