@@ -175,7 +175,7 @@ export default function AskPage() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>💬 질문하기</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문하기</h2>
         {!showForm && (
           <button onClick={() => { setShowForm(true); setSelectedId(null); }} style={{
             padding: '10px 20px', borderRadius: 'var(--radius-md)',

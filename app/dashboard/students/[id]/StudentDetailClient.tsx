@@ -48,7 +48,7 @@ const card: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px',
+  fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px',
 };
 
 export default function StudentDetailClient({

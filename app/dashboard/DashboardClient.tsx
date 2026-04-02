@@ -201,7 +201,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
   }, [selectedBatch]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
       {/* 인사 + 기수 선택 + D-day */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>

@@ -213,7 +213,7 @@ export default function SettingsPage() {
   const selectedBatch = batches.find((b) => b.id === selectedBatchId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           📚 기수 관리

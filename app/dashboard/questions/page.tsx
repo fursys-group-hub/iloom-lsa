@@ -138,7 +138,7 @@ export default function AdminQuestionsPage() {
     <div>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>💬 질문 관리</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문 관리</h2>
         {openCount > 0 && (
           <span style={{
             padding: '4px 12px', borderRadius: 'var(--radius-pill)',
