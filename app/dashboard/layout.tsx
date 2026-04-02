@@ -156,56 +156,58 @@ export default function DashboardLayout({
           })}
           </div>
 
-          {/* 외부 링크 */}
-          <div style={{ borderTop: '1px solid var(--border)', marginTop: 4, paddingTop: 4, display: 'flex', flexDirection: 'column', gap: 0 }}>
-          <a
-            href="https://iloom-education-settlement-production.up.railway.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '6px 14px', borderRadius: 'var(--radius-md)',
-              fontSize: 13, fontWeight: 500, textDecoration: 'none',
-              transition: 'all 0.15s ease',
-              background: 'transparent', color: 'var(--text-muted)',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <span style={{ fontSize: 14 }}>💰</span>
-            교육비용 정산 비서
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
-          </a>
-          <a
-            href="https://iloom-saleschatbot.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '6px 14px', borderRadius: 'var(--radius-md)',
-              fontSize: 13, fontWeight: 500, textDecoration: 'none',
-              transition: 'all 0.15s ease',
-              background: 'transparent', color: 'var(--text-muted)',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-          >
-            <span style={{ fontSize: 14 }}>💬</span>
-            영업지원 챗봇
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
-          </a>
-          </div>
         </nav>
 
-        {/* 하단 정보 */}
-        <div style={{
-          padding: '10px 16px',
-          borderTop: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>교육자: {authName || '관리자'}</p>
+        {/* 하단 고정 영역 */}
+        <div style={{ borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+          {/* 외부 링크 */}
+          <div style={{ padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <a
+              href="https://iloom-education-settlement-production.up.railway.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '5px 14px', borderRadius: 'var(--radius-md)',
+                fontSize: 12, fontWeight: 500, textDecoration: 'none',
+                transition: 'all 0.15s ease',
+                background: 'transparent', color: 'var(--text-muted)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <span style={{ fontSize: 13 }}>💰</span>
+              교육비용 정산 비서
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+            </a>
+            <a
+              href="https://iloom-saleschatbot.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '5px 14px', borderRadius: 'var(--radius-md)',
+                fontSize: 12, fontWeight: 500, textDecoration: 'none',
+                transition: 'all 0.15s ease',
+                background: 'transparent', color: 'var(--text-muted)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <span style={{ fontSize: 13 }}>💬</span>
+              영업지원 챗봇
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+            </a>
+          </div>
+          {/* 교육자 + 로그아웃 */}
+          <div style={{
+            padding: '8px 16px',
+            borderTop: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>교육자: {authName || '관리자'}</p>
           <button
             onClick={() => { localStorage.removeItem('iloom-auth'); router.replace('/login'); }}
             style={{
@@ -223,6 +225,7 @@ export default function DashboardLayout({
           >
             로그아웃
           </button>
+          </div>
         </div>
       </aside>
 
