@@ -74,7 +74,6 @@ export default function MyAnnouncementsPage() {
                 style={{
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-lg)', overflow: 'hidden',
-                  borderLeft: `4px solid ${ps.color}`,
                 }}
               >
                 <div

@@ -245,7 +245,6 @@ export default function AdminEvaluationsPage() {
                             fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7,
                             margin: '12px 0 0', padding: '12px 16px',
                             background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)',
-                            borderLeft: '3px solid var(--border-light)',
                           }}>
                             {ev.comment}
                           </p>

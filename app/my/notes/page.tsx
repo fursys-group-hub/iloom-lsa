@@ -1073,7 +1073,7 @@ function TextBlockEditor({ block, onChange }: { block: Block; onChange: (p: Part
         <div style={{
           marginTop: 8, padding: '10px 14px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-hover)', fontSize: 14, color: 'var(--text-second)',
-          lineHeight: 1.7, borderLeft: '2px solid var(--blue)',
+          lineHeight: 1.7,
         }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>미리보기</div>
           {block.content.split('\n').map((line, i) => (
@@ -1251,7 +1251,7 @@ function TableEditor({ block, onChange }: { block: Block; onChange: (p: Partial<
 function QuoteEditor({ block, onChange }: { block: Block; onChange: (p: Partial<Block>) => void }) {
   return (
     <div style={{
-      borderLeft: '3px solid var(--blue)', paddingLeft: 12,
+      background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '8px 12px',
     }}>
       <textarea
         value={block.content}
@@ -1638,10 +1638,9 @@ function BlockRenderer({ content, contentType, searchQuery }: { content: string;
         if (block.type === 'quote') {
           return (
             <div key={block.id} style={{
-              borderLeft: '3px solid var(--blue)', paddingLeft: 16,
               fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7,
               fontStyle: 'italic',
-              background: 'var(--bg-hover)', padding: '12px 16px', borderRadius: '0 var(--radius-md) var(--radius-md) 0',
+              background: 'var(--bg-hover)', padding: '12px 16px', borderRadius: 'var(--radius-md)',
             }}>
               {block.content.split('\n').map((line, i) => (
                 <div key={i}>{line.trim() ? renderInlineFormat(line, searchQuery) : <br />}</div>

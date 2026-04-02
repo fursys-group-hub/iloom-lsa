@@ -215,9 +215,9 @@ export default function OverviewPage() {
               return (
                 <div key={st.id} onClick={() => setSelectedStudentId(st.id)}
                   style={{
-                    background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                    background: stFinal ? 'var(--bg-surface)' : 'var(--bg-surface)',
+                    border: stFinal ? '1px solid var(--green)' : '1px solid var(--border)',
                     borderRadius: 'var(--radius-lg)', padding: 24, cursor: 'pointer',
-                    borderLeft: stFinal ? '4px solid var(--green)' : '4px solid var(--border)',
                     transition: 'all 0.15s ease',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}

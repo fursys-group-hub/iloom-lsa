@@ -266,7 +266,6 @@ export default function AnnouncementsPage() {
                 style={{
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-lg)', padding: '20px 24px',
-                  borderLeft: `4px solid ${p.color}`,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
