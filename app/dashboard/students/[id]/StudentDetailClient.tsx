@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance, StudentMemo, CoachingReport } from '@/lib/types';
+import { MEMO_CATEGORIES } from '@/lib/types';
 import { calculateRiskLevel, calculateAvgScore, calculateDailyAverages } from '@/lib/analysis';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import RiskBadge from '@/components/RiskBadge';
@@ -360,21 +361,7 @@ export default function StudentDetailClient({
       </div>
 
       {/* 교육 메모 (1열) */}
-      <div style={card}>
-        <h3 style={sectionTitle}>📝 교육 메모</h3>
-        {memos.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {memos.map((memo) => (
-              <div key={memo.id} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)' }}>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)', flexShrink: 0 }}>{memo.date}</span>
-                <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.5 }}>{memo.content}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p style={emptyStyle}>메모가 없어요</p>
-        )}
-      </div>
+      <MemoSection studentId={student.id} initialMemos={memos} />
 
       {/* AI 코칭 (1열) */}
       <div style={card}>
@@ -409,6 +396,171 @@ export default function StudentDetailClient({
           .detail-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+/* ── MemoSection ── */
+type MemoCategory = StudentMemo['category'];
+
+function MemoSection({ studentId, initialMemos }: { studentId: string; initialMemos: StudentMemo[] }) {
+  const [memoList, setMemoList] = useState<StudentMemo[]>(initialMemos);
+  const [content, setContent] = useState('');
+  const [category, setCategory] = useState<MemoCategory>('general');
+  const [saving, setSaving] = useState(false);
+
+  const todayStr = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
+
+  const handleSave = useCallback(async () => {
+    if (!content.trim() || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/student-memos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, date: todayStr, content: content.trim(), category }),
+      });
+      if (!res.ok) throw new Error('저장 실패');
+      const saved = await res.json();
+      setMemoList((prev) => [saved, ...prev]);
+      setContent('');
+      setCategory('general');
+    } catch {
+      alert('메모 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  }, [content, category, studentId, todayStr, saving]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (!confirm('이 메모를 삭제할까요?')) return;
+    try {
+      const res = await fetch(`/api/student-memos?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      setMemoList((prev) => prev.filter((m) => m.id !== id));
+    } catch {
+      alert('삭제에 실패했습니다.');
+    }
+  }, []);
+
+  return (
+    <div style={card}>
+      <h3 style={sectionTitle}>📝 교육 메모</h3>
+
+      {/* 입력 영역 */}
+      <div style={{ marginBottom: 20 }}>
+        {/* 카테고리 선택 */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          {(Object.entries(MEMO_CATEGORIES) as [MemoCategory, typeof MEMO_CATEGORIES[keyof typeof MEMO_CATEGORIES]][]).map(([key, cat]) => {
+            const selected = category === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setCategory(key)}
+                style={{
+                  padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  border: selected ? 'none' : '1px solid var(--border)',
+                  background: selected ? cat.color : 'transparent',
+                  color: selected ? '#fff' : 'var(--text-tertiary)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {cat.emoji} {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 메모 입력 + 저장 */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="메모를 입력하세요..."
+            rows={2}
+            style={{
+              flex: 1, padding: '10px 14px', fontSize: 14,
+              background: 'var(--bg-elevated)', color: 'var(--text-primary)',
+              border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+              resize: 'vertical', lineHeight: 1.5, outline: 'none',
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSave();
+            }}
+          />
+          <button
+            onClick={handleSave}
+            disabled={!content.trim() || saving}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--radius-md)',
+              background: content.trim() ? 'var(--blue)' : 'var(--bg-hover)',
+              color: content.trim() ? '#fff' : 'var(--text-muted)',
+              border: 'none', fontWeight: 600, fontSize: 14,
+              cursor: content.trim() ? 'pointer' : 'default',
+              alignSelf: 'flex-end', whiteSpace: 'nowrap',
+            }}
+          >
+            {saving ? '저장 중...' : '저장'}
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Ctrl+Enter로 빠르게 저장</p>
+      </div>
+
+      {/* 메모 타임라인 */}
+      {memoList.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {memoList.map((memo) => {
+            const cat = MEMO_CATEGORIES[memo.category as keyof typeof MEMO_CATEGORIES] || MEMO_CATEGORIES.general;
+            return (
+              <div
+                key={memo.id}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                  background: 'var(--bg-hover)',
+                }}
+              >
+                {/* 카테고리 뱃지 + 날짜 */}
+                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, minWidth: 64 }}>
+                  <span style={{
+                    padding: '3px 10px', borderRadius: 'var(--radius-pill)',
+                    fontSize: 11, fontWeight: 600,
+                    background: `color-mix(in srgb, ${cat.color} 15%, transparent)`,
+                    color: cat.color,
+                  }}>
+                    {cat.emoji} {cat.label}
+                  </span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{memo.date}</span>
+                </div>
+                {/* 내용 */}
+                <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, flex: 1, whiteSpace: 'pre-wrap' }}>
+                  {memo.content}
+                </span>
+                {/* 삭제 */}
+                <button
+                  onClick={() => handleDelete(memo.id)}
+                  title="삭제"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--text-muted)', fontSize: 16, padding: '2px 6px',
+                    borderRadius: 'var(--radius-sm)', flexShrink: 0,
+                    opacity: 0.4, transition: 'opacity 0.15s',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--red)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p style={emptyStyle}>아직 메모가 없어요. 학생에 대한 관찰 기록을 남겨보세요!</p>
+      )}
     </div>
   );
 }

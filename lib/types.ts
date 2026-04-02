@@ -43,8 +43,17 @@ export interface StudentMemo {
   student_id: string;
   date: string;
   content: string;
-  category: 'general' | 'strength' | 'weakness' | 'behavior';
+  category: 'general' | 'behavior' | 'counsel' | 'praise' | 'caution';
+  created_at?: string;
 }
+
+export const MEMO_CATEGORIES = {
+  behavior: { label: '수업태도', emoji: '📋', color: 'var(--blue)' },
+  counsel: { label: '상담', emoji: '💬', color: 'var(--purple)' },
+  praise: { label: '칭찬', emoji: '⭐', color: 'var(--green)' },
+  caution: { label: '주의', emoji: '⚠️', color: 'var(--orange)' },
+  general: { label: '일반', emoji: '📝', color: 'var(--text-tertiary)' },
+} as const;
 
 export interface WrongAnswer {
   id: string;
@@ -180,6 +189,27 @@ export interface FinalEvaluation {
   product_score: number;
   created_at: string;
   updated_at: string;
+}
+
+// 질문하기
+export interface StudentQuestion {
+  id: string;
+  student_id: string;
+  title: string;
+  status: 'open' | 'answered' | 'resolved';
+  created_at: string;
+  updated_at: string;
+  // join
+  student_name?: string;
+}
+
+export interface QuestionReply {
+  id: string;
+  question_id: string;
+  author_role: 'admin' | 'student';
+  author_name: string;
+  content: string;
+  created_at: string;
 }
 
 // 학생 + 집계 데이터

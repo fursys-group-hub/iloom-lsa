@@ -41,6 +41,16 @@ interface CommentRow {
   created_at: string;
 }
 
+interface QuestionRow {
+  id: string;
+  student_id: string;
+  title: string;
+  status: 'open' | 'answered';
+  created_at: string;
+  updated_at: string;
+  student_name?: string;
+}
+
 interface Props {
   batches: BatchInfo[];
   students: Student[];
@@ -49,6 +59,8 @@ interface Props {
   notes: NoteRow[];
   announcements: AnnouncementRow[];
   noteComments: CommentRow[];
+  questions: QuestionRow[];
+  memoCounts: Record<string, number>;
 }
 
 function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: string } {
@@ -89,7 +101,7 @@ function getEducationDay(startDate: string): number {
   return Math.max(diff + 1, 0);
 }
 
-export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments }: Props) {
+export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments, questions, memoCounts }: Props) {
   const today = new Date().toISOString().split('T')[0];
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
@@ -329,30 +341,30 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <h3 style={sectionTitle}>⚠️ 주의 교육생</h3>
             {riskStudents.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                 {riskStudents.map((s) => (
                   <Link key={s.id} href={`/dashboard/students/${s.id}`}
                     style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                      textDecoration: 'none', transition: 'background 0.15s ease',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '6px 12px', borderRadius: 'var(--radius-pill)',
+                      background: 'var(--bg-elevated)', textDecoration: 'none',
+                      transition: 'background 0.15s ease',
                     }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{
-                        width: 34, height: 34, borderRadius: '50%',
-                        background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 13, fontWeight: 700, flexShrink: 0,
-                      }}>{s.name[0]}</div>
-                      <div>
-                        <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>{s.name}</p>
-                        <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>평균 {s.avg_score}점</p>
-                      </div>
-                    </div>
-                    <RiskBadge level={s.risk_level} />
+                    <div style={{
+                      width: 24, height: 24, borderRadius: '50%',
+                      background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 700, flexShrink: 0,
+                    }}>{s.name[0]}</div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{s.avg_score}점</span>
+                    {memoCounts[s.id] ? (
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>📝{memoCounts[s.id]}</span>
+                    ) : null}
+                    <span style={{ marginLeft: 'auto' }}><RiskBadge level={s.risk_level} /></span>
                   </Link>
                 ))}
               </div>
@@ -408,6 +420,63 @@ export default function DashboardClient({ batches, students: allStudents, scores
             )}
             {practiceStats.count > 0 && (
               <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>총 {practiceStats.count}건 작성됨</div>
+            )}
+          </div>
+
+          {/* 질문 현황 */}
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <h3 style={{ ...sectionTitle, margin: 0 }}>💬 질문관리</h3>
+                {questions.filter(q => q.status === 'open').length > 0 && (
+                  <span style={{
+                    padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                    background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                    fontSize: 12, fontWeight: 700,
+                  }}>
+                    {questions.filter(q => q.status === 'open').length}개 대기
+                  </span>
+                )}
+              </div>
+              <Link href="/dashboard/questions" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+            </div>
+            {questions.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {questions.slice(0, 4).map(q => {
+                  const st = q.status === 'open'
+                    ? { bg: 'rgba(255,159,10,0.12)', color: 'var(--orange)', label: '대기' }
+                    : { bg: 'rgba(48,209,88,0.12)', color: 'var(--green)', label: '답변' };
+                  return (
+                    <Link key={q.id} href="/dashboard/questions" style={{
+                      padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 8,
+                      textDecoration: 'none',
+                    }}>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                        fontSize: 10, fontWeight: 700, background: st.bg, color: st.color, flexShrink: 0,
+                      }}>{st.label}</span>
+                      <span style={{
+                        width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                        background: 'var(--blue-dim)', color: 'var(--blue)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, fontWeight: 700,
+                      }}>{(q.student_name || '?')[0]}</span>
+                      <span style={{ fontSize: 14, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {q.title}
+                      </span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+                        {q.student_name}
+                      </span>
+                    </Link>
+                  );
+                })}
+                {questions.length === 0 && (
+                  <p style={{ fontSize: 14, color: 'var(--text-muted)', padding: '8px 0' }}>대기 중인 질문이 없어요</p>
+                )}
+              </div>
+            ) : (
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', padding: '16px 0' }}>아직 질문이 없어요</p>
             )}
           </div>
 

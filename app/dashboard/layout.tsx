@@ -10,6 +10,7 @@ const nav = [
   { href: '/dashboard/attendance', label: '출결', icon: '📋' },
   { href: '/dashboard/tests', label: '테스트', icon: '📝' },
   { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
+  { href: '/dashboard/questions', label: '질문관리', icon: '💬' },
   { href: '/dashboard/practice', label: '실습일지', icon: '🏪' },
   { href: '/dashboard/reports', label: '리포트', icon: '📈' },
   { href: '/dashboard/overview', label: '심화교육', icon: '🎓' },
@@ -86,20 +87,20 @@ export default function DashboardLayout({
       >
         {/* 로고 */}
         <div style={{
-          padding: '24px 20px',
+          padding: '16px 20px',
           borderBottom: '1px solid var(--border)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>
               일룸 LSA 입문교육
             </span>
           </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>교육 관리 시스템</p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>교육 관리 시스템</p>
         </div>
 
         {/* 네비게이션 */}
-        <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <nav style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'space-between', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {nav.map((item) => {
             const isDisabled = 'disabled' in item && item.disabled;
             const isActive = !isDisabled && (
@@ -113,16 +114,16 @@ export default function DashboardLayout({
                 <div
                   key={item.href}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    padding: '12px 16px', borderRadius: 'var(--radius-md)',
-                    fontSize: 15, fontWeight: 500,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                    fontSize: 14, fontWeight: 500,
                     color: 'var(--text-muted)', opacity: 0.5,
                     cursor: 'default',
                   }}
                 >
-                  <span style={{ fontSize: 16 }}>{item.icon}</span>
+                  <span style={{ fontSize: 15 }}>{item.icon}</span>
                   {item.label}
-                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+                  <span style={{ fontSize: 10, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
                 </div>
               );
             }
@@ -135,10 +136,10 @@ export default function DashboardLayout({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 16px',
+                  gap: 10,
+                  padding: '8px 14px',
                   borderRadius: 'var(--radius-md)',
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: 500,
                   textDecoration: 'none',
                   transition: 'all 0.15s ease',
@@ -148,7 +149,7 @@ export default function DashboardLayout({
                 onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-hover)'; }}
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
               >
-                <span style={{ fontSize: 16 }}>{item.icon}</span>
+                <span style={{ fontSize: 15 }}>{item.icon}</span>
                 {item.label}
               </Link>
             );
@@ -156,61 +157,49 @@ export default function DashboardLayout({
           </div>
 
           {/* 외부 링크 */}
-          <div style={{ borderTop: '1px solid var(--border)', marginTop: 8, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ borderTop: '1px solid var(--border)', marginTop: 4, paddingTop: 4, display: 'flex', flexDirection: 'column', gap: 0 }}>
           <a
             href="https://iloom-education-settlement-production.up.railway.app"
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '12px 16px',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 14,
-              fontWeight: 500,
-              textDecoration: 'none',
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '6px 14px', borderRadius: 'var(--radius-md)',
+              fontSize: 13, fontWeight: 500, textDecoration: 'none',
               transition: 'all 0.15s ease',
-              background: 'transparent',
-              color: 'var(--text-muted)',
+              background: 'transparent', color: 'var(--text-muted)',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <span style={{ fontSize: 16 }}>💰</span>
+            <span style={{ fontSize: 14 }}>💰</span>
             교육비용 정산 비서
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
           </a>
           <a
             href="https://iloom-saleschatbot.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '12px 16px',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 14,
-              fontWeight: 500,
-              textDecoration: 'none',
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '6px 14px', borderRadius: 'var(--radius-md)',
+              fontSize: 13, fontWeight: 500, textDecoration: 'none',
               transition: 'all 0.15s ease',
-              background: 'transparent',
-              color: 'var(--text-muted)',
+              background: 'transparent', color: 'var(--text-muted)',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
           >
-            <span style={{ fontSize: 16 }}>💬</span>
+            <span style={{ fontSize: 14 }}>💬</span>
             영업지원 챗봇
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
           </a>
           </div>
         </nav>
 
         {/* 하단 정보 */}
         <div style={{
-          padding: '16px 20px',
+          padding: '10px 16px',
           borderTop: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',

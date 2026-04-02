@@ -164,3 +164,23 @@ CREATE TABLE note_comments (
   content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 학생 질문 (질문하기 스레드)
+CREATE TABLE student_questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  status TEXT CHECK (status IN ('open', 'answered', 'resolved')) DEFAULT 'open',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 질문 답글 (관리자↔교육생)
+CREATE TABLE question_replies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  question_id UUID NOT NULL REFERENCES student_questions(id) ON DELETE CASCADE,
+  author_role TEXT NOT NULL CHECK (author_role IN ('admin', 'student')),
+  author_name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
