@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { getKSTToday } from '@/lib/date';
 
 export async function GET(req: NextRequest) {
   try {
@@ -60,7 +61,7 @@ export async function PATCH(req: NextRequest) {
     if (body.password !== undefined) updateData.password = body.password;
     if (body.is_dropped !== undefined) {
       updateData.is_dropped = body.is_dropped;
-      updateData.dropped_at = body.is_dropped ? (body.dropped_at || new Date().toISOString().slice(0, 10)) : null;
+      updateData.dropped_at = body.is_dropped ? (body.dropped_at || getKSTToday()) : null;
       updateData.drop_reason = body.is_dropped ? (body.drop_reason || null) : null;
     }
 

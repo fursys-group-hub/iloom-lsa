@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
 import { fetchSheetData, parseResultRows } from '@/lib/sheets';
+import { getKSTToday } from '@/lib/date';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     // 날짜 필터 적용
     const filterDate = date === 'today'
-      ? new Date().toISOString().split('T')[0]
+      ? getKSTToday()
       : date || null; // 'YYYY-MM-DD' 또는 null(전체)
 
     const filterByDate = (rows: string[][], headerRow: boolean = true): string[][] => {
@@ -59,8 +60,8 @@ export async function POST(req: NextRequest) {
         .from('batches')
         .insert({
           name: '신입 교육',
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          start_date: getKSTToday(),
+          end_date: getKSTToday(),
           sheet_id: sheetId, subject_columns: {},
         })
         .select('id').single();

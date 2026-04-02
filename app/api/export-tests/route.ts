@@ -1,4 +1,5 @@
 import { getSupabase } from '@/lib/supabase';
+import { getKSTToday } from '@/lib/date';
 import * as XLSX from 'xlsx';
 
 export async function GET() {
@@ -171,7 +172,7 @@ export async function GET() {
     }
 
     const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-    const today = new Date().toISOString().split('T')[0];
+    const today = getKSTToday();
     const fileName = `LSA_성적_${today}.xlsx`;
 
     return new Response(buf, {

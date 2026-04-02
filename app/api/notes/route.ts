@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServerClient, getSupabase } from '@/lib/supabase';
+import { getKSTDayRange } from '@/lib/date';
 
 // content JSON 구조: { blocks: Block[], meta: { tags, confidence } }
 // 하위호환: 기존 plain text도 지원
@@ -99,13 +100,13 @@ export async function POST(req: NextRequest) {
   // 교육일지(자율학습 아님)는 하루 1개 제한
   const isSelfStudy = Array.isArray(tags) && tags.includes('자율학습');
   if (!isSelfStudy) {
-    const today = new Date().toISOString().slice(0, 10);
+    const { start, end } = getKSTDayRange();
     const { data: existing } = await supabase
       .from('student_notes')
       .select('id, content')
       .eq('student_id', student_id)
-      .gte('created_at', `${today}T00:00:00`)
-      .lt('created_at', `${today}T23:59:59.999`);
+      .gte('created_at', start)
+      .lt('created_at', end);
     // 오늘 교육일지(자율학습 제외)가 이미 있으면 거부
     const hasRegularNote = existing?.some(n => {
       try { const p = JSON.parse(n.content); return !(p.meta?.tags || []).includes('자율학습'); } catch { return true; }
