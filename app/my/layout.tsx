@@ -61,7 +61,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{authName}님</p>
         </div>
 
-        <nav style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 3, overflowY: 'auto' }}>
+        <nav style={{ flex: 1, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto' }}>
           {nav.map((item) => {
             const isDisabled = 'disabled' in item && item.disabled;
             const isActive = !isDisabled && (

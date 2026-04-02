@@ -99,8 +99,8 @@ export default function DashboardLayout({
         </div>
 
         {/* 네비게이션 */}
-        <nav style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 3, justifyContent: 'space-between', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <nav style={{ flex: 1, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'space-between', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {nav.map((item) => {
             const isDisabled = 'disabled' in item && item.disabled;
             const isActive = !isDisabled && (
