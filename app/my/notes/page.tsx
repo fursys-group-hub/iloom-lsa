@@ -123,6 +123,8 @@ export default function MyNotesPage() {
   const [isSelfStudyMode, setIsSelfStudyMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [stepImages, setStepImages] = useState<Record<string, string[]>>({ step1: [], step2: [], step3: [] });
+  const [uploadingStep, setUploadingStep] = useState<string | null>(null);
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
   const [comments, setComments] = useState<NoteComment[]>([]);
@@ -167,6 +169,34 @@ export default function MyNotesPage() {
   const resetForm = () => {
     setPledge(''); setStep1(''); setStep2(''); setStep3('');
     setTags(''); setConfidence(''); setIsSelfStudyMode(false); setEditingNoteId(null); setSaveError('');
+    setStepImages({ step1: [], step2: [], step3: [] });
+  };
+
+  const handleImageUpload = async (stepKey: string, files: FileList | null) => {
+    if (!files || files.length === 0 || !studentId) return;
+    setUploadingStep(stepKey);
+    const newUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue;
+      if (file.size > 5 * 1024 * 1024) { setSaveError('이미지는 5MB 이하만 가능해요'); continue; }
+      const form = new FormData();
+      form.append('file', file);
+      form.append('student_id', studentId);
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: form });
+        const data = await res.json();
+        if (res.ok && data.url) newUrls.push(data.url);
+        else setSaveError(data.message || '업로드 실패');
+      } catch { setSaveError('이미지 업로드 중 오류가 발생했어요'); }
+    }
+    if (newUrls.length > 0) {
+      setStepImages(prev => ({ ...prev, [stepKey]: [...prev[stepKey], ...newUrls] }));
+    }
+    setUploadingStep(null);
+  };
+
+  const removeImage = (stepKey: string, idx: number) => {
+    setStepImages(prev => ({ ...prev, [stepKey]: prev[stepKey].filter((_, i) => i !== idx) }));
   };
 
 
@@ -263,8 +293,14 @@ export default function MyNotesPage() {
       try {
         const steps = JSON.parse(note.content);
         setStep1(steps.step1 || ''); setStep2(steps.step2 || ''); setStep3(steps.step3 || '');
+        setStepImages({
+          step1: steps.step1_images || [],
+          step2: steps.step2_images || [],
+          step3: steps.step3_images || [],
+        });
       } catch {
         setStep1(note.content); setStep2(''); setStep3('');
+        setStepImages({ step1: [], step2: [], step3: [] });
       }
     } else {
       // blocks/text → step1에 텍스트로 넣기
@@ -305,6 +341,9 @@ export default function MyNotesPage() {
       step1_completed: !!step1.trim(),
       step2_completed: !!step2.trim(),
       step3_completed: !!step3.trim(),
+      step1_images: stepImages.step1,
+      step2_images: stepImages.step2,
+      step3_images: stepImages.step3,
     };
 
     try {
@@ -551,6 +590,61 @@ export default function MyNotesPage() {
                       padding: '14px 16px', minHeight: 120,
                     }}
                   />
+                  {/* 이미지 첨부 영역 */}
+                  <div style={{ padding: '8px 16px 12px', borderTop: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: stepImages[key]?.length > 0 ? 10 : 0 }}>
+                      <label style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '6px 14px', borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border)', background: 'transparent',
+                        color: 'var(--text-tertiary)', fontSize: 13, fontWeight: 600,
+                        cursor: uploadingStep === key ? 'wait' : 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}>
+                        {uploadingStep === key ? '업로드 중...' : '📷 사진 첨부'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          style={{ display: 'none' }}
+                          onChange={e => handleImageUpload(key, e.target.files)}
+                          disabled={uploadingStep === key}
+                        />
+                      </label>
+                      {stepImages[key]?.length > 0 && (
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                          {stepImages[key].length}장 첨부됨
+                        </span>
+                      )}
+                    </div>
+                    {/* 첨부된 이미지 미리보기 */}
+                    {stepImages[key]?.length > 0 && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {stepImages[key].map((url, imgIdx) => (
+                          <div key={imgIdx} style={{ position: 'relative', width: 80, height: 80 }}>
+                            <img
+                              src={url}
+                              alt={`첨부 ${imgIdx + 1}`}
+                              style={{
+                                width: 80, height: 80, objectFit: 'cover',
+                                borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                              }}
+                            />
+                            <button
+                              onClick={() => removeImage(key, imgIdx)}
+                              style={{
+                                position: 'absolute', top: -6, right: -6,
+                                width: 20, height: 20, borderRadius: '50%',
+                                background: 'var(--red)', color: '#fff',
+                                border: 'none', fontSize: 12, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}
+                            >×</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -1330,6 +1424,72 @@ function renderMarkdownLines(text: string, searchQuery: string): React.ReactNode
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{elements}</div>;
 }
 
+function StepImagesGrid({ images }: { images: string[] }) {
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  if (!images || images.length === 0) return null;
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '8px 0 4px' }}>
+        {images.map((url, i) => (
+          <img
+            key={i}
+            src={url}
+            alt={`첨부 ${i + 1}`}
+            onClick={() => setLightboxIdx(i)}
+            style={{
+              width: 120, height: 120, objectFit: 'cover',
+              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+              cursor: 'pointer', transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.8'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+          />
+        ))}
+      </div>
+      {lightboxIdx !== null && (
+        <div
+          onClick={() => setLightboxIdx(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src={images[lightboxIdx]}
+            alt="확대 보기"
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }}
+            onClick={e => e.stopPropagation()}
+          />
+          {images.length > 1 && (
+            <div style={{ position: 'absolute', bottom: 32, display: 'flex', gap: 12 }}>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + images.length) % images.length); }}
+                style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 16, cursor: 'pointer' }}
+              >◀ 이전</button>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, alignSelf: 'center' }}>{lightboxIdx + 1} / {images.length}</span>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx + 1) % images.length); }}
+                style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 16, cursor: 'pointer' }}
+              >다음 ▶</button>
+            </div>
+          )}
+          <button
+            onClick={() => setLightboxIdx(null)}
+            style={{
+              position: 'absolute', top: 20, right: 20,
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)', color: '#fff',
+              border: 'none', fontSize: 20, cursor: 'pointer',
+            }}
+          >×</button>
+        </div>
+      )}
+    </>
+  );
+}
+
 function StepsRenderer({ content, searchQuery }: { content: string; searchQuery: string }) {
   try {
     const steps = JSON.parse(content);
@@ -1343,7 +1503,8 @@ function StepsRenderer({ content, searchQuery }: { content: string; searchQuery:
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {stepSections.map(({ key, label, icon, completed }) => {
           const text = steps[key] as string;
-          if (!text) return (
+          const images = steps[`${key}_images`] as string[] | undefined;
+          if (!text && (!images || images.length === 0)) return (
             <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
               <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
@@ -1356,10 +1517,16 @@ function StepsRenderer({ content, searchQuery }: { content: string; searchQuery:
                 background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
               }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
-                {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {images && images.length > 0 && (
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>
+                  )}
+                  {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+                </div>
               </div>
               <div style={{ padding: '12px 16px' }}>
-                {renderMarkdownLines(text, searchQuery)}
+                {text && renderMarkdownLines(text, searchQuery)}
+                <StepImagesGrid images={images || []} />
               </div>
             </div>
           );

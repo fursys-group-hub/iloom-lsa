@@ -2,6 +2,72 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
+function StepImagesGrid({ images }: { images: string[] }) {
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  if (!images || images.length === 0) return null;
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '8px 0 4px' }}>
+        {images.map((url, i) => (
+          <img
+            key={i}
+            src={url}
+            alt={`첨부 ${i + 1}`}
+            onClick={() => setLightboxIdx(i)}
+            style={{
+              width: 120, height: 120, objectFit: 'cover',
+              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+              cursor: 'pointer', transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.8'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+          />
+        ))}
+      </div>
+      {lightboxIdx !== null && (
+        <div
+          onClick={() => setLightboxIdx(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src={images[lightboxIdx]}
+            alt="확대 보기"
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }}
+            onClick={e => e.stopPropagation()}
+          />
+          {images.length > 1 && (
+            <div style={{ position: 'absolute', bottom: 32, display: 'flex', gap: 12 }}>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + images.length) % images.length); }}
+                style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 16, cursor: 'pointer' }}
+              >◀ 이전</button>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, alignSelf: 'center' }}>{lightboxIdx + 1} / {images.length}</span>
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx + 1) % images.length); }}
+                style={{ padding: '10px 20px', borderRadius: 'var(--radius-md)', border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: 16, cursor: 'pointer' }}
+              >다음 ▶</button>
+            </div>
+          )}
+          <button
+            onClick={() => setLightboxIdx(null)}
+            style={{
+              position: 'absolute', top: 20, right: 20,
+              width: 40, height: 40, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)', color: '#fff',
+              border: 'none', fontSize: 20, cursor: 'pointer',
+            }}
+          >×</button>
+        </div>
+      )}
+    </>
+  );
+}
+
 interface NoteComment {
   id: string;
   note_id: string;
@@ -781,7 +847,8 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {stepSections.map(({ key, label, icon, completed }) => {
             const text = steps[key] as string;
-            if (!text) return (
+            const images = steps[`${key}_images`] as string[] | undefined;
+            if (!text && (!images || images.length === 0)) return (
               <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
@@ -794,10 +861,16 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
                   background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
                 }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
-                  {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {images && images.length > 0 && (
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>
+                    )}
+                    {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
+                  </div>
                 </div>
                 <div style={{ padding: '12px 16px' }}>
-                  {renderMdLines(text)}
+                  {text && renderMdLines(text)}
+                  <StepImagesGrid images={images || []} />
                 </div>
               </div>
             );
