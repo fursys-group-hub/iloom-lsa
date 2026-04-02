@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 // ── 타입 ──
 interface NoteComment {
@@ -122,6 +122,15 @@ export default function MyNotesPage() {
   const [confidence, setConfidence] = useState('');
   const [isSelfStudyMode, setIsSelfStudyMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    // 새벽 5시 이전이면 전날
+    if (kst.getUTCHours() < 5) {
+      kst.setUTCDate(kst.getUTCDate() - 1);
+    }
+    return kst.toISOString().slice(0, 10);
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [stepImages, setStepImages] = useState<Record<string, string[]>>({ step1: [], step2: [], step3: [] });
   const [uploadingStep, setUploadingStep] = useState<string | null>(null);
@@ -323,14 +332,25 @@ export default function MyNotesPage() {
 
   const stepsHaveContent = step1.trim() || step2.trim() || step3.trim();
 
-  // 자동 제목 생성: YYYY-MM-DD 이름 / 교육일지
-  const autoTitle = (() => {
-    const today = new Date();
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d} ${studentName || '교육생'} / 교육일지`;
-  })();
+  // 자동 제목 생성: 선택한 날짜 기반
+  const autoTitle = `${selectedDate} ${studentName || '교육생'} / 교육일지`;
+
+  // 날짜 드롭다운 옵션 (최근 7일)
+  const dateOptions = useMemo(() => {
+    const opts: { value: string; label: string }[] = [];
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(kst);
+      d.setUTCDate(d.getUTCDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const dayName = dayNames[d.getUTCDay()];
+      const label = `${d.getUTCMonth() + 1}/${d.getUTCDate()} (${dayName})${i === 0 ? ' 오늘' : i === 1 ? ' 어제' : ''}`;
+      opts.push({ value: dateStr, label });
+    }
+    return opts;
+  }, []);
 
   const handleSave = async () => {
     if (!stepsHaveContent) return;
@@ -360,6 +380,7 @@ export default function MyNotesPage() {
           tags: [...(tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []), ...(isSelfStudyMode ? ['자율학습'] : [])],
           confidence: isSelfStudyMode ? null : (confidence || null),
           one_word: pledge.trim() || null,
+          ...(!isEdit && { target_date: selectedDate }),
         }),
       });
       const result = await res.json();
@@ -474,6 +495,28 @@ export default function MyNotesPage() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* 날짜 선택 */}
+            {!editingNoteId && (
+              <div>
+                <label style={labelStyle}>📅 날짜 선택</label>
+                <select
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  style={{
+                    ...inputStyle, fontSize: 15, width: 'auto', minWidth: 180,
+                    cursor: 'pointer', appearance: 'auto',
+                  }}
+                >
+                  {dateOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  자정 넘어서 작성할 때는 날짜를 확인해주세요
+                </p>
+              </div>
+            )}
+
             {/* 오늘의 다짐 (선택) */}
             <div>
               <label style={labelStyle}>{isSelfStudyMode ? '학습 주제' : '오늘의 다짐'} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>

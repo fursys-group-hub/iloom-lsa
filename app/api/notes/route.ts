@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createServerClient, getSupabase } from '@/lib/supabase';
-import { getKSTDayRange } from '@/lib/date';
+import { getKSTDayRange, getKSTToday } from '@/lib/date';
 
 // content JSON 구조: { blocks: Block[], meta: { tags, confidence } }
 // 하위호환: 기존 plain text도 지원
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 
 // 노트 생성
 export async function POST(req: NextRequest) {
-  const { student_id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word } = await req.json();
+  const { student_id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word, target_date } = await req.json();
 
   if (!student_id || !title || !content) {
     return Response.json({ message: '제목과 내용을 입력해주세요.' }, { status: 400 });
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
   const isSelfStudy = Array.isArray(tags) && tags.includes('자율학습');
   const isPractice = Array.isArray(tags) && tags.includes('실습일지');
   if (!isSelfStudy) {
-    const { start, end } = getKSTDayRange();
+    const { start, end } = getKSTDayRange(target_date || undefined);
     const { data: existing } = await supabase
       .from('student_notes')
       .select('id, content')
@@ -121,14 +121,22 @@ export async function POST(req: NextRequest) {
     });
     if (hasSameType) {
       const label = isPractice ? '실습일지' : '교육일지';
-      return Response.json({ message: `오늘은 이미 ${label}를 작성했어요! 수정하려면 기존 일지를 눌러주세요.` }, { status: 409 });
+      const dateLabel = target_date || getKSTToday();
+      return Response.json({ message: `${dateLabel}에 이미 ${label}를 작성했어요! 수정하려면 기존 일지를 눌러주세요.` }, { status: 409 });
     }
   }
 
   const extraMeta = { participation_score, best_learning, one_word };
+  // target_date가 있으면 해당 날짜 정오(KST)로 created_at 설정
+  const insertData: Record<string, unknown> = {
+    student_id, title, content: packContent(content, tags, confidence, content_type, extraMeta),
+  };
+  if (target_date) {
+    insertData.created_at = new Date(`${target_date}T12:00:00+09:00`).toISOString();
+  }
   const { data, error } = await supabase
     .from('student_notes')
-    .insert({ student_id, title, content: packContent(content, tags, confidence, content_type, extraMeta) })
+    .insert(insertData)
     .select('*')
     .single();
 
