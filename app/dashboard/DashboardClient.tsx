@@ -291,7 +291,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
       </div>
 
       {/* 2컬럼 메인 */}
-      <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 20 }}>
 
         {/* ─── 왼쪽 ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
