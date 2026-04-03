@@ -324,8 +324,8 @@ export default function MyPracticePage() {
               }}
               style={{
                 padding: '10px 20px', borderRadius: 'var(--radius-md)',
-                border: showForm ? 'none' : '1px solid rgba(10,132,255,0.4)',
-                background: showForm ? 'var(--red)' : 'rgba(48,209,88,0.08)',
+                border: showForm ? 'none' : '1px solid var(--blue-dim)',
+                background: showForm ? 'var(--red)' : 'var(--green-dim)',
                 color: showForm ? '#fff' : 'var(--blue)',
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
@@ -351,7 +351,7 @@ export default function MyPracticePage() {
 
       {/* ── 작성 폼 ── */}
       {showForm && (
-        <div style={{ ...card, border: '1px solid rgba(10,132,255,0.4)', background: 'rgba(48,209,88,0.03)' }}>
+        <div style={{ ...card, border: '1px solid var(--blue-dim)', background: 'var(--green-dim)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {editingNoteId ? '✏️ 실습일지 수정' : '✨ 오늘의 실습일지'}
@@ -362,7 +362,7 @@ export default function MyPracticePage() {
           {!editingNoteId && (
             <div style={{
               padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: 20,
-              background: 'rgba(48,209,88,0.08)', border: '1px solid rgba(48,209,88,0.2)',
+              background: 'var(--green-dim)', border: '1px solid var(--green-dim)',
             }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>
                 🐣 신입 LSA님, 매장은 여러분의 가장 큰 교실입니다!
@@ -424,7 +424,7 @@ export default function MyPracticePage() {
               const val = sections[key];
               return (
                 <div key={key} style={{
-                  border: '1px solid rgba(48,209,88,0.3)',
+                  border: '1px solid var(--green-dim)',
                   borderRadius: 'var(--radius-md)',
                   background: 'var(--bg-elevated)', overflow: 'hidden',
                 }}>
@@ -432,7 +432,7 @@ export default function MyPracticePage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: val.trim() ? 'rgba(48,209,88,0.06)' : 'var(--bg-hover)',
+                    background: val.trim() ? 'var(--green-dim)' : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -505,7 +505,7 @@ export default function MyPracticePage() {
             {saveError && (
               <div style={{
                 padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'rgba(255,69,58,0.12)', color: 'var(--red)', fontSize: 14, fontWeight: 600,
+                background: 'var(--red-dim)', color: 'var(--red)', fontSize: 14, fontWeight: 600,
               }}>
                 {saveError}
               </div>
@@ -557,8 +557,8 @@ export default function MyPracticePage() {
                   onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
                   style={{
                     padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--blue)' : '1px solid rgba(10,132,255,0.4)',
-                    background: isSelected ? 'rgba(48,209,88,0.1)' : 'rgba(48,209,88,0.04)',
+                    border: isSelected ? '2px solid var(--blue)' : '1px solid var(--blue-dim)',
+                    background: isSelected ? 'var(--green-dim)' : 'var(--green-dim)',
                     cursor: 'pointer', transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', gap: 10,
                   }}>
@@ -573,9 +573,9 @@ export default function MyPracticePage() {
                   {/* 실적 요약 */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {statsData.stats_consult > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>🗣️ {statsData.stats_consult}</span>}
-                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.12)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
-                    {statsData.stats_order > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.12)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
+                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
+                    {statsData.stats_order > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
+                    {statsData.stats_amount > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
                   </div>
                   {/* 수주 내역 미리보기 */}
                   {noteOrderDetail && (
@@ -607,7 +607,7 @@ export default function MyPracticePage() {
                   {(commentCounts[note.id] || 0) > 0 && (
                     <span style={{
                       padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                      background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
+                      background: 'var(--blue-dim)', color: 'var(--blue-light)',
                       fontSize: 11, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3,
                     }}>💬 {commentCounts[note.id]}</span>
                   )}
@@ -621,7 +621,7 @@ export default function MyPracticePage() {
             const note = notes.find(n => n.id === expandedNoteId);
             if (!note) return null;
             return (
-              <div style={{ ...card, border: '1px solid rgba(48,209,88,0.3)', background: 'rgba(48,209,88,0.03)' }}>
+              <div style={{ ...card, border: '1px solid var(--green-dim)', background: 'var(--green-dim)' }}>
                 {/* 헤더 */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
@@ -788,7 +788,7 @@ function PracticeStepsRenderer({ content }: { content: string }) {
             <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
               <div style={{
                 padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'rgba(48,209,88,0.06)',
+                background: 'var(--green-dim)',
               }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -169,7 +169,7 @@ export default function StudentDetailClient({
                   <span style={{
                     padding: '4px 12px', borderRadius: 'var(--radius-pill)',
                     fontSize: 13, fontWeight: 700,
-                    background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                    background: 'var(--red-dim)', color: 'var(--red)',
                   }}>퇴사 ({student.dropped_at})</span>
                 )}
               </div>
@@ -199,7 +199,7 @@ export default function StudentDetailClient({
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>🚨 이 부분을 더 공부하세요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {weakTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.1)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
+                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
                         {t.label} ({t.correct}/{t.total})
                       </span>
                     ))}
@@ -211,7 +211,7 @@ export default function StudentDetailClient({
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>⚠️ 조금 더 복습하면 좋아요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {midTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.1)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
+                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
                         {t.label} ({t.correct}/{t.total})
                       </span>
                     ))}
@@ -329,7 +329,7 @@ export default function StudentDetailClient({
                       {wrongs.map((w) => (
                         <div key={w.id} style={{
                           padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                          background: 'rgba(255,69,58,0.05)', border: '1px solid rgba(255,69,58,0.15)',
+                          background: 'var(--red-dim)', border: '1px solid var(--red-dim)',
                         }}>
                           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>
                             Q{w.question_id} · {w.question?.series || w.question?.category}
@@ -338,11 +338,11 @@ export default function StudentDetailClient({
                             {w.question?.question_text || ''}
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,69,58,0.08)', fontSize: 12 }}>
+                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--red-dim)', fontSize: 12 }}>
                               <span style={{ color: 'var(--text-muted)' }}>답: </span>
                               <span style={{ color: 'var(--red)', fontWeight: 500 }}>{w.user_answer || '(미입력)'}</span>
                             </div>
-                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'rgba(10,132,255,0.08)', fontSize: 12 }}>
+                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--blue-dim)', fontSize: 12 }}>
                               <span style={{ color: 'var(--text-muted)' }}>정답: </span>
                               <span style={{ color: 'var(--blue-light)', fontWeight: 500 }}>{w.question?.correct_answer || ''}</span>
                             </div>

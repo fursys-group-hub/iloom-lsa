@@ -80,7 +80,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
       </div>
       {lightboxIdx !== null && (
         <div onClick={() => setLightboxIdx(null)}
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--overlay-heavy)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
           <img src={images[lightboxIdx]} alt="확대 보기" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} onClick={e => e.stopPropagation()} />
           {images.length > 1 && (
             <div style={{ position: 'absolute', bottom: 32, display: 'flex', gap: 12 }}>
@@ -342,9 +342,9 @@ export default function DashboardPracticePage() {
                       style={{
                         width: '100%', textAlign: 'left', cursor: 'pointer',
                         padding: '16px 20px', borderRadius: isExpanded ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
-                        border: isExpanded ? '2px solid var(--blue)' : '1px solid rgba(10,132,255,0.3)',
+                        border: isExpanded ? '2px solid var(--blue)' : '1px solid var(--blue-dim)',
                         borderBottom: isExpanded ? '1px solid var(--border)' : undefined,
-                        background: isExpanded ? 'rgba(48,209,88,0.08)' : 'var(--bg-surface)',
+                        background: isExpanded ? 'var(--green-dim)' : 'var(--bg-surface)',
                         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                       }}>
                       {/* 아바타 + 이름 */}
@@ -362,9 +362,9 @@ export default function DashboardPracticePage() {
                       {/* 실적 뱃지 */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, flexWrap: 'wrap' }}>
                         {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>🗣️ 상담 {statsData.stats_consult}</span>}
-                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.12)', color: 'var(--blue-light)', fontWeight: 600 }}>📋 견적 {statsData.stats_estimate}</span>}
-                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontWeight: 600 }}>✅ 수주 {statsData.stats_order}</span>}
-                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.12)', color: 'var(--purple)', fontWeight: 600 }}>💰 {statsData.stats_amount.toLocaleString()}원</span>}
+                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>📋 견적 {statsData.stats_estimate}</span>}
+                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>✅ 수주 {statsData.stats_order}</span>}
+                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>💰 {statsData.stats_amount.toLocaleString()}원</span>}
                       </div>
                       {/* 섹션 완료 + 코멘트 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -390,7 +390,7 @@ export default function DashboardPracticePage() {
                         {(commentCounts[note.id] || 0) > 0 && (
                           <span style={{
                             padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                            background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
+                            background: 'var(--blue-dim)', color: 'var(--blue-light)',
                             fontSize: 11, fontWeight: 700,
                           }}>💬 {commentCounts[note.id]}</span>
                         )}
@@ -403,7 +403,7 @@ export default function DashboardPracticePage() {
                       <div style={{
                         padding: 20, border: '2px solid var(--blue)', borderTop: 'none',
                         borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-                        background: 'rgba(48,209,88,0.03)',
+                        background: 'var(--green-dim)',
                       }}>
                         {/* 실적 상세 */}
                         {(() => {
@@ -464,7 +464,7 @@ export default function DashboardPracticePage() {
                                   );
                                   return (
                                     <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
-                                      <div style={{ padding: '10px 16px', background: 'rgba(48,209,88,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <div style={{ padding: '10px 16px', background: 'var(--green-dim)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                                         {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>}
                                       </div>

@@ -64,9 +64,9 @@ function rpAreaSummary(evals: EvalData[]) {
 }
 
 const LEVEL_CONFIG = {
-  good:   { label: '잘함', emoji: '🟢', bg: 'rgba(48,209,88,0.10)', border: 'var(--green)', color: 'var(--green)' },
-  normal: { label: '보통', emoji: '🟡', bg: 'rgba(255,159,10,0.08)', border: 'var(--orange)', color: 'var(--orange)' },
-  weak:   { label: '보완 필요', emoji: '🔴', bg: 'rgba(255,69,58,0.08)', border: 'var(--red)', color: 'var(--red)' },
+  good:   { label: '잘함', emoji: '🟢', bg: 'var(--green-dim)', border: 'var(--green)', color: 'var(--green)' },
+  normal: { label: '보통', emoji: '🟡', bg: 'var(--orange-dim)', border: 'var(--orange)', color: 'var(--orange)' },
+  weak:   { label: '보완 필요', emoji: '🔴', bg: 'var(--red-dim)', border: 'var(--red)', color: 'var(--red)' },
 };
 
 export default function ManagerHomePage() {
@@ -201,8 +201,8 @@ export default function ManagerHomePage() {
                       </div>
                       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>{rp.weeks.map((w) => `${w}주차`).join(', ')}</p>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        {rp.topStrengths.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(48,209,88,0.12)', color: 'var(--green)', fontSize: 11, fontWeight: 600 }}>👍 {t}</span>)}
-                        {rp.topImprovements.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 11, fontWeight: 600 }}>📌 {t}</span>)}
+                        {rp.topStrengths.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 11, fontWeight: 600 }}>👍 {t}</span>)}
+                        {rp.topImprovements.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 11, fontWeight: 600 }}>📌 {t}</span>)}
                       </div>
                     </div>
                   );
@@ -230,7 +230,7 @@ export default function ManagerHomePage() {
                           {ev?.rp_area && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 13, fontWeight: 600 }}>{ev.rp_area}</span>}
                         </div>
                         {ev ? (
-                          <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)', color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)' }}>
+                          <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)', color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)' }}>
                             {ev.status === 'completed' ? '완료' : ev.status === 'partial' ? '일부' : '미진행'}
                           </span>
                         ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>미작성</span>}
@@ -238,14 +238,14 @@ export default function ManagerHomePage() {
                       {ev && (
                         <>
                           {resolved.length > 0 && (
-                            <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginBottom: 12, background: 'rgba(48,209,88,0.08)', border: '1px solid rgba(48,209,88,0.2)' }}>
+                            <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginBottom: 12, background: 'var(--green-dim)', border: '1px solid var(--green-dim)' }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', marginRight: 8 }}>지난주 대비 해결됨:</span>
                               {resolved.map((t) => <span key={t} style={{ fontSize: 12, color: 'var(--green)', marginRight: 8 }}>✅ {t}</span>)}
                             </div>
                           )}
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                            {ev.strength_tags.map((t) => <span key={`s-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'rgba(48,209,88,0.12)', color: 'var(--green)', fontSize: 12, fontWeight: 600 }}>👍 {t}</span>)}
-                            {ev.improvement_tags.map((t) => <span key={`i-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>📌 {t}</span>)}
+                            {ev.strength_tags.map((t) => <span key={`s-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12, fontWeight: 600 }}>👍 {t}</span>)}
+                            {ev.improvement_tags.map((t) => <span key={`i-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>📌 {t}</span>)}
                           </div>
                           {ev.comment && (
                             <div style={{ padding: '14px 18px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)' }}>

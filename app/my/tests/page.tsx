@@ -142,8 +142,8 @@ export default function MyTestsPage() {
             {selectedDetails.map(d => (
               <div key={d.id} style={{
                 padding: '12px 16px', borderRadius: 'var(--radius-sm)',
-                border: `1px solid ${d.is_correct ? 'var(--border)' : 'rgba(255,69,58,0.3)'}`,
-                background: d.is_correct ? 'var(--bg-surface)' : 'rgba(255,69,58,0.04)',
+                border: `1px solid ${d.is_correct ? 'var(--border)' : 'var(--red-dim)'}`,
+                background: d.is_correct ? 'var(--bg-surface)' : 'var(--red-dim)',
               }}>
                 {/* 문제 */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
@@ -151,7 +151,7 @@ export default function MyTestsPage() {
                     flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 13, fontWeight: 700,
-                    background: d.is_correct ? 'rgba(48,209,88,0.15)' : 'rgba(255,69,58,0.15)',
+                    background: d.is_correct ? 'var(--green-dim)' : 'var(--red-dim)',
                     color: d.is_correct ? 'var(--green)' : 'var(--red)',
                   }}>
                     {d.is_correct ? 'O' : 'X'}
@@ -184,14 +184,14 @@ export default function MyTestsPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginLeft: 38 }}>
                   <div style={{
                     padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                    background: d.is_correct ? 'rgba(48,209,88,0.08)' : 'rgba(255,69,58,0.08)',
+                    background: d.is_correct ? 'var(--green-dim)' : 'var(--red-dim)',
                   }}>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>내 답안</div>
                     <div style={{ fontSize: 14, color: d.is_correct ? 'var(--green)' : 'var(--red)', fontWeight: 500 }}>
                       {d.user_answer || '(미입력)'}
                     </div>
                   </div>
-                  <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(10,132,255,0.08)' }}>
+                  <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--blue-dim)' }}>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>정답</div>
                     <div style={{ fontSize: 14, color: 'var(--blue-light)', fontWeight: 500 }}>{d.question?.correct_answer}</div>
                   </div>

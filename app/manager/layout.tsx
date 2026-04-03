@@ -38,7 +38,7 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
       {sidebarOpen && (
         <div className="mobile-overlay" onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.6)' }} />
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'var(--overlay)' }} />
       )}
 
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}

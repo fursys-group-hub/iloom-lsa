@@ -193,7 +193,7 @@ export default function StudentsClient({ students: initialStudents, scores, atte
                           <span style={{
                             padding: '2px 8px', borderRadius: 'var(--radius-pill)',
                             fontSize: 11, fontWeight: 700,
-                            background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                            background: 'var(--red-dim)', color: 'var(--red)',
                           }}>퇴사</span>
                         )}
                       </div>

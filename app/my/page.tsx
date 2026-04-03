@@ -143,8 +143,8 @@ export default function MyPage() {
 
   const PRIORITY_STYLE: Record<string, { color: string; bg: string; icon: string; label: string }> = {
     normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢', label: '공지' },
-    important: { color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '⚠️', label: '중요' },
-    urgent: { color: 'var(--red)', bg: 'rgba(255,69,58,0.12)', icon: '🚨', label: '긴급' },
+    important: { color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️', label: '중요' },
+    urgent: { color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨', label: '긴급' },
   };
 
   return (
@@ -158,7 +158,7 @@ export default function MyPage() {
           <div
             style={{
               position: 'fixed', inset: 0, zIndex: 1000,
-              background: 'rgba(0,0,0,0.7)',
+              background: 'var(--overlay)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
             onClick={closePopup}
@@ -269,7 +269,7 @@ export default function MyPage() {
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>🚨 이 부분을 더 공부하세요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {weakTags.slice(0, 5).map(t => (
-                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.1)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
+                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
                       {t.label} ({t.correct}/{t.total})
                     </span>
                   ))}
@@ -281,7 +281,7 @@ export default function MyPage() {
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>⚠️ 조금 더 복습하면 좋아요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {midTags.slice(0, 5).map(t => (
-                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.1)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
+                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
                       {t.label} ({t.correct}/{t.total})
                     </span>
                   ))}
@@ -341,7 +341,7 @@ export default function MyPage() {
                 {wrongs.map(w => (
                   <div key={w.id} style={{
                     padding: '12px 16px', borderRadius: 'var(--radius-sm)',
-                    background: 'rgba(255,69,58,0.04)', border: '1px solid rgba(255,69,58,0.12)',
+                    background: 'var(--red-dim)', border: '1px solid var(--red-dim)',
                   }}>
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
                       Q{w.question_id} · {w.question?.category} · {w.question?.series}
@@ -350,11 +350,11 @@ export default function MyPage() {
                       {w.question?.question_text}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(255,69,58,0.08)' }}>
+                      <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--red-dim)' }}>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>내 답안</div>
                         <div style={{ fontSize: 14, color: 'var(--red)', fontWeight: 500 }}>{w.user_answer || '(미입력)'}</div>
                       </div>
-                      <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'rgba(10,132,255,0.08)' }}>
+                      <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--blue-dim)' }}>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>정답</div>
                         <div style={{ fontSize: 14, color: 'var(--blue-light)', fontWeight: 500 }}>{w.question?.correct_answer}</div>
                       </div>

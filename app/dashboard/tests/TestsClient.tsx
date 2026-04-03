@@ -281,8 +281,8 @@ export default function TestsClient({ batches, students, scores }: Props) {
       {syncResult && (
         <div style={{
           padding: '14px 20px', borderRadius: 'var(--radius-md)',
-          background: syncResult.includes('완료') ? 'rgba(48, 209, 88, 0.1)' : 'rgba(255, 69, 58, 0.1)',
-          border: `1px solid ${syncResult.includes('완료') ? 'rgba(48, 209, 88, 0.3)' : 'rgba(255, 69, 58, 0.3)'}`,
+          background: syncResult.includes('완료') ? 'var(--green-dim)' : 'var(--red-dim)',
+          border: `1px solid ${syncResult.includes('완료') ? 'var(--green-dim)' : 'var(--red-dim)'}`,
           color: syncResult.includes('완료') ? 'var(--green)' : 'var(--red)',
           fontSize: 15,
         }}>
@@ -407,7 +407,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                         <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{row.student.name}</span>
                         <span style={{
                           fontSize: 12, fontWeight: 600, padding: '2px 10px',
-                          borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.1)', color: 'var(--red)',
+                          borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)',
                         }}>미응시</span>
                       </div>
                       <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>-</div>
@@ -457,8 +457,8 @@ export default function TestsClient({ batches, students, scores }: Props) {
                             return (
                               <div key={r.id} style={{
                                 padding: '12px 16px', borderRadius: 'var(--radius-sm)',
-                                border: `1px solid ${r.is_correct ? 'var(--border)' : 'rgba(255, 69, 58, 0.3)'}`,
-                                background: r.is_correct ? 'var(--bg-surface)' : 'rgba(255, 69, 58, 0.05)',
+                                border: `1px solid ${r.is_correct ? 'var(--border)' : 'var(--red-dim)'}`,
+                                background: r.is_correct ? 'var(--bg-surface)' : 'var(--red-dim)',
                               }}>
                                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
                                   <OXBadge correct={r.is_correct} />
@@ -762,17 +762,17 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                   style={{
                                     display: 'flex', alignItems: 'center', gap: 8,
                                     padding: '10px 14px', borderRadius: 'var(--radius-sm)',
-                                    background: 'rgba(10, 132, 255, 0.08)', border: '1px solid rgba(10, 132, 255, 0.2)',
+                                    background: 'var(--blue-dim)', border: '1px solid var(--blue-dim)',
                                     cursor: 'pointer', transition: 'all 0.15s ease',
                                   }}
                                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(10, 132, 255, 0.2)'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--blue-dim)'; }}
                                 >
                                   <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>정답:</span>
                                   <span style={{ fontSize: 15, color: 'var(--blue-light)', fontWeight: 600 }}>{q.correct_answer}</span>
                                   <span style={{
                                     fontSize: 12, color: 'var(--purple)', padding: '2px 8px',
-                                    borderRadius: 'var(--radius-pill)', background: 'rgba(191, 90, 242, 0.1)',
+                                    borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)',
                                     marginLeft: 8,
                                   }}>{q.scoring_mode}</span>
                                   <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>클릭하여 수정</span>
@@ -838,7 +838,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                               style={{
                                                 width: 32, height: 32, borderRadius: '50%', border: 'none',
                                                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                                                background: currentCorrect ? 'var(--green)' : 'rgba(48, 209, 88, 0.1)',
+                                                background: currentCorrect ? 'var(--green)' : 'var(--green-dim)',
                                                 color: currentCorrect ? '#fff' : 'var(--green)',
                                                 transition: 'all 0.15s ease',
                                               }}
@@ -852,7 +852,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                               style={{
                                                 width: 32, height: 32, borderRadius: '50%', border: 'none',
                                                 fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                                                background: !currentCorrect ? 'var(--red)' : 'rgba(255, 69, 58, 0.1)',
+                                                background: !currentCorrect ? 'var(--red)' : 'var(--red-dim)',
                                                 color: !currentCorrect ? '#fff' : 'var(--red)',
                                                 transition: 'all 0.15s ease',
                                               }}
@@ -877,7 +877,7 @@ export default function TestsClient({ batches, students, scores }: Props) {
                                     onClick={() => { setGradingQ(q.question_id); setGradingChanges(new Map()); }}
                                     style={{
                                       padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                                      border: '1px solid var(--orange)', background: 'rgba(255, 159, 10, 0.08)',
+                                      border: '1px solid var(--orange)', background: 'var(--orange-dim)',
                                       color: 'var(--orange)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
                                       transition: 'all 0.15s ease',
                                     }}
@@ -970,7 +970,7 @@ function OXBadge({ correct }: { correct: boolean }) {
       flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 13, fontWeight: 700,
-      background: correct ? 'rgba(48, 209, 88, 0.15)' : 'rgba(255, 69, 58, 0.15)',
+      background: correct ? 'var(--green-dim)' : 'var(--red-dim)',
       color: correct ? 'var(--green)' : 'var(--red)',
     }}>
       {correct ? 'O' : 'X'}
@@ -980,9 +980,9 @@ function OXBadge({ correct }: { correct: boolean }) {
 
 function AnswerBox({ label, value, color }: { label: string; value: string; color: 'green' | 'red' | 'blue' }) {
   const colors = {
-    green: { bg: 'rgba(48, 209, 88, 0.08)', border: 'rgba(48, 209, 88, 0.2)', text: 'var(--green)' },
-    red: { bg: 'rgba(255, 69, 58, 0.08)', border: 'rgba(255, 69, 58, 0.2)', text: 'var(--red)' },
-    blue: { bg: 'rgba(10, 132, 255, 0.08)', border: 'rgba(10, 132, 255, 0.2)', text: 'var(--blue-light)' },
+    green: { bg: 'var(--green-dim)', border: 'var(--green-dim)', text: 'var(--green)' },
+    red: { bg: 'var(--red-dim)', border: 'var(--red-dim)', text: 'var(--red)' },
+    blue: { bg: 'var(--blue-dim)', border: 'var(--blue-dim)', text: 'var(--blue-light)' },
   };
   const c = colors[color];
   return (

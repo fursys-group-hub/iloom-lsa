@@ -29,7 +29,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
           onClick={() => setLightboxIdx(null)}
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.85)',
+            background: 'var(--overlay-heavy)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
           }}
@@ -350,7 +350,7 @@ export default function EducationLogsPage() {
                   style={{
                     padding: '6px 14px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                     border: filterType === f.key ? 'none' : '1px solid var(--border)',
-                    background: filterType === f.key ? (f.key === 'best' ? 'rgba(48,209,88,0.15)' : f.key === 'incomplete' ? 'rgba(255,159,10,0.12)' : 'var(--blue)') : 'transparent',
+                    background: filterType === f.key ? (f.key === 'best' ? 'var(--green-dim)' : f.key === 'incomplete' ? 'var(--orange-dim)' : 'var(--blue)') : 'transparent',
                     color: filterType === f.key ? (f.key === 'best' ? 'var(--green)' : f.key === 'incomplete' ? 'var(--orange)' : '#fff') : 'var(--text-tertiary)',
                     fontSize: 13, fontWeight: 600,
                   }}
@@ -444,7 +444,7 @@ export default function EducationLogsPage() {
                         return (
                           <span key={n.id} style={{
                             padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
-                            background: c?.bg || 'rgba(255,159,10,0.12)', color: c?.color || 'var(--orange)',
+                            background: c?.bg || 'var(--orange-dim)', color: c?.color || 'var(--orange)',
                           }}>
                             {c?.emoji} {n.students?.name || '?'}
                           </span>
@@ -475,16 +475,16 @@ export default function EducationLogsPage() {
                         width: '100%', textAlign: 'left', cursor: 'pointer',
                         padding: '16px 20px',
                         borderRadius: isExpanded ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
-                        border: isExpanded ? '2px solid var(--blue)' : isSelfStudy ? '1px solid rgba(191,90,242,0.3)' : '1px solid var(--border)',
+                        border: isExpanded ? '2px solid var(--blue)' : isSelfStudy ? '1px solid var(--purple-dim)' : '1px solid var(--border)',
                         borderBottom: isExpanded ? '1px solid var(--border)' : undefined,
-                        background: isExpanded ? 'var(--blue-dim)' : isSelfStudy ? 'rgba(191,90,242,0.04)' : 'var(--bg-surface)',
+                        background: isExpanded ? 'var(--blue-dim)' : isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-surface)',
                         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                       }}
                     >
                       {/* 아바타 + 이름 */}
                       <div style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                        background: isSelfStudy ? 'rgba(191,90,242,0.15)' : (conf?.bg || 'var(--blue-dim)'),
+                        background: isSelfStudy ? 'var(--purple-dim)' : (conf?.bg || 'var(--blue-dim)'),
                         color: isSelfStudy ? 'var(--purple)' : (conf?.color || 'var(--blue-light)'),
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 13, fontWeight: 700,
@@ -500,15 +500,15 @@ export default function EducationLogsPage() {
                           {note.one_word || note.title}
                         </span>
                         {isDropped && (
-                          <span style={{ padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'rgba(255,69,58,0.12)', color: 'var(--red)' }}>퇴사</span>
+                          <span style={{ padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>
                         )}
                         {isSelfStudy && (
-                          <span style={{ padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>자율학습</span>
+                          <span style={{ padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>
                         )}
                         {displayTags.length > 0 && (
                           <span style={{
                             padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600,
-                            background: isSelfStudy ? 'rgba(191,90,242,0.1)' : 'var(--bg-hover)',
+                            background: isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-hover)',
                             color: isSelfStudy ? 'var(--purple)' : 'var(--text-tertiary)',
                           }}>{displayTags[0]}{displayTags.length > 1 ? ` +${displayTags.length - 1}` : ''}</span>
                         )}
@@ -523,7 +523,7 @@ export default function EducationLogsPage() {
                             return (
                               <div style={{ display: 'flex', gap: 3 }}>
                                 {['📝', '💡', '🎯'].map((icon, i) => (
-                                  <span key={i} style={{ fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)', opacity: filled[i] ? 1 : 0.3 }}>{icon}</span>
+                                  <span key={i} style={{ fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'var(--green-dim)' : 'var(--bg-hover)', opacity: filled[i] ? 1 : 0.3 }}>{icon}</span>
                                 ))}
                               </div>
                             );
@@ -535,7 +535,7 @@ export default function EducationLogsPage() {
                         {!isSelfStudy && (
                           <span style={{
                             padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                            background: (note.participation_score || 0) >= 3 ? 'rgba(48,209,88,0.15)' : (note.participation_score || 0) >= 1 ? 'rgba(255,159,10,0.12)' : 'var(--bg-hover)',
+                            background: (note.participation_score || 0) >= 3 ? 'var(--green-dim)' : (note.participation_score || 0) >= 1 ? 'var(--orange-dim)' : 'var(--bg-hover)',
                             color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                           }}>
                             {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
@@ -543,7 +543,7 @@ export default function EducationLogsPage() {
                         )}
                         {/* 코멘트 */}
                         {(commentCounts[note.id] || 0) > 0 && (
-                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>💬 {commentCounts[note.id]}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>💬 {commentCounts[note.id]}</span>
                         )}
                         <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
                       </div>

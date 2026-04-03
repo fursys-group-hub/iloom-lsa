@@ -166,7 +166,7 @@ export default function GrowthPage() {
                       {resolved.length > 0 && (
                         <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {resolved.map((t) => (
-                            <span key={t} style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(48,209,88,0.12)', color: 'var(--green)', fontSize: 12 }}>
+                            <span key={t} style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12 }}>
                               ✓ {t} 해결
                             </span>
                           ))}
@@ -175,7 +175,7 @@ export default function GrowthPage() {
                       {newIssues.length > 0 && (
                         <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {newIssues.map((t) => (
-                            <span key={t} style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 12 }}>
+                            <span key={t} style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12 }}>
                               {idx === 0 ? '' : '+ '}{t}
                             </span>
                           ))}

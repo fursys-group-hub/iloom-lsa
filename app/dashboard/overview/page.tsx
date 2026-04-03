@@ -78,9 +78,9 @@ function rpAreaSummary(evals: EvalData[]) {
 }
 
 const LEVEL_CONFIG = {
-  good:   { label: '잘함',     emoji: '🟢', bg: 'rgba(48,209,88,0.10)',  border: 'var(--green)',  color: 'var(--green)' },
-  normal: { label: '보통',     emoji: '🟡', bg: 'rgba(255,159,10,0.08)', border: 'var(--orange)', color: 'var(--orange)' },
-  weak:   { label: '보완 필요', emoji: '🔴', bg: 'rgba(255,69,58,0.08)',  border: 'var(--red)',    color: 'var(--red)' },
+  good:   { label: '잘함',     emoji: '🟢', bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)' },
+  normal: { label: '보통',     emoji: '🟡', bg: 'var(--orange-dim)', border: 'var(--orange)', color: 'var(--orange)' },
+  weak:   { label: '보완 필요', emoji: '🔴', bg: 'var(--red-dim)',  border: 'var(--red)',    color: 'var(--red)' },
 };
 
 /* ── 메인 ── */
@@ -186,7 +186,7 @@ export default function OverviewPage() {
                             {ev ? (
                               <span title={`${ev.rp_area || ''} — 강점 ${ev.strength_tags.length} / 개선 ${ev.improvement_tags.length}`}
                                 style={{ display: 'inline-block', width: 28, height: 28, borderRadius: '50%', lineHeight: '28px', textAlign: 'center', fontSize: 13,
-                                  background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)',
+                                  background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                                   color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                                 }}>{ev.status === 'completed' ? '✓' : '△'}</span>
                             ) : <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>-</span>}
@@ -382,7 +382,7 @@ export default function OverviewPage() {
                         {ev ? (
                           <span style={{
                             padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                            background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)',
+                            background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                             color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                           }}>{ev.status === 'completed' ? '완료' : ev.status === 'partial' ? '일부' : '미진행'}</span>
                         ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>미작성</span>}
@@ -394,7 +394,7 @@ export default function OverviewPage() {
                           {resolved.length > 0 && (
                             <div style={{
                               padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginBottom: 12,
-                              background: 'rgba(48,209,88,0.08)', border: '1px solid rgba(48,209,88,0.2)',
+                              background: 'var(--green-dim)', border: '1px solid var(--green-dim)',
                             }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', marginRight: 8 }}>지난주 대비 해결됨:</span>
                               {resolved.map((t) => (
@@ -533,13 +533,13 @@ export default function OverviewPage() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
                     {fe.strengths && (
-                      <div style={{ padding: 20, background: 'rgba(48,209,88,0.08)', borderRadius: 'var(--radius-md)' }}>
+                      <div style={{ padding: 20, background: 'var(--green-dim)', borderRadius: 'var(--radius-md)' }}>
                         <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)', margin: '0 0 8px' }}>💪 핵심 강점</p>
                         <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.strengths}</p>
                       </div>
                     )}
                     {fe.areas_to_develop && (
-                      <div style={{ padding: 20, background: 'rgba(255,159,10,0.08)', borderRadius: 'var(--radius-md)' }}>
+                      <div style={{ padding: 20, background: 'var(--orange-dim)', borderRadius: 'var(--radius-md)' }}>
                         <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--orange)', margin: '0 0 8px' }}>🎯 발전 방향</p>
                         <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.areas_to_develop}</p>
                       </div>
@@ -627,7 +627,7 @@ function StoreBadge({ children }: { children: React.ReactNode }) {
   return <span style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 500 }}>{children}</span>;
 }
 function TagPill({ children, type }: { children: React.ReactNode; type: 'strength' | 'improvement' }) {
-  const c = type === 'strength' ? { bg: 'rgba(48,209,88,0.12)', color: 'var(--green)' } : { bg: 'rgba(255,159,10,0.12)', color: 'var(--orange)' };
+  const c = type === 'strength' ? { bg: 'var(--green-dim)', color: 'var(--green)' } : { bg: 'var(--orange-dim)', color: 'var(--orange)' };
   return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: c.bg, color: c.color, fontSize: 12, fontWeight: 600 }}>{children}</span>;
 }
 function FilterBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {

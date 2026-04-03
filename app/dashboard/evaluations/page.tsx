@@ -139,7 +139,7 @@ export default function AdminEvaluationsPage() {
                             <span style={{
                               display: 'inline-block', width: 28, height: 28,
                               borderRadius: '50%', lineHeight: '28px', textAlign: 'center', fontSize: 13,
-                              background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)',
+                              background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                               color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                             }} title={ev.rp_area || ''}>
                               {ev.status === 'completed' ? '✓' : '△'}
@@ -204,7 +204,7 @@ export default function AdminEvaluationsPage() {
                       {ev ? (
                         <span style={{
                           padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                          background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)',
+                          background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                           color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                         }}>
                           {ev.status === 'completed' ? '완료' : ev.status === 'partial' ? '일부 진행' : '미진행'}
@@ -221,7 +221,7 @@ export default function AdminEvaluationsPage() {
                             {ev.strength_tags.map((tag) => (
                               <span key={tag} style={{
                                 padding: '4px 10px', borderRadius: 'var(--radius-pill)',
-                                background: 'rgba(48,209,88,0.12)', color: 'var(--green)', fontSize: 12, fontWeight: 500,
+                                background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12, fontWeight: 500,
                               }}>
                                 + {tag}
                               </span>
@@ -233,7 +233,7 @@ export default function AdminEvaluationsPage() {
                             {ev.improvement_tags.map((tag) => (
                               <span key={tag} style={{
                                 padding: '4px 10px', borderRadius: 'var(--radius-pill)',
-                                background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 12, fontWeight: 500,
+                                background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 500,
                               }}>
                                 - {tag}
                               </span>

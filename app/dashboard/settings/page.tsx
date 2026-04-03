@@ -269,7 +269,7 @@ export default function SettingsPage() {
             {/* 심화교육 일정 */}
             <div>
               <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'rgba(191,90,242,0.15)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
+                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
                 심화교육 일정 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span>
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -312,10 +312,10 @@ export default function SettingsPage() {
                     </p>
                     {(() => {
                       const today = new Date().toISOString().slice(0, 10);
-                      if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(48,209,88,0.12)', color: 'var(--green)' }}>입문교육 진행중</span>;
-                      if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>심화교육 진행중</span>;
+                      if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
+                      if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
                       if (batch.advanced_end && today > batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>완료</span>;
-                      if (today > batch.end_date && (!batch.advanced_start || today < batch.advanced_start)) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'rgba(255,159,10,0.12)', color: 'var(--orange)' }}>매장 배치 대기</span>;
+                      if (today > batch.end_date && (!batch.advanced_start || today < batch.advanced_start)) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--orange-dim)', color: 'var(--orange)' }}>매장 배치 대기</span>;
                       if (today < batch.start_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>예정</span>;
                       return null;
                     })()}
@@ -466,7 +466,7 @@ export default function SettingsPage() {
                           {s.is_dropped && (
                             <span style={{
                               padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
-                              background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                              background: 'var(--red-dim)', color: 'var(--red)',
                             }}>퇴사{s.dropped_at ? ` ${s.dropped_at.slice(5)}` : ''}</span>
                           )}
                         </div>
@@ -492,7 +492,7 @@ export default function SettingsPage() {
                             style={{
                               ...tinyBtnStyle,
                               border: 'none',
-                              background: s.is_dropped ? 'rgba(48,209,88,0.12)' : 'rgba(255,69,58,0.08)',
+                              background: s.is_dropped ? 'var(--green-dim)' : 'var(--red-dim)',
                               color: s.is_dropped ? 'var(--green)' : 'var(--red)',
                               fontWeight: 600,
                             }}
@@ -543,7 +543,7 @@ export default function SettingsPage() {
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'rgba(0,0,0,0.7)',
+            background: 'var(--overlay)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
           onClick={() => setDropModal(null)}

@@ -46,7 +46,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
       {/* 모바일 오버레이 */}
       {sidebarOpen && (
         <div className="mobile-overlay" onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.6)' }} />
+          style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'var(--overlay)' }} />
       )}
 
       {/* 사이드바 */}

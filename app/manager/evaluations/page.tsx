@@ -288,7 +288,7 @@ export default function EvaluationsPage() {
                     style={{
                       padding: '8px 14px', borderRadius: 'var(--radius-pill)',
                       border: selected ? '2px solid var(--green)' : '1px solid var(--border)',
-                      background: selected ? 'rgba(48, 209, 88, 0.15)' : 'transparent',
+                      background: selected ? 'var(--green-dim)' : 'transparent',
                       color: selected ? 'var(--green)' : 'var(--text-tertiary)',
                       fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s ease',
                     }}
@@ -314,7 +314,7 @@ export default function EvaluationsPage() {
                     style={{
                       padding: '8px 14px', borderRadius: 'var(--radius-pill)',
                       border: selected ? '2px solid var(--orange)' : '1px solid var(--border)',
-                      background: selected ? 'rgba(255, 159, 10, 0.15)' : 'transparent',
+                      background: selected ? 'var(--orange-dim)' : 'transparent',
                       color: selected ? 'var(--orange)' : 'var(--text-tertiary)',
                       fontSize: 13, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s ease',
                     }}
@@ -419,7 +419,7 @@ export default function EvaluationsPage() {
                     {ev ? (
                       <span style={{
                         padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                        background: ev.status === 'completed' ? 'rgba(48,209,88,0.15)' : 'rgba(255,159,10,0.15)',
+                        background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                         color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                         fontSize: 12, fontWeight: 600,
                       }}>

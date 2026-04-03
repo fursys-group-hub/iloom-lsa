@@ -62,7 +62,7 @@ export default function DashboardLayout({
           onClick={() => setSidebarOpen(false)}
           style={{
             position: 'fixed', inset: 0, zIndex: 40,
-            background: 'rgba(0,0,0,0.6)',
+            background: 'var(--overlay)',
           }}
         />
       )}

@@ -556,7 +556,7 @@ export default function AttendancePage() {
                         >
                           <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
                             {d.students?.name || '알 수 없음'}
-                            {isDropped && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'rgba(255,69,58,0.12)', color: 'var(--red)', fontWeight: 700 }}>퇴사</span>}
+                            {isDropped && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontWeight: 700 }}>퇴사</span>}
                           </td>
                           <td style={tdStyle}>{times.checkIn}</td>
                           <td style={tdStyle}>{times.checkOut}</td>

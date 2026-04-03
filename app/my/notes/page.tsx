@@ -469,7 +469,7 @@ export default function MyNotesPage() {
 
       {/* 작성 폼 — STEP 구조 */}
       {showForm && (
-        <div style={{ ...card, ...(isSelfStudyMode ? { border: '1px solid rgba(191,90,242,0.4)', background: 'rgba(191,90,242,0.04)' } : {}) }}>
+        <div style={{ ...card, ...(isSelfStudyMode ? { border: '1px solid var(--purple-dim)', background: 'var(--purple-dim)' } : {}) }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {isSelfStudyMode ? '📚 자율학습 노트' : editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
@@ -485,7 +485,7 @@ export default function MyNotesPage() {
                 style={{
                   padding: '6px 16px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
                   border: isSelfStudyMode ? '2px solid var(--purple)' : '1px solid var(--border)',
-                  background: isSelfStudyMode ? 'rgba(191,90,242,0.15)' : 'transparent',
+                  background: isSelfStudyMode ? 'var(--purple-dim)' : 'transparent',
                   color: isSelfStudyMode ? 'var(--purple)' : 'var(--text-tertiary)',
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease', whiteSpace: 'nowrap',
                 }}
@@ -587,7 +587,7 @@ export default function MyNotesPage() {
 
               return (
                 <div key={key} style={{
-                  border: isSelfStudyMode ? '1px solid rgba(191,90,242,0.3)' : '1px solid var(--border)',
+                  border: isSelfStudyMode ? '1px solid var(--purple-dim)' : '1px solid var(--border)',
                   borderRadius: 'var(--radius-md)',
                   background: 'var(--bg-elevated)', overflow: 'hidden',
                 }}>
@@ -595,7 +595,7 @@ export default function MyNotesPage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: val.trim() ? (isSelfStudyMode ? 'rgba(191,90,242,0.06)' : 'var(--step-filled-bg)') : 'var(--bg-hover)',
+                    background: val.trim() ? (isSelfStudyMode ? 'var(--purple-dim)' : 'var(--step-filled-bg)') : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -697,7 +697,7 @@ export default function MyNotesPage() {
             {saveError && (
               <div style={{
                 padding: '10px 16px', borderRadius: 'var(--radius-md)',
-                background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                background: 'var(--red-dim)', color: 'var(--red)',
                 fontSize: 14, fontWeight: 600,
               }}>
                 {saveError}
@@ -747,8 +747,8 @@ export default function MyNotesPage() {
                   onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
                   style={{
                     padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--blue)' : isSelfStudy ? '1px solid rgba(191,90,242,0.4)' : '1px solid var(--border)',
-                    background: isSelected ? 'var(--blue-dim)' : isSelfStudy ? 'rgba(191,90,242,0.06)' : 'var(--bg-surface)',
+                    border: isSelected ? '2px solid var(--blue)' : isSelfStudy ? '1px solid var(--purple-dim)' : '1px solid var(--border)',
+                    background: isSelected ? 'var(--blue-dim)' : isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-surface)',
                     cursor: 'pointer', transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', gap: 10,
                   }}
@@ -761,7 +761,7 @@ export default function MyNotesPage() {
                     {isSelfStudy && (
                       <span style={{
                         padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
-                        background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
+                        background: 'var(--purple-dim)', color: 'var(--purple)',
                       }}>📚 자율학습</span>
                     )}
                   </div>
@@ -780,7 +780,7 @@ export default function MyNotesPage() {
                       {note.participation_score != null && note.participation_score > 0 && (
                         <span style={{
                           padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                          background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : note.participation_score >= 1 ? 'rgba(255,159,10,0.12)' : 'rgba(255,69,58,0.12)',
+                          background: note.participation_score >= 3 ? 'var(--green-dim)' : note.participation_score >= 1 ? 'var(--orange-dim)' : 'var(--red-dim)',
                           color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
                         }}>
                           참여 {note.participation_score}/3
@@ -804,7 +804,7 @@ export default function MyNotesPage() {
                             return (
                               <span key={i} style={{
                                 fontSize: 15, padding: '2px 6px', borderRadius: 'var(--radius-pill)',
-                                background: completed ? 'rgba(48,209,88,0.12)' : 'var(--bg-hover)',
+                                background: completed ? 'var(--green-dim)' : 'var(--bg-hover)',
                                 opacity: completed ? 1 : 0.3,
                               }}>
                                 {icon}
@@ -822,7 +822,7 @@ export default function MyNotesPage() {
                       {displayTags.slice(0, 3).map(tag => (
                         <span key={tag} style={{
                           padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                          background: isSelfStudy ? 'rgba(191,90,242,0.12)' : 'var(--blue-dim)',
+                          background: isSelfStudy ? 'var(--purple-dim)' : 'var(--blue-dim)',
                           color: isSelfStudy ? 'var(--purple)' : 'var(--blue-light)',
                           fontSize: 11, fontWeight: 600,
                         }}>{tag}</span>
@@ -837,7 +837,7 @@ export default function MyNotesPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span style={{
                         padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                        background: 'rgba(0,122,255,0.1)', color: 'var(--blue-light)',
+                        background: 'var(--blue-dim)', color: 'var(--blue-light)',
                         fontSize: 11, fontWeight: 700,
                         display: 'flex', alignItems: 'center', gap: 3,
                       }}>
@@ -857,7 +857,7 @@ export default function MyNotesPage() {
             const isSelfStudy = note.tags?.includes('자율학습');
             const conf = (!isSelfStudy && note.confidence) ? CONFIDENCE.find(o => o.value === note.confidence) : null;
             return (
-              <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid rgba(191,90,242,0.3)', background: 'rgba(191,90,242,0.04)' } : {}) }}>
+              <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid var(--purple-dim)', background: 'var(--purple-dim)' } : {}) }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -867,7 +867,7 @@ export default function MyNotesPage() {
                       {isSelfStudy && (
                         <span style={{
                           padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                          background: 'rgba(191,90,242,0.15)', color: 'var(--purple)',
+                          background: 'var(--purple-dim)', color: 'var(--purple)',
                         }}>📚 자율학습</span>
                       )}
                     </div>
@@ -887,7 +887,7 @@ export default function MyNotesPage() {
                     {!isSelfStudy && note.participation_score != null && (
                       <span style={{
                         padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700,
-                        background: note.participation_score >= 3 ? 'rgba(48,209,88,0.12)' : 'rgba(255,159,10,0.12)',
+                        background: note.participation_score >= 3 ? 'var(--green-dim)' : 'var(--orange-dim)',
                         color: note.participation_score >= 3 ? 'var(--green)' : 'var(--orange)',
                       }}>
                         참여 {note.participation_score}/3
@@ -896,7 +896,7 @@ export default function MyNotesPage() {
                     {!isSelfStudy && note.best_learning && (
                       <span style={{
                         padding: '4px 12px', borderRadius: 'var(--radius-pill)',
-                        background: 'rgba(255,159,10,0.12)', color: 'var(--orange)', fontSize: 13, fontWeight: 600,
+                        background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600,
                       }}>
                         ⭐ 우수학습
                       </span>
@@ -1495,7 +1495,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
           onClick={() => setLightboxIdx(null)}
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.85)',
+            background: 'var(--overlay-heavy)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
           }}

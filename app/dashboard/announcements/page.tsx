@@ -18,8 +18,8 @@ interface Announcement {
 
 const PRIORITY_OPTIONS = [
   { value: 'normal', label: '일반', color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢' },
-  { value: 'important', label: '중요', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '⚠️' },
-  { value: 'urgent', label: '긴급', color: 'var(--red)', bg: 'rgba(255,69,58,0.12)', icon: '🚨' },
+  { value: 'important', label: '중요', color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️' },
+  { value: 'urgent', label: '긴급', color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨' },
 ];
 
 export default function AnnouncementsPage() {

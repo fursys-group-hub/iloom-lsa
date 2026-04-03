@@ -66,13 +66,13 @@ interface Props {
 function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: string } {
   const today = new Date().toISOString().slice(0, 10);
   if (today >= batch.start_date && today <= batch.end_date)
-    return { label: '입문교육 진행중', color: 'var(--green)', bg: 'rgba(48,209,88,0.12)' };
+    return { label: '입문교육 진행중', color: 'var(--green)', bg: 'var(--green-dim)' };
   if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end)
-    return { label: '심화교육 진행중', color: 'var(--purple)', bg: 'rgba(191,90,242,0.15)' };
+    return { label: '심화교육 진행중', color: 'var(--purple)', bg: 'var(--purple-dim)' };
   if (batch.advanced_end && today > batch.advanced_end)
     return { label: '완료', color: 'var(--text-muted)', bg: 'var(--bg-hover)' };
   if (today > batch.end_date)
-    return { label: '매장 배치 대기', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)' };
+    return { label: '매장 배치 대기', color: 'var(--orange)', bg: 'var(--orange-dim)' };
   if (today < batch.start_date)
     return { label: '예정', color: 'var(--blue-light)', bg: 'var(--blue-dim)' };
   return { label: '', color: '', bg: '' };
@@ -217,7 +217,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           {dDayInfo && (
             <div style={{
               padding: '8px 16px', borderRadius: 'var(--radius-md)',
-              background: 'var(--blue-dim)', border: '1px solid rgba(0,122,255,0.2)',
+              background: 'var(--blue-dim)', border: '1px solid var(--blue-dim)',
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{dDayInfo.label}</span>
@@ -267,7 +267,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           </div>
           <div style={{ width: 1, background: 'var(--border)' }} />
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'rgba(191,90,242,0.15)', color: 'var(--purple)' }}>심화</span>
+            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화</span>
             {selectedBatch.advanced_start ? (
               <span style={{ fontSize: 14, color: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 600 : 400 }}>
                 {selectedBatch.advanced_start} ~ {selectedBatch.advanced_end}
@@ -392,7 +392,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                 {noteNotSubmitted.map(s => (
                   <span key={s.id} style={{
                     padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                    background: 'rgba(255,69,58,0.1)', color: 'var(--red)',
+                    background: 'var(--red-dim)', color: 'var(--red)',
                   }}>{s.name}</span>
                 ))}
               </div>
@@ -431,7 +431,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                 {questions.filter(q => q.status === 'open').length > 0 && (
                   <span style={{
                     padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                    background: 'rgba(255,69,58,0.12)', color: 'var(--red)',
+                    background: 'var(--red-dim)', color: 'var(--red)',
                     fontSize: 12, fontWeight: 700,
                   }}>
                     {questions.filter(q => q.status === 'open').length}개 대기
@@ -444,8 +444,8 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {questions.slice(0, 4).map(q => {
                   const st = q.status === 'open'
-                    ? { bg: 'rgba(255,159,10,0.12)', color: 'var(--orange)', label: '대기' }
-                    : { bg: 'rgba(48,209,88,0.12)', color: 'var(--green)', label: '답변' };
+                    ? { bg: 'var(--orange-dim)', color: 'var(--orange)', label: '대기' }
+                    : { bg: 'var(--green-dim)', color: 'var(--green)', label: '답변' };
                   return (
                     <Link key={q.id} href="/dashboard/questions" style={{
                       padding: '10px 14px', borderRadius: 'var(--radius-md)',
@@ -493,9 +493,9 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {announcements.slice(0, 3).map(a => {
                   const priorityStyle = a.priority === 'urgent'
-                    ? { bg: 'rgba(255,69,58,0.12)', color: 'var(--red)', label: '긴급' }
+                    ? { bg: 'var(--red-dim)', color: 'var(--red)', label: '긴급' }
                     : a.priority === 'important'
-                    ? { bg: 'rgba(255,159,10,0.12)', color: 'var(--orange)', label: '중요' }
+                    ? { bg: 'var(--orange-dim)', color: 'var(--orange)', label: '중요' }
                     : null;
                   return (
                     <div key={a.id} style={{

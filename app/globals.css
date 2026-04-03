@@ -34,6 +34,12 @@
   --red: #FF453A;
   --red-dim: rgba(255, 69, 58, 0.15);
   --purple: #BF5AF2;
+  --purple-dim: rgba(191, 90, 242, 0.15);
+  --gray-dim: rgba(142, 142, 147, 0.12);
+
+  /* 오버레이 */
+  --overlay: rgba(0, 0, 0, 0.7);
+  --overlay-heavy: rgba(0, 0, 0, 0.85);
 
   /* 메시지 버블 */
   --bubble-assistant: #2C2C2E;
@@ -90,6 +96,11 @@ body.light {
   --red: #EF4444;
   --red-dim: rgba(239, 68, 68, 0.10);
   --purple: #A855F7;
+  --purple-dim: rgba(168, 85, 247, 0.10);
+  --gray-dim: rgba(107, 114, 128, 0.10);
+
+  --overlay: rgba(0, 0, 0, 0.5);
+  --overlay-heavy: rgba(0, 0, 0, 0.7);
 
   /* 라이트 전용: 경고 강조 (filled 스타일) */
   --red-solid-bg: #EF4444;
@@ -144,7 +155,7 @@ body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #48484A;
+  background: var(--text-muted);
 }
 
 /* fadeInUp 애니메이션 */

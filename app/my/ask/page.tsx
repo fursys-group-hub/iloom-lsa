@@ -9,10 +9,10 @@ const card: React.CSSProperties = {
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  open: { label: '답변 대기', color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)' },
-  answered: { label: '답변 완료', color: 'var(--green)', bg: 'rgba(48,209,88,0.12)' },
+  open: { label: '답변 대기', color: 'var(--orange)', bg: 'var(--orange-dim)' },
+  answered: { label: '답변 완료', color: 'var(--green)', bg: 'var(--green-dim)' },
 };
-const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'rgba(142,142,147,0.12)' };
+const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)' };
 
 export default function AskPage() {
   const [studentId, setStudentId] = useState('');
@@ -297,7 +297,7 @@ export default function AskPage() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button onClick={() => handleDeleteQuestion(selectedQ.id)} style={{
                     padding: '6px 14px', borderRadius: 'var(--radius-pill)',
-                    background: 'rgba(255,69,58,0.08)', color: 'var(--red)',
+                    background: 'var(--red-dim)', color: 'var(--red)',
                     border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
                   }}>
                     삭제

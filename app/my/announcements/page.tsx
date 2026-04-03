@@ -12,8 +12,8 @@ interface Announcement {
 
 const PRIORITY_STYLE: Record<string, { color: string; bg: string; icon: string; label: string }> = {
   normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢', label: '공지' },
-  important: { color: 'var(--orange)', bg: 'rgba(255,159,10,0.12)', icon: '⚠️', label: '중요' },
-  urgent: { color: 'var(--red)', bg: 'rgba(255,69,58,0.12)', icon: '🚨', label: '긴급' },
+  important: { color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️', label: '중요' },
+  urgent: { color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨', label: '긴급' },
 };
 
 export default function MyAnnouncementsPage() {
