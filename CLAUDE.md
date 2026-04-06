@@ -75,6 +75,8 @@ Dashboard UI (Recharts 차트, 테이블)
 | `GET/POST/DELETE /api/student-memos` | 교육자 메모 (학생 상세 페이지, 관리자 전용 비공개). category: behavior/counsel/praise/caution/general |
 | `GET/POST/PATCH/DELETE /api/student-questions` | 질문하기 스레드 CRUD. `?all=true` 관리자 전체 조회. `?question_id=` 단일+답글. `?reply_id=` 답글 수정/삭제 |
 | `POST /api/attendance` | 엑셀 업로드 → 출결 파싱 |
+| `GET /api/reports` | AI 코칭 리포트 조회. `?batchId=&reportType=` 또는 `?groupId=` 상세. report_group_id로 그룹핑 |
+| `PATCH /api/reports` | 리포트 수정. `{ id, manager_report }` |
 
 ### Database (Supabase)
 
@@ -183,6 +185,38 @@ GEMINI_API_KEY=
 - 출결: 퇴사자 행 opacity 0.4 + 퇴사 뱃지, "확인 필요한 교육생"에서 제외
 - 심화교육: 전체 교육생 수에서 제외, 교육생 목록에서 제외
 - 홈 대시보드: 퇴사자 별도 카드 표시, 모든 통계에서 제외
+
+### AI Coaching Reports (관리자 종합 리포트)
+
+`coaching_reports` 테이블. 매장 관리자에게 전달하는 인수인계 문서.
+
+**워크플로우 (Claude Code 수동):**
+1. 리포트 페이지(`/dashboard/reports`)에서 "📋 프롬프트 복사" 클릭
+2. Claude Code에 프롬프트 붙여넣기
+3. Claude Code가 DB 7개 테이블 데이터 수집 → **교육자 메모 생활기록부 톤 리라이팅** → 리포트 생성 → `coaching_reports` 저장
+4. 리포트 페이지에서 확인 → ✏️ 수정 → 📄 PDF 다운로드
+
+**리포트 구조 (종합분석):**
+- 왼쪽: 📋 전반적인 피드백 + 📈 시험 성적 차트 + 💡 추천 교육 스타일 + 🎯 첫 주 교육 추천
+- 오른쪽: 📊 교육 과정 체크리스트 (O/△/X 테이블) + 🚨 반복 오답 문항
+
+**DB 컬럼:**
+- `report_type`: 'daily' | 'subject' | 'weekly' | 'comprehensive'
+- `report_group_id`: 같은 생성 회차 그룹핑
+- `subject`: 분야별 분석 시 카테고리명
+- `manager_report`: 리포트 본문 (마크다운 — `**볼드**`, `==형광펜==`, `| 테이블 |`, `CHART:` 데이터)
+
+**프롬프트 빌더:** `lib/report-prompts.ts` — `buildComprehensivePrompt()`, `buildSubjectPrompt()`
+**메모 리라이트:** `scripts/memo-rewrites.json` — Claude가 직접 작성한 전문적 리라이트
+**생성 스크립트:** `scripts/generate-reports.js` — 데이터 기반 자동 생성 (메모 리라이트는 JSON 참조)
+
+**렌더링 (ReportsClient.tsx):**
+- `parseSections()`: 이모지 헤더로 섹션 분리
+- `renderTable()`: 마크다운 `|` 테이블 → HTML `<table>`
+- `renderWrongAnswers()`: 오답 카드형 렌더링
+- `renderScoreSummary()`: `CHART:` 데이터 → 바 차트
+- `formatInline()`: `**볼드**` → `<strong>`, `==형광펜==` → `<mark>`
+- PDF: 새 창(`window.open`) 방식으로 다크모드 CSS 충돌 회피
 
 ## Known Issues / In Progress
 

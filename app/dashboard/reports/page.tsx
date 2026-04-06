@@ -1,10 +1,14 @@
-export default function ReportsPage() {
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-900">리포트</h2>
-      <div className="rounded-2xl bg-white border border-slate-200 shadow-sm p-12 text-center">
-        <p className="text-slate-400 text-sm">Phase 4에서 구현 예정</p>
-      </div>
-    </div>
-  );
+import { getSupabase } from '@/lib/supabase';
+import ReportsClient from './ReportsClient';
+
+export default async function ReportsPage() {
+  const supabase = getSupabase();
+
+  // 기수 목록
+  const { data: batches } = await supabase
+    .from('batches')
+    .select('id, name, start_date, end_date')
+    .order('start_date', { ascending: false });
+
+  return <ReportsClient batches={batches || []} />;
 }

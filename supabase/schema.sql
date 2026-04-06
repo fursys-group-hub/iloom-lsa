@@ -69,11 +69,14 @@ CREATE TABLE coaching_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id UUID REFERENCES students(id),
   test_date DATE NOT NULL,
-  student_message TEXT NOT NULL,
+  student_message TEXT NOT NULL DEFAULT '',
   manager_report TEXT NOT NULL,
   tag_tracking JSONB,
+  report_type TEXT DEFAULT 'daily',
+  report_group_id TEXT,
+  subject TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(student_id, test_date)
+  UNIQUE(student_id, test_date, report_type)
 );
 
 -- 학생 교육 노트

@@ -368,23 +368,45 @@ export default function StudentDetailClient({
         <h3 style={sectionTitle}>🤖 AI 코칭 리포트</h3>
         {coachingReports.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {coachingReports.map((report) => (
-              <details key={report.id}>
-                <summary style={{
-                  padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                  fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
-                  cursor: 'pointer', transition: 'background 0.15s ease',
-                }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                  {report.test_date} 분석
-                </summary>
-                <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                  {report.manager_report}
-                </div>
-              </details>
-            ))}
+            {coachingReports.map((report) => {
+              const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
+              const typeColor: Record<string, { bg: string; color: string }> = {
+                comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
+                subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
+                daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
+                weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
+              };
+              const rt = (report as { report_type?: string }).report_type || 'daily';
+              const tc = typeColor[rt] || typeColor.daily;
+              const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
+              return (
+                <details key={report.id}>
+                  <summary style={{
+                    padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                    fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
+                    cursor: 'pointer', transition: 'background 0.15s ease',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                  }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
+                    {report.test_date} 분석
+                    {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
+                  </summary>
+                  <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                    {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>✅ {t}</span>)}
+                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>🔴 {t}</span>)}
+                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>⚠️ {t}</span>)}
+                      </div>
+                    ) : null}
+                    {report.manager_report}
+                  </div>
+                </details>
+              );
+            })}
           </div>
         ) : (
           <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>

@@ -143,6 +143,12 @@ body {
   box-sizing: border-box;
 }
 
+/* 인쇄 시 흰 배경 강제 */
+@media print {
+  html, body { background: #fff !important; color: #1a1a1a !important; }
+  [style*="min-height"] { background: #fff !important; }
+}
+
 /* 스크롤바 */
 ::-webkit-scrollbar {
   width: 6px;

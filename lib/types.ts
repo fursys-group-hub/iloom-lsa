@@ -65,6 +65,8 @@ export interface WrongAnswer {
   created_at: string;
 }
 
+export type ReportType = 'daily' | 'subject' | 'weekly' | 'comprehensive';
+
 export interface CoachingReport {
   id: string;
   student_id: string;
@@ -72,6 +74,9 @@ export interface CoachingReport {
   student_message: string;
   manager_report: string;
   tag_tracking: TagTracking | null;
+  report_type: ReportType;
+  report_group_id: string | null;
+  subject: string | null;
   created_at: string;
 }
 
