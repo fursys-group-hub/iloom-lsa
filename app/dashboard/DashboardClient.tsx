@@ -143,7 +143,11 @@ export default function DashboardClient({ batches, students: allStudents, scores
     for (const s of scores) { const a = m.get(s.subject) || []; a.push(s.score); m.set(s.subject, a); }
     return [...m.entries()]
       .map(([subject, vals]) => ({ subject, avg: Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 }))
-      .sort((a, b) => a.subject.localeCompare(b.subject));
+      .sort((a, b) => {
+        const numA = parseInt(a.subject.match(/\d+/)?.[0] || '0');
+        const numB = parseInt(b.subject.match(/\d+/)?.[0] || '0');
+        return numA - numB;
+      });
   }, [scores]);
 
   // 오늘 교육일지 제출 현황
@@ -312,7 +316,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                     <div style={{ flex: 1, height: 28, background: 'var(--bg-hover)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%', width: `${Math.max(s.avg, 8)}%`, borderRadius: 'var(--radius-sm)',
-                        background: s.avg >= 80 ? 'var(--green)' : s.avg >= 60 ? 'var(--blue)' : 'var(--red)',
+                        background: s.avg >= 80 ? 'var(--green)' : s.avg >= 70 ? 'var(--blue)' : s.avg >= 60 ? 'var(--orange)' : 'var(--red)',
                         display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8,
                         transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                       }}>
