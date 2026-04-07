@@ -8,7 +8,9 @@ CREATE TABLE batches (
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   sheet_id TEXT,
-  subject_columns JSONB NOT NULL DEFAULT '{}'
+  subject_columns JSONB NOT NULL DEFAULT '{}',
+  advanced_start DATE,
+  advanced_end DATE
 );
 
 -- 교육생
@@ -17,6 +19,11 @@ CREATE TABLE students (
   batch_id UUID REFERENCES batches(id),
   name TEXT NOT NULL,
   department TEXT,
+  password TEXT DEFAULT '0000',
+  email TEXT,
+  phone TEXT,
+  company_email TEXT,
+  store_location TEXT,
   is_dropped BOOLEAN DEFAULT FALSE,
   dropped_at DATE,
   drop_reason TEXT,
@@ -51,17 +58,6 @@ CREATE TABLE student_memos (
   date DATE NOT NULL,
   content TEXT NOT NULL,
   category TEXT DEFAULT 'general'
-);
-
--- 오답 기록
-CREATE TABLE wrong_answers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id UUID REFERENCES students(id),
-  test_date DATE NOT NULL,
-  subject TEXT NOT NULL,
-  question_summary TEXT,
-  tags TEXT[] NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- AI 코칭 리포트
@@ -146,6 +142,43 @@ CREATE TABLE final_evaluations (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(student_id, manager_id)
+);
+
+-- 문제은행
+CREATE TABLE questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id UUID REFERENCES batches(id),
+  session TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  question_text TEXT NOT NULL,
+  correct_answer TEXT NOT NULL,
+  scoring_mode TEXT,
+  max_score NUMERIC(5,2) DEFAULT 1,
+  category TEXT,
+  series TEXT,
+  detail TEXT,
+  explanation TEXT,
+  image_url TEXT,
+  options TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(batch_id, session, question_id)
+);
+
+-- 학생별 문항 응답
+CREATE TABLE test_responses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id),
+  batch_id UUID REFERENCES batches(id),
+  session TEXT NOT NULL,
+  question_id TEXT NOT NULL,
+  test_date DATE NOT NULL,
+  user_answer TEXT,
+  is_correct BOOLEAN NOT NULL,
+  earned_score NUMERIC(5,2) DEFAULT 0,
+  max_score NUMERIC(5,2) DEFAULT 1,
+  scoring_mode TEXT,
+  submitted_at TEXT,
+  UNIQUE(student_id, session, question_id, test_date)
 );
 
 -- 공지사항 (관리자 → 기수별)
