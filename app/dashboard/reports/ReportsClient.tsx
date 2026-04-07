@@ -164,7 +164,40 @@ function formatInline(text: string) {
 
 // 피드백(긴 문단)
 function renderFeedback(text: string) {
-  return <div className="rpt-feedback">{formatInline(text)}</div>;
+  // [매장 실습 관찰] 기준으로 분리
+  const practiceMarker = '**[매장 실습 관찰]**';
+  const practiceIdx = text.indexOf(practiceMarker);
+
+  if (practiceIdx === -1) {
+    return <div className="rpt-feedback">{formatInline(text)}</div>;
+  }
+
+  const mainText = text.substring(0, practiceIdx).trim();
+  const practiceText = text.substring(practiceIdx + practiceMarker.length).trim();
+
+  // 실습 관찰 텍스트를 줄 단위로 파싱
+  const practiceLines = practiceText.split('\n').filter(l => l.trim());
+
+  // 첫 줄 = 실적 요약, 나머지 = 관찰 항목
+  const statsLine = practiceLines[0] || '';
+  const observationLines = practiceLines.slice(1);
+
+  return (
+    <div className="rpt-feedback">
+      <div>{formatInline(mainText)}</div>
+      <div className="rpt-practice-section">
+        <div className="rpt-practice-header">매장 실습 관찰</div>
+        <div className="rpt-practice-stats">{formatInline(statsLine)}</div>
+        {observationLines.length > 0 && (
+          <div className="rpt-practice-observations">
+            {observationLines.map((line, i) => (
+              <div key={i} className="rpt-practice-item">{formatInline(line.trim())}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // 성적 요약 + 차시별 바 차트
@@ -226,10 +259,10 @@ function renderSectionContent(icon: string, content: string, isPrint = false) {
 // 인쇄용 학생 카드 (A4 가로 2단)
 function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: boolean }) {
   const sections = parseSections(r.manager_report);
-  // 왼쪽: 피드백 + 성적 + 코칭
-  const leftOrder = ['📋', '📈', '💡', '🎯'];
-  // 오른쪽: 체크리스트 + 오답
-  const rightOrder = ['📊', '🚨'];
+  // 왼쪽: 피드백 + 추천 교육 + 첫 주 교육 (하나의 흐름)
+  const leftOrder = ['📋', '💡', '🎯'];
+  // 오른쪽: 체크리스트 + 성적 + 반복 오답
+  const rightOrder = ['📊', '📈', '🚨'];
   const leftSections = leftOrder.map(icon => sections.find(s => s.icon === icon)).filter(Boolean) as typeof sections;
   const rightSections = rightOrder.map(icon => sections.find(s => s.icon === icon)).filter(Boolean) as typeof sections;
 
@@ -384,6 +417,14 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
   .print-section-content { color: #374151; }
 
   .rpt-feedback { color: #374151; line-height: 1.55; }
+
+  .rpt-practice-section { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border, #D1D5DB); }
+  .rpt-practice-header { font-size: 8.5pt; font-weight: 700; color: var(--blue, #1D4ED8); margin-bottom: 4px; letter-spacing: 0.3px; }
+  .rpt-practice-stats { font-size: 8pt; color: var(--text-second, #374151); margin-bottom: 6px; padding: 4px 8px; background: var(--blue-dim, #F0F4FF); border-radius: 4px; line-height: 1.5; }
+  .rpt-practice-observations { display: flex; flex-direction: column; gap: 3px; }
+  .rpt-practice-item { font-size: 8pt; color: var(--text-second, #374151); padding-left: 10px; position: relative; line-height: 1.5; }
+  .rpt-practice-item::before { content: '▸'; position: absolute; left: 0; color: var(--blue, #1D4ED8); font-weight: 700; }
+
   .rpt-text { display: flex; flex-direction: column; gap: 2px; color: #374151; }
   .rpt-li { padding-left: 8px; }
   .rpt-bold { font-weight: 700; }
@@ -680,6 +721,11 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
         .print-preview-container .rpt-feedback { color: #374151 !important; }
         .print-preview-container .rpt-text, .print-preview-container .rpt-text * { color: #374151 !important; }
         .print-preview-container .rpt-li { color: #374151 !important; }
+        .print-preview-container .rpt-practice-section { border-top-color: #D1D5DB !important; }
+        .print-preview-container .rpt-practice-header { color: #1D4ED8 !important; }
+        .print-preview-container .rpt-practice-stats { background: #F0F4FF !important; color: #374151 !important; }
+        .print-preview-container .rpt-practice-item { color: #374151 !important; }
+        .print-preview-container .rpt-practice-item::before { color: #1D4ED8 !important; }
         /* 테이블 */
         .print-preview-container .rpt-table th { color: #1D4ED8 !important; border-bottom-color: #1D4ED8 !important; }
         .print-preview-container .rpt-table td { color: #374151 !important; border-bottom-color: #E5E7EB !important; }
