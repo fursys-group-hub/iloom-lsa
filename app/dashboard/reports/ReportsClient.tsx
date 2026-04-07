@@ -130,7 +130,7 @@ function renderText(text: string, maxLines?: number) {
 
 // 인라인 마크다운 → HTML 변환 (**볼드**, ==형광펜==)
 function formatInline(text: string) {
-  const parts: (string | JSX.Element)[] = [];
+  const parts: (string | React.ReactElement)[] = [];
   let remaining = text;
   let key = 0;
 
@@ -277,7 +277,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [groupReports, setGroupReports] = useState<ReportDetail[]>([]);
   const [loadingGroup, setLoadingGroup] = useState(false);
-  const [subjectCategory, setSubjectCategory] = useState(REPORT_CATEGORIES[0]);
+  const [subjectCategory, setSubjectCategory] = useState<typeof REPORT_CATEGORIES[number]>(REPORT_CATEGORIES[0]);
   const [toast, setToast] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
@@ -479,7 +479,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
         </div>
         <div style={card}>
           <h3 style={sTitle}>🔍 분야별 분석</h3>
-          <select value={subjectCategory} onChange={e => setSubjectCategory(e.target.value)}
+          <select value={subjectCategory} onChange={e => setSubjectCategory(e.target.value as typeof REPORT_CATEGORIES[number])}
             style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14, marginBottom: 12 }}>
             {REPORT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
