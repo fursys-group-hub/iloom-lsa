@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { isBatchArchived } from '@/lib/archive-check';
 
 // GET /api/note-comments?note_id=xxx  또는  ?note_ids=id1,id2,id3
 export async function GET(req: NextRequest) {
@@ -41,6 +42,15 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = createServerClient();
     const body = await req.json();
+
+    // 아카이브 체크: 학생이 코멘트를 달 때, note의 student_id로 체크
+    if (body.author_role === 'student' && body.note_id) {
+      const { data: note } = await supabase
+        .from('student_notes').select('student_id').eq('id', body.note_id).single();
+      if (note && await isBatchArchived(supabase, note.student_id)) {
+        return NextResponse.json({ error: '보관된 기수입니다. 수정할 수 없습니다.' }, { status: 403 });
+      }
+    }
 
     const { data, error } = await supabase
       .from('note_comments')

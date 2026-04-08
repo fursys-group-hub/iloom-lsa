@@ -2,17 +2,11 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as XLSX from 'xlsx';
-
-interface AttendanceRow {
-  date: string;
-  name: string;
-  department: string;
-  checkIn: string;
-  checkOut: string;
-  status: 'present' | 'late' | 'early_leave' | 'absent';
-  statusLabel: string;
-  note: string;
-}
+import {
+  type AttendanceRow, type StatusType,
+  parseStatus, excelSerialToDate, excelSerialToTime,
+  getStatusLabel, parseNoteToTimes, parseTimeinoutExcel,
+} from '@/lib/attendance-parser';
 
 interface SavedAttendance {
   id: string;
@@ -23,56 +17,12 @@ interface SavedAttendance {
   students: { name: string; department: string } | null;
 }
 
-type StatusType = 'present' | 'late' | 'early_leave' | 'absent';
-
 const statusOptions: { value: StatusType; label: string }[] = [
   { value: 'present', label: '출근' },
   { value: 'late', label: '지각' },
   { value: 'early_leave', label: '조퇴' },
   { value: 'absent', label: '미출근' },
 ];
-
-function parseStatus(checkIn: string, raw?: string): { status: AttendanceRow['status']; label: string } {
-  if (raw === '미출근' || raw === '-' || !raw) {
-    if (!checkIn || checkIn === '-') return { status: 'absent', label: '미출근' };
-  }
-  if (raw?.includes('지각')) return { status: 'late', label: '지각' };
-  if (raw?.includes('조퇴')) return { status: 'early_leave', label: '조퇴' };
-  return { status: 'present', label: '출근' };
-}
-
-function excelSerialToDate(serial: number): string {
-  const epoch = new Date(1899, 11, 30);
-  const d = new Date(epoch.getTime() + serial * 86400000);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function excelSerialToTime(serial: number | string | undefined): string {
-  if (!serial || serial === '-' || serial === '미출근' || serial === '') return '-';
-  const num = Number(serial);
-  if (isNaN(num)) return String(serial);
-  const fraction = num - Math.floor(num);
-  const totalMinutes = Math.round(fraction * 24 * 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-}
-
-function getStatusLabel(status: string): string {
-  const map: Record<string, string> = { present: '출근', late: '지각', early_leave: '조퇴', absent: '미출근' };
-  return map[status] || status;
-}
-
-function parseNoteToTimes(note: string | null): { checkIn: string; checkOut: string } {
-  if (!note) return { checkIn: '-', checkOut: '-' };
-  // "출근 08:04 / 퇴근 17:30" 형식 파싱
-  const checkInMatch = note.match(/출근\s*([\d:]+)/);
-  const checkOutMatch = note.match(/퇴근\s*([\d:]+)/);
-  return {
-    checkIn: checkInMatch?.[1] || '-',
-    checkOut: checkOutMatch?.[1] || '-',
-  };
-}
 
 export default function AttendancePage() {
   // ── DB 데이터 ──
@@ -178,21 +128,8 @@ export default function AttendancePage() {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' });
-
-      const parsed: AttendanceRow[] = json
-        .filter((r) => r['이름'] && r['날짜'])
-        .map((r) => {
-          const dateRaw = r['날짜'];
-          const date = typeof dateRaw === 'number'
-            ? excelSerialToDate(dateRaw)
-            : String(dateRaw).match(/(\d{4}-\d{2}-\d{2})/)?.[1] || String(dateRaw);
-          const checkIn = excelSerialToTime(r['출퇴근시간']);
-          const checkOut = excelSerialToTime(r['출퇴근시간_1']);
-          const statusRaw = String(r['출근'] || '');
-          const { status, label } = parseStatus(checkIn, statusRaw);
-          return { date, name: String(r['이름'] || ''), department: String(r['기본 부서'] || r['부서'] || ''), checkIn, checkOut, status, statusLabel: label, note: '' };
-        });
+      const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' });
+      const parsed = parseTimeinoutExcel(json);
       setRows(parsed);
     };
     reader.readAsArrayBuffer(file);

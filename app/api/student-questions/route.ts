@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase';
+import { isBatchArchived } from '@/lib/archive-check';
 
 // GET /api/student-questions?student_id=xxx  또는  ?all=true (관리자용)  또는  ?question_id=xxx
 export async function GET(req: NextRequest) {
@@ -104,6 +105,13 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = createServerClient();
     const body = await req.json();
+
+    // 아카이브 체크 (학생 요청만)
+    if (body.student_id && body.author_role !== 'admin') {
+      if (await isBatchArchived(supabase, body.student_id)) {
+        return NextResponse.json({ error: '보관된 기수입니다. 수정할 수 없습니다.' }, { status: 403 });
+      }
+    }
 
     // 답글 추가
     if (body.question_id) {

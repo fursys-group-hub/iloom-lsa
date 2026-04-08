@@ -94,6 +94,7 @@ export default function MyPracticePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
   // 폼 상태
@@ -124,6 +125,7 @@ export default function MyPracticePage() {
       const parsed = JSON.parse(auth);
       setStudentId(parsed.studentId);
       setStudentName(parsed.name || '');
+      if (parsed.isArchived) setIsArchived(true);
     }
   }, []);
 
@@ -316,7 +318,7 @@ export default function MyPracticePage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>🏪 실습일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
-          {(isPracticeDay || showForm) && (
+          {!isArchived && (isPracticeDay || showForm) && (
             <button
               onClick={() => {
                 if (showForm) { setShowForm(false); resetForm(); }

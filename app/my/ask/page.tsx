@@ -23,6 +23,7 @@ export default function AskPage() {
   const [newTitle, setNewTitle] = useState('');
   const [replyText, setReplyText] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function AskPage() {
       const p = JSON.parse(auth);
       setStudentId(p.studentId || '');
       setStudentName(p.name || '');
+      if (p.isArchived) setIsArchived(true);
     }
   }, []);
 
@@ -176,7 +178,7 @@ export default function AskPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문하기</h2>
-        {!showForm && (
+        {!showForm && !isArchived && (
           <button onClick={() => { setShowForm(true); setSelectedId(null); }} style={{
             padding: '10px 20px', borderRadius: 'var(--radius-md)',
             background: 'var(--blue)', color: '#fff', border: 'none',
@@ -188,7 +190,7 @@ export default function AskPage() {
       </div>
 
       {/* 새 질문 작성 폼 */}
-      {showForm && (
+      {showForm && !isArchived && (
         <div style={{ ...card, marginBottom: 20 }}>
           <h3 style={{ fontSize: 17, fontWeight: 600, margin: '0 0 12px' }}>새 질문 작성</h3>
           <textarea

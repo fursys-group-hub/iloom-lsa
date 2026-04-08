@@ -10,6 +10,8 @@ interface Batch {
   advanced_start: string | null;
   advanced_end: string | null;
   sheet_id: string | null;
+  is_archived: boolean;
+  archived_at: string | null;
 }
 
 interface StudentRow {
@@ -311,6 +313,7 @@ export default function SettingsPage() {
                       {batch.name}
                     </p>
                     {(() => {
+                      if (batch.is_archived) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>📦 보관됨</span>;
                       const today = new Date().toISOString().slice(0, 10);
                       if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
                       if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
@@ -326,23 +329,65 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingBatchId(batch.id);
-                      setBatchForm({
-                        name: batch.name,
-                        start_date: batch.start_date,
-                        end_date: batch.end_date,
-                        advanced_start: batch.advanced_start || '',
-                        advanced_end: batch.advanced_end || '',
-                      });
-                      setShowBatchForm(true);
-                    }}
-                    style={tinyBtnStyle}
-                  >
-                    수정
-                  </button>
+                  {batch.is_archived ? (
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await fetch('/api/batches', {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ id: batch.id, is_archived: false }),
+                        });
+                        fetchBatches();
+                      }}
+                      style={{ ...tinyBtnStyle, color: 'var(--blue-light)' }}
+                    >
+                      복구
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingBatchId(batch.id);
+                          setBatchForm({
+                            name: batch.name,
+                            start_date: batch.start_date,
+                            end_date: batch.end_date,
+                            advanced_start: batch.advanced_start || '',
+                            advanced_end: batch.advanced_end || '',
+                          });
+                          setShowBatchForm(true);
+                        }}
+                        style={tinyBtnStyle}
+                      >
+                        수정
+                      </button>
+                      {(() => {
+                        const today = new Date().toISOString().slice(0, 10);
+                        const isCompleted = (batch.advanced_end && today > batch.advanced_end) ||
+                          (!batch.advanced_end && today > batch.end_date);
+                        if (!isCompleted) return null;
+                        return (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm(`"${batch.name}" 기수를 보관 처리하시겠어요?\n학생은 읽기 전용으로 전환됩니다.`)) return;
+                              await fetch('/api/batches', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: batch.id, is_archived: true }),
+                              });
+                              fetchBatches();
+                            }}
+                            style={{ ...tinyBtnStyle, color: 'var(--text-muted)' }}
+                          >
+                            📦 보관
+                          </button>
+                        );
+                      })()}
+                    </>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleBatchDelete(batch.id); }}
                     style={{ ...tinyBtnStyle, color: 'var(--red)' }}

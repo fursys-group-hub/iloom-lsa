@@ -14,6 +14,7 @@ interface BatchInfo {
   end_date: string;
   advanced_start: string | null;
   advanced_end: string | null;
+  is_archived: boolean;
 }
 
 interface NoteRow {
@@ -238,9 +239,16 @@ export default function DashboardClient({ batches, students: allStudents, scores
               minWidth: 180,
             }}
           >
-            {batches.map(b => (
+            {batches.filter(b => !b.is_archived).map(b => (
               <option key={b.id} value={b.id}>{b.name} 기수</option>
             ))}
+            {batches.some(b => b.is_archived) && (
+              <optgroup label="보관된 기수">
+                {batches.filter(b => b.is_archived).map(b => (
+                  <option key={b.id} value={b.id}>{b.name} 기수 (보관)</option>
+                ))}
+              </optgroup>
+            )}
           </select>
           {selectedBatch && (() => {
             const status = getBatchStatus(selectedBatch);

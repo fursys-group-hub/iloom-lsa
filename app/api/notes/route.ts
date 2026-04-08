@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createServerClient, getSupabase } from '@/lib/supabase';
 import { getKSTDayRange, getKSTToday } from '@/lib/date';
+import { isBatchArchived } from '@/lib/archive-check';
 
 // content JSON 구조: { blocks: Block[], meta: { tags, confidence } }
 // 하위호환: 기존 plain text도 지원
@@ -97,6 +98,10 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createServerClient();
+
+  if (await isBatchArchived(supabase, student_id)) {
+    return Response.json({ message: '보관된 기수입니다. 수정할 수 없습니다.' }, { status: 403 });
+  }
 
   // 하루 1개 제한: 교육일지/실습일지 각각 독립, 자율학습은 무제한
   const isSelfStudy = Array.isArray(tags) && tags.includes('자율학습');

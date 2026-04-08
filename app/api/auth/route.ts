@@ -53,5 +53,16 @@ export async function POST(req: NextRequest) {
     return Response.json({ message: '퇴사 처리된 계정이에요. 관리자에게 문의해주세요.' }, { status: 403 });
   }
 
-  return Response.json({ role: 'student', name: student.name, studentId: student.id, batchId: student.batch_id });
+  // 아카이브 상태 확인
+  let isArchived = false;
+  if (student.batch_id) {
+    const { data: batch } = await supabase
+      .from('batches')
+      .select('is_archived')
+      .eq('id', student.batch_id)
+      .single();
+    isArchived = batch?.is_archived === true;
+  }
+
+  return Response.json({ role: 'student', name: student.name, studentId: student.id, batchId: student.batch_id, isArchived });
 }

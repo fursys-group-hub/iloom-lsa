@@ -218,6 +218,44 @@ GEMINI_API_KEY=
 - `formatInline()`: `**볼드**` → `<strong>`, `==형광펜==` → `<mark>`
 - PDF: 새 창(`window.open`) 방식으로 다크모드 CSS 충돌 회피
 
+### Attendance Automation (출결 자동화)
+
+Playwright로 타임인아웃(timeinout.kr) 출결 데이터를 자동 수집하여 `/api/attendance`로 전송.
+
+```bash
+npm run attendance              # 헤드리스 모드
+npm run attendance:headed       # 브라우저 표시 (디버깅)
+```
+
+- `scripts/attendance/fetch-attendance.js` — 메인 실행
+- `scripts/attendance/timeinout-auth.js` — 로그인 모듈
+- `scripts/attendance/timeinout-scraper.js` — Excel 다운로드
+- `scripts/attendance/run-attendance.bat` — Windows 작업 스케줄러용
+- `lib/attendance-parser.ts` — 파싱 유틸 (page.tsx와 공유)
+- 환경변수: `TIMEINOUT_EMAIL`, `TIMEINOUT_PW`, `TIMEINOUT_WORKPLACE`, `APP_BASE_URL`
+- Windows 작업 스케줄러: 하루 4번 (8:15, 8:25, 12:00, 18:00)
+- 로그: `scripts/attendance/logs.txt`
+
+### Cron Sync (자동 동기화)
+
+`GET /api/cron/sync` — 진행중인 기수의 구글 시트를 자동 동기화.
+
+- `Authorization: Bearer CRON_SECRET` 헤더 필수
+- `lib/sync.ts` — 핵심 동기화 로직 (`syncBatch()` 함수, `/api/sync`와 공유)
+- 진행중 판별: `start_date ≤ today ≤ end_date` 또는 `advanced_start ≤ today ≤ advanced_end`
+- cron-job.org: 매일 09:30 KST
+
+### Batch Archive (기수 아카이브)
+
+심화교육까지 완료된 기수를 보관 처리 → 학생 읽기전용.
+
+- DB: `batches.is_archived` (boolean), `batches.archived_at` (timestamptz)
+- `lib/archive-check.ts` — `isBatchArchived(supabase, studentId)` 헬퍼
+- `PATCH /api/batches` — `{ id, is_archived: true/false }` 로 아카이브/복구
+- Auth: 로그인 응답에 `isArchived` 플래그 포함
+- 학생 쓰기 차단: notes, student-questions, note-comments, benchmarks POST → 403
+- UI: 설정(📦보관/복구), 대시보드(드롭다운 분리), 학생(읽기전용 배너+버튼 숨김)
+
 ## Known Issues / In Progress
 
 - **심화교육 시험**: 구글 시트 연동 예정. 시험 점수 섹션은 빈칸으로 마련됨

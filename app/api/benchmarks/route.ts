@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
+import { isBatchArchived } from '@/lib/archive-check';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getSupabase();
+
+  if (await isBatchArchived(supabase, studentId)) {
+    return Response.json({ message: '보관된 기수입니다. 수정할 수 없습니다.' }, { status: 403 });
+  }
   const { data, error } = await supabase
     .from('benchmarks')
     .upsert(

@@ -113,6 +113,7 @@ export default function MyNotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [pledge, setPledge] = useState(''); // 오늘의 다짐
   const [step1, setStep1] = useState('');
@@ -215,6 +216,7 @@ export default function MyNotesPage() {
       const parsed = JSON.parse(auth);
       setStudentId(parsed.studentId);
       setStudentName(parsed.name || '');
+      if (parsed.isArchived) setIsArchived(true);
     }
 
     // 임시저장 복원
@@ -433,21 +435,23 @@ export default function MyNotesPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📓 교육일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => {
-              if (showForm) { setShowForm(false); resetForm(); }
-              else { resetForm(); setShowForm(true); }
-            }}
-            style={{
-              padding: '10px 20px', borderRadius: 'var(--radius-md)',
-              border: showForm ? 'none' : '1px solid var(--border)',
-              background: showForm ? 'var(--red)' : 'transparent',
-              color: showForm ? '#fff' : 'var(--text-tertiary)',
-              fontSize: 14, fontWeight: 600, cursor: 'pointer',
-            }}
-          >
-            {showForm ? '✕ 닫기' : '✏️ 새 교육일지'}
-          </button>
+          {!isArchived && (
+            <button
+              onClick={() => {
+                if (showForm) { setShowForm(false); resetForm(); }
+                else { resetForm(); setShowForm(true); }
+              }}
+              style={{
+                padding: '10px 20px', borderRadius: 'var(--radius-md)',
+                border: showForm ? 'none' : '1px solid var(--border)',
+                background: showForm ? 'var(--red)' : 'transparent',
+                color: showForm ? '#fff' : 'var(--text-tertiary)',
+                fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              {showForm ? '✕ 닫기' : '✏️ 새 교육일지'}
+            </button>
+          )}
         </div>
       </div>
 

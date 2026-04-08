@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "attendance": "node scripts/attendance/fetch-attendance.js",
+    "attendance:headed": "node scripts/attendance/fetch-attendance.js --headed"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0",
@@ -22,8 +24,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "playwright": "^1.59.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

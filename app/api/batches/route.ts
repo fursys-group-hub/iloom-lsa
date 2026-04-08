@@ -49,6 +49,19 @@ export async function PATCH(req: NextRequest) {
     const supabase = createServerClient();
     const body = await req.json();
 
+    // 아카이브 처리
+    if (body.is_archived !== undefined) {
+      const { error: archiveError } = await supabase
+        .from('batches')
+        .update({
+          is_archived: body.is_archived,
+          archived_at: body.is_archived ? new Date().toISOString() : null,
+        })
+        .eq('id', body.id);
+      if (archiveError) throw archiveError;
+      return NextResponse.json({ success: true });
+    }
+
     const { error } = await supabase
       .from('batches')
       .update({

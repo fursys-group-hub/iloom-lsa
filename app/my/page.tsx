@@ -25,6 +25,8 @@ export default function MyPage() {
   const [announcePopup, setAnnouncePopup] = useState<Announcement[]>([]);
   const [popupIndex, setPopupIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
+  const [showAttendanceAlert, setShowAttendanceAlert] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -33,8 +35,34 @@ export default function MyPage() {
       setStudentId(p.studentId);
       setStudentName(p.name);
       if (p.batchId) setBatchId(p.batchId);
+      if (p.isArchived) setIsArchived(true);
     }
   }, []);
+
+  // 출결 알림 체크 (미출근이면 알림 표시, 30분마다 재확인)
+  useEffect(() => {
+    if (!studentId) return;
+
+    const checkAttendance = () => {
+      const today = new Date().toISOString().slice(0, 10);
+      fetch(`/api/attendance?studentId=${studentId}`)
+        .then(r => r.json())
+        .then((data) => {
+          if (!Array.isArray(data)) return;
+          const todayRecord = data.find((d: { date: string }) => d.date === today);
+          if (!todayRecord || todayRecord.status === 'absent') {
+            setShowAttendanceAlert(true);
+          } else {
+            setShowAttendanceAlert(false);
+          }
+        })
+        .catch(() => {});
+    };
+
+    checkAttendance();
+    const interval = setInterval(checkAttendance, 30 * 60 * 1000); // 30분마다 재확인
+    return () => clearInterval(interval);
+  }, [studentId]);
 
   // 로그인 시 새 공지 팝업
   useEffect(() => {
@@ -236,6 +264,72 @@ export default function MyPage() {
           </div>
         );
       })()}
+
+      {/* 아카이브 읽기전용 배너 */}
+      {isArchived && (
+        <div style={{
+          ...card,
+          background: 'rgba(142, 142, 147, 0.1)',
+          border: '1px solid var(--border-light)',
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <span style={{ fontSize: 24 }}>📦</span>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-tertiary)' }}>
+              이 기수는 보관 처리되었습니다
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              기록을 조회할 수 있지만, 새로운 작성이나 수정은 할 수 없어요.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 출결 알림 팝업 */}
+      {showAttendanceAlert && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
+              padding: '40px 36px', width: 440, maxWidth: '90vw',
+              boxShadow: 'var(--shadow-lg)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 56, marginBottom: 16 }}>⏰</div>
+            <h3 style={{ fontSize: 22, fontWeight: 800, color: 'var(--orange)', margin: '0 0 12px' }}>
+              출근 체크를 확인해 주세요!
+            </h3>
+            <p style={{ fontSize: 16, color: 'var(--text-second)', lineHeight: 1.7, margin: '0 0 8px' }}>
+              아직 오늘 출근 기록이 없어요.
+            </p>
+            <p style={{ fontSize: 15, color: 'var(--text-tertiary)', lineHeight: 1.6, margin: '0 0 28px' }}>
+              타임인아웃 앱에서 출근 체크를 해 주세요.<br />
+              8시 30분이 넘으면 지각 처리돼요!
+            </p>
+            <button
+              onClick={() => setShowAttendanceAlert(false)}
+              style={{
+                padding: '14px 40px', borderRadius: 'var(--radius-md)',
+                border: 'none', background: 'var(--orange)', color: '#fff',
+                fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              확인했어요
+            </button>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12 }}>
+              출근 체크 전까지 페이지 방문 시 다시 알려드려요
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 프로필 */}
       <div style={card}>

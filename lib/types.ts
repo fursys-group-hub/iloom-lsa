@@ -3,8 +3,12 @@ export interface Batch {
   name: string;
   start_date: string;
   end_date: string;
+  advanced_start: string | null;
+  advanced_end: string | null;
   sheet_id: string | null;
   subject_columns: Record<string, { column: string; maxScore: number }>;
+  is_archived: boolean;
+  archived_at: string | null;
 }
 
 export interface Student {
