@@ -19,13 +19,13 @@ const supabase = createClient(
 // type: education(정규교육), practice(매장실습), off(휴무)
 // weekdaysOnly: true이면 해당 범위에서 평일(월~금)만 해당
 const SCHEDULE_RANGES = [
-  { start: '2026-03-23', end: '2026-04-09', type: 'education', weekdaysOnly: true },
-  { start: '2026-04-10', end: '2026-04-11', type: 'off' },
-  { start: '2026-04-12', end: '2026-04-13', type: 'practice' },  // 토~일
-  { start: '2026-04-14', end: '2026-04-16', type: 'education' },
-  { start: '2026-04-17', end: '2026-04-18', type: 'off' },
-  { start: '2026-04-19', end: '2026-04-20', type: 'practice' },  // 토~일
-  { start: '2026-04-21', end: '2026-04-22', type: 'education' }, // 4/22 수료일
+  { start: '2026-03-23', end: '2026-04-08', type: 'education', weekdaysOnly: true },  // 월~수
+  { start: '2026-04-09', end: '2026-04-10', type: 'off' },       // 목~금 휴무
+  { start: '2026-04-11', end: '2026-04-12', type: 'practice' },  // 토~일 매장실습
+  { start: '2026-04-13', end: '2026-04-15', type: 'education' }, // 월~수
+  { start: '2026-04-16', end: '2026-04-17', type: 'off' },       // 목~금 휴무
+  { start: '2026-04-18', end: '2026-04-19', type: 'practice' },  // 토~일 매장실습
+  { start: '2026-04-20', end: '2026-04-22', type: 'education' }, // 월~수, 4/22 수료일
 ];
 
 // 범위 → 개별 날짜 맵 변환 (KST 기준, 타임존 이슈 방지를 위해 문자열로 계산)
