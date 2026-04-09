@@ -45,6 +45,7 @@ export default function SettingsPage() {
   const [scheduleEdit, setScheduleEdit] = useState<ScheduleMap>({});
   const [paintMode, setPaintMode] = useState<DayType>('education');
   const [isDragging, setIsDragging] = useState(false);
+  const [wizardStep, setWizardStep] = useState(1); // 1: 기본정보, 2: 스케줄, 3: 심화교육
 
   // ── 교육생 ──
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -130,6 +131,7 @@ export default function SettingsPage() {
         setShowBatchForm(false);
         setEditingBatchId(null);
         setScheduleEdit({});
+        setWizardStep(1);
         setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
       }
     } catch { /* silent */ }
@@ -268,6 +270,8 @@ export default function SettingsPage() {
               setShowBatchForm(true);
               setEditingBatchId(null);
               setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
+              setScheduleEdit({});
+              setWizardStep(1);
             }}
             style={primaryBtnStyle}
           >
@@ -275,158 +279,149 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        {/* 기수 등록/수정 폼 */}
+        {/* 기수 등록/수정 — 단계별 마법사 */}
         {showBatchForm && (
-          <div style={{ marginBottom: 20, padding: 20, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* 기수명 */}
-            <div>
-              <label style={labelStyle}>기수명 *</label>
-              <input
-                type="text"
-                placeholder="26년 3월"
-                value={batchForm.name}
-                onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })}
-                style={inputStyle}
-              />
-            </div>
-            {/* 입문교육 일정 */}
-            <div>
-              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>입문</span>
-                입문교육 일정 *
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <input type="date" value={batchForm.start_date} onChange={(e) => {
-                  const v = e.target.value;
-                  setBatchForm(f => ({ ...f, start_date: v }));
-                  if (v && batchForm.end_date && !editingBatchId) generateDefaultSchedule(v, batchForm.end_date);
-                }} style={inputStyle} />
-                <input type="date" value={batchForm.end_date} onChange={(e) => {
-                  const v = e.target.value;
-                  setBatchForm(f => ({ ...f, end_date: v }));
-                  if (batchForm.start_date && v && !editingBatchId) generateDefaultSchedule(batchForm.start_date, v);
-                }} style={inputStyle} />
-              </div>
-            </div>
-            {/* 심화교육 일정 */}
-            <div>
-              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
-                심화교육 일정 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span>
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <input type="date" value={batchForm.advanced_start} onChange={(e) => setBatchForm({ ...batchForm, advanced_start: e.target.value })} style={inputStyle} placeholder="매장 배치 시작일" />
-                <input type="date" value={batchForm.advanced_end} onChange={(e) => setBatchForm({ ...batchForm, advanced_end: e.target.value })} style={inputStyle} placeholder="심화교육 종료일" />
-              </div>
-            </div>
-            {/* 스케줄 캘린더 (드래그로 칠하기) */}
-            {batchForm.start_date && batchForm.end_date && (
-              <div>
-                <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 11, fontWeight: 700 }}>스케줄</span>
-                  교육 스케줄
-                </label>
+          <div style={{ marginBottom: 20, padding: 24, borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-                {/* 페인트 모드 선택 */}
-                <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-                  {([
-                    { type: 'education' as DayType, label: '📚 정규교육', bg: 'var(--blue)', bgDim: 'var(--blue-dim)', color: 'var(--blue)' },
-                    { type: 'practice' as DayType, label: '🏪 매장실습', bg: 'var(--orange)', bgDim: 'var(--orange-dim)', color: 'var(--orange)' },
-                    { type: 'off' as DayType, label: '🌙 휴무', bg: 'var(--text-muted)', bgDim: 'var(--bg-hover)', color: 'var(--text-muted)' },
-                  ]).map(opt => (
-                    <button
-                      key={opt.type}
-                      type="button"
-                      onClick={() => setPaintMode(opt.type)}
-                      style={{
-                        padding: '8px 16px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
-                        fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
-                        border: paintMode === opt.type ? `2px solid ${opt.bg}` : '1px solid var(--border)',
-                        background: paintMode === opt.type ? opt.bgDim : 'transparent',
-                        color: paintMode === opt.type ? opt.color : 'var(--text-tertiary)',
-                        boxShadow: paintMode === opt.type ? `0 0 0 1px ${opt.bg}` : 'none',
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 8 }}>
-                    선택 후 드래그하세요
-                  </span>
+            {/* 스텝 인디케이터 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 4 }}>
+              {[
+                { step: 1, label: '기본 정보', icon: '📋' },
+                { step: 2, label: '교육 스케줄', icon: '📅' },
+                { step: 3, label: '심화교육', icon: '🏪' },
+              ].map((s, i) => (
+                <div key={s.step} style={{ display: 'flex', alignItems: 'center' }}>
+                  <div
+                    onClick={() => { if (s.step < wizardStep || (s.step === 2 && batchForm.start_date && batchForm.end_date) || s.step === 1) setWizardStep(s.step); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px',
+                      borderRadius: 'var(--radius-pill)', cursor: s.step <= wizardStep ? 'pointer' : 'default',
+                      background: wizardStep === s.step ? 'var(--blue)' : wizardStep > s.step ? 'var(--green-dim)' : 'var(--bg-hover)',
+                      color: wizardStep === s.step ? '#fff' : wizardStep > s.step ? 'var(--green)' : 'var(--text-muted)',
+                      fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
+                    }}
+                  >
+                    <span>{wizardStep > s.step ? '✓' : s.icon}</span>
+                    <span>{s.label}</span>
+                  </div>
+                  {i < 2 && <div style={{ width: 24, height: 2, background: wizardStep > s.step ? 'var(--green)' : 'var(--border)', margin: '0 4px' }} />}
+                </div>
+              ))}
+            </div>
+
+            {/* ── STEP 1: 기본 정보 ── */}
+            {wizardStep === 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>기수명 *</label>
+                  <input type="text" placeholder="26년 3월" value={batchForm.name}
+                    onChange={(e) => setBatchForm({ ...batchForm, name: e.target.value })} style={inputStyle} />
+                </div>
+                <div>
+                  <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>입문</span>
+                    입문교육 일정 *
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }}>
+                    <input type="date" value={batchForm.start_date} onChange={(e) => setBatchForm(f => ({ ...f, start_date: e.target.value }))} style={inputStyle} />
+                    <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>~</span>
+                    <input type="date" value={batchForm.end_date} onChange={(e) => setBatchForm(f => ({ ...f, end_date: e.target.value }))} style={inputStyle} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button onClick={() => { setShowBatchForm(false); setEditingBatchId(null); setWizardStep(1); }} style={smallBtnStyle}>취소</button>
+                  <button
+                    onClick={() => {
+                      if (!batchForm.name || !batchForm.start_date || !batchForm.end_date) return;
+                      if (Object.keys(scheduleEdit).length === 0) generateDefaultSchedule(batchForm.start_date, batchForm.end_date);
+                      setWizardStep(2);
+                    }}
+                    disabled={!batchForm.name || !batchForm.start_date || !batchForm.end_date}
+                    style={{ ...smallBtnStyle, background: (batchForm.name && batchForm.start_date && batchForm.end_date) ? 'var(--blue)' : 'var(--bg-hover)', color: (batchForm.name && batchForm.start_date && batchForm.end_date) ? '#fff' : 'var(--text-muted)', border: 'none' }}
+                  >
+                    다음: 스케줄 설정 →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 2: 교육 스케줄 ── */}
+            {wizardStep === 2 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* 요약 정보 */}
+                <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 14, color: 'var(--text-second)' }}>
+                  <strong>{batchForm.name}</strong> · 입문교육 {batchForm.start_date} ~ {batchForm.end_date}
                 </div>
 
-                {/* 달력 그리드 — 월별로 표시 */}
+                {/* 페인트 모드 선택 */}
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
+                    날짜 유형을 선택하고 달력을 드래그하세요
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                    {([
+                      { type: 'education' as DayType, label: '📚 정규교육', bg: 'var(--blue)', bgDim: 'var(--blue-dim)', color: 'var(--blue)' },
+                      { type: 'practice' as DayType, label: '🏪 매장실습', bg: 'var(--orange)', bgDim: 'var(--orange-dim)', color: 'var(--orange)' },
+                      { type: 'off' as DayType, label: '🌙 휴무', bg: 'var(--text-muted)', bgDim: 'var(--bg-hover)', color: 'var(--text-muted)' },
+                    ]).map(opt => (
+                      <button key={opt.type} type="button" onClick={() => setPaintMode(opt.type)}
+                        style={{
+                          padding: '10px 20px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                          fontSize: 14, fontWeight: 600, transition: 'all 0.15s',
+                          border: paintMode === opt.type ? `2px solid ${opt.bg}` : '1px solid var(--border)',
+                          background: paintMode === opt.type ? opt.bgDim : 'transparent',
+                          color: paintMode === opt.type ? opt.color : 'var(--text-tertiary)',
+                          boxShadow: paintMode === opt.type ? `0 0 0 1px ${opt.bg}` : 'none',
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 달력 그리드 */}
                 {(() => {
                   const allDays: { date: string; day: number; month: number; year: number; dayOfWeek: number }[] = [];
                   const start = new Date(batchForm.start_date + 'T12:00:00Z');
                   const end = new Date(batchForm.end_date + 'T12:00:00Z');
                   for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
-                    allDays.push({
-                      date: d.toISOString().slice(0, 10),
-                      day: d.getUTCDate(),
-                      month: d.getUTCMonth() + 1,
-                      year: d.getUTCFullYear(),
-                      dayOfWeek: d.getUTCDay(),
-                    });
+                    allDays.push({ date: d.toISOString().slice(0, 10), day: d.getUTCDate(), month: d.getUTCMonth() + 1, year: d.getUTCFullYear(), dayOfWeek: d.getUTCDay() });
                   }
-
-                  // 월별 그룹
                   const months = new Map<string, typeof allDays>();
-                  allDays.forEach(d => {
-                    const key = `${d.year}-${String(d.month).padStart(2, '0')}`;
-                    if (!months.has(key)) months.set(key, []);
-                    months.get(key)!.push(d);
-                  });
+                  allDays.forEach(d => { const key = `${d.year}-${String(d.month).padStart(2, '0')}`; if (!months.has(key)) months.set(key, []); months.get(key)!.push(d); });
 
                   const bgMap: Record<string, string> = { education: 'var(--blue)', practice: 'var(--orange)', off: 'var(--bg-elevated)' };
                   const colorMap: Record<string, string> = { education: '#fff', practice: '#fff', off: 'var(--text-muted)' };
                   const dayHeaders = ['일', '월', '화', '수', '목', '금', '토'];
-
-                  const handlePaint = (date: string) => {
-                    setScheduleEdit(prev => ({ ...prev, [date]: paintMode }));
-                  };
+                  const handlePaint = (date: string) => setScheduleEdit(prev => ({ ...prev, [date]: paintMode }));
 
                   return (
-                    <div
-                      style={{ display: 'flex', flexDirection: 'column', gap: 16, userSelect: 'none' }}
-                      onMouseUp={() => setIsDragging(false)}
-                      onMouseLeave={() => setIsDragging(false)}
-                    >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, userSelect: 'none' }}
+                      onMouseUp={() => setIsDragging(false)} onMouseLeave={() => setIsDragging(false)}>
                       {[...months.entries()].map(([monthKey, days]) => (
                         <div key={monthKey}>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
-                            {days[0].year}년 {days[0].month}월
-                          </div>
-                          {/* 요일 헤더 */}
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{days[0].year}년 {days[0].month}월</div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 2 }}>
                             {dayHeaders.map(h => (
-                              <div key={h} style={{ textAlign: 'center', fontSize: 11, color: h === '일' ? 'var(--red)' : h === '토' ? 'var(--blue-light)' : 'var(--text-muted)', fontWeight: 600, padding: '4px 0' }}>
-                                {h}
-                              </div>
+                              <div key={h} style={{ textAlign: 'center', fontSize: 12, color: h === '일' ? 'var(--red)' : h === '토' ? 'var(--blue-light)' : 'var(--text-muted)', fontWeight: 600, padding: '4px 0' }}>{h}</div>
                             ))}
                           </div>
-                          {/* 날짜 그리드 */}
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
-                            {/* 첫 주 앞 빈칸 */}
-                            {Array.from({ length: days[0].dayOfWeek }).map((_, i) => (
-                              <div key={`empty-${i}`} />
-                            ))}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+                            {Array.from({ length: days[0].dayOfWeek }).map((_, i) => <div key={`e-${i}`} />)}
                             {days.map(d => {
                               const type = (scheduleEdit[d.date] as DayType) || 'off';
-                              const isSun = d.dayOfWeek === 0;
-                              const isSat = d.dayOfWeek === 6;
                               return (
-                                <div
-                                  key={d.date}
+                                <div key={d.date}
                                   onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); handlePaint(d.date); }}
                                   onMouseEnter={() => { if (isDragging) handlePaint(d.date); }}
                                   style={{
-                                    height: 40, borderRadius: 'var(--radius-sm)',
+                                    height: 44, borderRadius: 'var(--radius-sm)',
                                     border: type === 'off' ? '1px solid var(--border)' : '1px solid transparent',
                                     background: bgMap[type], color: colorMap[type],
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     cursor: 'pointer', transition: 'background 0.1s',
-                                    fontSize: 13, fontWeight: 600,
+                                    fontSize: 14, fontWeight: 600,
                                   }}
                                   title={`${d.date} — ${DAY_TYPE_CONFIG[type].label}`}
                                 >
@@ -442,27 +437,63 @@ export default function SettingsPage() {
                 })()}
 
                 {/* 합계 */}
-                <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 13, color: 'var(--text-second)', padding: '8px 12px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', gap: 16, fontSize: 14, color: 'var(--text-second)', padding: '10px 16px', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)' }}>
                   {(() => {
                     const counts = { education: 0, practice: 0, off: 0 };
                     Object.values(scheduleEdit).forEach(t => counts[t as DayType]++);
                     return <>
-                      <span style={{ fontWeight: 700 }}>📚 정규교육 {counts.education}일</span>
-                      <span style={{ fontWeight: 700 }}>🏪 매장실습 {counts.practice}일</span>
+                      <span style={{ fontWeight: 700 }}>📚 정규 {counts.education}일</span>
+                      <span style={{ fontWeight: 700 }}>🏪 실습 {counts.practice}일</span>
                       <span style={{ fontWeight: 700 }}>🌙 휴무 {counts.off}일</span>
                       <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>총 {counts.education + counts.practice + counts.off}일</span>
                     </>;
                   })()}
                 </div>
+
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button onClick={() => setWizardStep(1)} style={smallBtnStyle}>← 이전</button>
+                  <button onClick={() => setWizardStep(3)}
+                    style={{ ...smallBtnStyle, background: 'var(--blue)', color: '#fff', border: 'none' }}>
+                    다음: 심화교육 →
+                  </button>
+                </div>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setShowBatchForm(false); setEditingBatchId(null); }} style={smallBtnStyle}>취소</button>
-              <button onClick={handleBatchSave} disabled={savingBatch} style={{ ...smallBtnStyle, background: 'var(--blue)', color: '#fff', border: 'none' }}>
-                {savingBatch ? '...' : editingBatchId ? '수정 저장' : '등록하기'}
-              </button>
-            </div>
+            {/* ── STEP 3: 심화교육 ── */}
+            {wizardStep === 3 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* 요약 */}
+                <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 14, color: 'var(--text-second)' }}>
+                  <strong>{batchForm.name}</strong> · 입문 {batchForm.start_date} ~ {batchForm.end_date}
+                  {(() => {
+                    const counts = { education: 0, practice: 0, off: 0 };
+                    Object.values(scheduleEdit).forEach(t => counts[t as DayType]++);
+                    return <span style={{ marginLeft: 12, color: 'var(--text-muted)' }}>📚{counts.education} 🏪{counts.practice} 🌙{counts.off}</span>;
+                  })()}
+                </div>
+
+                <div>
+                  <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
+                    심화교육 일정 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택 — 나중에 설정해도 돼요)</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }}>
+                    <input type="date" value={batchForm.advanced_start} onChange={(e) => setBatchForm({ ...batchForm, advanced_start: e.target.value })} style={inputStyle} placeholder="시작일" />
+                    <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>~</span>
+                    <input type="date" value={batchForm.advanced_end} onChange={(e) => setBatchForm({ ...batchForm, advanced_end: e.target.value })} style={inputStyle} placeholder="종료일" />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button onClick={() => setWizardStep(2)} style={smallBtnStyle}>← 이전</button>
+                  <button onClick={handleBatchSave} disabled={savingBatch}
+                    style={{ ...smallBtnStyle, background: 'var(--green)', color: '#fff', border: 'none', padding: '8px 24px', fontSize: 14 }}>
+                    {savingBatch ? '저장 중...' : editingBatchId ? '수정 완료' : '등록 완료'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -541,6 +572,7 @@ export default function SettingsPage() {
                             advanced_end: batch.advanced_end || '',
                           });
                           setScheduleEdit(batch.schedule || {});
+                          setWizardStep(1);
                           setShowBatchForm(true);
                         }}
                         style={tinyBtnStyle}
