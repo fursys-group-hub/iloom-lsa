@@ -512,6 +512,32 @@ export default function MyNotesPage() {
         </div>
       </div>
 
+      {/* 오늘 일정 안내 */}
+      {!showForm && schedule && (() => {
+        const now = new Date();
+        const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        const todayStr = kst.toISOString().slice(0, 10);
+        const dayType = getDayType(schedule, todayStr);
+        if (dayType === 'off') return (
+          <div style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--text-tertiary)' }}>
+            <span style={{ fontSize: 20 }}>🌙</span>
+            <span>오늘은 <strong>휴무일</strong>이에요! 교육일지 제출이 필요 없어요. 작성하면 자율학습으로 저장돼요.</span>
+          </div>
+        );
+        if (dayType === 'practice') return (
+          <div style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--orange-dim)', border: '1px solid var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--orange)' }}>
+              <span style={{ fontSize: 20 }}>🏪</span>
+              <span>오늘은 <strong>매장실습일</strong>이에요! 실습일지를 작성해주세요.</span>
+            </div>
+            <a href="/my/practice" style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--orange)', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              실습일지 →
+            </a>
+          </div>
+        );
+        return null;
+      })()}
+
       {/* 검색 */}
       {!showForm && notes.length > 0 && (
         <div style={{ position: 'relative' }}>

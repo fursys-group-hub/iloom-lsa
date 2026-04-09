@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
+import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
+import type { ScheduleMap } from '@/lib/schedule';
 
 interface TestScore { id: string; test_date: string; subject: string; score: number; }
 interface TestResponse { id: string; session: string; question_id: string; is_correct: boolean; earned_score: number; max_score: number; user_answer: string; }
@@ -22,6 +25,7 @@ export default function MyPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [batchId, setBatchId] = useState('');
+  const [schedule, setSchedule] = useState<ScheduleMap | null>(null);
   const [announcePopup, setAnnouncePopup] = useState<Announcement[]>([]);
   const [popupIndex, setPopupIndex] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
@@ -34,7 +38,13 @@ export default function MyPage() {
       const p = JSON.parse(auth);
       setStudentId(p.studentId);
       setStudentName(p.name);
-      if (p.batchId) setBatchId(p.batchId);
+      if (p.batchId) {
+        setBatchId(p.batchId);
+        fetch('/api/batches').then(r => r.json()).then(batches => {
+          const batch = batches.find((b: { id: string }) => b.id === p.batchId);
+          if (batch?.schedule) setSchedule(batch.schedule);
+        }).catch(() => {});
+      }
       if (p.isArchived) setIsArchived(true);
     }
   }, []);
@@ -263,6 +273,60 @@ export default function MyPage() {
             </div>
           </div>
         );
+      })()}
+
+      {/* 오늘 일정 안내 배너 */}
+      {schedule && (() => {
+        const now = new Date();
+        const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        const todayStr = kst.toISOString().slice(0, 10);
+        const dayType = getDayType(schedule, todayStr);
+        const config = DAY_TYPE_CONFIG[dayType];
+        if (dayType === 'practice') return (
+          <div style={{
+            ...card, padding: '16px 20px',
+            background: 'var(--orange-dim)', border: '1px solid var(--orange)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 24 }}>🏪</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)' }}>오늘은 매장실습일이에요!</div>
+                <div style={{ fontSize: 13, color: 'var(--text-second)', marginTop: 2 }}>실습일지 작성이 필요해요</div>
+              </div>
+            </div>
+            <Link href="/my/practice" style={{
+              padding: '8px 16px', borderRadius: 'var(--radius-md)',
+              background: 'var(--orange)', color: '#fff', fontSize: 14, fontWeight: 600,
+              textDecoration: 'none',
+            }}>
+              실습일지 쓰러가기 →
+            </Link>
+          </div>
+        );
+        if (dayType === 'off') return (
+          <div style={{
+            ...card, padding: '16px 20px',
+            background: 'var(--bg-hover)', border: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 24 }}>🌙</span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-tertiary)' }}>오늘은 휴무일이에요!</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요!</div>
+              </div>
+            </div>
+            <Link href="/my/notes" style={{
+              padding: '8px 16px', borderRadius: 'var(--radius-md)',
+              background: 'var(--purple)', color: '#fff', fontSize: 14, fontWeight: 600,
+              textDecoration: 'none',
+            }}>
+              자율학습 쓰기
+            </Link>
+          </div>
+        );
+        return null;
       })()}
 
       {/* 아카이브 읽기전용 배너 */}
