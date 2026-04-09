@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance } from '@/lib/types';
 import { calculateRiskLevel, calculateDailyAverages, calculateAvgScore } from '@/lib/analysis';
+import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
+import type { ScheduleMap } from '@/lib/schedule';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import RiskBadge from '@/components/RiskBadge';
 
@@ -15,6 +17,7 @@ interface BatchInfo {
   advanced_start: string | null;
   advanced_end: string | null;
   is_archived: boolean;
+  schedule?: ScheduleMap;
 }
 
 interface NoteRow {
@@ -390,29 +393,60 @@ export default function DashboardClient({ batches, students: allStudents, scores
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* 교육일지 제출 현황 */}
-          <div style={cardStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ ...sectionTitle, margin: 0 }}>📓 오늘 교육일지</h3>
-              <Link href="/dashboard/education-logs" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
-            </div>
-            <div style={{ fontSize: 14, color: 'var(--text-second)', marginBottom: noteNotSubmitted.length > 0 ? 8 : 0 }}>
-              제출 <span style={{ fontWeight: 700, color: 'var(--green)' }}>{noteSubmitted.size}</span> / 미제출 <span style={{ fontWeight: 700, color: noteNotSubmitted.length > 0 ? 'var(--red)' : 'var(--green)' }}>{noteNotSubmitted.length}</span>
-              <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>({students.length}명)</span>
-            </div>
-            {noteNotSubmitted.length > 0 && (
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {noteNotSubmitted.map(s => (
-                  <span key={s.id} style={{
-                    padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                    background: 'var(--red-dim)', color: 'var(--red)',
-                  }}>{s.name}</span>
-                ))}
+          {(() => {
+            const todayType = getDayType(selectedBatch?.schedule, today);
+            const dayConfig = DAY_TYPE_CONFIG[todayType];
+            const isEducationDay = todayType === 'education';
+            const isPracticeDay = todayType === 'practice';
+            const isOffDay = todayType === 'off';
+            return (
+              <div style={cardStyle}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <h3 style={{ ...sectionTitle, margin: 0 }}>📓 오늘 교육일지</h3>
+                    <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: dayConfig.bg, color: dayConfig.color }}>
+                      {dayConfig.emoji} {dayConfig.label}
+                    </span>
+                  </div>
+                  <Link href="/dashboard/education-logs" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+                </div>
+                {isOffDay ? (
+                  <div style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>
+                    🌙 오늘은 휴무일이에요. 교육일지 제출이 필요하지 않아요!
+                  </div>
+                ) : isPracticeDay ? (
+                  <div style={{ fontSize: 14, color: 'var(--text-second)' }}>
+                    🏪 오늘은 매장실습일이에요. <Link href="/dashboard/practice" style={{ color: 'var(--blue-light)', textDecoration: 'underline' }}>실습일지</Link>를 확인해주세요!
+                    {todayNotes.length > 0 && (
+                      <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-muted)' }}>
+                        자율학습 제출: {noteSubmitted.size}명
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 14, color: 'var(--text-second)', marginBottom: noteNotSubmitted.length > 0 ? 8 : 0 }}>
+                      제출 <span style={{ fontWeight: 700, color: 'var(--green)' }}>{noteSubmitted.size}</span> / 미제출 <span style={{ fontWeight: 700, color: noteNotSubmitted.length > 0 ? 'var(--red)' : 'var(--green)' }}>{noteNotSubmitted.length}</span>
+                      <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>({students.length}명)</span>
+                    </div>
+                    {noteNotSubmitted.length > 0 && (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                        {noteNotSubmitted.map(s => (
+                          <span key={s.id} style={{
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                            background: 'var(--red-dim)', color: 'var(--red)',
+                          }}>{s.name}</span>
+                        ))}
+                      </div>
+                    )}
+                    {noteNotSubmitted.length === 0 && students.length > 0 && (
+                      <div style={{ fontSize: 13, color: 'var(--green)' }}>전원 제출 완료! 🎉</div>
+                    )}
+                  </>
+                )}
               </div>
-            )}
-            {noteNotSubmitted.length === 0 && students.length > 0 && (
-              <div style={{ fontSize: 13, color: 'var(--green)' }}>전원 제출 완료! 🎉</div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* 실습일지 실적 요약 */}
           <div style={cardStyle}>
