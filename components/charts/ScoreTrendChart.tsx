@@ -20,9 +20,10 @@ interface Props {
   data: DataPoint[];
   lines?: { key: string; color: string; name: string }[];
   height?: number;
+  onDateClick?: (date: string) => void;
 }
 
-export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
+export default function ScoreTrendChart({ data, lines, height = 300, onDateClick }: Props) {
   const formatDate = (date: string) => {
     const d = new Date(date);
     return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -30,7 +31,16 @@ export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+      <LineChart
+        data={data}
+        margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onClick={onDateClick ? (e: any) => {
+          if (e?.activePayload?.[0]?.payload?.date) {
+            onDateClick(e.activePayload[0].payload.date);
+          }
+        } : undefined}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" />
         <XAxis
           dataKey="date"
@@ -55,6 +65,7 @@ export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
             color: '#EBEBF5CC',
           }}
           labelFormatter={(label) => formatDate(String(label))}
+          wrapperStyle={onDateClick ? { cursor: 'pointer' } : undefined}
         />
         {lines ? (
           lines.map((line) => (
@@ -66,7 +77,7 @@ export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
               name={line.name}
               strokeWidth={2}
               dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+              activeDot={{ r: 7, stroke: '#fff', strokeWidth: 2 }}
             />
           ))
         ) : (
@@ -76,7 +87,7 @@ export default function ScoreTrendChart({ data, lines, height = 300 }: Props) {
             stroke="#3b82f6"
             strokeWidth={2.5}
             dot={{ r: 4, fill: '#3b82f6' }}
-            activeDot={{ r: 6 }}
+            activeDot={{ r: 7, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }}
             name="평균"
           />
         )}

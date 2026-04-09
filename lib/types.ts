@@ -230,6 +230,37 @@ export interface StudentWithStats extends Student {
   late_count: number;
 }
 
+// 교육 효과 분석용
+export interface AdaptationIndex {
+  studentId: string;
+  studentName: string;
+  total: number;           // 종합 적응 지수 (0~100)
+  group: 'high' | 'mid' | 'low';  // 상/중/하
+  breakdown: {
+    examAvg: number;       // 시험 평균 (0~100)
+    weakCategories: number; // 하위 분야 점수 (0~100) — 60점 미만 분야가 적을수록 높음
+    weakCategoryCount: number; // 60점 미만 분야 개수 (원본)
+    totalCategories: number;   // 전체 분야 개수
+    attendanceRate: number; // 출석률 (0~100)
+    participation: number;  // 교육일지 참여 (0~100)
+    participationDetail: string; // 근거 텍스트 (예: "15일 중 15일 제출")
+    confidenceTrend: number; // 자신감 추이 (0~100)
+    confidenceDetail: string; // 근거 텍스트 (예: "높음3→보통5→낮음2, 하락")
+    hasConfidenceData: boolean; // 자신감 데이터 있는지
+  };
+}
+
+export interface RiskCheck {
+  studentId: string;
+  studentName: string;
+  checks: {
+    label: string;
+    triggered: boolean;
+    value: string;
+  }[];
+  riskCount: number;
+}
+
 // Google Sheets 파싱용
 export interface SheetQuestion {
   session: string;      // 차시
