@@ -49,7 +49,7 @@ interface QuestionRow {
   id: string;
   student_id: string;
   title: string;
-  status: 'open' | 'answered';
+  status: 'open' | 'answered' | 'archived';
   created_at: string;
   updated_at: string;
   student_name?: string;
@@ -486,9 +486,9 @@ export default function DashboardClient({ batches, students: allStudents, scores
               </div>
               <Link href="/dashboard/questions" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
             </div>
-            {questions.length > 0 ? (
+            {questions.filter(q => q.status !== 'archived').length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {questions.slice(0, 4).map(q => {
+                {questions.filter(q => q.status !== 'archived').slice(0, 4).map(q => {
                   const st = q.status === 'open'
                     ? { bg: 'var(--orange-dim)', color: 'var(--orange)', label: '대기' }
                     : { bg: 'var(--green-dim)', color: 'var(--green)', label: '답변' };
