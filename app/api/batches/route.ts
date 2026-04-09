@@ -62,6 +62,16 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    // 스케줄만 업데이트
+    if (body.schedule !== undefined) {
+      const { error: schedError } = await supabase
+        .from('batches')
+        .update({ schedule: body.schedule })
+        .eq('id', body.id);
+      if (schedError) throw schedError;
+      return NextResponse.json({ success: true });
+    }
+
     const { error } = await supabase
       .from('batches')
       .update({

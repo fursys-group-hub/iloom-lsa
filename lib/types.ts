@@ -205,7 +205,7 @@ export interface StudentQuestion {
   id: string;
   student_id: string;
   title: string;
-  status: 'open' | 'answered' | 'resolved';
+  status: 'open' | 'answered' | 'resolved' | 'archived';
   created_at: string;
   updated_at: string;
   // join

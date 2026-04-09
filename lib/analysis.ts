@@ -154,12 +154,17 @@ function calculateConfidenceTrend(notes: { confidence?: string | null; created_a
 
   if (withConf.length < 2) return 50; // 데이터 부족 → 중립
 
+  // 5단계: very_confident=5, confident=4, normal=3, uncertain=2, need_help=1
+  // 기존 4단계 데이터 호환: 구 confident→5, understood→4, half→2
   const confToNum = (c: string | null | undefined): number => {
     if (!c) return 3;
     const lower = c.toLowerCase();
-    if (lower === 'confident' || lower === '높음') return 5;
-    if (lower === 'half' || lower === '보통' || lower === 'understood') return 3;
-    if (lower === 'low' || lower === '낮음') return 1;
+    if (lower === 'very_confident') return 5;
+    if (lower === 'confident' || lower === '높음') return 5; // 기존 confident도 최상위로 호환
+    if (lower === 'understood') return 4; // 기존 understood → 자신있어요
+    if (lower === 'normal' || lower === '보통') return 3;
+    if (lower === 'uncertain' || lower === 'half') return 2; // 기존 half → 알쏭달쏭
+    if (lower === 'need_help' || lower === 'low' || lower === '낮음') return 1;
     return 3;
   };
 
@@ -231,18 +236,20 @@ export function calculateAdaptationIndex(params: {
   const hasConfidenceData = confNotes.length >= 2;
   const confidenceTrend = calculateConfidenceTrend(educationNotes);
 
-  // 자신감 상세 텍스트
+  // 자신감 상세 텍스트 (5단계: 높음/자신/보통/알쏭/도움)
   let confidenceDetail = '미입력';
   if (confNotes.length > 0) {
-    const confCounts = { high: 0, mid: 0, low: 0 };
+    const confCounts = { high: 0, confident: 0, normal: 0, uncertain: 0, low: 0 };
     for (const n of confNotes) {
       const c = (n.confidence || '').toLowerCase();
-      if (c === 'confident' || c === '높음') confCounts.high++;
-      else if (c === 'half' || c === '보통' || c === 'understood') confCounts.mid++;
-      else if (c === 'low' || c === '낮음') confCounts.low++;
+      if (c === 'very_confident') confCounts.high++;
+      else if (c === 'confident' || c === 'understood' || c === '높음') confCounts.confident++;
+      else if (c === 'normal' || c === '보통') confCounts.normal++;
+      else if (c === 'uncertain' || c === 'half') confCounts.uncertain++;
+      else if (c === 'need_help' || c === 'low' || c === '낮음') confCounts.low++;
     }
     const trend = confidenceTrend > 60 ? '↑ 상승' : confidenceTrend < 40 ? '↓ 하락' : '→ 유지';
-    confidenceDetail = `높음 ${confCounts.high}회 / 보통 ${confCounts.mid}회 / 낮음 ${confCounts.low}회 ${trend}`;
+    confidenceDetail = `😎${confCounts.high} 😊${confCounts.confident} 😐${confCounts.normal} 🤔${confCounts.uncertain} 😵${confCounts.low} ${trend}`;
   }
 
   // 종합 점수 (자신감 데이터 없으면 50으로 중립 처리)
@@ -328,7 +335,7 @@ export function calculateRiskChecklist(params: {
   const consecutive3Low = hasEnoughData &&
     last3Conf.every(n => {
       const c = (n.confidence || '').toLowerCase();
-      return c === 'low' || c === '낮음';
+      return c === 'need_help' || c === 'uncertain' || c === 'low' || c === '낮음' || c === 'half';
     });
   checks.push({
     label: '자신감 3회 연속 낮음',

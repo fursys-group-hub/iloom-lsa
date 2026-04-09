@@ -11,6 +11,7 @@ const card: React.CSSProperties = {
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   open: { label: '답변 대기', color: 'var(--orange)', bg: 'var(--orange-dim)', dot: '🟠' },
   answered: { label: '답변 완료', color: 'var(--green)', bg: 'var(--green-dim)', dot: '🟢' },
+  archived: { label: '보관됨', color: 'var(--text-muted)', bg: 'var(--bg-hover)', dot: '📦' },
 };
 const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)', dot: '⚪' };
 
@@ -21,7 +22,7 @@ export default function AdminQuestionsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [replies, setReplies] = useState<QuestionReply[]>([]);
   const [replyText, setReplyText] = useState('');
-  const [filter, setFilter] = useState<'all' | 'open' | 'answered'>('all');
+  const [filter, setFilter] = useState<'all' | 'open' | 'answered' | 'archived'>('all');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [adminName, setAdminName] = useState('관리자');
@@ -128,7 +129,7 @@ export default function AdminQuestionsPage() {
     if (selectedId === id) { setSelectedId(null); setReplies([]); }
   };
 
-  const filtered = filter === 'all' ? questions : questions.filter((q) => q.status === filter);
+  const filtered = filter === 'all' ? questions.filter((q) => q.status !== 'archived') : questions.filter((q) => q.status === filter);
   const selectedQ = questions.find((q) => q.id === selectedId);
   const openCount = questions.filter((q) => q.status === 'open').length;
 
@@ -152,7 +153,7 @@ export default function AdminQuestionsPage() {
 
       {/* 필터 탭 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료']] as const).map(([key, label]) => (
+        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '📦 보관됨']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -271,6 +272,35 @@ export default function AdminQuestionsPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
+                  {selectedQ.status === 'archived' ? (
+                    <button onClick={async () => {
+                      const res = await fetch(`/api/student-questions?id=${selectedQ.id}`, {
+                        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'answered' }),
+                      });
+                      if (res.ok) setQuestions(prev => prev.map(q => q.id === selectedQ.id ? { ...q, status: 'answered' } : q));
+                    }} style={{
+                      padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                      background: 'var(--blue-dim)', color: 'var(--blue)',
+                      border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
+                    }}>
+                      보관 해제
+                    </button>
+                  ) : (
+                    <button onClick={async () => {
+                      const res = await fetch(`/api/student-questions?id=${selectedQ.id}`, {
+                        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'archived' }),
+                      });
+                      if (res.ok) setQuestions(prev => prev.map(q => q.id === selectedQ.id ? { ...q, status: 'archived' } : q));
+                    }} style={{
+                      padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                      background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
+                      border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
+                    }}>
+                      📦 보관
+                    </button>
+                  )}
                   <button onClick={() => handleDelete(selectedQ.id)} style={{
                     padding: '6px 14px', borderRadius: 'var(--radius-pill)',
                     background: 'var(--red-dim)', color: 'var(--red)',

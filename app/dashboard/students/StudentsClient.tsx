@@ -43,9 +43,12 @@ function parseNoteMeta(content: string) {
 function confToKor(c: string | null | undefined): string {
   if (!c) return '';
   const lower = c.toLowerCase();
-  if (lower === 'confident') return '높음';
-  if (lower === 'half' || lower === 'understood') return '보통';
-  if (lower === 'low') return '낮음';
+  if (lower === 'very_confident') return '자신만만';
+  if (lower === 'confident' || lower === '높음') return '자신있어요';
+  if (lower === 'understood') return '자신있어요';
+  if (lower === 'normal' || lower === '보통') return '보통이에요';
+  if (lower === 'uncertain' || lower === 'half') return '알쏭달쏭';
+  if (lower === 'need_help' || lower === 'low' || lower === '낮음') return '도움요청';
   return c;
 }
 
@@ -148,9 +151,9 @@ export default function StudentsClient({ batches, students: initialStudents, sco
     return { avgAttendance: Math.round(totalAttRate / count), avgSubmitRate: Math.round(totalSubmitRate / count), avgParticipation: Math.round(totalPart / count) };
   }, [batchStudents, attendance, notes, totalEducationDays]);
 
-  // 자신감 추이
+  // 자신감 추이 (5단계 → 차트는 높음/보통/낮음 3색으로 그룹핑)
   const confidenceTrendData = useMemo(() => {
-    const dateMap = new Map<string, { confident: number; half: number; low: number; total: number }>();
+    const dateMap = new Map<string, { high: number; mid: number; low: number; total: number }>();
     for (const student of batchStudents) {
       for (const note of notes.filter(n => n.student_id === student.id)) {
         const meta = parseNoteMeta(note.content);
@@ -158,18 +161,19 @@ export default function StudentsClient({ batches, students: initialStudents, sco
         const conf = (meta.confidence || '').toLowerCase();
         if (!conf) continue;
         const date = note.created_at.slice(0, 10);
-        const entry = dateMap.get(date) || { confident: 0, half: 0, low: 0, total: 0 };
+        const entry = dateMap.get(date) || { high: 0, mid: 0, low: 0, total: 0 };
         entry.total++;
-        if (conf === 'confident' || conf === '높음') entry.confident++;
-        else if (conf === 'half' || conf === '보통' || conf === 'understood') entry.half++;
-        else if (conf === 'low' || conf === '낮음') entry.low++;
+        // 5단계 → 3그룹: 높음(very_confident+confident), 보통(normal), 낮음(uncertain+need_help)
+        if (conf === 'very_confident' || conf === 'confident' || conf === '높음' || conf === 'understood') entry.high++;
+        else if (conf === 'normal' || conf === '보통') entry.mid++;
+        else if (conf === 'uncertain' || conf === 'half' || conf === 'need_help' || conf === 'low' || conf === '낮음') entry.low++;
         dateMap.set(date, entry);
       }
     }
     return [...dateMap.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, v]) => ({
       date: date.slice(5),
-      높음: v.total > 0 ? Math.round((v.confident / v.total) * 100) : 0,
-      보통: v.total > 0 ? Math.round((v.half / v.total) * 100) : 0,
+      높음: v.total > 0 ? Math.round((v.high / v.total) * 100) : 0,
+      보통: v.total > 0 ? Math.round((v.mid / v.total) * 100) : 0,
       낮음: v.total > 0 ? Math.round((v.low / v.total) * 100) : 0,
     }));
   }, [batchStudents, notes]);

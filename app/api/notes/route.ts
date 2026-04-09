@@ -151,9 +151,20 @@ export async function POST(req: NextRequest) {
 
 // 노트 수정
 export async function PATCH(req: NextRequest) {
-  const { id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word } = await req.json();
+  const { id, title, content, tags, confidence, content_type, participation_score, best_learning, one_word, created_at } = await req.json();
 
   const supabase = createServerClient();
+
+  // 날짜만 수정하는 경우 (관리자용)
+  if (created_at && !content) {
+    const { error } = await supabase
+      .from('student_notes')
+      .update({ created_at, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) return Response.json({ message: error.message }, { status: 500 });
+    return Response.json({ message: '날짜 수정 완료!' });
+  }
+
   const extraMeta = { participation_score, best_learning, one_word };
   const { error } = await supabase
     .from('student_notes')

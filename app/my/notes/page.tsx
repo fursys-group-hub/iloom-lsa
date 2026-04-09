@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
+import type { ScheduleMap } from '@/lib/schedule';
 
 // ── 타입 ──
 interface NoteComment {
@@ -44,11 +46,30 @@ const inputStyle: React.CSSProperties = {
 };
 
 const CONFIDENCE = [
-  { value: 'confident', label: '자신만만', icon: '😎', desc: '고객 앞에서 바로 답변 가능' },
-  { value: 'understood', label: '이해완료', icon: '😊', desc: '혼자 복습하면 충분해요' },
-  { value: 'half', label: '알쏭달쏭', icon: '🤔', desc: '실물 보면서 한번 더 봐야 할 것 같아요' },
+  { value: 'very_confident', label: '자신만만', icon: '😎', desc: '고객 앞에서 바로 답변 가능' },
+  { value: 'confident', label: '자신있어요', icon: '😊', desc: '혼자 복습하면 충분해요' },
+  { value: 'normal', label: '보통이에요', icon: '😐', desc: '반반이에요' },
+  { value: 'uncertain', label: '알쏭달쏭', icon: '🤔', desc: '실물 보면서 한번 더 봐야 할 것 같아요' },
   { value: 'need_help', label: '도움요청', icon: '😵', desc: '추가 설명이 필요해요' },
 ];
+
+// 주말 판별 (토=6, 일=0)
+function isWeekend(dateStr: string): boolean {
+  const d = new Date(dateStr + 'T12:00:00+09:00');
+  const day = d.getUTCDay();
+  return day === 0 || day === 6;
+}
+
+// 기존 DB 값 → 새 5단계 value로 매핑 (노트 목록 표시용)
+const LEGACY_CONF_MAP: Record<string, string> = {
+  'understood': 'confident',  // 구 이해완료 → 자신있어요
+  'half': 'uncertain',        // 구 알쏭달쏭 → 알쏭달쏭
+};
+function findConfidence(value: string | null | undefined) {
+  if (!value) return null;
+  const mapped = LEGACY_CONF_MAP[value] || value;
+  return CONFIDENCE.find(o => o.value === mapped) || null;
+}
 
 const BLOCK_TYPES: { type: BlockType; label: string; icon: string }[] = [
   { type: 'heading', label: '제목', icon: 'H' },
@@ -110,6 +131,7 @@ const STEP_DEFS = [
 export default function MyNotesPage() {
   const [studentId, setStudentId] = useState('');
   const [studentName, setStudentName] = useState('');
+  const [schedule, setSchedule] = useState<ScheduleMap | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -217,6 +239,13 @@ export default function MyNotesPage() {
       setStudentId(parsed.studentId);
       setStudentName(parsed.name || '');
       if (parsed.isArchived) setIsArchived(true);
+      // 스케줄 로드
+      if (parsed.batchId) {
+        fetch('/api/batches').then(r => r.json()).then(batches => {
+          const batch = batches.find((b: { id: string }) => b.id === parsed.batchId);
+          if (batch?.schedule) setSchedule(batch.schedule);
+        }).catch(() => {});
+      }
     }
 
     // 임시저장 복원
@@ -348,14 +377,28 @@ export default function MyNotesPage() {
       const dateStr = d.toISOString().slice(0, 10);
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
       const dayName = dayNames[d.getUTCDay()];
-      const label = `${d.getUTCMonth() + 1}/${d.getUTCDate()} (${dayName})${i === 0 ? ' 오늘' : i === 1 ? ' 어제' : ''}`;
+      const dayType = getDayType(schedule, dateStr);
+      const dayTypeLabel = dayType === 'education' ? '' : dayType === 'practice' ? ' 🏪실습' : ' 🌙휴무';
+      const label = `${d.getUTCMonth() + 1}/${d.getUTCDate()} (${dayName})${i === 0 ? ' 오늘' : i === 1 ? ' 어제' : ''}${dayTypeLabel}`;
       opts.push({ value: dateStr, label });
     }
     return opts;
-  }, []);
+  }, [schedule]);
 
   const handleSave = async () => {
     if (!stepsHaveContent) return;
+    if (!isSelfStudyMode && !confidence) {
+      setSaveError('오늘의 자신감을 선택해주세요!');
+      // 자신감 영역으로 스크롤 + 깜빡임
+      const confEl = document.getElementById('confidence-section');
+      if (confEl) {
+        confEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        confEl.style.animation = 'none';
+        confEl.offsetHeight; // reflow
+        confEl.style.animation = 'shake 0.5s ease-in-out';
+      }
+      return;
+    }
     setSaving(true);
     setSaveError('');
 
@@ -432,6 +475,15 @@ export default function MyNotesPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+        }
+      `}</style>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📓 교육일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -439,7 +491,12 @@ export default function MyNotesPage() {
             <button
               onClick={() => {
                 if (showForm) { setShowForm(false); resetForm(); }
-                else { resetForm(); setShowForm(true); }
+                else {
+                  resetForm();
+                  const dayType = getDayType(schedule, selectedDate);
+                  if (dayType === 'off') setIsSelfStudyMode(true);
+                  setShowForm(true);
+                }
               }}
               style={{
                 padding: '10px 20px', borderRadius: 'var(--radius-md)',
@@ -474,6 +531,23 @@ export default function MyNotesPage() {
       {/* 작성 폼 — STEP 구조 */}
       {showForm && (
         <div style={{ ...card, ...(isSelfStudyMode ? { border: '1px solid var(--purple-dim)', background: 'var(--purple-dim)' } : {}) }}>
+          {/* 스케줄 안내 배너 */}
+          {(() => {
+            const dayType = getDayType(schedule, selectedDate);
+            const config = DAY_TYPE_CONFIG[dayType];
+            if (dayType === 'practice' && !isSelfStudyMode) return (
+              <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>🏪</span>
+                <span>오늘은 <strong>매장실습일</strong>이에요! <a href="/my/practice" style={{ color: 'var(--blue-light)', textDecoration: 'underline' }}>실습일지 작성하기 →</a></span>
+              </div>
+            );
+            if (dayType === 'off' && !isSelfStudyMode) return (
+              <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 14, marginBottom: 16 }}>
+                🌙 오늘은 <strong>휴무일</strong>이에요. 자율학습 모드로 전환되었어요!
+              </div>
+            );
+            return null;
+          })()}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {isSelfStudyMode ? '📚 자율학습 노트' : editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
@@ -505,7 +579,15 @@ export default function MyNotesPage() {
                 <label style={labelStyle}>📅 날짜 선택</label>
                 <select
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedDate(val);
+                    if (!editingNoteId) {
+                      const dayType = getDayType(schedule, val);
+                      if (dayType === 'off') setIsSelfStudyMode(true);
+                      else setIsSelfStudyMode(false);
+                    }
+                  }}
                   style={{
                     ...inputStyle, fontSize: 15, width: 'auto', minWidth: 180,
                     cursor: 'pointer', appearance: 'auto',
@@ -529,22 +611,26 @@ export default function MyNotesPage() {
                 style={{ ...inputStyle, fontSize: 15 }} />
             </div>
 
-            {/* 오늘의 자신감 (자율학습이면 숨김) */}
+            {/* 오늘의 자신감 (자율학습이면 숨김, 필수) */}
             {!isSelfStudyMode && (
-              <div>
-                <label style={labelStyle}>오늘의 자신감</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+              <div id="confidence-section" style={{
+                padding: 12, borderRadius: 'var(--radius-md)', marginInline: -12,
+                border: (saveError && !confidence) ? '2px solid var(--red)' : '2px solid transparent',
+                transition: 'border-color 0.3s',
+              }}>
+                <label style={labelStyle}>오늘의 자신감 <span style={{ fontWeight: 400, color: 'var(--red)', fontSize: 13 }}>*필수</span></label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
                   {CONFIDENCE.map(opt => (
                     <button key={opt.value}
-                      onClick={() => setConfidence(confidence === opt.value ? '' : opt.value)}
+                      onClick={() => { setConfidence(opt.value); setSaveError(''); }}
                       style={{
-                        padding: '12px 8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'center',
+                        padding: '12px 4px', borderRadius: 'var(--radius-md)', cursor: 'pointer', textAlign: 'center',
                         border: confidence === opt.value ? '2px solid var(--blue)' : '1px solid var(--border)',
                         background: confidence === opt.value ? 'var(--blue-dim)' : 'var(--bg-elevated)',
                       }}
                     >
                       <div style={{ fontSize: 24, marginBottom: 4 }}>{opt.icon}</div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{opt.label}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{opt.label}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</div>
                     </button>
                   ))}
@@ -709,16 +795,16 @@ export default function MyNotesPage() {
             )}
 
             {/* 저장 버튼 */}
-            <button onClick={handleSave} disabled={saving || !stepsHaveContent}
+            <button onClick={handleSave} disabled={saving || !stepsHaveContent || (!isSelfStudyMode && !confidence)}
               style={{
                 padding: '14px', borderRadius: 'var(--radius-md)', border: 'none',
-                background: stepsHaveContent ? 'var(--blue)' : 'var(--bg-elevated)',
-                color: stepsHaveContent ? '#fff' : 'var(--text-muted)',
+                background: (stepsHaveContent && (isSelfStudyMode || confidence)) ? 'var(--blue)' : 'var(--bg-elevated)',
+                color: (stepsHaveContent && (isSelfStudyMode || confidence)) ? '#fff' : 'var(--text-muted)',
                 fontSize: 16, fontWeight: 600,
-                cursor: stepsHaveContent ? 'pointer' : 'not-allowed',
+                cursor: (stepsHaveContent && (isSelfStudyMode || confidence)) ? 'pointer' : 'not-allowed',
               }}
             >
-              {saving ? '저장 중...' : editingNoteId ? '수정 완료' : '저장하기'}
+              {saving ? '저장 중...' : !isSelfStudyMode && !confidence ? '자신감을 선택해주세요' : editingNoteId ? '수정 완료' : '저장하기'}
             </button>
           </div>
         </div>
@@ -738,7 +824,7 @@ export default function MyNotesPage() {
             {filteredNotes.map(note => {
               const isSelected = expandedNoteId === note.id;
               const isSelfStudy = note.tags?.includes('자율학습');
-              const conf = (!isSelfStudy && note.confidence) ? CONFIDENCE.find(o => o.value === note.confidence) : null;
+              const conf = (!isSelfStudy && note.confidence) ? findConfidence(note.confidence) : null;
               const dateObj = new Date(note.created_at);
               const month = dateObj.getMonth() + 1;
               const day = dateObj.getDate();
@@ -859,7 +945,7 @@ export default function MyNotesPage() {
             const note = filteredNotes.find(n => n.id === expandedNoteId);
             if (!note) return null;
             const isSelfStudy = note.tags?.includes('자율학습');
-            const conf = (!isSelfStudy && note.confidence) ? CONFIDENCE.find(o => o.value === note.confidence) : null;
+            const conf = (!isSelfStudy && note.confidence) ? findConfidence(note.confidence) : null;
             return (
               <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid var(--purple-dim)', background: 'var(--purple-dim)' } : {}) }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>

@@ -11,6 +11,7 @@ const card: React.CSSProperties = {
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
   open: { label: '답변 대기', color: 'var(--orange)', bg: 'var(--orange-dim)' },
   answered: { label: '답변 완료', color: 'var(--green)', bg: 'var(--green-dim)' },
+  archived: { label: '보관처리 됨', color: 'var(--text-muted)', bg: 'var(--bg-hover)' },
 };
 const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)' };
 
@@ -464,7 +465,17 @@ export default function AskPage() {
               </div>
 
               {/* 입력 영역 */}
-              <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+              {selectedQ.status === 'archived' ? (
+                <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+                  <div style={{
+                    padding: '10px 16px', borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 14,
+                  }}>
+                    📦 이 질문은 보관처리 되었습니다
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
                   <input
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
@@ -488,6 +499,7 @@ export default function AskPage() {
                     ↑
                   </button>
                 </div>
+              )}
             </>
           )}
         </div>

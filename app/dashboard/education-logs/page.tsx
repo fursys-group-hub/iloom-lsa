@@ -100,12 +100,17 @@ interface StudentBasic {
 }
 
 const confidenceMap: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
-  confident: { label: '자신만만', emoji: '🔥', color: 'var(--green)', bg: 'var(--green-dim)' },
-  understood: { label: '이해완료', emoji: '✅', color: 'var(--blue-light)', bg: 'var(--blue-dim)' },
+  // 5단계 (신규)
+  very_confident: { label: '자신만만', emoji: '😎', color: 'var(--green)', bg: 'var(--green-dim)' },
+  confident: { label: '자신있어요', emoji: '😊', color: 'var(--blue-light)', bg: 'var(--blue-dim)' },
+  normal: { label: '보통이에요', emoji: '😐', color: 'var(--text-tertiary)', bg: 'var(--bg-hover)' },
+  uncertain: { label: '알쏭달쏭', emoji: '🤔', color: 'var(--orange)', bg: 'var(--orange-dim)' },
+  need_help: { label: '도움요청', emoji: '😵', color: 'var(--red)', bg: 'var(--red-dim)' },
+  // 기존 데이터 호환
+  understood: { label: '자신있어요', emoji: '😊', color: 'var(--blue-light)', bg: 'var(--blue-dim)' },
   confused: { label: '알쏭달쏭', emoji: '🤔', color: 'var(--orange)', bg: 'var(--orange-dim)' },
   half: { label: '알쏭달쏭', emoji: '🤔', color: 'var(--orange)', bg: 'var(--orange-dim)' },
-  help_needed: { label: '도움요청', emoji: '🆘', color: 'var(--red)', bg: 'var(--red-dim)' },
-  need_help: { label: '도움요청', emoji: '🆘', color: 'var(--red)', bg: 'var(--red-dim)' },
+  help_needed: { label: '도움요청', emoji: '😵', color: 'var(--red)', bg: 'var(--red-dim)' },
 };
 
 const card: React.CSSProperties = {
@@ -130,6 +135,8 @@ export default function EducationLogsPage() {
   const [comments, setComments] = useState<NoteComment[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
+  const [editingDateNoteId, setEditingDateNoteId] = useState<string | null>(null);
+  const [editingDateValue, setEditingDateValue] = useState('');
   const commentEndRef = useRef<HTMLDivElement>(null);
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
 
@@ -432,7 +439,7 @@ export default function EducationLogsPage() {
                 {(() => {
                   const needHelp = notesByDate.filter(n => {
                     if (n.tags?.includes('자율학습')) return false;
-                    return ['confused', 'half', 'help_needed', 'need_help'].includes(n.confidence || '');
+                    return ['confused', 'half', 'help_needed', 'need_help', 'uncertain'].includes(n.confidence || '');
                   });
                   if (needHelp.length === 0) return (
                     <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>없음 👍</div>
@@ -570,8 +577,54 @@ export default function EducationLogsPage() {
                           </div>
                         )}
                         <NoteContentRenderer content={note.content} contentType={note.content_type} />
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'right', marginTop: 12 }}>
-                          작성: {new Date(note.created_at).toLocaleString('ko-KR')}
+                        <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'right', marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+                          {editingDateNoteId === note.id ? (
+                            <>
+                              <input
+                                type="date"
+                                value={editingDateValue}
+                                onChange={e => setEditingDateValue(e.target.value)}
+                                style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 13 }}
+                              />
+                              <button
+                                onClick={async () => {
+                                  if (!editingDateValue) return;
+                                  const newCreatedAt = new Date(`${editingDateValue}T12:00:00+09:00`).toISOString();
+                                  const res = await fetch('/api/notes', {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ id: note.id, created_at: newCreatedAt }),
+                                  });
+                                  if (res.ok) {
+                                    setEditingDateNoteId(null);
+                                    fetchData();
+                                  }
+                                }}
+                                style={{ padding: '4px 12px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--blue)', color: '#fff', fontSize: 13, cursor: 'pointer' }}
+                              >
+                                확인
+                              </button>
+                              <button
+                                onClick={() => setEditingDateNoteId(null)}
+                                style={{ padding: '4px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: 13, cursor: 'pointer' }}
+                              >
+                                취소
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              작성: {note.created_at.slice(0, 10)}
+                              <button
+                                onClick={() => {
+                                  setEditingDateNoteId(note.id);
+                                  setEditingDateValue(note.created_at.slice(0, 10));
+                                }}
+                                style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer' }}
+                              >
+                                날짜 수정
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {/* 코멘트 영역 */}
