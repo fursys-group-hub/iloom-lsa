@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { ScheduleMap, DayType } from '@/lib/schedule';
+import { DAY_TYPE_CONFIG } from '@/lib/schedule';
 
 interface Batch {
   id: string;
@@ -12,6 +14,7 @@ interface Batch {
   sheet_id: string | null;
   is_archived: boolean;
   archived_at: string | null;
+  schedule?: ScheduleMap;
 }
 
 interface StudentRow {
@@ -39,6 +42,7 @@ export default function SettingsPage() {
   const [showBatchForm, setShowBatchForm] = useState(false);
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [savingBatch, setSavingBatch] = useState(false);
+  const [scheduleEdit, setScheduleEdit] = useState<ScheduleMap>({});
 
   // ── 교육생 ──
   const [students, setStudents] = useState<StudentRow[]>([]);
@@ -77,6 +81,19 @@ export default function SettingsPage() {
     if (selectedBatchId) fetchStudents(selectedBatchId);
   }, [selectedBatchId, fetchStudents]);
 
+  // 기본 스케줄 생성 (평일=education, 주말=off)
+  const generateDefaultSchedule = (startStr: string, endStr: string) => {
+    const sch: ScheduleMap = {};
+    const start = new Date(startStr + 'T12:00:00Z');
+    const end = new Date(endStr + 'T12:00:00Z');
+    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+      const dateStr = d.toISOString().slice(0, 10);
+      const day = d.getUTCDay();
+      sch[dateStr] = (day === 0 || day === 6) ? 'off' : 'education';
+    }
+    setScheduleEdit(sch);
+  };
+
   // 기수 저장
   const handleBatchSave = async () => {
     if (!batchForm.name || !batchForm.start_date || !batchForm.end_date) return;
@@ -95,9 +112,22 @@ export default function SettingsPage() {
         }),
       });
       if (res.ok) {
+        // 스케줄 저장 (편집한 경우)
+        if (Object.keys(scheduleEdit).length > 0) {
+          const batchData = editingBatchId ? { id: editingBatchId } : await res.json();
+          const batchId = editingBatchId || batchData?.id;
+          if (batchId) {
+            await fetch('/api/batches', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: batchId, schedule: scheduleEdit }),
+            });
+          }
+        }
         await fetchBatches();
         setShowBatchForm(false);
         setEditingBatchId(null);
+        setScheduleEdit({});
         setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
       }
     } catch { /* silent */ }
@@ -264,8 +294,16 @@ export default function SettingsPage() {
                 입문교육 일정 *
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <input type="date" value={batchForm.start_date} onChange={(e) => setBatchForm({ ...batchForm, start_date: e.target.value })} style={inputStyle} />
-                <input type="date" value={batchForm.end_date} onChange={(e) => setBatchForm({ ...batchForm, end_date: e.target.value })} style={inputStyle} />
+                <input type="date" value={batchForm.start_date} onChange={(e) => {
+                  const v = e.target.value;
+                  setBatchForm(f => ({ ...f, start_date: v }));
+                  if (v && batchForm.end_date && !editingBatchId) generateDefaultSchedule(v, batchForm.end_date);
+                }} style={inputStyle} />
+                <input type="date" value={batchForm.end_date} onChange={(e) => {
+                  const v = e.target.value;
+                  setBatchForm(f => ({ ...f, end_date: v }));
+                  if (batchForm.start_date && v && !editingBatchId) generateDefaultSchedule(batchForm.start_date, v);
+                }} style={inputStyle} />
               </div>
             </div>
             {/* 심화교육 일정 */}
@@ -279,6 +317,72 @@ export default function SettingsPage() {
                 <input type="date" value={batchForm.advanced_end} onChange={(e) => setBatchForm({ ...batchForm, advanced_end: e.target.value })} style={inputStyle} placeholder="심화교육 종료일" />
               </div>
             </div>
+            {/* 스케줄 캘린더 */}
+            {batchForm.start_date && batchForm.end_date && (
+              <div>
+                <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 11, fontWeight: 700 }}>스케줄</span>
+                  교육 스케줄 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(클릭하여 변경)</span>
+                </label>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, display: 'flex', gap: 12 }}>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--blue)', marginRight: 4 }} />정규교육</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--orange)', marginRight: 4 }} />매장실습</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: 'var(--bg-elevated)', marginRight: 4, border: '1px solid var(--border)' }} />휴무</span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                  {(() => {
+                    const days: { date: string; dayName: string }[] = [];
+                    const start = new Date(batchForm.start_date + 'T12:00:00Z');
+                    const end = new Date(batchForm.end_date + 'T12:00:00Z');
+                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+                      days.push({ date: d.toISOString().slice(0, 10), dayName: dayNames[d.getUTCDay()] });
+                    }
+                    return days.map(({ date, dayName }) => {
+                      const type = (scheduleEdit[date] as DayType) || 'off';
+                      const isWeekend = dayName === '토' || dayName === '일';
+                      const bgMap: Record<string, string> = { education: 'var(--blue)', practice: 'var(--orange)', off: 'var(--bg-elevated)' };
+                      const colorMap: Record<string, string> = { education: '#fff', practice: '#fff', off: 'var(--text-muted)' };
+                      const cycle: DayType[] = ['education', 'practice', 'off'];
+                      return (
+                        <button
+                          key={date}
+                          type="button"
+                          onClick={() => {
+                            const next = cycle[(cycle.indexOf(type) + 1) % cycle.length];
+                            setScheduleEdit(prev => ({ ...prev, [date]: next }));
+                          }}
+                          style={{
+                            width: 44, height: 44, borderRadius: 'var(--radius-sm)',
+                            border: type === 'off' ? '1px solid var(--border)' : '1px solid transparent',
+                            background: bgMap[type], color: colorMap[type],
+                            fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
+                            opacity: isWeekend && type === 'off' ? 0.5 : 1,
+                          }}
+                          title={`${date} (${dayName}) — ${DAY_TYPE_CONFIG[type].label} → 클릭하여 변경`}
+                        >
+                          <span style={{ fontSize: 12 }}>{parseInt(date.slice(8))}</span>
+                          <span style={{ fontSize: 9 }}>{dayName}</span>
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                  {(() => {
+                    const counts = { education: 0, practice: 0, off: 0 };
+                    Object.values(scheduleEdit).forEach(t => counts[t as DayType]++);
+                    return <>
+                      <span>📚 정규 {counts.education}일</span>
+                      <span>🏪 실습 {counts.practice}일</span>
+                      <span>🌙 휴무 {counts.off}일</span>
+                    </>;
+                  })()}
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => { setShowBatchForm(false); setEditingBatchId(null); }} style={smallBtnStyle}>취소</button>
               <button onClick={handleBatchSave} disabled={savingBatch} style={{ ...smallBtnStyle, background: 'var(--blue)', color: '#fff', border: 'none' }}>
@@ -326,6 +430,11 @@ export default function SettingsPage() {
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
                     입문 {batch.start_date} ~ {batch.end_date}
                     {batch.advanced_start && ` · 심화 ${batch.advanced_start} ~ ${batch.advanced_end}`}
+                    {batch.schedule && Object.keys(batch.schedule).length > 0 && (() => {
+                      const counts = { education: 0, practice: 0, off: 0 };
+                      Object.values(batch.schedule).forEach(t => counts[t as DayType]++);
+                      return <span style={{ marginLeft: 8 }}>📚{counts.education} 🏪{counts.practice} 🌙{counts.off}</span>;
+                    })()}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -357,6 +466,7 @@ export default function SettingsPage() {
                             advanced_start: batch.advanced_start || '',
                             advanced_end: batch.advanced_end || '',
                           });
+                          setScheduleEdit(batch.schedule || {});
                           setShowBatchForm(true);
                         }}
                         style={tinyBtnStyle}
