@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import type { Batch, Student, TestScore } from '@/lib/types';
+import type { Batch, Student, TestScore, Attendance } from '@/lib/types';
+import { calculateDailyAverages } from '@/lib/analysis';
+import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 
 interface Question {
   id: string;
@@ -33,19 +35,39 @@ interface TestResponse {
 }
 
 type ViewMode = 'scores' | 'questions';
+type PageTab = 'manage' | 'analysis';
+
+// 분석용 타입
+interface AnalysisResponse { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string; }
+interface AnalysisQuestion { id: string; batch_id: string; session: string; question_id: string; category: string | null; series: string | null; detail: string | null; question_text: string | null; }
+interface NoteRow { id: string; student_id: string; title: string; content: string; created_at: string; }
 
 interface Props {
   batches: Batch[];
   students: Student[];
   scores: TestScore[];
+  attendance: Attendance[];
+  notes: NoteRow[];
+  allTestResponses: AnalysisResponse[];
+  allQuestions: AnalysisQuestion[];
 }
 
-export default function TestsClient({ batches, students, scores }: Props) {
+// 분석 유틸
+function rateColor(rate: number) {
+  if (rate >= 80) return { bg: '#30D15833', text: 'var(--green)' };
+  if (rate >= 60) return { bg: '#FF9F0A33', text: 'var(--orange)' };
+  return { bg: '#FF453A33', text: 'var(--red)' };
+}
+
+const analysisCardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
+
+export default function TestsClient({ batches, students, scores, attendance, notes, allTestResponses, allQuestions }: Props) {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('scores');
+  const [pageTab, setPageTab] = useState<PageTab>('manage');
 
   // DB 데이터
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -202,6 +224,165 @@ export default function TestsClient({ batches, students, scores }: Props) {
     }
   };
 
+  // ── 분석 탭 데이터 ──
+  const [analysisStudentId, setAnalysisStudentId] = useState('');
+  const [analysisDate, setAnalysisDate] = useState<string | null>(null);
+  const [studentDateModal, setStudentDateModal] = useState<string | null>(null);
+  const [heatmapModal, setHeatmapModal] = useState<{ category: string; detail: string } | null>(null);
+
+  const batchStudents = useMemo(() => students.filter(s => s.batch_id === batchId && !s.is_dropped), [students, batchId]);
+
+  // 시험 성적 추이
+  const dailyAverages = useMemo(() => {
+    const batchScores = scores.filter(s => batchStudents.some(st => st.id === s.student_id));
+    return calculateDailyAverages(batchScores);
+  }, [scores, batchStudents]);
+
+  // 교육생별 성장 곡선
+  const studentGrowthData = useMemo(() => {
+    if (!analysisStudentId) return { merged: [] as { date: string; avg: number; classAvg: number }[], summary: null as null | { first: number; last: number; diff: number; overall: number } };
+    const personalAvgs = calculateDailyAverages(scores.filter(s => s.student_id === analysisStudentId));
+    const avgMap = new Map(dailyAverages.map(d => [d.date, d.avg]));
+    const merged = personalAvgs.map(d => ({ date: d.date, avg: d.avg, classAvg: avgMap.get(d.date) ?? 0 }));
+    const first = personalAvgs[0]?.avg ?? 0;
+    const last = personalAvgs[personalAvgs.length - 1]?.avg ?? 0;
+    const diff = Math.round((last - first) * 10) / 10;
+    const overall = personalAvgs.length > 0 ? Math.round(personalAvgs.reduce((s, d) => s + d.avg, 0) / personalAvgs.length * 10) / 10 : 0;
+    return { merged, summary: { first, last, diff, overall } };
+  }, [analysisStudentId, scores, dailyAverages]);
+
+  // 날짜별 상세 분석
+  const dateAnalysis = useMemo(() => {
+    if (!analysisDate) return null;
+    const batchStudentIds = new Set(batchStudents.map(s => s.id));
+    const qMap = new Map<string, AnalysisQuestion>();
+    for (const q of allQuestions) { if (q.batch_id === batchId) qMap.set(`${q.session}_${q.question_id}`, q); }
+
+    const currIdx = dailyAverages.findIndex(d => d.date === analysisDate);
+    const curr = dailyAverages[currIdx];
+    const prev = currIdx > 0 ? dailyAverages[currIdx - 1] : null;
+    if (!curr) return null;
+    const change = prev ? Math.round((curr.avg - prev.avg) * 10) / 10 : 0;
+
+    const dayScores = scores.filter(s => s.test_date === analysisDate && batchStudentIds.has(s.student_id));
+    const daySessions = [...new Set(dayScores.map(s => s.subject))];
+    const dayResponses = allTestResponses.filter(r => r.test_date === analysisDate && batchStudentIds.has(r.student_id));
+    const dayCategories = new Set<string>();
+    for (const r of dayResponses) { const q = qMap.get(`${r.session}_${r.question_id}`); if (q?.category) dayCategories.add(q.category); }
+
+    const qStats = new Map<string, { session: string; questionId: string; questionText: string; wrong: number; correct: number; total: number; category: string; detail: string }>();
+    for (const r of dayResponses) {
+      const q = qMap.get(`${r.session}_${r.question_id}`);
+      if (!q) continue;
+      const key = `${r.session}_${r.question_id}`;
+      const stat = qStats.get(key) || { session: r.session, questionId: r.question_id, questionText: q.question_text || '', wrong: 0, correct: 0, total: 0, category: q.category || '', detail: q.detail || '' };
+      stat.total++; if (r.is_correct) stat.correct++; else stat.wrong++;
+      qStats.set(key, stat);
+    }
+    const questionStats = [...qStats.values()].map(s => ({ ...s, wrongRate: s.total > 0 ? Math.round((s.wrong / s.total) * 100) : 0 })).sort((a, b) => b.wrongRate - a.wrongRate);
+
+    const studentScores: { name: string; score: number; prevScore: number | null; diff: number | null }[] = [];
+    for (const student of batchStudents) {
+      const currS = dayScores.filter(s => s.student_id === student.id);
+      if (currS.length === 0) continue;
+      const currAvg = Math.round(currS.reduce((s, x) => s + x.score, 0) / currS.length * 10) / 10;
+      let prevScore: number | null = null; let pDiff: number | null = null;
+      if (prev) { const prevS = scores.filter(s => s.test_date === prev.date && s.student_id === student.id); if (prevS.length > 0) { prevScore = Math.round(prevS.reduce((s, x) => s + x.score, 0) / prevS.length * 10) / 10; pDiff = Math.round((currAvg - prevScore) * 10) / 10; } }
+      studentScores.push({ name: student.name, score: currAvg, prevScore, diff: pDiff });
+    }
+    studentScores.sort((a, b) => (a.diff ?? 0) - (b.diff ?? 0));
+    return { date: analysisDate, avg: curr.avg, prevAvg: prev?.avg ?? null, change, categories: [...dayCategories], sessions: daySessions, questionStats, studentScores };
+  }, [analysisDate, dailyAverages, scores, allTestResponses, allQuestions, batchStudents, batchId]);
+
+  // 학생별 날짜 분석 모달
+  const studentDateAnalysis = useMemo(() => {
+    if (!studentDateModal || !analysisStudentId) return null;
+    const batchStudentIds = new Set(batchStudents.map(s => s.id));
+    const qMap = new Map<string, AnalysisQuestion>();
+    for (const q of allQuestions) { if (q.batch_id === batchId) qMap.set(`${q.session}_${q.question_id}`, q); }
+    const student = batchStudents.find(s => s.id === analysisStudentId);
+    if (!student) return null;
+
+    const myResponses = allTestResponses.filter(r => r.student_id === analysisStudentId && r.test_date === studentDateModal);
+    const allDayResponses = allTestResponses.filter(r => r.test_date === studentDateModal && batchStudentIds.has(r.student_id));
+
+    const qAnalysis: { session: string; questionId: string; questionText: string; category: string; detail: string; myCorrect: boolean; classRate: number }[] = [];
+    for (const myR of myResponses) {
+      const q = qMap.get(`${myR.session}_${myR.question_id}`);
+      if (!q) continue;
+      const classForQ = allDayResponses.filter(r => r.session === myR.session && r.question_id === myR.question_id);
+      const classCorrect = classForQ.filter(r => r.is_correct).length;
+      qAnalysis.push({ session: myR.session, questionId: myR.question_id, questionText: q.question_text || '', category: q.category || '', detail: q.detail || '', myCorrect: myR.is_correct, classRate: classForQ.length > 0 ? Math.round((classCorrect / classForQ.length) * 100) : 0 });
+    }
+
+    const onlyMyWrong = qAnalysis.filter(q => !q.myCorrect && q.classRate >= 70).sort((a, b) => b.classRate - a.classRate);
+    const wrongByCategory = new Map<string, number>();
+    const wrongByDetail = new Map<string, number>();
+    for (const q of qAnalysis.filter(q => !q.myCorrect)) {
+      if (q.category) wrongByCategory.set(q.category, (wrongByCategory.get(q.category) || 0) + 1);
+      if (q.detail) wrongByDetail.set(q.detail, (wrongByDetail.get(q.detail) || 0) + 1);
+    }
+    const topWeakCategories = [...wrongByCategory.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const topWeakDetails = [...wrongByDetail.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+    const myDayScores = scores.filter(s => s.student_id === analysisStudentId && s.test_date === studentDateModal);
+    const myAvg = myDayScores.length > 0 ? Math.round(myDayScores.reduce((s, x) => s + x.score, 0) / myDayScores.length * 10) / 10 : 0;
+    const classAvgForDay = dailyAverages.find(d => d.date === studentDateModal)?.avg ?? 0;
+    const gap = Math.round((myAvg - classAvgForDay) * 10) / 10;
+    const totalQ = qAnalysis.length;
+    const myCorrectCount = qAnalysis.filter(q => q.myCorrect).length;
+
+    return { studentName: student.name, date: studentDateModal, myAvg, classAvg: classAvgForDay, gap, totalQ, myCorrectCount, myWrongCount: totalQ - myCorrectCount, onlyMyWrong, topWeakCategories, topWeakDetails };
+  }, [studentDateModal, analysisStudentId, allTestResponses, allQuestions, scores, batchStudents, dailyAverages, batchId]);
+
+  // 히트맵
+  const heatmapData = useMemo(() => {
+    const batchStudentIds = new Set(batchStudents.map(s => s.id));
+    const batchResponses = allTestResponses.filter(r => batchStudentIds.has(r.student_id));
+    const qMap = new Map<string, AnalysisQuestion>();
+    for (const q of allQuestions) { if (q.batch_id === batchId) qMap.set(`${q.session}_${q.question_id}`, q); }
+    const cellMap = new Map<string, { correct: number; total: number }>();
+    const allCats = new Set<string>(); const allDets = new Set<string>();
+    for (const r of batchResponses) {
+      const q = qMap.get(`${r.session}_${r.question_id}`);
+      if (!q || !q.category) continue;
+      const det = q.detail || '기타';
+      allCats.add(q.category); allDets.add(det);
+      const key = `${q.category}__${det}`;
+      const cell = cellMap.get(key) || { correct: 0, total: 0 };
+      cell.total++; if (r.is_correct) cell.correct++;
+      cellMap.set(key, cell);
+    }
+    const categories = [...allCats].sort();
+    const details = [...allDets].sort();
+    const data: { category: string; detail: string; rate: number; totalQ: number }[] = [];
+    for (const cat of categories) for (const det of details) {
+      const cell = cellMap.get(`${cat}__${det}`);
+      if (cell && cell.total > 0) data.push({ category: cat, detail: det, rate: Math.round((cell.correct / cell.total) * 100), totalQ: cell.total });
+    }
+    return { data, categories, details };
+  }, [batchStudents, allTestResponses, allQuestions, batchId]);
+
+  // 히트맵 모달 데이터
+  const heatmapModalData = useMemo(() => {
+    if (!heatmapModal) return [];
+    const { category, detail } = heatmapModal;
+    const batchStudentIds = new Set(batchStudents.map(s => s.id));
+    const qMap = new Map<string, AnalysisQuestion>();
+    for (const q of allQuestions) { if (q.batch_id === batchId) qMap.set(`${q.session}_${q.question_id}`, q); }
+    const qStats = new Map<string, { questionId: string; session: string; correct: number; wrong: number; total: number }>();
+    for (const r of allTestResponses) {
+      if (!batchStudentIds.has(r.student_id)) continue;
+      const q = qMap.get(`${r.session}_${r.question_id}`);
+      if (!q || q.category !== category || (q.detail || '기타') !== detail) continue;
+      const key = `${r.session}_${r.question_id}`;
+      const stat = qStats.get(key) || { questionId: r.question_id, session: r.session, correct: 0, wrong: 0, total: 0 };
+      stat.total++; if (r.is_correct) stat.correct++; else stat.wrong++;
+      qStats.set(key, stat);
+    }
+    return [...qStats.values()].map(s => ({ ...s, wrongRate: s.total > 0 ? Math.round((s.wrong / s.total) * 100) : 0 })).sort((a, b) => b.wrongRate - a.wrongRate);
+  }, [heatmapModal, batchStudents, allTestResponses, allQuestions, batchId]);
+
   // 동기화
   const handleSync = async (date?: string, mode?: string) => {
     if (!sheetId) {
@@ -230,9 +411,21 @@ export default function TestsClient({ batches, students, scores }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          📝 테스트
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            📝 테스트
+          </h2>
+          <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
+            {([['manage', '차시별 성적'], ['analysis', '시험 분석']] as const).map(([key, label]) => (
+              <button key={key} onClick={() => setPageTab(key)} style={{
+                padding: '8px 16px', borderRadius: 'var(--radius-sm)',
+                background: pageTab === key ? 'var(--blue)' : 'transparent',
+                color: pageTab === key ? '#fff' : 'var(--text-tertiary)',
+                border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <a
             href={`/api/export-tests?batchId=${batchId}`}
@@ -289,6 +482,330 @@ export default function TestsClient({ batches, students, scores }: Props) {
           {syncResult}
         </div>
       )}
+
+      {/* ════════════ 분석 탭 ════════════ */}
+      {pageTab === 'analysis' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* 시험 성적 추이 + 교육생별 성장 곡선 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div style={analysisCardStyle}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>📈 차시별 전체 평균 추이</h3>
+              {dailyAverages.length > 0 ? (
+                <>
+                  <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 13 }}>
+                    <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '6px 12px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>최근 평균 </span>
+                      <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{dailyAverages[dailyAverages.length - 1]?.avg}점</span>
+                    </div>
+                    <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '6px 12px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>변화 </span>
+                      {(() => {
+                        const first = dailyAverages[0]?.avg ?? 0;
+                        const last = dailyAverages[dailyAverages.length - 1]?.avg ?? 0;
+                        const diff = Math.round((last - first) * 10) / 10;
+                        return <span style={{ fontWeight: 700, color: diff >= 0 ? 'var(--green)' : 'var(--red)' }}>{diff >= 0 ? '+' : ''}{diff}점</span>;
+                      })()}
+                    </div>
+                  </div>
+                  <ScoreTrendChart data={dailyAverages} height={240} />
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
+                    {dailyAverages.map((d, i) => {
+                      const prev = i > 0 ? dailyAverages[i - 1] : null;
+                      const ch = prev ? Math.round((d.avg - prev.avg) * 10) / 10 : 0;
+                      const isDown = ch < -3;
+                      const dt = new Date(d.date);
+                      return (
+                        <button key={d.date} onClick={() => setAnalysisDate(d.date)} style={{
+                          background: isDown ? 'var(--red-dim)' : 'var(--bg-elevated)', border: `1px solid ${isDown ? 'var(--red)' : 'var(--border)'}`,
+                          borderRadius: 'var(--radius-sm)', padding: '4px 8px', fontSize: 11,
+                          color: isDown ? 'var(--red)' : 'var(--text-second)', fontWeight: isDown ? 700 : 400, cursor: 'pointer',
+                        }}>{dt.getMonth() + 1}/{dt.getDate()}{isDown && ' ▼'}</button>
+                      );
+                    })}
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>💡 날짜를 클릭하면 그날의 상세 분석을 볼 수 있어요. <span style={{ color: 'var(--red)' }}>빨간 날짜</span>는 3점 이상 하락한 날이에요.</p>
+                </>
+              ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>시험 데이터가 없습니다.</p>}
+            </div>
+
+            <div style={analysisCardStyle}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>📊 교육생별 성장 곡선</h3>
+              <select value={analysisStudentId} onChange={e => setAnalysisStudentId(e.target.value)} style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '4px 10px', fontSize: 13, marginBottom: 12 }}>
+                <option value="">교육생 선택</option>
+                {batchStudents.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              {analysisStudentId && studentGrowthData.merged.length > 0 ? (
+                <>
+                  {studentGrowthData.summary && (
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 12, fontSize: 13, flexWrap: 'wrap' }}>
+                      <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '6px 12px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>전체 평균 </span>
+                        <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{studentGrowthData.summary.overall}점</span>
+                      </div>
+                      <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '6px 12px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>첫 시험 </span>
+                        <span style={{ fontWeight: 700 }}>{studentGrowthData.summary.first}점</span>
+                        <span style={{ color: 'var(--text-muted)' }}> → 최근 </span>
+                        <span style={{ fontWeight: 700 }}>{studentGrowthData.summary.last}점</span>
+                      </div>
+                      <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', padding: '6px 12px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>변화 </span>
+                        <span style={{ fontWeight: 700, color: studentGrowthData.summary.diff >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                          {studentGrowthData.summary.diff >= 0 ? '+' : ''}{studentGrowthData.summary.diff}점
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <ScoreTrendChart data={studentGrowthData.merged} lines={[{ key: 'avg', color: '#007AFF', name: '개인 점수' }, { key: 'classAvg', color: '#8E8E93', name: '전체 평균' }]} height={200} />
+                  <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: 11, color: 'var(--text-tertiary)' }}>
+                    <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#007AFF', marginRight: 4, verticalAlign: 'middle' }} />개인 점수</span>
+                    <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#8E8E93', marginRight: 4, verticalAlign: 'middle' }} />전체 평균</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 8 }}>
+                    {studentGrowthData.merged.map(d => {
+                      const g = d.avg - d.classAvg;
+                      const isBigGap = g < -15;
+                      const dt = new Date(d.date);
+                      return (
+                        <button key={d.date} onClick={() => setStudentDateModal(d.date)} style={{
+                          background: isBigGap ? 'var(--red-dim)' : g > 10 ? 'var(--green-dim)' : 'var(--bg-elevated)',
+                          border: `1px solid ${isBigGap ? 'var(--red)' : g > 10 ? 'var(--green)' : 'var(--border)'}`,
+                          borderRadius: 'var(--radius-sm)', padding: '4px 8px', fontSize: 11,
+                          color: isBigGap ? 'var(--red)' : g > 10 ? 'var(--green)' : 'var(--text-second)',
+                          fontWeight: isBigGap || g > 10 ? 700 : 400, cursor: 'pointer',
+                        }}>{dt.getMonth() + 1}/{dt.getDate()}{isBigGap && ' ▼'}{g > 10 && ' ▲'}</button>
+                      );
+                    })}
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>💡 날짜를 클릭하면 &quot;다른 애들은 맞췄는데 이 학생만 틀린 문항&quot;과 약점 분석을 볼 수 있어요</p>
+                </>
+              ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{analysisStudentId ? '시험 데이터가 없습니다.' : '교육생을 선택하면 전체 평균과 비교한 성장 곡선이 보여요.'}</p>}
+            </div>
+          </div>
+
+          {/* 히트맵 */}
+          <div style={analysisCardStyle}>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>🗺️ 카테고리별 약점 맵</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, marginTop: -8 }}>
+              <b>가로축</b> = 대분류 (제품군), <b>세로축</b> = 소분류 (지식 유형). 셀 색상은 전체 교육생 정답률이에요.
+              <span style={{ marginLeft: 8 }}>
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#30D15833', borderRadius: 2, marginRight: 2 }} />80%+
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF9F0A33', borderRadius: 2, marginLeft: 8, marginRight: 2 }} />60~79%
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF453A33', borderRadius: 2, marginLeft: 8, marginRight: 2 }} />60% 미만
+              </span>
+              <br />셀을 <b>클릭</b>하면 해당 문항 목록과 오답률을 볼 수 있어요.
+            </p>
+            {heatmapData.data.length > 0 ? (
+              <div style={{ overflowX: 'auto' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: `140px repeat(${heatmapData.categories.length}, minmax(80px, 1fr))`, gap: 3 }}>
+                  <div style={{ padding: 8, fontWeight: 800, fontSize: 12, color: 'var(--text-second)' }}>소분류 ↓ / 대분류 →</div>
+                  {heatmapData.categories.map(cat => (
+                    <div key={cat} style={{ textAlign: 'center', padding: 8, fontWeight: 700, color: 'var(--text-primary)', fontSize: 12, background: 'var(--bg-elevated)', borderRadius: 4 }}>{cat}</div>
+                  ))}
+                  {heatmapData.details.map(det => (
+                    <div key={det} style={{ display: 'contents' }}>
+                      <div style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-second)', fontSize: 12, display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)', borderRadius: 4 }}>{det}</div>
+                      {heatmapData.categories.map(cat => {
+                        const cell = heatmapData.data.find(d => d.category === cat && d.detail === det);
+                        if (!cell) return <div key={`${cat}-${det}`} style={{ textAlign: 'center', padding: 8, color: 'var(--text-muted)', fontSize: 12, background: 'var(--bg-hover)', borderRadius: 4 }}>—</div>;
+                        const rc = rateColor(cell.rate);
+                        return (
+                          <div key={`${cat}-${det}`} onClick={() => setHeatmapModal({ category: cat, detail: det })} style={{ textAlign: 'center', padding: 8, background: rc.bg, color: rc.text, fontSize: 13, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }} title={`${cat} > ${det}: ${cell.rate}% (${cell.totalQ}문항)`}>
+                            {cell.rate}%
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>시험 응답 데이터가 없습니다.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* 날짜별 상세 분석 모달 */}
+      {analysisDate && dateAnalysis && (
+        <div onClick={() => setAnalysisDate(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 720, width: '90%', maxHeight: '85vh', overflow: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📋 {(() => { const d = new Date(dateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 시험 상세 분석</h3>
+                <div style={{ fontSize: 15, fontWeight: 600, color: dateAnalysis.change >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                  전체 평균 {dateAnalysis.avg}점{dateAnalysis.prevAvg !== null && <span> (전일 대비 {dateAnalysis.change >= 0 ? '+' : ''}{dateAnalysis.change}점)</span>}
+                </div>
+              </div>
+              <button onClick={() => setAnalysisDate(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+              {dateAnalysis.sessions.map(s => <span key={s} style={{ background: 'var(--blue-dim)', color: 'var(--blue)', borderRadius: 'var(--radius-pill)', padding: '4px 12px', fontSize: 13, fontWeight: 600 }}>{s}</span>)}
+              {dateAnalysis.categories.map(cat => <span key={cat} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', padding: '4px 12px', fontSize: 13, color: 'var(--text-second)' }}>{cat}</span>)}
+            </div>
+            {dateAnalysis.questionStats.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🚨 문항별 정답률</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {dateAnalysis.questionStats.map((q, i) => {
+                    const rc = rateColor(100 - q.wrongRate);
+                    return (
+                      <div key={i} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{q.session} Q{q.questionId}</span>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <span style={{ fontSize: 12, color: 'var(--green)' }}>정답 {q.correct}명</span>
+                            <span style={{ fontSize: 12, color: 'var(--red)' }}>오답 {q.wrong}명</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: rc.text, background: rc.bg, borderRadius: 'var(--radius-pill)', padding: '2px 8px' }}>오답률 {q.wrongRate}%</span>
+                          </div>
+                        </div>
+                        {q.questionText && <p style={{ fontSize: 13, color: 'var(--text-second)', margin: 0, lineHeight: 1.5 }}>{q.questionText.length > 100 ? q.questionText.slice(0, 100) + '...' : q.questionText}</p>}
+                        {(q.category || q.detail) && (
+                          <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                            {q.category && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px' }}>{q.category}</span>}
+                            {q.detail && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px' }}>{q.detail}</span>}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <div>
+              <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>👤 교육생별 점수</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+                {dateAnalysis.studentScores.map((s, i) => {
+                  const isDown = (s.diff ?? 0) < -10; const isUp = (s.diff ?? 0) > 5;
+                  return (
+                    <div key={i} style={{ background: isDown ? 'var(--red-dim)' : isUp ? 'var(--green-dim)' : 'var(--bg-surface)', border: `1px solid ${isDown ? 'var(--red)' : isUp ? 'var(--green)' : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 10 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>{s.name}</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 20, fontWeight: 800, color: isDown ? 'var(--red)' : isUp ? 'var(--green)' : 'var(--text-primary)' }}>{s.score}점</span>
+                        {s.diff !== null && <span style={{ fontSize: 13, fontWeight: 600, color: s.diff >= 0 ? 'var(--green)' : 'var(--red)' }}>{s.diff >= 0 ? '▲' : '▼'} {Math.abs(s.diff)}</span>}
+                      </div>
+                      {s.prevScore !== null && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>전일 {s.prevScore}점</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 학생별 날짜 분석 모달 */}
+      {studentDateModal && studentDateAnalysis && (
+        <div onClick={() => setStudentDateModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 720, width: '90%', maxHeight: '85vh', overflow: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>🔍 {studentDateAnalysis.studentName} — {(() => { const d = new Date(studentDateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 분석</h3>
+                <div style={{ display: 'flex', gap: 12, fontSize: 14 }}>
+                  <span style={{ color: 'var(--text-second)' }}>개인 <b style={{ color: studentDateAnalysis.gap >= 0 ? 'var(--green)' : 'var(--red)' }}>{studentDateAnalysis.myAvg}점</b></span>
+                  <span style={{ color: 'var(--text-muted)' }}>전체 평균 {studentDateAnalysis.classAvg}점</span>
+                  <span style={{ fontWeight: 700, color: studentDateAnalysis.gap >= 0 ? 'var(--green)' : 'var(--red)' }}>{studentDateAnalysis.gap >= 0 ? '+' : ''}{studentDateAnalysis.gap}점 차이</span>
+                </div>
+              </div>
+              <button onClick={() => setStudentDateModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
+              <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center' }}><div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>{studentDateAnalysis.totalQ}문항</div><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>총 문항</div></div>
+              <div style={{ background: 'var(--green-dim)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center' }}><div style={{ fontSize: 24, fontWeight: 800, color: 'var(--green)' }}>{studentDateAnalysis.myCorrectCount}개 정답</div><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>맞힌 문항</div></div>
+              <div style={{ background: 'var(--red-dim)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center' }}><div style={{ fontSize: 24, fontWeight: 800, color: 'var(--red)' }}>{studentDateAnalysis.myWrongCount}개 오답</div><div style={{ fontSize: 12, color: 'var(--text-muted)' }}>틀린 문항</div></div>
+            </div>
+            {studentDateAnalysis.onlyMyWrong.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--red)', marginBottom: 12 }}>🚨 다른 교육생은 맞췄는데 {studentDateAnalysis.studentName}만 틀린 문항 ({studentDateAnalysis.onlyMyWrong.length}개)</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {studentDateAnalysis.onlyMyWrong.map((q, i) => (
+                    <div key={i} style={{ background: 'var(--red-dim)', border: '1px solid var(--red)', borderRadius: 'var(--radius-md)', padding: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{q.session} Q{q.questionId}</span>
+                        <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>전체 정답률 {q.classRate}%</span>
+                      </div>
+                      {q.questionText && <p style={{ fontSize: 13, color: 'var(--text-second)', margin: '0 0 6px', lineHeight: 1.5 }}>{q.questionText.length > 120 ? q.questionText.slice(0, 120) + '...' : q.questionText}</p>}
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {q.category && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px', color: 'var(--text-muted)' }}>{q.category}</span>}
+                        {q.detail && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px', color: 'var(--text-muted)' }}>{q.detail}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {(studentDateAnalysis.topWeakCategories.length > 0 || studentDateAnalysis.topWeakDetails.length > 0) && (
+              <div>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)', marginBottom: 12 }}>📊 약점 패턴 분석</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>약한 제품군 (대분류)</div>
+                    {studentDateAnalysis.topWeakCategories.map(([cat, count], i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                        <span style={{ color: 'var(--text-second)' }}>{cat}</span>
+                        <span style={{ color: 'var(--red)', fontWeight: 700 }}>{count}문항 오답</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 14 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>약한 지식 유형 (소분류)</div>
+                    {studentDateAnalysis.topWeakDetails.map(([det, count], i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
+                        <span style={{ color: 'var(--text-second)' }}>{det}</span>
+                        <span style={{ color: 'var(--red)', fontWeight: 700 }}>{count}문항 오답</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginTop: 12, background: 'var(--blue-dim)', border: '1px solid var(--blue)', borderRadius: 'var(--radius-md)', padding: 14 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>💡 교육 제안</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6 }}>
+                    {studentDateAnalysis.topWeakCategories.length > 0 && <p style={{ margin: '0 0 4px' }}>• <b>{studentDateAnalysis.topWeakCategories[0][0]}</b> 분야 제품 지식을 집중 보강해주세요</p>}
+                    {studentDateAnalysis.topWeakDetails.length > 0 && <p style={{ margin: '0 0 4px' }}>• 특히 <b>{studentDateAnalysis.topWeakDetails[0][0]}</b> 유형의 문제를 많이 틀렸어요</p>}
+                    {studentDateAnalysis.onlyMyWrong.length > 0 && <p style={{ margin: 0 }}>• &quot;나만 틀린 문항&quot; {studentDateAnalysis.onlyMyWrong.length}개는 스터디 그룹으로 빠르게 따라잡을 수 있어요</p>}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 히트맵 모달 */}
+      {heatmapModal && (
+        <div onClick={() => setHeatmapModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 560, width: '90%', maxHeight: '80vh', overflow: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>📋 {heatmapModal.category} &gt; {heatmapModal.detail}</h3>
+              <button onClick={() => setHeatmapModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            {heatmapModalData.length > 0 ? (
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-second)' }}>차시</th>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-second)' }}>문항</th>
+                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--green)' }}>정답</th>
+                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--red)' }}>오답</th>
+                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--text-second)' }}>오답률</th>
+                </tr></thead>
+                <tbody>{heatmapModalData.map((q, i) => {
+                  const rc = rateColor(100 - q.wrongRate);
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>{q.session}</td>
+                      <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>Q{q.questionId}</td>
+                      <td style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--green)', fontWeight: 600 }}>{q.correct}명</td>
+                      <td style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--red)', fontWeight: 600 }}>{q.wrong}명</td>
+                      <td style={{ textAlign: 'center', padding: '8px 12px', fontWeight: 700, color: rc.text }}>{q.wrongRate}%</td>
+                    </tr>
+                  );
+                })}</tbody>
+              </table>
+            ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>해당 문항 데이터가 없습니다.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ════════════ 차시별 성적 (기존) ════════════ */}
+      {pageTab === 'manage' && <>
 
       {/* 차시 카드 */}
       <div>
@@ -898,6 +1415,8 @@ export default function TestsClient({ batches, students, scores }: Props) {
           )}
         </div>
       )}
+
+      </>}
     </div>
   );
 }

@@ -14,16 +14,14 @@ export default async function AnalyticsPage() {
     { data: notes },
     { data: testResponses },
     { data: questions },
-    { data: studentQuestions },
     { data: memos },
-    { data: coaching },
   ] = await Promise.all([
     supabase.from('batches').select('*').order('start_date', { ascending: false }),
     supabase.from('students').select('*').order('name'),
     supabase.from('test_scores').select('*').order('test_date'),
     supabase.from('attendance').select('*'),
     supabase.from('student_notes').select('id, student_id, title, content, created_at').order('created_at', { ascending: false }),
-    // test_responses: Supabase 기본 limit 1000건 → 전체 가져오기
+    // test_responses: 전체 페이지네이션
     (async () => {
       const all: { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string }[] = [];
       let from = 0;
@@ -40,9 +38,7 @@ export default async function AnalyticsPage() {
       return { data: all };
     })(),
     supabase.from('questions').select('id, batch_id, session, question_id, category, series, detail, question_text'),
-    supabase.from('student_questions').select('id, student_id'),
     supabase.from('student_memos').select('student_id, category'),
-    supabase.from('coaching_reports').select('student_id, tag_tracking'),
   ]);
 
   return (
@@ -54,9 +50,7 @@ export default async function AnalyticsPage() {
       notes={notes || []}
       testResponses={testResponses || []}
       questions={questions || []}
-      studentQuestions={studentQuestions || []}
       memos={memos || []}
-      coaching={coaching || []}
     />
   );
 }
