@@ -241,12 +241,23 @@ export interface AdaptationIndex {
     weakCategories: number; // 하위 분야 점수 (0~100) — 60점 미만 분야가 적을수록 높음
     weakCategoryCount: number; // 60점 미만 분야 개수 (원본)
     totalCategories: number;   // 전체 분야 개수
+    weakCategoryNames: string[]; // 60점 미만 분야 이름 (HR 조언용)
     attendanceRate: number; // 출석률 (0~100)
     participation: number;  // 교육일지 참여 (0~100)
     participationDetail: string; // 근거 텍스트 (예: "15일 중 15일 제출")
     confidenceTrend: number; // 자신감 추이 (0~100)
     confidenceDetail: string; // 근거 텍스트 (예: "높음3→보통5→낮음2, 하락")
     hasConfidenceData: boolean; // 자신감 데이터 있는지
+    // ── 신규 항목 ──
+    growthSlope: number; // 성장 기울기 점수 (0~100)
+    growthSlopeRaw: number; // 실제 점수 변화량 (마지막 3차시 - 초반 3차시)
+    growthDetail: string; // 근거 텍스트
+    chronicScore: number; // 만성 오답 점수 (0~100, 높을수록 좋음)
+    chronicDetail: string; // 근거 텍스트
+    memoBalance: number; // 교육자 메모 톤 밸런스 (0~100)
+    memoBalanceDetail: string; // 근거 텍스트
+    deltaDeduction: number; // 부정 신호 감점 (0~10)
+    deltaDetail: string; // 감점 사유
   };
 }
 
@@ -259,6 +270,27 @@ export interface RiskCheck {
     value: string;
   }[];
   riskCount: number;
+}
+
+// HR 조언 (주의 교육생 맞춤 가이드)
+export type AdviceType =
+  | 'knowledge'   // 📘 지식 부족형
+  | 'category'    // 🎯 약점 편중형
+  | 'psych'       // 💔 심리 위축형
+  | 'attendance'  // 🚪 근태/동기 이슈형
+  | 'behavior'    // 🔍 행동 관찰형
+  | 'complex'     // 🚨 복합 위기형
+  | 'partial'     // 💎 부분 주의형
+  | 'descent';    // 🌊 하락 징후형 (조용히 무너지는 중)
+
+export interface HRAdvice {
+  studentId: string;
+  type: AdviceType;
+  typeLabel: string;  // "지식 부족형"
+  typeEmoji: string;  // "📘"
+  typeColor: 'red' | 'orange' | 'blue' | 'purple' | 'green'; // 카드 테마
+  difficulty: string; // 어려움 서술 문장
+  actions: string[];  // 권장 액션 (2~3개)
 }
 
 // Google Sheets 파싱용

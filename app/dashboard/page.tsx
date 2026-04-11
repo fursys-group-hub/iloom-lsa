@@ -16,6 +16,9 @@ export default async function DashboardPage() {
     { data: noteComments },
     { data: questions },
     { data: memos },
+    { data: testResponses },
+    { data: examQuestions },
+    { data: coachingReports },
   ] = await Promise.all([
     supabase.from('batches').select('*').order('start_date', { ascending: false }),
     supabase.from('students').select('*').order('name'),
@@ -25,7 +28,25 @@ export default async function DashboardPage() {
     supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(5),
     supabase.from('note_comments').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('student_questions').select('*, students(name)').order('updated_at', { ascending: false }).limit(20),
-    supabase.from('student_memos').select('student_id'),
+    supabase.from('student_memos').select('student_id, category'),
+    // 🆕 주의 교육생 판정에 필요한 데이터 (교육생 종합 분석과 동일 로직)
+    (async () => {
+      const all: { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string }[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data } = await supabase.from('test_responses')
+          .select('student_id, batch_id, session, question_id, is_correct, test_date')
+          .range(from, from + pageSize - 1);
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return { data: all };
+    })(),
+    supabase.from('questions').select('id, batch_id, session, question_id, category'),
+    supabase.from('coaching_reports').select('student_id, tag_tracking, created_at').order('created_at', { ascending: true }),
   ]);
 
   // 학생별 메모 수
@@ -55,6 +76,10 @@ export default async function DashboardPage() {
       noteComments={noteComments || []}
       questions={questionsWithName}
       memoCounts={memoCounts}
+      memos={memos || []}
+      testResponses={testResponses || []}
+      examQuestions={examQuestions || []}
+      coachingReports={coachingReports || []}
     />
   );
 }

@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import type { Batch, Student, TestScore, Attendance } from '@/lib/types';
-import { calculateRiskLevel, calculateAvgScore, calculateAdaptationIndex, calculateRiskChecklist } from '@/lib/analysis';
+import { useSearchParams } from 'next/navigation';
+import type { Batch, Student, TestScore, Attendance, TagTracking, HRAdvice } from '@/lib/types';
+import { calculateRiskLevel, calculateAvgScore, calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import RiskBadge from '@/components/RiskBadge';
 
 type PageTab = 'list' | 'analysis';
@@ -11,6 +12,7 @@ type PageTab = 'list' | 'analysis';
 interface NoteRow { id: string; student_id: string; title: string; content: string; created_at: string; }
 interface AnalysisResponse { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string; }
 interface AnalysisQuestion { id: string; batch_id: string; session: string; question_id: string; category: string | null; series: string | null; detail: string | null; question_text: string | null; }
+interface CoachingReportRow { student_id: string; tag_tracking: TagTracking | null; created_at: string; }
 
 interface Props {
   batches: Batch[];
@@ -21,6 +23,7 @@ interface Props {
   testResponses: AnalysisResponse[];
   questions: AnalysisQuestion[];
   memos: { student_id: string; category: string }[];
+  coachingReports: CoachingReportRow[];
 }
 
 // 유틸
@@ -60,12 +63,15 @@ const GROUP_COLORS = {
 
 const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
 
-export default function StudentsClient({ batches, students: initialStudents, scores, attendance, notes, testResponses, questions, memos }: Props) {
+export default function StudentsClient({ batches, students: initialStudents, scores, attendance, notes, testResponses, questions, memos, coachingReports }: Props) {
+  const searchParams = useSearchParams();
+  const initialTab: PageTab = searchParams.get('tab') === 'analysis' ? 'analysis' : 'list';
+
   const [students] = useState(initialStudents);
   const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showDropped, setShowDropped] = useState(false);
   const [search, setSearch] = useState('');
-  const [pageTab, setPageTab] = useState<PageTab>('list');
+  const [pageTab, setPageTab] = useState<PageTab>(initialTab);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // 활성 기수
@@ -117,9 +123,17 @@ export default function StudentsClient({ batches, students: initialStudents, sco
       const sAttendance = attendance.filter(a => a.student_id === student.id);
       const sNotes = notes.filter(n => n.student_id === student.id).map(n => ({ ...parseNoteMeta(n.content), created_at: n.created_at }));
       const catRates = studentCategoryRates.get(student.id) || [];
-      return calculateAdaptationIndex({ studentId: student.id, studentName: student.name, scores: sScores, attendance: sAttendance, notes: sNotes, totalEducationDays, categoryRates: catRates });
+      const sMemoCategories = memos.filter(m => m.student_id === student.id).map(m => m.category);
+      const sTagTrackings = coachingReports.filter(r => r.student_id === student.id).map(r => r.tag_tracking);
+      return calculateAdaptationIndex({
+        studentId: student.id, studentName: student.name,
+        scores: sScores, attendance: sAttendance, notes: sNotes,
+        totalEducationDays, categoryRates: catRates,
+        memoCategories: sMemoCategories,
+        tagTrackings: sTagTrackings,
+      });
     }).sort((a, b) => b.total - a.total);
-  }, [batchStudents, scores, attendance, notes, studentCategoryRates, totalEducationDays]);
+  }, [batchStudents, scores, attendance, notes, studentCategoryRates, totalEducationDays, memos, coachingReports]);
 
   // 위험 체크리스트
   const riskChecks = useMemo(() => {
@@ -224,14 +238,76 @@ export default function StudentsClient({ batches, students: initialStudents, sco
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* 적응 지수 */}
           <div style={cardStyle}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>🎯 입문교육 적응 지수</h3>
-            <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
-              시험 평균(40%) + 하위 분야(20%) + 출석률(15%) + 교육일지 참여(15%) + 자신감 추이(10%)로 계산해요. 카드를 클릭하면 상세 근거를 볼 수 있어요.
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>🎯 입문교육 적응 지수</h3>
+              <details style={{ cursor: 'pointer', position: 'relative' }}>
+                <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>ℹ️ 계산 기준</summary>
+                <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 480 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
+                    적응 지수는 8가지를 종합해서 계산해요
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+                    각 항목의 점수에 아래 비율을 곱해서 100점 만점으로 합산해요
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                        <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>항목</th>
+                        <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)', width: 60 }}>비율</th>
+                        <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>무엇을 보나요?</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { emoji: '📝', name: '시험 평균',     weight: '30%', note: '전체 차시 시험 점수의 평균' },
+                        { emoji: '🗺️', name: '하위 분야',     weight: '15%', note: '60점 미만인 제품 카테고리 개수' },
+                        { emoji: '📋', name: '출석률',        weight: '13%', note: '출석/지각/결석 (지각은 0.5로 계산)' },
+                        { emoji: '📓', name: '교육일지 참여', weight: '15%', note: '일지 제출과 STEP 작성 충실도' },
+                        { emoji: '📈', name: '성장 기울기',   weight: '10%', note: '최근 3차시와 초반 3차시 점수 비교' },
+                        { emoji: '💪', name: '자신감 추이',   weight: '8%',  note: '일지 자신감 단계의 변화 (상승/유지/하락)' },
+                        { emoji: '🔁', name: '만성 오답',     weight: '5%',  note: '계속 반복해서 틀리는 문항이 얼마나 되는지' },
+                        { emoji: '🗒️', name: '메모 톤',       weight: '4%',  note: '교육자가 남긴 칭찬/주의 메모의 비율' },
+                      ].map((row, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                          <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            {row.emoji} {row.name}
+                          </td>
+                          <td style={{ padding: '6px 8px', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
+                          <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.note}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* 부정 신호 감점 — 강조 박스 */}
+                  <div style={{
+                    marginTop: 12,
+                    padding: '12px 14px',
+                    background: 'var(--red-dim)',
+                    borderRadius: 'var(--radius-sm)',
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)', marginBottom: 4 }}>
+                      ⚠️ 최근 무너지는 신호가 있으면 추가 감점돼요 <span style={{ fontSize: 11, fontWeight: 500 }}>(최대 −8점)</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
+                      점수가 괜찮아도 &quot;조용히 무너지는&quot; 학생을 놓치지 않기 위해서예요
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-second)', lineHeight: 1.7 }}>
+                      • 최근 시험 점수가 <strong style={{ color: 'var(--red)' }}>초반보다 5점 넘게 떨어짐</strong> → <strong>−5점</strong><br/>
+                      • 일지 자신감이 <strong style={{ color: 'var(--red)' }}>계속 낮은 상태로 유지</strong> → <strong>−3점</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                    💡 학생 카드를 클릭하면 각 항목의 상세 근거를 볼 수 있어요
+                  </div>
+                </div>
+              </details>
+            </div>
             {adaptationIndices.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>교육생 데이터가 없습니다.</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {adaptationIndices.map(idx => {
                   const gc = GROUP_COLORS[idx.group];
                   const isExpanded = expandedCard === idx.studentId;
@@ -252,11 +328,19 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                       </div>
                       {isExpanded && (
                         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <DetailRow label="📝 시험 평균" score={idx.breakdown.examAvg} detail={`전체 시험 평균 ${idx.breakdown.examAvg}점 (가중치 40%)`} />
-                          <DetailRow label="🗺️ 하위 분야" score={idx.breakdown.weakCategories} detail={`${idx.breakdown.totalCategories}개 분야 중 60점 미만 ${idx.breakdown.weakCategoryCount}개 (가중치 20%)`} />
-                          <DetailRow label="📋 출석률" score={idx.breakdown.attendanceRate} detail={`출석률 ${idx.breakdown.attendanceRate}% (지각=0.5 반영, 가중치 15%)`} />
-                          <DetailRow label="📓 교육일지 참여" score={idx.breakdown.participation} detail={`${idx.breakdown.participationDetail} (가중치 15%)`} />
-                          <DetailRow label={`💪 자신감 추이${!idx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={idx.breakdown.confidenceTrend} detail={`${idx.breakdown.confidenceDetail} (가중치 10%)`} />
+                          <DetailRow label="📝 시험 평균" score={idx.breakdown.examAvg} detail={`전체 시험 평균 ${idx.breakdown.examAvg}점`} />
+                          <DetailRow label="🗺️ 하위 분야" score={idx.breakdown.weakCategories} detail={`${idx.breakdown.totalCategories}개 분야 중 60점 미만 ${idx.breakdown.weakCategoryCount}개${idx.breakdown.weakCategoryNames.length > 0 ? ` (${idx.breakdown.weakCategoryNames.slice(0, 3).join('/')}${idx.breakdown.weakCategoryNames.length > 3 ? '…' : ''})` : ''}`} />
+                          <DetailRow label="📋 출석률" score={idx.breakdown.attendanceRate} detail={`출석률 ${idx.breakdown.attendanceRate}% (지각=0.5 반영)`} />
+                          <DetailRow label="📓 교육일지 참여" score={idx.breakdown.participation} detail={idx.breakdown.participationDetail} />
+                          <DetailRow label="📈 성장 기울기" score={idx.breakdown.growthSlope} detail={idx.breakdown.growthDetail} />
+                          <DetailRow label={`💪 자신감 추이${!idx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={idx.breakdown.confidenceTrend} detail={`${idx.breakdown.confidenceDetail}${!idx.breakdown.hasConfidenceData ? ' → 시험/참여로 분산' : ''}`} />
+                          <DetailRow label="🔁 만성 오답" score={idx.breakdown.chronicScore} detail={idx.breakdown.chronicDetail} />
+                          <DetailRow label="🗒️ 메모 톤" score={idx.breakdown.memoBalance} detail={idx.breakdown.memoBalanceDetail} />
+                          {idx.breakdown.deltaDeduction > 0 && (
+                            <div style={{ marginTop: 4, padding: '8px 10px', background: 'var(--red-dim)', borderRadius: 6, fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>
+                              ⚠️ 부정 신호 감점 −{idx.breakdown.deltaDeduction}점 ({idx.breakdown.deltaDetail})
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -268,22 +352,119 @@ export default function StudentsClient({ batches, students: initialStudents, sco
 
           {/* 위험 체크리스트 */}
           {riskChecks.length > 0 && (
-            <div style={{ ...cardStyle, borderColor: 'var(--red)' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>⚠️ 주의가 필요한 교육생 ({riskChecks.length}명)</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>5개 항목 중 해당되는 것이 있는 교육생이에요.</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
+            <div style={cardStyle}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>⚠️ 주의가 필요한 교육생 ({riskChecks.length}명)</h3>
+                <details style={{ cursor: 'pointer', position: 'relative' }}>
+                  <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>ℹ️ 판정 기준</summary>
+                  <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 520 }}>
+
+                    {/* Part 1: 체크 항목 */}
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
+                      1️⃣ 먼저 6가지 신호를 체크해요
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+                      하나라도 해당되면 주의 교육생으로 표시해요
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, marginBottom: 14 }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>체크 항목</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>해당 조건</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { name: '시험 평균',     cond: '전체 차시 평균이 60점 미만' },
+                          { name: '하위 분야',     cond: '60점 미만인 제품 카테고리가 4개 이상' },
+                          { name: '출석률',        cond: '출석률이 80% 미만 (지각 0.5 반영)' },
+                          { name: '자신감',        cond: '최근 일지 자신감이 3회 연속 낮음' },
+                          { name: '주의 메모',     cond: '교육자 주의 메모가 2건 이상' },
+                          { name: '최근 하락 신호', cond: '성적 5점↓ 하락 또는 자신감 급락' },
+                        ].map((row, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>⚠️ {row.name}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.cond}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Part 2: 유형 판정 */}
+                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
+                      2️⃣ 해당된 신호 조합으로 유형을 정해요
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+                      각 유형에 맞춰 맞춤 HR 조언이 자동으로 붙어요
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>유형</th>
+                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>언제 이 유형이 되나요?</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { emoji: '🚨', name: '복합 위기형',    when: '주의 신호 3개 이상 동시 해당' },
+                          { emoji: '📘', name: '지식 부족형',    when: '시험 낮음 + 하위 분야 많음' },
+                          { emoji: '🎯', name: '약점 편중형',    when: '시험은 양호한데 하위 분야만 많음' },
+                          { emoji: '💔', name: '심리 위축형',    when: '자신감이 계속 낮은 상태' },
+                          { emoji: '🌊', name: '하락 징후형',    when: '성적이나 자신감이 최근 하락 중' },
+                          { emoji: '🚪', name: '근태/동기 이슈형', when: '출석률만 낮은 경우' },
+                          { emoji: '🔍', name: '행동 관찰형',    when: '주의 메모만 쌓인 경우' },
+                          { emoji: '💎', name: '부분 주의형',    when: '적응 점수 \'상\' 그룹인데 한두 가지 주의' },
+                        ].map((row, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                              {row.emoji} {row.name}
+                            </td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.when}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <div style={{ marginTop: 12, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                      💡 카드 배경색: <strong style={{ color: 'var(--red)' }}>빨강</strong> = 3개+ 위험 · <strong style={{ color: 'var(--orange)' }}>주황</strong> = 1~2개 주의 · <strong style={{ color: 'var(--blue)' }}>파랑</strong> = 부분 주의
+                    </div>
+                  </div>
+                </details>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {riskChecks.map(r => {
                   const idx = adaptationIndices.find(a => a.studentId === r.studentId);
                   const isHighGroup = idx?.group === 'high';
+                  const hasDescent = r.checks.some(c => c.label === '최근 하락 신호' && c.triggered);
+
+                  // 기본 색상 — 바탕색으로만 구분 (외곽선 없음)
+                  // 1개 해당: 바깥 카드와 구분되도록 elevated 배경
                   let rCardBg = r.riskCount >= 3 ? 'var(--red-dim)' : r.riskCount >= 2 ? 'var(--orange-dim)' : 'var(--bg-elevated)';
-                  let rCardBorder = r.riskCount >= 3 ? 'var(--red)' : r.riskCount >= 2 ? 'var(--orange)' : 'var(--border)';
                   let badgeBg = r.riskCount >= 3 ? 'var(--red)' : 'var(--orange)';
                   let badgeText = r.riskCount >= 3 ? '위험' : '주의';
-                  if (isHighGroup) { rCardBg = 'var(--blue-dim)'; rCardBorder = 'var(--blue)'; badgeBg = 'var(--blue)'; badgeText = '부분 주의'; }
+                  let topHint: { text: string; color: string } | null = null;
+
+                  if (isHighGroup) {
+                    if (hasDescent) {
+                      // 🌊 상 그룹인데 조용히 무너지는 중 — 주황색 경고
+                      rCardBg = 'var(--orange-dim)';
+                      badgeBg = 'var(--orange)';
+                      badgeText = '하락 경고';
+                      topHint = { text: '🌊 전반은 양호하나 최근 하락 징후가 있어요', color: 'var(--orange)' };
+                    } else {
+                      rCardBg = 'var(--blue-dim)';
+                      badgeBg = 'var(--blue)';
+                      badgeText = '부분 주의';
+                      topHint = { text: '💡 전체적으로 양호하지만 이 부분은 주의', color: 'var(--blue)' };
+                    }
+                  }
+
+                  // 🆕 HR 조언 자동 생성
+                  const advice = generateHRAdvice(r, idx);
 
                   return (
-                    <div key={r.studentId} style={{ background: rCardBg, border: `1px solid ${rCardBorder}`, borderRadius: 'var(--radius-md)', padding: 16 }}>
-                      {isHighGroup && <div style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600, marginBottom: 6 }}>💡 전체적으로 양호하지만 이 부분은 주의</div>}
+                    <div key={r.studentId} style={{ background: rCardBg, borderRadius: 'var(--radius-md)', padding: 16 }}>
+                      {topHint && <div style={{ fontSize: 12, color: topHint.color, fontWeight: 600, marginBottom: 6 }}>{topHint.text}</div>}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
                           {r.studentName}
@@ -313,6 +494,9 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           </div>
                         )}
                       </div>
+
+                      {/* 🆕 HR 조언 박스 */}
+                      {advice && <HRAdviceBox advice={advice} />}
                     </div>
                   );
                 })}
@@ -458,12 +642,78 @@ export default function StudentsClient({ batches, students: initialStudents, sco
 function DetailRow({ label, score, detail }: { label: string; score: number; detail: string }) {
   const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--orange)' : 'var(--red)';
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <span style={{ fontSize: 13, color: 'var(--text-second)', minWidth: 130 }}>{label}</span>
-      <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${Math.min(score, 100)}%`, background: color, borderRadius: 4 }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, color: 'var(--text-second)', minWidth: 130 }}>{label}</span>
+        <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${Math.min(score, 100)}%`, background: color, borderRadius: 4 }} />
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 700, color, minWidth: 40, textAlign: 'right' }}>{score}</span>
       </div>
-      <span style={{ fontSize: 13, fontWeight: 700, color, minWidth: 40, textAlign: 'right' }}>{score}</span>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', paddingLeft: 140 }}>{detail}</div>
+    </div>
+  );
+}
+
+// HR 조언 박스 (주의 교육생 카드 하단)
+function HRAdviceBox({ advice }: { advice: HRAdvice }) {
+  // 유형별 색상 토큰 매핑
+  const colorMap: Record<HRAdvice['typeColor'], { bg: string; border: string; text: string }> = {
+    red:    { bg: 'var(--red-dim)',    border: 'var(--red)',    text: 'var(--red)' },
+    orange: { bg: 'var(--orange-dim)', border: 'var(--orange)', text: 'var(--orange)' },
+    blue:   { bg: 'var(--blue-dim)',   border: 'var(--blue)',   text: 'var(--blue)' },
+    purple: { bg: 'var(--purple-dim, rgba(191,90,242,0.15))', border: 'var(--purple)', text: 'var(--purple)' },
+    green:  { bg: 'var(--green-dim)',  border: 'var(--green)',  text: 'var(--green)' },
+  };
+  const c = colorMap[advice.typeColor];
+
+  return (
+    <div style={{
+      marginTop: 12,
+      padding: 12,
+      background: 'var(--bg-surface)',
+      borderRadius: 'var(--radius-sm)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+    }}>
+      {/* 유형 뱃지 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{
+          background: c.bg,
+          color: c.text,
+          fontSize: 12,
+          fontWeight: 700,
+          padding: '3px 10px',
+          borderRadius: 'var(--radius-pill)',
+        }}>
+          {advice.typeEmoji} {advice.typeLabel}
+        </span>
+      </div>
+
+      {/* 어려움 서술 */}
+      <div style={{ fontSize: 12.5, color: 'var(--text-second)', lineHeight: 1.55 }}>
+        💬 <strong style={{ color: 'var(--text-primary)' }}>어려움</strong> — {advice.difficulty}
+      </div>
+
+      {/* 권장 액션 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 700 }}>✅ 권장 액션</div>
+        {advice.actions.map((action, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 6,
+            fontSize: 12.5,
+            color: 'var(--text-second)',
+            lineHeight: 1.5,
+            paddingLeft: 4,
+          }}>
+            <span style={{ color: c.text, fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
+            <span>{action}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

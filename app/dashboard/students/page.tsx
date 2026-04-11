@@ -15,6 +15,7 @@ export default async function StudentsPage() {
     { data: testResponses },
     { data: questions },
     { data: memos },
+    { data: coachingReports },
   ] = await Promise.all([
     supabase.from('batches').select('*').order('start_date', { ascending: false }),
     supabase.from('students').select('*').order('name'),
@@ -39,6 +40,8 @@ export default async function StudentsPage() {
     })(),
     supabase.from('questions').select('id, batch_id, session, question_id, category, series, detail, question_text'),
     supabase.from('student_memos').select('student_id, category'),
+    // 🆕 만성 오답 비율 계산용 (최신 리포트 기준)
+    supabase.from('coaching_reports').select('student_id, tag_tracking, created_at').order('created_at', { ascending: true }),
   ]);
 
   return (
@@ -51,6 +54,7 @@ export default async function StudentsPage() {
       testResponses={testResponses || []}
       questions={questions || []}
       memos={memos || []}
+      coachingReports={coachingReports || []}
     />
   );
 }

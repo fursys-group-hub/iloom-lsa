@@ -2,12 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import type { Student, TestScore, Attendance } from '@/lib/types';
-import { calculateRiskLevel, calculateDailyAverages, calculateAvgScore } from '@/lib/analysis';
+import type { Student, TestScore, Attendance, TagTracking } from '@/lib/types';
+import { calculateDailyAverages, calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
 import type { ScheduleMap } from '@/lib/schedule';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
-import RiskBadge from '@/components/RiskBadge';
 
 interface BatchInfo {
   id: string;
@@ -55,6 +54,29 @@ interface QuestionRow {
   student_name?: string;
 }
 
+interface AnalysisResponse {
+  student_id: string;
+  batch_id: string;
+  session: string;
+  question_id: string;
+  is_correct: boolean;
+  test_date: string;
+}
+
+interface AnalysisQuestion {
+  id: string;
+  batch_id: string;
+  session: string;
+  question_id: string;
+  category: string | null;
+}
+
+interface CoachingReportRow {
+  student_id: string;
+  tag_tracking: TagTracking | null;
+  created_at: string;
+}
+
 interface Props {
   batches: BatchInfo[];
   students: Student[];
@@ -65,6 +87,10 @@ interface Props {
   noteComments: CommentRow[];
   questions: QuestionRow[];
   memoCounts: Record<string, number>;
+  memos: { student_id: string; category: string }[];
+  testResponses: AnalysisResponse[];
+  examQuestions: AnalysisQuestion[];
+  coachingReports: CoachingReportRow[];
 }
 
 function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: string } {
@@ -105,7 +131,24 @@ function getEducationDay(startDate: string): number {
   return Math.max(diff + 1, 0);
 }
 
-export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments, questions, memoCounts }: Props) {
+// 교육일지 노트 메타 파서 (StudentsClient와 동일)
+function parseNoteMeta(content: string) {
+  try {
+    const parsed = JSON.parse(content);
+    const meta = parsed.meta || {};
+    const steps = parsed.steps || {};
+    let pScore = meta.participation_score;
+    if (pScore === undefined) {
+      pScore = 0;
+      if (steps.step1 && String(steps.step1).trim()) pScore++;
+      if (steps.step2 && String(steps.step2).trim()) pScore++;
+      if (steps.step3 && String(steps.step3).trim()) pScore++;
+    }
+    return { participation_score: pScore as number, confidence: (meta.confidence || null) as string | null, tags: (meta.tags || []) as string[] };
+  } catch { return { participation_score: 0, confidence: null, tags: [] as string[] }; }
+}
+
+export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments, questions, memos, testResponses, examQuestions, coachingReports }: Props) {
   const today = new Date().toISOString().split('T')[0];
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
@@ -132,15 +175,70 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
   const dailyAverages = useMemo(() => calculateDailyAverages(scores), [scores]);
 
-  const studentsWithStats = useMemo(() => {
-    return students.map((student) => {
-      const ss = scores.filter((s) => s.student_id === student.id);
-      const sa = attendance.filter((a) => a.student_id === student.id);
-      return { ...student, avg_score: calculateAvgScore(ss), risk_level: calculateRiskLevel(ss, sa) };
-    });
-  }, [students, scores, attendance]);
+  // 🆕 교육일수 (적응 지수 계산용)
+  const totalEducationDays = useMemo(() => {
+    if (!selectedBatch) return 20;
+    const start = new Date(selectedBatch.start_date);
+    const end = new Date(selectedBatch.end_date);
+    const todayDate = new Date();
+    const effectiveEnd = todayDate < end ? todayDate : end;
+    let days = 0;
+    const d = new Date(start);
+    while (d <= effectiveEnd) { if (d.getDay() !== 0 && d.getDay() !== 6) days++; d.setDate(d.getDate() + 1); }
+    return Math.max(days, 1);
+  }, [selectedBatch]);
 
-  const riskStudents = studentsWithStats.filter((s) => s.risk_level !== 'low');
+  // 🆕 학생별 카테고리 정답률 (주의 교육생 판정용)
+  const studentCategoryRates = useMemo(() => {
+    const result = new Map<string, { category: string; rate: number }[]>();
+    const qMap = new Map<string, AnalysisQuestion>();
+    for (const q of examQuestions) { if (q.batch_id === selectedBatchId) qMap.set(`${q.session}_${q.question_id}`, q); }
+    for (const student of students) {
+      const catMap = new Map<string, { correct: number; total: number }>();
+      const sResponses = testResponses.filter(r => r.student_id === student.id);
+      for (const r of sResponses) {
+        const q = qMap.get(`${r.session}_${r.question_id}`);
+        if (!q || !q.category) continue;
+        const cell = catMap.get(q.category) || { correct: 0, total: 0 };
+        cell.total++; if (r.is_correct) cell.correct++;
+        catMap.set(q.category, cell);
+      }
+      result.set(student.id, [...catMap.entries()].map(([category, v]) => ({ category, rate: v.total > 0 ? Math.round((v.correct / v.total) * 100) : 0 })));
+    }
+    return result;
+  }, [students, testResponses, examQuestions, selectedBatchId]);
+
+  // 🆕 적응 지수 + 위험 체크리스트 (교육생 종합 분석과 동일 로직)
+  const riskStudentsDetailed = useMemo(() => {
+    return students.map((student) => {
+      const sScores = scores.filter(s => s.student_id === student.id);
+      const sAttendance = attendance.filter(a => a.student_id === student.id);
+      const sNotes = notes.filter(n => n.student_id === student.id).map(n => ({ ...parseNoteMeta(n.content), created_at: n.created_at }));
+      const catRates = studentCategoryRates.get(student.id) || [];
+      const sMemoCategories = memos.filter(m => m.student_id === student.id).map(m => m.category);
+      const sTagTrackings = coachingReports.filter(r => r.student_id === student.id).map(r => r.tag_tracking);
+
+      const adaptation = calculateAdaptationIndex({
+        studentId: student.id, studentName: student.name,
+        scores: sScores, attendance: sAttendance, notes: sNotes,
+        totalEducationDays, categoryRates: catRates,
+        memoCategories: sMemoCategories,
+        tagTrackings: sTagTrackings,
+      });
+
+      const riskCheck = calculateRiskChecklist({
+        studentId: student.id, studentName: student.name,
+        scores: sScores, attendance: sAttendance, notes: sNotes,
+        memoCategories: sMemoCategories,
+        totalEducationDays, categoryRates: catRates,
+      });
+
+      const advice = generateHRAdvice(riskCheck, adaptation);
+
+      return { student, adaptation, riskCheck, advice };
+    }).filter(r => r.riskCheck.riskCount > 0)
+      .sort((a, b) => b.riskCheck.riskCount - a.riskCheck.riskCount || a.adaptation.total - b.adaptation.total);
+  }, [students, scores, attendance, notes, studentCategoryRates, memos, coachingReports, totalEducationDays]);
 
   const subjectAverages = useMemo(() => {
     const m = new Map<string, number[]>();
@@ -311,6 +409,74 @@ export default function DashboardClient({ batches, students: allStudents, scores
         {/* ─── 왼쪽 ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
+          {/* 🆕 주의 교육생 — 교육생 종합 분석과 동일 로직 */}
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h3 style={{ ...sectionTitle, marginBottom: 0 }}>⚠️ 주의 교육생 ({riskStudentsDetailed.length}명)</h3>
+              <Link href="/dashboard/students?tab=analysis" style={{
+                fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none',
+              }}>종합 분석 →</Link>
+            </div>
+            {riskStudentsDetailed.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                {riskStudentsDetailed.map(({ student, adaptation, riskCheck, advice }) => {
+                  // 유형별 배지 색상 매핑
+                  const typeColorMap: Record<string, { bg: string; text: string }> = {
+                    red:    { bg: 'var(--red-dim)',    text: 'var(--red)' },
+                    orange: { bg: 'var(--orange-dim)', text: 'var(--orange)' },
+                    blue:   { bg: 'var(--blue-dim)',   text: 'var(--blue)' },
+                    purple: { bg: 'var(--purple-dim, rgba(191,90,242,0.15))', text: 'var(--purple)' },
+                    green:  { bg: 'var(--green-dim)',  text: 'var(--green)' },
+                  };
+                  const badgeColor = advice ? typeColorMap[advice.typeColor] : typeColorMap.orange;
+                  const badgeLabel = advice ? `${advice.typeEmoji} ${advice.typeLabel}` : '주의';
+
+                  return (
+                    <Link key={student.id} href="/dashboard/students?tab=analysis"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        padding: '8px 12px', borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-elevated)', textDecoration: 'none',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                    >
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: 'var(--bg-surface)', color: 'var(--text-primary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 700, flexShrink: 0,
+                      }}>{student.name[0]}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {student.name}
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginLeft: 5 }}>
+                            적응 {adaptation.total}점 · {riskCheck.riskCount}개 해당
+                          </span>
+                        </span>
+                      </div>
+                      <span style={{
+                        flexShrink: 0,
+                        background: badgeColor.bg,
+                        color: badgeColor.text,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: 'var(--radius-pill)',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {badgeLabel}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '16px 0' }}>모든 교육생이 양호해요! 🎉</p>
+            )}
+          </div>
+
           {/* 차시별 평균 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -349,42 +515,6 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <ScoreTrendChart data={dailyAverages} height={180} />
             ) : (
               <p style={{ fontSize: 14, color: 'var(--text-muted)', textAlign: 'center', padding: '16px 0' }}>데이터 없음</p>
-            )}
-          </div>
-
-          {/* 주의 교육생 */}
-          <div style={cardStyle}>
-            <h3 style={sectionTitle}>⚠️ 주의 교육생</h3>
-            {riskStudents.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                {riskStudents.map((s) => (
-                  <Link key={s.id} href={`/dashboard/students/${s.id}`}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '6px 12px', borderRadius: 'var(--radius-pill)',
-                      background: 'var(--bg-elevated)', textDecoration: 'none',
-                      transition: 'background 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
-                  >
-                    <div style={{
-                      width: 24, height: 24, borderRadius: '50%',
-                      background: 'var(--red-solid-bg)', color: 'var(--red-solid-text)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 11, fontWeight: 700, flexShrink: 0,
-                    }}>{s.name[0]}</div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{s.avg_score}점</span>
-                    {memoCounts[s.id] ? (
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>📝{memoCounts[s.id]}</span>
-                    ) : null}
-                    <span style={{ marginLeft: 'auto' }}><RiskBadge level={s.risk_level} /></span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '16px 0' }}>모든 교육생이 양호해요! 🎉</p>
             )}
           </div>
         </div>
