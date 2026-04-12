@@ -626,16 +626,16 @@ export default function MyPracticePage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{month}/{day} ({dayName})</span>
                     <span style={{
-                      padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
+                      padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
                       background: 'var(--blue-dim)', color: 'var(--blue)',
                     }}>🏪 실습일지</span>
                   </div>
                   {/* 실적 요약 */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {statsData.stats_consult > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>🗣️ {statsData.stats_consult}</span>}
-                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
-                    {statsData.stats_order > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
+                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>🗣️ {statsData.stats_consult}</span>}
+                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
+                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
+                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
                   </div>
                   {/* 수주 내역 미리보기 */}
                   {noteOrderDetail && (

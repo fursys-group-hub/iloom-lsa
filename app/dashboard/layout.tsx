@@ -4,19 +4,44 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-const nav = [
-  { href: '/dashboard', label: '홈', icon: '🏠' },
-  { href: '/dashboard/students', label: '교육생', icon: '👥' },
-  { href: '/dashboard/attendance', label: '출결', icon: '📋' },
-  { href: '/dashboard/tests', label: '테스트', icon: '📝' },
-  { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
-  { href: '/dashboard/questions', label: '질문관리', icon: '💬' },
-  { href: '/dashboard/practice', label: '실습일지', icon: '🏪' },
-  { href: '/dashboard/reports', label: '리포트', icon: '📈' },
-  { href: '/dashboard/analytics', label: '교육효과', icon: '📊' },
-  { href: '/dashboard/overview', label: '심화교육', icon: '🎓' },
-  { href: '/dashboard/announcements', label: '공지사항', icon: '📢' },
-  { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
+const navGroups = [
+  {
+    label: '',
+    items: [
+      { href: '/dashboard', label: '홈', icon: '🏠' },
+    ],
+  },
+  {
+    label: '일일 운영',
+    items: [
+      { href: '/dashboard/attendance', label: '출결', icon: '📋' },
+      { href: '/dashboard/tests', label: '테스트', icon: '📝' },
+      { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
+      { href: '/dashboard/practice', label: '실습일지', icon: '🏪' },
+      { href: '/dashboard/questions', label: '질문관리', icon: '💬' },
+    ],
+  },
+  {
+    label: '성과 분석',
+    items: [
+      { href: '/dashboard/students', label: '개별분석', icon: '👤' },
+      { href: '/dashboard/reports', label: '리포트', icon: '📈' },
+      { href: '/dashboard/analytics', label: '교육효과', icon: '📊' },
+    ],
+  },
+  {
+    label: '심화교육',
+    items: [
+      { href: '/dashboard/overview', label: '심화교육', icon: '🎓' },
+    ],
+  },
+  {
+    label: '설정',
+    items: [
+      { href: '/dashboard/announcements', label: '공지사항', icon: '📢' },
+      { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
+    ],
+  },
 ];
 
 export default function DashboardLayout({
@@ -100,63 +125,54 @@ export default function DashboardLayout({
         </div>
 
         {/* 네비게이션 */}
-        <nav style={{ flex: 1, padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'space-between', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {nav.map((item) => {
-            const isDisabled = 'disabled' in item && item.disabled;
-            const isActive = !isDisabled && (
-              item.href === '/dashboard'
-                ? pathname === '/dashboard'
-                : pathname.startsWith(item.href)
-            );
-
-            if (isDisabled) {
-              return (
-                <div
-                  key={item.href}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '11px 16px', borderRadius: 'var(--radius-md)',
-                    fontSize: 14, fontWeight: 500,
-                    color: 'var(--text-muted)', opacity: 0.5,
-                    cursor: 'default',
-                  }}
-                >
-                  <span style={{ fontSize: 15 }}>{item.icon}</span>
-                  {item.label}
-                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+        <nav style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'space-between', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {navGroups.map((group, gi) => (
+            <div key={gi}>
+              {group.label && (
+                <div style={{
+                  fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
+                  padding: '12px 14px 4px', letterSpacing: '0.04em',
+                  textTransform: 'uppercase' as const,
+                }}>
+                  {group.label}
                 </div>
-              );
-            }
+              )}
+              {group.items.map((item) => {
+                const isActive =
+                  item.href === '/dashboard'
+                    ? pathname === '/dashboard'
+                    : pathname.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  transition: 'all 0.15s ease',
-                  background: isActive ? 'var(--blue)' : 'transparent',
-                  color: isActive ? '#fff' : 'var(--text-tertiary)',
-                }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-              >
-                <span style={{ fontSize: 15 }}>{item.icon}</span>
-                {item.label}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '8px 14px',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'all 0.15s ease',
+                      background: isActive ? 'var(--blue)' : 'transparent',
+                      color: isActive ? '#fff' : 'var(--text-tertiary)',
+                    }}
+                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <span style={{ fontSize: 15 }}>{item.icon}</span>
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
           </div>
-
         </nav>
 
         {/* 하단 고정 영역 */}

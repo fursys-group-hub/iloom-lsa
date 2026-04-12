@@ -254,9 +254,6 @@ export default function SettingsPage() {
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           📚 기수 관리
         </h2>
-        <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
-          기수와 교육생을 등록하고 관리해요
-        </p>
       </div>
 
       {/* ═══ 기수 목록 ═══ */}
@@ -812,7 +809,7 @@ export default function SettingsPage() {
           <div
             style={{
               background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
-              padding: 32, width: 420, maxWidth: '90vw',
+              padding: 28, width: 420, maxWidth: '90vw',
               boxShadow: 'var(--shadow-lg)',
             }}
             onClick={e => e.stopPropagation()}

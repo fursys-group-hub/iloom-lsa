@@ -12,7 +12,7 @@ interface ReportDetail {
   students: { name: string; store_location: string | null };
 }
 
-const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px' };
+const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
 const sTitle: React.CSSProperties = { fontSize: 17, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 };
 
 // 리포트 텍스트를 섹션으로 파싱
@@ -493,7 +493,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
     <div style={{ maxWidth: 1200 }}>
       {/* 헤더 */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>📈 AI 분석 리포트</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>📈 AI 분석 리포트</h2>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14 }}>

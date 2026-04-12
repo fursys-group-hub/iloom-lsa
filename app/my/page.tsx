@@ -406,7 +406,7 @@ export default function MyPage() {
               fontSize: 22, fontWeight: 700,
             }}>{studentName[0]}</div>
             <div>
-              <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{studentName}</h2>
+              <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{studentName}</h2>
               <p style={{ fontSize: 15, color: 'var(--text-muted)', marginTop: 2 }}>일룸 LSA 입문교육</p>
             </div>
           </div>

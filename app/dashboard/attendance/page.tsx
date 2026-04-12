@@ -280,7 +280,7 @@ export default function AttendancePage() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
                       {['날짜', '이름', '부서', '출근', '퇴근', '상태'].map((h) => (
-                        <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                           {h}
                         </th>
                       ))}
@@ -363,12 +363,12 @@ export default function AttendancePage() {
       {loading ? (
         <p style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center', padding: 48 }}>불러오는 중...</p>
       ) : savedData.length === 0 ? (
-        <div style={{ ...card, textAlign: 'center', padding: 64 }}>
-          <p style={{ fontSize: 48, margin: '0 0 16px' }}>📭</p>
-          <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        <div style={{ ...card, textAlign: 'center', padding: 48 }}>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
             아직 출결 데이터가 없어요
           </p>
-          <p style={{ fontSize: 15, color: 'var(--text-muted)', margin: '0 0 20px' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: '0 0 20px' }}>
             위의 Excel 업로드 버튼으로 타임인아웃 파일을 올려주세요
           </p>
           <button
@@ -390,29 +390,23 @@ export default function AttendancePage() {
       ) : (
         <>
           {/* 날짜 선택 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>날짜</span>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {availableDates.slice(0, 14).map((date) => (
-                <button
-                  key={date}
-                  onClick={() => setSelectedDate(date)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: selectedDate === date ? 'none' : '1px solid var(--border)',
-                    background: selectedDate === date ? 'var(--blue)' : 'transparent',
-                    color: selectedDate === date ? '#fff' : 'var(--text-tertiary)',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {date.slice(5)}
-                </button>
-              ))}
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <select
+              value={selectedDate}
+              onChange={e => setSelectedDate(e.target.value)}
+              style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)', background: 'var(--bg-surface)',
+                color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', outline: 'none',
+              }}
+            >
+              {availableDates.slice(0, 14).map(date => {
+                const d = new Date(date + 'T00:00:00');
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                return <option key={date} value={date}>{d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})</option>;
+              })}
+            </select>
           </div>
 
           {/* 알림: 지각/결석자 */}

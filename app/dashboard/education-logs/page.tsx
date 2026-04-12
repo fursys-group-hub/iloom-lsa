@@ -291,57 +291,34 @@ export default function EducationLogsPage() {
       </h2>
 
       {notes.length === 0 ? (
-        <div style={{ ...card, textAlign: 'center', padding: 64 }}>
-          <p style={{ fontSize: 48, margin: '0 0 16px' }}>📭</p>
-          <p style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+        <div style={{ ...card, textAlign: 'center', padding: 48 }}>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
             아직 작성된 교육일지가 없어요
           </p>
-          <p style={{ fontSize: 15, color: 'var(--text-muted)', margin: 0 }}>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
             교육생들이 교육일지를 작성하면 여기에 표시됩니다
           </p>
         </div>
       ) : (
         <>
-          {/* 날짜 선택 */}
+          {/* 날짜 선택 + 필터 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            {/* 데스크탑: 버튼 */}
-            <div className="date-buttons-desktop" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {availableDates.slice(0, 14).map(date => {
-                const d = new Date(date + 'T00:00:00');
-                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-                return (
-                  <button
-                    key={date}
-                    onClick={() => { setSelectedDate(date); setExpandedNoteId(null); }}
-                    style={{
-                      padding: '8px 16px', borderRadius: 'var(--radius-md)',
-                      border: selectedDate === date ? '2px solid var(--blue)' : '1px solid var(--border)',
-                      background: selectedDate === date ? 'var(--blue)' : 'var(--bg-surface)',
-                      color: selectedDate === date ? '#fff' : 'var(--text-tertiary)',
-                      fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                    }}
-                  >
-                    {d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})
-                  </button>
-                );
-              })}
-            </div>
-            {/* 모바일: 드롭다운 */}
             <select
-              className="date-select-mobile"
               value={selectedDate}
               onChange={e => { setSelectedDate(e.target.value); setExpandedNoteId(null); }}
               style={{
-                display: 'none',
-                padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
-                color: 'var(--text-primary)', fontSize: 15, fontWeight: 600,
-                outline: 'none', flex: 1,
+                color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', outline: 'none',
               }}
             >
-              {availableDates.map(date => (
-                <option key={date} value={date}>{date.slice(5)}</option>
-              ))}
+              {availableDates.map(date => {
+                const d = new Date(date + 'T00:00:00');
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                return <option key={date} value={date}>{d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})</option>;
+              })}
             </select>
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -370,9 +347,9 @@ export default function EducationLogsPage() {
                 value={filterStudentId}
                 onChange={e => { setFilterStudentId(e.target.value); setExpandedNoteId(null); }}
                 style={{
-                  padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-                  color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer',
+                  padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border)', background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)', fontSize: 14, cursor: 'pointer', outline: 'none',
                 }}
               >
                 <option value="">전체 교육생</option>

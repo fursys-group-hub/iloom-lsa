@@ -247,30 +247,30 @@ export default function DashboardPracticePage() {
       ) : (
         <>
           {/* 날짜 선택 */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            {availableDates.map(date => {
-              const d = new Date(date + 'T00:00:00');
-              const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-              return (
-                <button key={date}
-                  onClick={() => { setSelectedDate(date); setExpandedNoteId(null); }}
-                  style={{
-                    padding: '8px 16px', borderRadius: 'var(--radius-md)',
-                    border: selectedDate === date ? '2px solid var(--blue)' : '1px solid var(--border)',
-                    background: selectedDate === date ? 'var(--blue)' : 'var(--bg-surface)',
-                    color: selectedDate === date ? '#fff' : 'var(--text-tertiary)',
-                    fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                  }}>
-                  {d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})
-                </button>
-              );
-            })}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <select
+              value={selectedDate}
+              onChange={e => { setSelectedDate(e.target.value); setExpandedNoteId(null); }}
+              style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border)', background: 'var(--bg-surface)',
+                color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', outline: 'none',
+              }}
+            >
+              {availableDates.map(date => {
+                const d = new Date(date + 'T00:00:00');
+                const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                return <option key={date} value={date}>{d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})</option>;
+              })}
+            </select>
             {/* 학생 필터 */}
             <select value={filterStudentId} onChange={e => setFilterStudentId(e.target.value)}
               style={{
-                padding: '8px 12px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
                 color: 'var(--text-primary)', fontSize: 14, marginLeft: 'auto',
+                cursor: 'pointer', outline: 'none',
               }}>
               <option value="">전체 교육생</option>
               {students.map(s => (

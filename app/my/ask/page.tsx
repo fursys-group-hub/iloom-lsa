@@ -263,8 +263,8 @@ export default function AskPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
-                      padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                      fontSize: 11, fontWeight: 600, background: st.bg, color: st.color,
+                      padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                      fontSize: 12, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
                       {st.label}
                     </span>

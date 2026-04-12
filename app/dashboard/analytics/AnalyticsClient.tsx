@@ -260,12 +260,12 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
 
   // ── 렌더 ──
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>📊 교육 효과 분석</h1>
-          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '6px 12px', fontSize: 14 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📊 교육 효과 분석</h2>
+          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
             {archivedBatches.length > 0 && <optgroup label="보관됨">{archivedBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
           </select>
@@ -353,11 +353,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-second)' }}>카테고리</th>
-                <th style={{ textAlign: 'center', padding: '10px 14px', color: 'var(--text-second)' }}>시험 정답률</th>
-                <th style={{ padding: '10px 14px', color: 'var(--text-second)' }}>정답률 바</th>
-                <th style={{ textAlign: 'right', padding: '10px 14px', color: 'var(--text-second)' }}>수주 금액 (만원)</th>
-                <th style={{ padding: '10px 14px', color: 'var(--text-second)' }}>수주 바</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>카테고리</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>시험 정답률</th>
+                <th style={{ padding: '12px 16px', color: 'var(--text-second)' }}>정답률 바</th>
+                <th style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-second)' }}>수주 금액 (만원)</th>
+                <th style={{ padding: '12px 16px', color: 'var(--text-second)' }}>수주 바</th>
               </tr>
             </thead>
             <tbody>
@@ -421,11 +421,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                <th style={{ textAlign: 'left', padding: '10px 14px', color: 'var(--text-second)' }}>교육생</th>
-                <th style={{ textAlign: 'center', padding: '10px 14px', color: 'var(--text-second)' }}>출석률</th>
-                <th style={{ textAlign: 'center', padding: '10px 14px', color: 'var(--text-second)' }}>일지 제출률</th>
-                <th style={{ textAlign: 'center', padding: '10px 14px', color: 'var(--text-second)' }}>수주 전환율</th>
-                <th style={{ textAlign: 'center', padding: '10px 14px', color: 'var(--text-second)' }}>상관 신호</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>교육생</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>출석률</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>일지 제출률</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>수주 전환율</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>상관 신호</th>
               </tr>
             </thead>
             <tbody>

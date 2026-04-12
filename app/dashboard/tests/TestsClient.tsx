@@ -408,7 +408,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -458,9 +458,9 @@ export default function TestsClient({ batches, students, scores, attendance, not
             disabled={syncing}
             style={{
               padding: '10px 20px', borderRadius: 'var(--radius-md)',
-              border: syncing ? 'none' : '1px solid var(--green)',
+              border: syncing ? 'none' : '1px solid var(--border)',
               background: syncing ? 'var(--bg-elevated)' : 'transparent',
-              color: syncing ? 'var(--text-muted)' : 'var(--green)',
+              color: syncing ? 'var(--text-muted)' : 'var(--text-tertiary)',
               fontSize: 14, fontWeight: 600, cursor: syncing ? 'not-allowed' : 'pointer',
               transition: 'all 0.15s ease',
             }}

@@ -136,9 +136,9 @@ export default function AdminQuestionsPage() {
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>불러오는 중...</div>;
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문 관리</h2>
         {openCount > 0 && (
           <span style={{
@@ -152,13 +152,13 @@ export default function AdminQuestionsPage() {
       </div>
 
       {/* 필터 탭 */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 6 }}>
         {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '📦 보관됨']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
             style={{
-              padding: '7px 16px', borderRadius: 'var(--radius-pill)',
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)',
               fontSize: 13, fontWeight: 600, cursor: 'pointer',
               border: filter === key ? 'none' : '1px solid var(--border)',
               background: filter === key ? 'var(--blue)' : 'transparent',
@@ -213,8 +213,8 @@ export default function AdminQuestionsPage() {
                       </span>
                     </div>
                     <span style={{
-                      padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                      fontSize: 11, fontWeight: 600, background: st.bg, color: st.color,
+                      padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                      fontSize: 12, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
                       {st.dot} {st.label}
                     </span>

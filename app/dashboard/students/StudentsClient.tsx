@@ -216,10 +216,10 @@ export default function StudentsClient({ batches, students: initialStudents, sco
   const filterLabels: Record<string, string> = { all: '전체', high: '위험', medium: '주의', low: '양호' };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          👥 교육생
+          👤 개별분석
         </h2>
         <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
           {([['list', '명단'], ['analysis', '종합 분석']] as const).map(([key, label]) => (

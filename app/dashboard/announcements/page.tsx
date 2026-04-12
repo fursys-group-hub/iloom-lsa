@@ -118,9 +118,6 @@ export default function AnnouncementsPage() {
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
             📢 공지사항
           </h2>
-          <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
-            교육생에게 전달할 공지를 작성해요
-          </p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
@@ -135,23 +132,21 @@ export default function AnnouncementsPage() {
       </div>
 
       {/* 기수 선택 */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {batches.map(b => (
-          <button
-            key={b.id}
-            onClick={() => setSelectedBatchId(b.id)}
-            style={{
-              padding: '10px 18px', borderRadius: 'var(--radius-md)',
-              border: selectedBatchId === b.id ? 'none' : '1px solid var(--border)',
-              background: selectedBatchId === b.id ? 'var(--blue)' : 'transparent',
-              color: selectedBatchId === b.id ? '#fff' : 'var(--text-tertiary)',
-              fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            {b.name}
-          </button>
-        ))}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <select
+          value={selectedBatchId}
+          onChange={e => setSelectedBatchId(e.target.value)}
+          style={{
+            padding: '8px 14px', borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)', background: 'var(--bg-surface)',
+            color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', outline: 'none',
+          }}
+        >
+          {batches.map(b => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* 작성/수정 폼 */}
@@ -246,9 +241,9 @@ export default function AnnouncementsPage() {
       ) : announcements.length === 0 ? (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 64, textAlign: 'center',
+          borderRadius: 'var(--radius-lg)', padding: 48, textAlign: 'center',
         }}>
-          <p style={{ fontSize: 48, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)', margin: 0 }}>
             아직 작성된 공지가 없어요
           </p>

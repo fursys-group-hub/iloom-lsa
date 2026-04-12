@@ -50,9 +50,9 @@ export default function MyAnnouncementsPage() {
       {announcements.length === 0 ? (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 64, textAlign: 'center',
+          borderRadius: 'var(--radius-lg)', padding: 48, textAlign: 'center',
         }}>
-          <p style={{ fontSize: 48, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)', margin: 0 }}>
             공지사항이 없어요
           </p>
