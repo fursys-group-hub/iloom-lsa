@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 // ── 타입 ──
 interface NoteComment {
@@ -82,9 +82,15 @@ function unformatKRW(val: string): string {
   return val.replace(/[^0-9]/g, '');
 }
 
-function getToday() {
-  const t = new Date();
-  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+/** KST 기준 오늘 날짜 (새벽 5시 이전이면 전날로 보정) */
+function getKSTTodayWithCutoff(): string {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  // 새벽 5시 이전이면 전날
+  if (kst.getUTCHours() < 5) {
+    kst.setUTCDate(kst.getUTCDate() - 1);
+  }
+  return kst.toISOString().slice(0, 10);
 }
 
 // ── 메인 ──
@@ -107,6 +113,16 @@ export default function MyPracticePage() {
   const [saveError, setSaveError] = useState('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
 
+  // 날짜 선택 (새벽 5시 보정 + 실습일 중 가장 가까운 날짜)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = getKSTTodayWithCutoff();
+    // 오늘이 실습일이면 그대로, 아니면 가장 가까운 과거 실습일 선택
+    if (PRACTICE_DATES.includes(today)) return today;
+    const past = PRACTICE_DATES.filter(d => d <= today);
+    if (past.length > 0) return past[past.length - 1];
+    return PRACTICE_DATES[0];
+  });
+
   // 코멘트
   const [comments, setComments] = useState<NoteComment[]>([]);
   const [commentInput, setCommentInput] = useState('');
@@ -114,9 +130,21 @@ export default function MyPracticePage() {
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const commentEndRef = useRef<HTMLDivElement>(null);
 
-  const todayStr = getToday();
   // 실습일지는 항상 작성 가능 (실습일 이후에도 작성 허용)
   const isPracticeDay = true;
+
+  // 날짜 드롭다운 옵션: 실습일만 표시
+  const dateOptions = useMemo(() => {
+    const todayStr = getKSTTodayWithCutoff();
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    return [...PRACTICE_DATES].sort().map(dateStr => {
+      const d = new Date(dateStr + 'T12:00:00+09:00');
+      const dayName = dayNames[d.getDay()];
+      const isToday = dateStr === todayStr;
+      const label = `${d.getMonth() + 1}/${d.getDate()} (${dayName})${isToday ? '  ← 오늘' : ''}`;
+      return { value: dateStr, label };
+    });
+  }, []);
 
   // ── 인증 ──
   useEffect(() => {
@@ -258,7 +286,7 @@ export default function MyPracticePage() {
 
   const hasContent = Object.values(sections).some(v => v.trim());
 
-  const autoTitle = `${todayStr} ${studentName || '교육생'} / 실습일지`;
+  const autoTitle = `${selectedDate} ${studentName || '교육생'} / 실습일지`;
 
   const handleSave = async () => {
     if (!hasContent) return;
@@ -292,6 +320,7 @@ export default function MyPracticePage() {
           tags: ['실습일지'],
           confidence: null,
           one_word: null,
+          ...(!isEdit && { target_date: selectedDate }),
         }),
       });
       const result = await res.json();
@@ -326,9 +355,9 @@ export default function MyPracticePage() {
               }}
               style={{
                 padding: '10px 20px', borderRadius: 'var(--radius-md)',
-                border: showForm ? 'none' : '1px solid var(--blue-dim)',
-                background: showForm ? 'var(--red)' : 'var(--green-dim)',
-                color: showForm ? '#fff' : 'var(--blue)',
+                border: showForm ? 'none' : '1px solid var(--border)',
+                background: showForm ? 'var(--red)' : 'transparent',
+                color: showForm ? '#fff' : 'var(--text-tertiary)',
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
@@ -353,18 +382,47 @@ export default function MyPracticePage() {
 
       {/* ── 작성 폼 ── */}
       {showForm && (
-        <div style={{ ...card, border: '1px solid var(--blue-dim)', background: 'var(--green-dim)' }}>
+        <div style={{ ...card, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {editingNoteId ? '✏️ 실습일지 수정' : '✨ 오늘의 실습일지'}
             </h3>
           </div>
 
+          {/* 날짜 선택 드롭다운 (새 작성 시에만 표시) */}
+          {!editingNoteId && (
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                📅 작성 날짜
+                <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--text-muted)' }}>
+                  새벽 5시 이전에 쓰면 전날로 자동 선택돼요
+                </span>
+              </label>
+              <select
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                style={{
+                  ...inputStyle,
+                  width: 'auto', minWidth: 220, cursor: 'pointer',
+                  appearance: 'none', WebkitAppearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  paddingRight: 36,
+                }}
+              >
+                {dateOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* 안내 카드 */}
           {!editingNoteId && (
             <div style={{
               padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: 20,
-              background: 'var(--green-dim)', border: '1px solid var(--green-dim)',
+              background: 'var(--blue-dim)', border: '1px solid var(--blue-dim)',
             }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>
                 🐣 신입 LSA님, 매장은 여러분의 가장 큰 교실입니다!
@@ -426,7 +484,7 @@ export default function MyPracticePage() {
               const val = sections[key];
               return (
                 <div key={key} style={{
-                  border: '1px solid var(--green-dim)',
+                  border: '1px solid var(--border)',
                   borderRadius: 'var(--radius-md)',
                   background: 'var(--bg-elevated)', overflow: 'hidden',
                 }}>
@@ -434,7 +492,7 @@ export default function MyPracticePage() {
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px',
-                    background: val.trim() ? 'var(--green-dim)' : 'var(--bg-hover)',
+                    background: val.trim() ? 'var(--blue-dim)' : 'var(--bg-hover)',
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -559,8 +617,8 @@ export default function MyPracticePage() {
                   onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
                   style={{
                     padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--blue)' : '1px solid var(--blue-dim)',
-                    background: isSelected ? 'var(--green-dim)' : 'var(--green-dim)',
+                    border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
+                    background: isSelected ? 'var(--blue-dim)' : 'var(--bg-surface)',
                     cursor: 'pointer', transition: 'all 0.15s ease',
                     display: 'flex', flexDirection: 'column', gap: 10,
                   }}>
@@ -623,7 +681,7 @@ export default function MyPracticePage() {
             const note = notes.find(n => n.id === expandedNoteId);
             if (!note) return null;
             return (
-              <div style={{ ...card, border: '1px solid var(--green-dim)', background: 'var(--green-dim)' }}>
+              <div style={{ ...card, border: '1px solid var(--border)' }}>
                 {/* 헤더 */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
@@ -790,7 +848,7 @@ function PracticeStepsRenderer({ content }: { content: string }) {
             <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
               <div style={{
                 padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                background: 'var(--green-dim)',
+                background: 'var(--blue-dim)',
               }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

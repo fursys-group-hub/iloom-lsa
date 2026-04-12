@@ -342,9 +342,9 @@ export default function DashboardPracticePage() {
                       style={{
                         width: '100%', textAlign: 'left', cursor: 'pointer',
                         padding: '16px 20px', borderRadius: isExpanded ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
-                        border: isExpanded ? '2px solid var(--blue)' : '1px solid var(--blue-dim)',
+                        border: isExpanded ? '2px solid var(--blue)' : '1px solid var(--border)',
                         borderBottom: isExpanded ? '1px solid var(--border)' : undefined,
-                        background: isExpanded ? 'var(--green-dim)' : 'var(--bg-surface)',
+                        background: isExpanded ? 'var(--blue-dim)' : 'var(--bg-surface)',
                         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                       }}>
                       {/* 아바타 + 이름 */}
@@ -403,7 +403,7 @@ export default function DashboardPracticePage() {
                       <div style={{
                         padding: 20, border: '2px solid var(--blue)', borderTop: 'none',
                         borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-                        background: 'var(--green-dim)',
+                        background: 'var(--bg-surface)',
                       }}>
                         {/* 실적 상세 */}
                         {(() => {
@@ -464,7 +464,7 @@ export default function DashboardPracticePage() {
                                   );
                                   return (
                                     <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
-                                      <div style={{ padding: '10px 16px', background: 'var(--green-dim)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <div style={{ padding: '10px 16px', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
                                         {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>}
                                       </div>
