@@ -413,7 +413,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            📝 테스트
+            테스트
           </h2>
           <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
             {([['manage', '차시별 성적'], ['analysis', '시험 분석']] as const).map(([key, label]) => (
@@ -437,7 +437,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
             }}
           >
-            📥<span className="btn-label"> Excel 다운로드</span>
+            <span className="btn-label">Excel 다운로드</span>
           </a>
           <button
             onClick={() => { handleSync('today'); }}
@@ -451,7 +451,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               transition: 'all 0.15s ease',
             }}
           >
-            {syncing ? '⏳' : '🔄'}<span className="btn-label"> {syncing ? '동기화 중...' : '오늘 시험 동기화'}</span>
+            <span className="btn-label">{syncing ? '동기화 중...' : '오늘 시험 동기화'}</span>
           </button>
           <button
             onClick={() => { handleSync('today', 'new_only'); }}
@@ -465,7 +465,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               transition: 'all 0.15s ease',
             }}
           >
-            {syncing ? '⏳' : '➕'}<span className="btn-label"> {syncing ? '동기화 중...' : '새 응답만 추가'}</span>
+            <span className="btn-label">{syncing ? '동기화 중...' : '+ 새 응답만 추가'}</span>
           </button>
         </div>
       </div>
@@ -489,7 +489,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
           {/* 시험 성적 추이 + 교육생별 성장 곡선 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div style={analysisCardStyle}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>📈 차시별 전체 평균 추이</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>차시별 전체 평균 추이</h3>
               {dailyAverages.length > 0 ? (
                 <>
                   <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 13 }}>
@@ -523,13 +523,13 @@ export default function TestsClient({ batches, students, scores, attendance, not
                       );
                     })}
                   </div>
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>💡 날짜를 클릭하면 그날의 상세 분석을 볼 수 있어요. <span style={{ color: 'var(--red)' }}>빨간 날짜</span>는 3점 이상 하락한 날이에요.</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>날짜를 클릭하면 그날의 상세 분석을 볼 수 있어요. <span style={{ color: 'var(--red)' }}>빨간 날짜</span>는 3점 이상 하락한 날이에요.</p>
                 </>
               ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>시험 데이터가 없습니다.</p>}
             </div>
 
             <div style={analysisCardStyle}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>📊 교육생별 성장 곡선</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>교육생별 성장 곡선</h3>
               <select value={analysisStudentId} onChange={e => setAnalysisStudentId(e.target.value)} style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '4px 10px', fontSize: 13, marginBottom: 12 }}>
                 <option value="">교육생 선택</option>
                 {batchStudents.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -577,7 +577,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                       );
                     })}
                   </div>
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>💡 날짜를 클릭하면 &quot;다른 애들은 맞췄는데 이 학생만 틀린 문항&quot;과 약점 분석을 볼 수 있어요</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>날짜를 클릭하면 &quot;다른 애들은 맞췄는데 이 학생만 틀린 문항&quot;과 약점 분석을 볼 수 있어요</p>
                 </>
               ) : <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{analysisStudentId ? '시험 데이터가 없습니다.' : '교육생을 선택하면 전체 평균과 비교한 성장 곡선이 보여요.'}</p>}
             </div>
@@ -585,7 +585,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
 
           {/* 히트맵 */}
           <div style={analysisCardStyle}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>🗺️ 카테고리별 약점 맵</h3>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>카테고리별 약점 맵</h3>
             <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, marginTop: -8 }}>
               <b>가로축</b> = 대분류 (제품군), <b>세로축</b> = 소분류 (지식 유형). 셀 색상은 전체 교육생 정답률이에요.
               <span style={{ marginLeft: 8 }}>
@@ -630,7 +630,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 720, width: '90%', maxHeight: '85vh', overflow: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>📋 {(() => { const d = new Date(dateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 시험 상세 분석</h3>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>{(() => { const d = new Date(dateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 시험 상세 분석</h3>
                 <div style={{ fontSize: 15, fontWeight: 600, color: dateAnalysis.change >= 0 ? 'var(--green)' : 'var(--red)' }}>
                   전체 평균 {dateAnalysis.avg}점{dateAnalysis.prevAvg !== null && <span> (전일 대비 {dateAnalysis.change >= 0 ? '+' : ''}{dateAnalysis.change}점)</span>}
                 </div>
@@ -643,7 +643,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
             </div>
             {dateAnalysis.questionStats.length > 0 && (
               <div style={{ marginBottom: 24 }}>
-                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>🚨 문항별 정답률</h4>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>문항별 정답률</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {dateAnalysis.questionStats.map((q, i) => {
                     const rc = rateColor(100 - q.wrongRate);
@@ -671,7 +671,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               </div>
             )}
             <div>
-              <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>👤 교육생별 점수</h4>
+              <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>교육생별 점수</h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
                 {dateAnalysis.studentScores.map((s, i) => {
                   const isDown = (s.diff ?? 0) < -10; const isUp = (s.diff ?? 0) > 5;
@@ -698,7 +698,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 720, width: '90%', maxHeight: '85vh', overflow: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>🔍 {studentDateAnalysis.studentName} — {(() => { const d = new Date(studentDateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 분석</h3>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 4 }}>{studentDateAnalysis.studentName} — {(() => { const d = new Date(studentDateAnalysis.date); return `${d.getMonth() + 1}/${d.getDate()}`; })()} 분석</h3>
                 <div style={{ display: 'flex', gap: 12, fontSize: 14 }}>
                   <span style={{ color: 'var(--text-second)' }}>개인 <b style={{ color: studentDateAnalysis.gap >= 0 ? 'var(--green)' : 'var(--red)' }}>{studentDateAnalysis.myAvg}점</b></span>
                   <span style={{ color: 'var(--text-muted)' }}>전체 평균 {studentDateAnalysis.classAvg}점</span>
@@ -714,7 +714,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
             </div>
             {studentDateAnalysis.onlyMyWrong.length > 0 && (
               <div style={{ marginBottom: 24 }}>
-                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--red)', marginBottom: 12 }}>🚨 다른 교육생은 맞췄는데 {studentDateAnalysis.studentName}만 틀린 문항 ({studentDateAnalysis.onlyMyWrong.length}개)</h4>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--red)', marginBottom: 12 }}>다른 교육생은 맞췄는데 {studentDateAnalysis.studentName}만 틀린 문항 ({studentDateAnalysis.onlyMyWrong.length}개)</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {studentDateAnalysis.onlyMyWrong.map((q, i) => (
                     <div key={i} style={{ background: 'var(--red-dim)', border: '1px solid var(--red)', borderRadius: 'var(--radius-md)', padding: 12 }}>
@@ -734,7 +734,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
             )}
             {(studentDateAnalysis.topWeakCategories.length > 0 || studentDateAnalysis.topWeakDetails.length > 0) && (
               <div>
-                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)', marginBottom: 12 }}>📊 약점 패턴 분석</h4>
+                <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)', marginBottom: 12 }}>약점 패턴 분석</h4>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div style={{ background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', padding: 14 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>약한 제품군 (대분류)</div>
@@ -756,7 +756,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                   </div>
                 </div>
                 <div style={{ marginTop: 12, background: 'var(--blue-dim)', border: '1px solid var(--blue)', borderRadius: 'var(--radius-md)', padding: 14 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>💡 교육 제안</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>교육 제안</div>
                   <div style={{ fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6 }}>
                     {studentDateAnalysis.topWeakCategories.length > 0 && <p style={{ margin: '0 0 4px' }}>• <b>{studentDateAnalysis.topWeakCategories[0][0]}</b> 분야 제품 지식을 집중 보강해주세요</p>}
                     {studentDateAnalysis.topWeakDetails.length > 0 && <p style={{ margin: '0 0 4px' }}>• 특히 <b>{studentDateAnalysis.topWeakDetails[0][0]}</b> 유형의 문제를 많이 틀렸어요</p>}
@@ -774,7 +774,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
         <div onClick={() => setHeatmapModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)', padding: 28, maxWidth: 560, width: '90%', maxHeight: '80vh', overflow: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>📋 {heatmapModal.category} &gt; {heatmapModal.detail}</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>{heatmapModal.category} &gt; {heatmapModal.detail}</h3>
               <button onClick={() => setHeatmapModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
             {heatmapModalData.length > 0 ? (
@@ -885,7 +885,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 15,
               background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)',
             }}>
-              ⏳ 데이터 불러오는 중...
+              데이터 불러오는 중...
             </div>
           ) : viewMode === 'scores' ? (
             /* ========== 학생별 성적 ========== */
@@ -1300,7 +1300,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                             {/* 해설 */}
                             {q.explanation && (
                               <div style={{ marginLeft: hasSubs ? 50 : 0, marginTop: 8, fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                                💡 {q.explanation}
+                                {q.explanation}
                               </div>
                             )}
 
@@ -1399,7 +1399,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                                       transition: 'all 0.15s ease',
                                     }}
                                   >
-                                    ✏️ 서술형 채점하기 ({qResp.filter((r) => !r.is_correct).length}명 미채점/오답)
+                                    서술형 채점하기 ({qResp.filter((r) => !r.is_correct).length}명 미채점/오답)
                                   </button>
                                 )}
                               </div>

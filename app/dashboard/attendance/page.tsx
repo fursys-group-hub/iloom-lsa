@@ -190,7 +190,7 @@ export default function AttendancePage() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            📋 출결
+            출결
           </h2>
         </div>
         <button
@@ -271,7 +271,7 @@ export default function AttendancePage() {
                     border: editMode ? 'none' : '1px solid var(--border)',
                   }}
                 >
-                  {editMode ? '수정 완료' : '✏️ 수정'}
+                  {editMode ? '수정 완료' : '수정'}
                 </button>
               </div>
 
@@ -343,12 +343,12 @@ export default function AttendancePage() {
                   border: `1px solid ${result.errors.length > 0 ? 'var(--orange)' : 'var(--green)'}`,
                 }}>
                   <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                    ✅ {result.inserted}건 저장 완료 {result.skipped > 0 && `/ ${result.skipped}건 스킵`}
+                    {result.inserted}건 저장 완료 {result.skipped > 0 && `/ ${result.skipped}건 스킵`}
                   </p>
                   {result.errors.length > 0 && (
                     <div style={{ fontSize: 13, color: 'var(--text-second)', marginTop: 8 }}>
                       {result.errors.map((e, i) => (
-                        <p key={i} style={{ margin: '2px 0' }}>⚠️ {e}</p>
+                        <p key={i} style={{ margin: '2px 0' }}>{e}</p>
                       ))}
                     </div>
                   )}
@@ -364,7 +364,7 @@ export default function AttendancePage() {
         <p style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center', padding: 48 }}>불러오는 중...</p>
       ) : savedData.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}></p>
           <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
             아직 출결 데이터가 없어요
           </p>
@@ -413,7 +413,7 @@ export default function AttendancePage() {
           {issues.length > 0 && (
             <div style={card}>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
-                ⚠️ 확인이 필요한 교육생
+                확인이 필요한 교육생
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {issues.map((d) => (
@@ -449,7 +449,7 @@ export default function AttendancePage() {
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                  📊 {selectedDate}
+                  {selectedDate}
                 </h3>
                 <div style={{ display: 'flex', gap: 16, fontSize: 14 }}>
                   <span style={{ color: 'var(--text-muted)' }}>전체 <strong style={{ color: 'var(--text-primary)' }}>{filteredData.length}명</strong></span>

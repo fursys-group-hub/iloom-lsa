@@ -8,38 +8,38 @@ const navGroups = [
   {
     label: '',
     items: [
-      { href: '/dashboard', label: '홈', icon: '🏠' },
+      { href: '/dashboard', label: '홈' },
     ],
   },
   {
     label: '일일 운영',
     items: [
-      { href: '/dashboard/attendance', label: '출결', icon: '📋' },
-      { href: '/dashboard/tests', label: '테스트', icon: '📝' },
-      { href: '/dashboard/education-logs', label: '교육일지', icon: '📓' },
-      { href: '/dashboard/practice', label: '실습일지', icon: '🏪' },
-      { href: '/dashboard/questions', label: '질문관리', icon: '💬' },
+      { href: '/dashboard/attendance', label: '출결' },
+      { href: '/dashboard/tests', label: '테스트' },
+      { href: '/dashboard/education-logs', label: '교육일지' },
+      { href: '/dashboard/practice', label: '실습일지' },
+      { href: '/dashboard/questions', label: '질문관리' },
     ],
   },
   {
     label: '성과 분석',
     items: [
-      { href: '/dashboard/students', label: '개별분석', icon: '👤' },
-      { href: '/dashboard/reports', label: '리포트', icon: '📈' },
-      { href: '/dashboard/analytics', label: '교육효과', icon: '📊' },
+      { href: '/dashboard/students', label: '개별분석' },
+      { href: '/dashboard/reports', label: 'AI 리포트' },
+      { href: '/dashboard/analytics', label: '교육효과' },
     ],
   },
   {
     label: '심화교육',
     items: [
-      { href: '/dashboard/overview', label: '심화교육', icon: '🎓' },
+      { href: '/dashboard/overview', label: '심화교육' },
     ],
   },
   {
     label: '설정',
     items: [
-      { href: '/dashboard/announcements', label: '공지사항', icon: '📢' },
-      { href: '/dashboard/settings', label: '기수 관리', icon: '📚' },
+      { href: '/dashboard/announcements', label: '공지사항' },
+      { href: '/dashboard/settings', label: '기수 관리' },
     ],
   },
 ];
@@ -131,8 +131,8 @@ export default function DashboardLayout({
             <div key={gi}>
               {group.label && (
                 <div style={{
-                  fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                  padding: '12px 14px 4px', letterSpacing: '0.04em',
+                  fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
+                  padding: '16px 14px 6px', letterSpacing: '0.06em',
                   textTransform: 'uppercase' as const,
                 }}>
                   {group.label}
@@ -152,20 +152,19 @@ export default function DashboardLayout({
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 10,
-                      padding: '8px 14px',
+                      padding: '9px 14px',
                       borderRadius: 'var(--radius-md)',
                       fontSize: 14,
-                      fontWeight: 500,
+                      fontWeight: isActive ? 600 : 400,
                       textDecoration: 'none',
                       transition: 'all 0.15s ease',
                       background: isActive ? 'var(--blue)' : 'transparent',
                       color: isActive ? '#fff' : 'var(--text-tertiary)',
+                      letterSpacing: isActive ? '0.01em' : '0',
                     }}
-                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                    onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-second)'; } }}
+                    onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; } }}
                   >
-                    <span style={{ fontSize: 15 }}>{item.icon}</span>
                     {item.label}
                   </Link>
                 );
@@ -193,7 +192,6 @@ export default function DashboardLayout({
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: 13 }}>💰</span>
               교육비용 정산 비서
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>
@@ -211,7 +209,6 @@ export default function DashboardLayout({
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: 13 }}>💬</span>
               영업지원 챗봇
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>

@@ -152,7 +152,6 @@ export default function TrainingPage() {
         borderRadius: 'var(--radius-lg)', padding: 32,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-          <span style={{ fontSize: 22 }}>🔍</span>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{selectedWeek}주차 벤치마킹</h2>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>

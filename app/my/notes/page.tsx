@@ -111,17 +111,17 @@ function parseContent(content: string): Block[] | null {
 // ── STEP 정의 ──
 const STEP_DEFS = [
   {
-    key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝',
+    key: 'step1', label: 'STEP 1 — 핵심 필기',
     desc: '오늘의 배움 쌓기',
     placeholder: '오늘 학습한 상세 내용을 자유롭게 적어주세요.\n\n현장 스케치: 매장의 실제 제품 사진을 찍어서 올려두면 나중에 훨씬 기억하기 좋습니다.',
   },
   {
-    key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡',
+    key: 'step2', label: 'STEP 2 — LSA 비법서',
     desc: '나를 지켜주는 무기',
     placeholder: '고객님이 반드시 물어볼 핵심 스펙이나 수치를 적어보세요.\n\n"확인해 볼게요"보다 "이 제품은 ~입니다"라는 즉각적인 답변이 고객의 마음을 엽니다.\n한 달 뒤, 상담 중에 갑자기 기억이 안 날 때 꺼내 볼 수 있는 나만의 컨닝 페이퍼!',
   },
   {
-    key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯',
+    key: 'step3', label: 'STEP 3 — 실전 적용',
     desc: '내일 바로 써먹기',
     placeholder: '오늘의 가구 One-Pick: 오늘 배운 제품 중 고객에게 가장 추천하고 싶은 하나와 그 이유\n\n내일의 나에게: 오늘 놓쳤거나 내일 출근해서 가장 먼저 확인해야 할 한 가지는?',
   },
@@ -378,7 +378,7 @@ export default function MyNotesPage() {
       const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
       const dayName = dayNames[d.getUTCDay()];
       const dayType = getDayType(schedule, dateStr);
-      const dayTypeLabel = dayType === 'education' ? '' : dayType === 'practice' ? ' 🏪실습' : ' 🌙휴무';
+      const dayTypeLabel = dayType === 'education' ? '' : dayType === 'practice' ? ' [실습]' : ' [휴무]';
       const label = `${d.getUTCMonth() + 1}/${d.getUTCDate()} (${dayName})${i === 0 ? ' 오늘' : i === 1 ? ' 어제' : ''}${dayTypeLabel}`;
       opts.push({ value: dateStr, label });
     }
@@ -506,7 +506,7 @@ export default function MyNotesPage() {
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
-              {showForm ? '✕ 닫기' : '✏️ 새 교육일지'}
+              {showForm ? '닫기' : '새 교육일지'}
             </button>
           )}
         </div>
@@ -527,7 +527,6 @@ export default function MyNotesPage() {
         if (dayType === 'practice') return (
           <div style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--orange-dim)', border: '1px solid var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--orange)' }}>
-              <span style={{ fontSize: 20 }}>🏪</span>
               <span>오늘은 <strong>매장실습일</strong>이에요! 실습일지를 작성해주세요.</span>
             </div>
             <a href="/my/practice" style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--orange)', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
@@ -550,7 +549,7 @@ export default function MyNotesPage() {
           <span style={{
             position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
             fontSize: 16, color: 'var(--text-muted)', pointerEvents: 'none',
-          }}>🔍</span>
+          }}>검색</span>
         </div>
       )}
 
@@ -563,7 +562,6 @@ export default function MyNotesPage() {
             const config = DAY_TYPE_CONFIG[dayType];
             if (dayType === 'practice' && !isSelfStudyMode) return (
               <div style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>🏪</span>
                 <span>오늘은 <strong>매장실습일</strong>이에요! <a href="/my/practice" style={{ color: 'var(--blue-light)', textDecoration: 'underline' }}>실습일지 작성하기 →</a></span>
               </div>
             );
@@ -576,7 +574,7 @@ export default function MyNotesPage() {
           })()}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-              {isSelfStudyMode ? '📚 자율학습 노트' : editingNoteId ? '✏️ 교육일지 수정' : '✨ 오늘의 교육일지'}
+              {isSelfStudyMode ? '자율학습 노트' : editingNoteId ? '교육일지 수정' : '오늘의 교육일지'}
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {!isSelfStudyMode && (
@@ -594,7 +592,7 @@ export default function MyNotesPage() {
                   fontSize: 13, fontWeight: 600, transition: 'all 0.15s ease', whiteSpace: 'nowrap',
                 }}
               >
-                {isSelfStudyMode ? '📚 자율학습 ON' : '📚 자율학습'}
+                {isSelfStudyMode ? '자율학습 ON' : '자율학습'}
               </button>
             </div>
           </div>
@@ -672,7 +670,7 @@ export default function MyNotesPage() {
             </div>
 
             {/* STEP 1/2/3 에디터 (자율학습이면 STEP 1만) */}
-            {(isSelfStudyMode ? [STEP_DEFS[0]] : STEP_DEFS).map(({ key, label, icon, desc, placeholder }) => {
+            {(isSelfStudyMode ? [STEP_DEFS[0]] : STEP_DEFS).map(({ key, label, desc, placeholder }) => {
               const val = key === 'step1' ? step1 : key === 'step2' ? step2 : step3;
               const setVal = key === 'step1' ? setStep1 : key === 'step2' ? setStep2 : setStep3;
               const textareaId = `step-textarea-${key}`;
@@ -697,7 +695,7 @@ export default function MyNotesPage() {
                 setTimeout(() => el.focus(), 50);
               };
 
-              const stepLabel = isSelfStudyMode ? '📚 학습 내용' : `${icon} ${label}`;
+              const stepLabel = isSelfStudyMode ? '학습 내용' : label;
               const stepDesc = isSelfStudyMode ? '자유롭게 정리해보세요' : desc;
               const stepPlaceholder = isSelfStudyMode ? '공부한 내용을 자유롭게 정리해주세요.\n\n표, 목록, 제목 등 서식을 활용하면 나중에 찾아보기 좋아요!' : placeholder;
 
@@ -878,7 +876,7 @@ export default function MyNotesPage() {
                       <span style={{
                         padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
                         background: 'var(--purple-dim)', color: 'var(--purple)',
-                      }}>📚 자율학습</span>
+                      }}>자율학습</span>
                     )}
                   </div>
                   {/* 제목 */}
@@ -915,15 +913,16 @@ export default function MyNotesPage() {
                       const done = filled.filter(Boolean).length;
                       return (
                         <div style={{ display: 'flex', gap: 4 }}>
-                          {['📝', '💡', '🎯'].map((icon, i) => {
+                          {['1', '2', '3'].map((num, i) => {
                             const completed = filled[i];
                             return (
                               <span key={i} style={{
-                                fontSize: 15, padding: '2px 6px', borderRadius: 'var(--radius-pill)',
+                                fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                                 background: completed ? 'var(--green-dim)' : 'var(--bg-hover)',
-                                opacity: completed ? 1 : 0.3,
+                                color: completed ? 'var(--green)' : 'var(--text-muted)',
+                                opacity: completed ? 1 : 0.3, fontWeight: 700,
                               }}>
-                                {icon}
+                                {num}
                               </span>
                             );
                           })}
@@ -957,7 +956,7 @@ export default function MyNotesPage() {
                         fontSize: 11, fontWeight: 700,
                         display: 'flex', alignItems: 'center', gap: 3,
                       }}>
-                        💬 {commentCounts[note.id]}
+                        {commentCounts[note.id]}개 코멘트
                       </span>
                     </div>
                   )}
@@ -984,7 +983,7 @@ export default function MyNotesPage() {
                         <span style={{
                           padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
                           background: 'var(--purple-dim)', color: 'var(--purple)',
-                        }}>📚 자율학습</span>
+                        }}>자율학습</span>
                       )}
                     </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
@@ -1043,7 +1042,6 @@ export default function MyNotesPage() {
                 {comments.length > 0 && (
                 <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                    <span style={{ fontSize: 14 }}>💬</span>
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                       코멘트 ({comments.length})
                     </span>
@@ -1060,7 +1058,7 @@ export default function MyNotesPage() {
                         }}
                       >
                         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                          <span>{c.author_name}</span>
                           <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <div style={{
@@ -1654,19 +1652,19 @@ function StepsRenderer({ content, searchQuery }: { content: string; searchQuery:
   try {
     const steps = JSON.parse(content);
     const stepSections = [
-      { key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝', completed: steps.step1_completed },
-      { key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡', completed: steps.step2_completed },
-      { key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯', completed: steps.step3_completed },
+      { key: 'step1', label: 'STEP 1 — 핵심 필기', completed: steps.step1_completed },
+      { key: 'step2', label: 'STEP 2 — LSA 비법서', completed: steps.step2_completed },
+      { key: 'step3', label: 'STEP 3 — 실전 적용', completed: steps.step3_completed },
     ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {stepSections.map(({ key, label, icon, completed }) => {
+        {stepSections.map(({ key, label, completed }) => {
           const text = steps[key] as string;
           const images = steps[`${key}_images`] as string[] | undefined;
           if (!text && (!images || images.length === 0)) return (
             <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{label}</span>
               <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
             </div>
           );
@@ -1676,10 +1674,10 @@ function StepsRenderer({ content, searchQuery }: { content: string; searchQuery:
                 padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
               }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {images && images.length > 0 && (
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{images.length}장</span>
                   )}
                   {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
                 </div>

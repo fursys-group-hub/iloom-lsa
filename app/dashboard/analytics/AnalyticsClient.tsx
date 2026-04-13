@@ -264,14 +264,14 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📊 교육 효과 분석</h2>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 효과 분석</h2>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
             {archivedBatches.length > 0 && <optgroup label="보관됨">{archivedBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
           </select>
         </div>
         <div style={{ background: 'var(--orange-dim)', color: 'var(--orange)', borderRadius: 'var(--radius-pill)', padding: '6px 14px', fontSize: 13, fontWeight: 600 }}>
-          🧪 가상 수주 데이터로 미리보기
+          가상 수주 데이터로 미리보기
         </div>
       </div>
 
@@ -289,12 +289,12 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       {/* ── 1. 주간 수주 추이 ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
         <div style={cardStyle}>
-          <h2 style={sectionTitle}>💰 주간 수주 금액 추이</h2>
+          <h2 style={sectionTitle}>주간 수주 금액 추이</h2>
           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 12 }}>교육생 1인 평균 주간 수주 금액 (만원)</p>
           <ScoreTrendChart data={weeklySalesTrend} height={220} />
         </div>
         <div style={cardStyle}>
-          <h2 style={sectionTitle}>📈 주간 전환율 추이</h2>
+          <h2 style={sectionTitle}>주간 전환율 추이</h2>
           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 12 }}>상담 건수 대비 수주 건수 비율</p>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             {weeklySalesTrend.map(w => (
@@ -310,7 +310,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
 
       {/* ── 2. 교차 분석: 시험 성적 그룹 vs 수주 ── */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <h2 style={sectionTitle}>🔀 교차 분석 1: 시험 성적이 수주에 영향을 줄까?</h2>
+        <h2 style={sectionTitle}>교차 분석 1: 시험 성적이 수주에 영향을 줄까?</h2>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           교육생을 시험 성적 상/중/하로 나누고, 각 그룹의 수주 전환율과 수주 금액을 비교해요.
         </p>
@@ -331,7 +331,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           })}
         </div>
         <div style={{ marginTop: 12, padding: 14, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>
-          <b>💡 인사이트:</b> {(() => {
+          <b>인사이트:</b> {(() => {
             const top = crossScoreVsSales[0];
             const bottom = crossScoreVsSales[2];
             if (!top || !bottom) return '데이터 부족';
@@ -345,7 +345,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
 
       {/* ── 3. 교차 분석: 카테고리 정답률 vs 수주 분야 ── */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <h2 style={sectionTitle}>🔀 교차 분석 2: 잘 아는 분야를 잘 팔까?</h2>
+        <h2 style={sectionTitle}>교차 분석 2: 잘 아는 분야를 잘 팔까?</h2>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           카테고리별 시험 정답률과 해당 분야의 수주 금액을 비교해요. 정답률이 높은 분야에서 수주도 많다면, 교육이 실전에 효과가 있다는 증거예요.
         </p>
@@ -389,7 +389,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
 
       {/* ── 4. 교차 분석: 적응 지수 vs 수주 전환율 ── */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <h2 style={sectionTitle}>🔀 교차 분석 3: 적응 지수가 수주를 예측할 수 있을까?</h2>
+        <h2 style={sectionTitle}>교차 분석 3: 적응 지수가 수주를 예측할 수 있을까?</h2>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           교육생별 적응 지수(종합 점수)와 수주 전환율을 비교해요. 이 둘이 비례한다면, 적응 지수로 2기 위험 교육생을 조기 발견할 수 있어요.
         </p>
@@ -413,7 +413,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
 
       {/* ── 5. 교차 분석: 태도 vs 수주 ── */}
       <div style={{ ...cardStyle, marginBottom: 20 }}>
-        <h2 style={sectionTitle}>🔀 교차 분석 4: 성실한 교육생이 수주도 잘할까?</h2>
+        <h2 style={sectionTitle}>교차 분석 4: 성실한 교육생이 수주도 잘할까?</h2>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           출석률과 교육일지 제출률이 높은 교육생이 실전에서도 잘하는지 확인해요.
         </p>
@@ -434,7 +434,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                 const subColor = rateColor(row.submitRate);
                 // 출석+일지 둘 다 높은데 전환율도 높으면 ✓, 둘 다 높은데 전환율 낮으면 ✗
                 const isHighAtt = row.attRate >= 80 && row.submitRate >= 60;
-                const signal = isHighAtt && row.conversionRate >= 30 ? '✅ 일치' : isHighAtt && row.conversionRate < 20 ? '⚠️ 불일치' : row.attRate < 70 && row.conversionRate >= 30 ? '🤔 역전' : '—';
+                const signal = isHighAtt && row.conversionRate >= 30 ? '일치' : isHighAtt && row.conversionRate < 20 ? '불일치' : row.attRate < 70 && row.conversionRate >= 30 ? '역전' : '—';
                 return (
                   <tr key={row.name} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.name}</td>
@@ -449,27 +449,26 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           </table>
         </div>
         <div style={{ marginTop: 12, padding: 14, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>
-          <b>💡 읽는 법:</b> ✅ 일치 = 성실한 교육생이 실전에서도 잘한다, ⚠️ 불일치 = 성실했지만 수주가 부진하다 (교육 방식 재검토), 🤔 역전 = 태도가 아쉬웠지만 수주는 잘한다 (재능형)
+          <b>읽는 법:</b> 일치 = 성실한 교육생이 실전에서도 잘한다, 불일치 = 성실했지만 수주가 부진하다 (교육 방식 재검토), 역전 = 태도가 아쉬웠지만 수주는 잘한다 (재능형)
         </div>
       </div>
 
       {/* ── 6. 2기 교육 설계 근거 (예측 요약) ── */}
       <div style={{ ...cardStyle, borderColor: 'var(--purple)' }}>
-        <h2 style={sectionTitle}>🎯 2기 교육 설계를 위한 핵심 질문 (1기 데이터 기반)</h2>
+        <h2 style={sectionTitle}>2기 교육 설계를 위한 핵심 질문 (1기 데이터 기반)</h2>
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           실제 수주 데이터가 쌓이면, 아래 질문에 데이터로 답할 수 있어요.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {[
-            { q: '시험 성적이 매장 성과를 예측하나?', status: '분석 3 참고', icon: '📝' },
-            { q: '어떤 카테고리 교육이 수주에 효과적인가?', status: '분석 2 참고', icon: '📚' },
-            { q: '적응 지수로 위험 교육생을 조기 발견할 수 있나?', status: '분석 3 참고', icon: '⚠️' },
-            { q: '성실한 태도가 실전 성과와 관련 있나?', status: '분석 4 참고', icon: '🙋' },
-            { q: '교육 시간 배분을 어떻게 바꿔야 하나?', status: '수주 후 확인', icon: '⏰' },
-            { q: '2기 위험 교육생 체크리스트 기준값은?', status: '수주 후 확정', icon: '📋' },
+            { q: '시험 성적이 매장 성과를 예측하나?', status: '분석 3 참고' },
+            { q: '어떤 카테고리 교육이 수주에 효과적인가?', status: '분석 2 참고' },
+            { q: '적응 지수로 위험 교육생을 조기 발견할 수 있나?', status: '분석 3 참고' },
+            { q: '성실한 태도가 실전 성과와 관련 있나?', status: '분석 4 참고' },
+            { q: '교육 시간 배분을 어떻게 바꿔야 하나?', status: '수주 후 확인' },
+            { q: '2기 위험 교육생 체크리스트 기준값은?', status: '수주 후 확정' },
           ].map(item => (
-            <div key={item.q} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 14, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: 20 }}>{item.icon}</span>
+            <div key={item.q} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 14 }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{item.q}</div>
                 <span style={{ fontSize: 12, color: 'var(--purple)', fontWeight: 600 }}>{item.status}</span>

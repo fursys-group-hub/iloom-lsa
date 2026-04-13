@@ -10,10 +10,10 @@ interface Announcement {
   created_at: string;
 }
 
-const PRIORITY_STYLE: Record<string, { color: string; bg: string; icon: string; label: string }> = {
-  normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢', label: '공지' },
-  important: { color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️', label: '중요' },
-  urgent: { color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨', label: '긴급' },
+const PRIORITY_STYLE: Record<string, { color: string; bg: string; label: string }> = {
+  normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', label: '공지' },
+  important: { color: 'var(--orange)', bg: 'var(--orange-dim)', label: '중요' },
+  urgent: { color: 'var(--red)', bg: 'var(--red-dim)', label: '긴급' },
 };
 
 export default function MyAnnouncementsPage() {
@@ -44,7 +44,7 @@ export default function MyAnnouncementsPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-        📢 공지사항
+        공지사항
       </h2>
 
       {announcements.length === 0 ? (
@@ -52,7 +52,7 @@ export default function MyAnnouncementsPage() {
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-lg)', padding: 48, textAlign: 'center',
         }}>
-          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}></p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)', margin: 0 }}>
             공지사항이 없어요
           </p>
@@ -92,7 +92,7 @@ export default function MyAnnouncementsPage() {
                       background: ps.bg, color: ps.color,
                       fontSize: 11, fontWeight: 700, flexShrink: 0,
                     }}>
-                      {ps.icon} {ps.label}
+                      {ps.label}
                     </span>
                     <span style={{
                       fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',

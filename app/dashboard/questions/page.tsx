@@ -8,12 +8,12 @@ const card: React.CSSProperties = {
   borderRadius: 'var(--radius-lg)',
 };
 
-const STATUS_MAP: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  open: { label: '답변 대기', color: 'var(--orange)', bg: 'var(--orange-dim)', dot: '🟠' },
-  answered: { label: '답변 완료', color: 'var(--green)', bg: 'var(--green-dim)', dot: '🟢' },
-  archived: { label: '보관됨', color: 'var(--text-muted)', bg: 'var(--bg-hover)', dot: '📦' },
+const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
+  open: { label: '답변 대기', color: 'var(--orange)', bg: 'var(--orange-dim)' },
+  answered: { label: '답변 완료', color: 'var(--green)', bg: 'var(--green-dim)' },
+  archived: { label: '보관됨', color: 'var(--text-muted)', bg: 'var(--bg-hover)' },
 };
-const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)', dot: '⚪' };
+const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)' };
 
 type QuestionWithMeta = StudentQuestion & { reply_count: number; student_name?: string };
 
@@ -139,7 +139,7 @@ export default function AdminQuestionsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문 관리</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>질문 관리</h2>
         {openCount > 0 && (
           <span style={{
             padding: '4px 12px', borderRadius: 'var(--radius-pill)',
@@ -153,7 +153,7 @@ export default function AdminQuestionsPage() {
 
       {/* 필터 탭 */}
       <div style={{ display: 'flex', gap: 6 }}>
-        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '📦 보관됨']] as const).map(([key, label]) => (
+        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '보관됨']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -216,7 +216,7 @@ export default function AdminQuestionsPage() {
                       padding: '2px 10px', borderRadius: 'var(--radius-pill)',
                       fontSize: 12, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
-                      {st.dot} {st.label}
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: st.color, display: 'inline-block', marginRight: 4 }} />{st.label}
                     </span>
                   </div>
                   {/* 질문 내용 미리보기 */}
@@ -228,7 +228,7 @@ export default function AdminQuestionsPage() {
                     {q.title}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-                    {q.reply_count > 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>💬 {q.reply_count}</span>}
+                    {q.reply_count > 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{q.reply_count}개 답변</span>}
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                       {timeAgo(q.updated_at || q.created_at)}
                     </span>
@@ -243,7 +243,7 @@ export default function AdminQuestionsPage() {
         <div style={{ ...card, display: 'flex', flexDirection: 'column' }}>
           {!selectedQ ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8, color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: 40 }}>💬</span>
+              <span style={{ fontSize: 18, color: 'var(--text-muted)' }}></span>
               <span style={{ fontSize: 15 }}>왼쪽에서 질문을 선택하세요</span>
             </div>
           ) : (
@@ -298,7 +298,7 @@ export default function AdminQuestionsPage() {
                       background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
                       border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
                     }}>
-                      📦 보관
+                      보관
                     </button>
                   )}
                   <button onClick={() => handleDelete(selectedQ.id)} style={{

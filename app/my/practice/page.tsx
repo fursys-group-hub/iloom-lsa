@@ -36,22 +36,22 @@ const inputStyle: React.CSSProperties = {
 // 실습일지 섹션 정의
 const PRACTICE_SECTIONS = [
   {
-    key: 'step1', label: '기억에 남는 고객님', icon: '👥',
+    key: 'step1', label: '기억에 남는 고객님',
     desc: '오늘의 상담 기록',
     placeholder: '1. 상황/고객:\n(예: 신혼 가구를 고르러 오셨는데 두 분의 취향이 너무 달라 고민하심)\n\n2. 대응/결과:\n고객님의 고민을 어떻게 들어드렸고, 어떤 제품을 추천해 드렸을 때 반응이 좋았나요?',
   },
   {
-    key: 'step2', label: '선배님에게 배운 한 끗 차이', icon: '💎',
+    key: 'step2', label: '선배님에게 배운 한 끗 차이',
     desc: '베테랑의 비법',
     placeholder: '1. 인상 깊었던 선배님의 모습:\n(예: "선배님이 고객님의 거절 의사를 부드럽게 넘기시는 걸 보고 정말 놀랐어요!")\n\n2. 나중에 꼭 해보고 싶은 것:\n다음 상담 때 직접 적용해보고 싶은 선배님의 멘트나 행동을 적어보세요.',
   },
   {
-    key: 'step3', label: '오늘 나의 온도 — 칭찬할 점', icon: '📈',
+    key: 'step3', label: '오늘 나의 온도 — 칭찬할 점',
     desc: '작은 성공도 기록!',
     placeholder: '스스로 칭찬할 점을 적어보세요.\n\n예: 처음으로 견적서를 직접 뽑아본 것, 고객님께 먼저 다가가 인사를 건넨 것 등',
   },
   {
-    key: 'step4', label: '오늘 나의 온도 — 보완할 점', icon: '📝',
+    key: 'step4', label: '오늘 나의 온도 — 보완할 점',
     desc: '내일의 성장 포인트',
     placeholder: '보완하고 싶은 점을 적어보세요.\n\n예: 원목 소재의 특징을 설명할 때 말이 좀 꼬였는데, 내일은 이 부분을 더 연습해 와야겠어요.',
   },
@@ -61,10 +61,10 @@ const PRACTICE_SECTIONS = [
 const PRACTICE_DATES = ['2026-04-11', '2026-04-12', '2026-04-17', '2026-04-18'];
 
 const STATS_FIELDS = [
-  { key: 'stats_consult', label: '상담(건)', icon: '🗣️' },
-  { key: 'stats_estimate', label: '견적(건)', icon: '📋' },
-  { key: 'stats_order', label: '수주(건)', icon: '✅' },
-  { key: 'stats_amount', label: '수주금액(원)', icon: '💰' },
+  { key: 'stats_consult', label: '상담(건)' },
+  { key: 'stats_estimate', label: '견적(건)' },
+  { key: 'stats_order', label: '수주(건)' },
+  { key: 'stats_amount', label: '수주금액(원)' },
 ] as const;
 
 const labelStyle: React.CSSProperties = {
@@ -345,7 +345,7 @@ export default function MyPracticePage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>🏪 실습일지</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>실습일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           {!isArchived && (isPracticeDay || showForm) && (
             <button
@@ -361,7 +361,7 @@ export default function MyPracticePage() {
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
-              {showForm ? '✕ 닫기' : '✏️ 새 실습일지'}
+              {showForm ? '닫기' : '새 실습일지'}
             </button>
           )}
         </div>
@@ -370,7 +370,7 @@ export default function MyPracticePage() {
       {/* 작성 가능일 안내 */}
       {!showForm && !isPracticeDay && notes.length === 0 && (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, marginBottom: 12 }}>🏪</p>
+          <p style={{ fontSize: 40, marginBottom: 12 }}></p>
           <p style={{ fontSize: 16, color: 'var(--text-second)', marginBottom: 8 }}>
             실습일지는 매장 실습일에 작성할 수 있어요
           </p>
@@ -385,7 +385,7 @@ export default function MyPracticePage() {
         <div style={{ ...card, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-              {editingNoteId ? '✏️ 실습일지 수정' : '✨ 오늘의 실습일지'}
+              {editingNoteId ? '실습일지 수정' : '오늘의 실습일지'}
             </h3>
           </div>
 
@@ -437,14 +437,14 @@ export default function MyPracticePage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* 숫자 실적 */}
             <div>
-              <label style={labelStyle}>📊 오늘의 실적</label>
+              <label style={labelStyle}>오늘의 실적</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
                 {STATS_FIELDS.map(stat => {
                   const isAmount = stat.key === 'stats_amount';
                   return (
                     <div key={stat.key}>
                       <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4, textAlign: 'center' }}>
-                        {stat.icon} {stat.label}
+                        {stat.label}
                       </div>
                       <input
                         type={isAmount ? 'text' : 'number'}
@@ -469,7 +469,7 @@ export default function MyPracticePage() {
 
             {/* 상담/수주 내역 (선택) */}
             <div>
-              <label style={labelStyle}>📦 상담/수주 내역 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>
+              <label style={labelStyle}>상담/수주 내역 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택)</span></label>
               <textarea
                 value={orderDetail}
                 onChange={e => setOrderDetail(e.target.value)}
@@ -480,7 +480,7 @@ export default function MyPracticePage() {
             </div>
 
             {/* 텍스트 섹션 */}
-            {PRACTICE_SECTIONS.map(({ key, label, icon, desc, placeholder }) => {
+            {PRACTICE_SECTIONS.map(({ key, label, desc, placeholder }) => {
               const val = sections[key];
               return (
                 <div key={key} style={{
@@ -496,7 +496,7 @@ export default function MyPracticePage() {
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
                       <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{desc}</span>
                     </div>
                     {val.trim() && (
@@ -628,19 +628,19 @@ export default function MyPracticePage() {
                     <span style={{
                       padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
                       background: 'var(--blue-dim)', color: 'var(--blue)',
-                    }}>🏪 실습일지</span>
+                    }}>실습일지</span>
                   </div>
                   {/* 실적 요약 */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>🗣️ {statsData.stats_consult}</span>}
-                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>📋 {statsData.stats_estimate}</span>}
-                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>✅ {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>💰 {statsData.stats_amount.toLocaleString()}</span>}
+                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>상담 {statsData.stats_consult}</span>}
+                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>견적 {statsData.stats_estimate}</span>}
+                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>수주 {statsData.stats_order}</span>}
+                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount.toLocaleString()}</span>}
                   </div>
                   {/* 수주 내역 미리보기 */}
                   {noteOrderDetail && (
                     <div style={{ fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-                      📦 {noteOrderDetail.split('\n')[0]}
+                      {noteOrderDetail.split('\n')[0]}
                     </div>
                   )}
                   {/* 섹션 완료 현황 */}
@@ -651,12 +651,13 @@ export default function MyPracticePage() {
                       const done = filled.filter(Boolean).length;
                       return (
                         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          {['👥', '💎', '📈', '📝'].map((icon, i) => (
+                          {['1', '2', '3', '4'].map((num, i) => (
                             <span key={i} style={{
-                              fontSize: 14, padding: '2px 6px', borderRadius: 'var(--radius-pill)',
+                              fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                               background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
-                              opacity: filled[i] ? 1 : 0.3,
-                            }}>{icon}</span>
+                              color: filled[i] ? 'var(--blue)' : 'var(--text-muted)',
+                              opacity: filled[i] ? 1 : 0.3, fontWeight: 700,
+                            }}>{num}</span>
                           ))}
                           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{done}/4</span>
                         </div>
@@ -669,7 +670,7 @@ export default function MyPracticePage() {
                       padding: '2px 8px', borderRadius: 'var(--radius-pill)',
                       background: 'var(--blue-dim)', color: 'var(--blue-light)',
                       fontSize: 11, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3,
-                    }}>💬 {commentCounts[note.id]}</span>
+                    }}>{commentCounts[note.id]}개 코멘트</span>
                   )}
                 </button>
               );
@@ -690,7 +691,7 @@ export default function MyPracticePage() {
                       <span style={{
                         padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
-                      }}>🏪 실습일지</span>
+                      }}>실습일지</span>
                     </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                       {new Date(note.created_at).toLocaleDateString('ko', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -718,7 +719,7 @@ export default function MyPracticePage() {
                       }}>
                         {STATS_FIELDS.map(sf => (
                           <div key={sf.key} style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.icon} {sf.label}</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.label}</div>
                             <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>
                               {sf.key === 'stats_amount' ? (steps[sf.key] || 0).toLocaleString() : steps[sf.key] || 0}
                             </div>
@@ -739,7 +740,7 @@ export default function MyPracticePage() {
                         padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)',
                         marginBottom: 16, border: '1px solid var(--border)',
                       }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>📦 상담/수주 내역</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>상담/수주 내역</div>
                         <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{steps.order_detail}</div>
                       </div>
                     );
@@ -753,14 +754,13 @@ export default function MyPracticePage() {
                 {comments.length > 0 && (
                   <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                      <span style={{ fontSize: 14 }}>💬</span>
                       <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>코멘트 ({comments.length})</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
                       {comments.map(c => (
                         <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start' }}>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6 }}>
-                            <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                            <span>{c.author_name}</span>
                             <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                           <div style={{
@@ -813,7 +813,7 @@ export default function MyPracticePage() {
       {/* 비어있을 때 (실습일자이면서 노트 없음) */}
       {notes.length === 0 && isPracticeDay && !showForm && (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, marginBottom: 12 }}>🏪</p>
+          <p style={{ fontSize: 40, marginBottom: 12 }}></p>
           <p style={{ fontSize: 16, color: 'var(--text-second)', marginBottom: 8 }}>아직 작성한 실습일지가 없어요</p>
           <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>오늘 매장에서 배운 것을 기록해보세요!</p>
         </div>
@@ -827,20 +827,20 @@ function PracticeStepsRenderer({ content }: { content: string }) {
   try {
     const steps = JSON.parse(content);
     const sectionDefs = [
-      { key: 'step1', label: '기억에 남는 고객님', icon: '👥' },
-      { key: 'step2', label: '선배님에게 배운 한 끗 차이', icon: '💎' },
-      { key: 'step3', label: '오늘 나의 온도 — 칭찬할 점', icon: '📈' },
-      { key: 'step4', label: '오늘 나의 온도 — 보완할 점', icon: '📝' },
+      { key: 'step1', label: '기억에 남는 고객님' },
+      { key: 'step2', label: '선배님에게 배운 한 끗 차이' },
+      { key: 'step3', label: '오늘 나의 온도 — 칭찬할 점' },
+      { key: 'step4', label: '오늘 나의 온도 — 보완할 점' },
     ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {sectionDefs.map(({ key, label, icon }) => {
+        {sectionDefs.map(({ key, label }) => {
           const text = steps[key] as string;
           const images = steps[`${key}_images`] as string[] | undefined;
           if (!text && (!images || images.length === 0)) return (
             <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{label}</span>
               <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
             </div>
           );
@@ -850,7 +850,7 @@ function PracticeStepsRenderer({ content }: { content: string }) {
                 padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 background: 'var(--blue-dim)',
               }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>}
                   <span style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600 }}>✓ 완료</span>

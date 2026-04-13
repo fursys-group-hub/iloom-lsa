@@ -5,14 +5,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const nav = [
-  { href: '/my', label: '홈', icon: '🏠', exact: true },
-  { href: '/my/announcements', label: '공지사항', icon: '📢' },
-  { href: '/my/attendance', label: '출결', icon: '📋' },
-  { href: '/my/tests', label: '테스트', icon: '📝' },
-  { href: '/my/notes', label: '교육일지', icon: '📓' },
-  { href: '/my/practice', label: '실습일지', icon: '🏪' },
-  { href: '/my/ask', label: '질문하기', icon: '💬' },
-  { href: '/my/training', label: '심화교육', icon: '🏪', disabled: true },
+  { href: '/my', label: '홈', exact: true },
+  { href: '/my/announcements', label: '공지사항' },
+  { href: '/my/attendance', label: '출결' },
+  { href: '/my/tests', label: '테스트' },
+  { href: '/my/notes', label: '교육일지' },
+  { href: '/my/practice', label: '실습일지' },
+  { href: '/my/ask', label: '질문하기' },
+  { href: '/my/training', label: '심화교육', disabled: true },
 ];
 
 export default function MyLayout({ children }: { children: React.ReactNode }) {
@@ -71,11 +71,10 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
             if (isDisabled) {
               return (
                 <div key={item.href} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px',
-                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500,
+                  display: 'flex', alignItems: 'center', padding: '11px 16px',
+                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 400,
                   color: 'var(--text-muted)', opacity: 0.5, cursor: 'default',
                 }}>
-                  <span style={{ fontSize: 16 }}>{item.icon}</span>
                   {item.label}
                   <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
                 </div>
@@ -84,13 +83,17 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
 
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px',
-                borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, textDecoration: 'none',
+                display: 'flex', alignItems: 'center', padding: '11px 16px',
+                borderRadius: 'var(--radius-md)', fontSize: 15,
+                fontWeight: isActive ? 600 : 400,
+                textDecoration: 'none',
                 transition: 'all 0.15s ease',
                 background: isActive ? 'var(--blue)' : 'transparent',
                 color: isActive ? '#fff' : 'var(--text-tertiary)',
-              }}>
-                <span style={{ fontSize: 16 }}>{item.icon}</span>
+              }}
+                onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-second)'; } }}
+                onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; } }}
+              >
                 {item.label}
               </Link>
             );
@@ -114,7 +117,6 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <span style={{ fontSize: 14 }}>💬</span>
               영업지원 챗봇
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>

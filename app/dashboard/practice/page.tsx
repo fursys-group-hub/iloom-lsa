@@ -40,17 +40,17 @@ const card: React.CSSProperties = {
 };
 
 const STATS_FIELDS = [
-  { key: 'stats_consult', label: '상담(건)', icon: '🗣️' },
-  { key: 'stats_estimate', label: '견적(건)', icon: '📋' },
-  { key: 'stats_order', label: '수주(건)', icon: '✅' },
-  { key: 'stats_amount', label: '수주금액(원)', icon: '💰' },
+  { key: 'stats_consult', label: '상담(건)' },
+  { key: 'stats_estimate', label: '견적(건)' },
+  { key: 'stats_order', label: '수주(건)' },
+  { key: 'stats_amount', label: '수주금액(원)' },
 ] as const;
 
 const SECTION_DEFS = [
-  { key: 'step1', label: '기억에 남는 고객님', icon: '👥' },
-  { key: 'step2', label: '선배님에게 배운 한 끗 차이', icon: '💎' },
-  { key: 'step3', label: '칭찬할 점', icon: '📈' },
-  { key: 'step4', label: '보완할 점', icon: '📝' },
+  { key: 'step1', label: '기억에 남는 고객님' },
+  { key: 'step2', label: '선배님에게 배운 한 끗 차이' },
+  { key: 'step3', label: '칭찬할 점' },
+  { key: 'step4', label: '보완할 점' },
 ];
 
 function toKSTDate(utcStr: string): string {
@@ -214,7 +214,7 @@ ${studentSections}
 모든 교육생에 대해 한 번에 INSERT하세요.`;
 
       await navigator.clipboard.writeText(prompt);
-      showToast(`📋 ${data.students.length}명 실습일지 프롬프트가 복사되었습니다!`);
+      showToast(`${data.students.length}명 실습일지 프롬프트가 복사되었습니다!`);
     } catch {
       showToast('프롬프트 복사에 실패했습니다.');
     }
@@ -349,11 +349,11 @@ ${studentSections}
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>🏪 실습일지</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>실습일지</h2>
 
       {notes.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, marginBottom: 12 }}>🏪</p>
+          <p style={{ fontSize: 40, marginBottom: 12 }}></p>
           <p style={{ fontSize: 16, color: 'var(--text-second)' }}>아직 제출된 실습일지가 없어요</p>
           <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>교육생이 매장 실습일에 작성하면 여기에 표시됩니다</p>
         </div>
@@ -387,7 +387,7 @@ ${studentSections}
                   color: 'var(--green)', fontSize: 13, fontWeight: 600,
                   textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                📊 보고서 보기
+                보고서 보기
               </a>
             )}
             <button
@@ -400,7 +400,7 @@ ${studentSections}
                 fontSize: 13, fontWeight: 600, cursor: copyingPrompt ? 'default' : 'pointer',
                 display: 'flex', alignItems: 'center', gap: 6,
               }}>
-              {copyingPrompt ? '⏳ 준비 중...' : '📋 보고서 프롬프트 복사'}
+              {copyingPrompt ? '준비 중...' : '보고서 프롬프트 복사'}
             </button>
 
             {/* 학생 필터 */}
@@ -423,7 +423,7 @@ ${studentSections}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
               {/* 제출 현황 */}
               <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>📊 제출 현황</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>제출 현황</div>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <div>
                     <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--blue)' }}>{submissionStatus.submitted.length}</div>
@@ -443,7 +443,7 @@ ${studentSections}
               {/* 실적 합계 */}
               {STATS_FIELDS.map(sf => (
                 <div key={sf.key} style={{ ...card, padding: 16, textAlign: 'center' }}>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.icon} {sf.label}</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.label}</div>
                   <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {sf.key === 'stats_amount'
                       ? totalStats[sf.key].toLocaleString()
@@ -500,10 +500,10 @@ ${studentSections}
                       </span>
                       {/* 실적 뱃지 */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, flexWrap: 'wrap' }}>
-                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>🗣️ 상담 {statsData.stats_consult}</span>}
-                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>📋 견적 {statsData.stats_estimate}</span>}
-                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>✅ 수주 {statsData.stats_order}</span>}
-                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>💰 {statsData.stats_amount.toLocaleString()}원</span>}
+                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>상담 {statsData.stats_consult}</span>}
+                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>견적 {statsData.stats_estimate}</span>}
+                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>수주 {statsData.stats_order}</span>}
+                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>{statsData.stats_amount.toLocaleString()}원</span>}
                       </div>
                       {/* 섹션 완료 + 코멘트 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -514,12 +514,13 @@ ${studentSections}
                             const done = filled.filter(Boolean).length;
                             return (
                               <div style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                                {['👥', '💎', '📈', '📝'].map((icon, i) => (
+                                {['1', '2', '3', '4'].map((num, i) => (
                                   <span key={i} style={{
-                                    fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)',
+                                    fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                                     background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
-                                    opacity: filled[i] ? 1 : 0.3,
-                                  }}>{icon}</span>
+                                    color: filled[i] ? 'var(--blue)' : 'var(--text-muted)',
+                                    opacity: filled[i] ? 1 : 0.3, fontWeight: 700,
+                                  }}>{num}</span>
                                 ))}
                                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 2 }}>{done}/4</span>
                               </div>
@@ -531,7 +532,7 @@ ${studentSections}
                             padding: '2px 8px', borderRadius: 'var(--radius-pill)',
                             background: 'var(--blue-dim)', color: 'var(--blue-light)',
                             fontSize: 11, fontWeight: 700,
-                          }}>💬 {commentCounts[note.id]}</span>
+                          }}>{commentCounts[note.id]}개 코멘트</span>
                         )}
                         <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
                       </div>
@@ -558,7 +559,7 @@ ${studentSections}
                               }}>
                                 {STATS_FIELDS.map(sf => (
                                   <div key={sf.key} style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.icon} {sf.label}</div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.label}</div>
                                     <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>
                                       {sf.key === 'stats_amount' ? (steps[sf.key] || 0).toLocaleString() : steps[sf.key] || 0}
                                     </div>
@@ -579,7 +580,7 @@ ${studentSections}
                                 padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)',
                                 marginBottom: 12, border: '1px solid var(--border)',
                               }}>
-                                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>📦 상담/수주 내역</div>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>상담/수주 내역</div>
                                 <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{steps.order_detail}</div>
                               </div>
                             );
@@ -592,20 +593,20 @@ ${studentSections}
                             const steps = JSON.parse(note.content);
                             return (
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {SECTION_DEFS.map(({ key, label, icon }) => {
+                                {SECTION_DEFS.map(({ key, label }) => {
                                   const text = steps[key] as string;
                                   const images = steps[`${key}_images`] as string[] | undefined;
                                   if (!text && (!images || images.length === 0)) return (
                                     <div key={key} style={{ padding: '10px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
-                                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+                                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{label}</span>
                                       <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
                                     </div>
                                   );
                                   return (
                                     <div key={key} style={{ borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
                                       <div style={{ padding: '10px 16px', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
-                                        {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>}
+                                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
+                                        {images && images.length > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{images.length}장</span>}
                                       </div>
                                       <div style={{ padding: '12px 16px', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                                         {text}
@@ -622,7 +623,6 @@ ${studentSections}
                         {/* 코멘트 영역 */}
                         <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                            <span style={{ fontSize: 14 }}>💬</span>
                             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                               코멘트 {comments.length > 0 ? `(${comments.length})` : ''}
                             </span>
@@ -633,7 +633,7 @@ ${studentSections}
                               {comments.map(c => (
                                 <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: c.author_role === 'admin' ? 'flex-end' : 'flex-start' }}>
                                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                                    <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                                    <span>{c.author_name}</span>
                                     <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                     {c.author_role === 'admin' && (
                                       <button onClick={() => deleteComment(c.id, note.id)}

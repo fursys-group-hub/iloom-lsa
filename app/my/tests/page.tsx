@@ -89,7 +89,7 @@ export default function MyTestsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📝 내 테스트</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>내 테스트</h2>
 
       {/* 차시 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
@@ -200,7 +200,7 @@ export default function MyTestsPage() {
                 {/* 해설 */}
                 {d.question?.explanation && (
                   <div style={{ marginTop: 8, marginLeft: 38, fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                    💡 {d.question.explanation}
+                    {d.question.explanation}
                   </div>
                 )}
               </div>

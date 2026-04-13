@@ -78,9 +78,9 @@ function rpAreaSummary(evals: EvalData[]) {
 }
 
 const LEVEL_CONFIG = {
-  good:   { label: '잘함',     emoji: '🟢', bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)' },
-  normal: { label: '보통',     emoji: '🟡', bg: 'var(--orange-dim)', border: 'var(--orange)', color: 'var(--orange)' },
-  weak:   { label: '보완 필요', emoji: '🔴', bg: 'var(--red-dim)',  border: 'var(--red)',    color: 'var(--red)' },
+  good:   { label: '잘함',     bg: 'var(--green-dim)',  border: 'var(--green)',  color: 'var(--green)' },
+  normal: { label: '보통',     bg: 'var(--orange-dim)', border: 'var(--orange)', color: 'var(--orange)' },
+  weak:   { label: '보완 필요', bg: 'var(--red-dim)',  border: 'var(--red)',    color: 'var(--red)' },
 };
 
 /* ── 메인 ── */
@@ -118,10 +118,8 @@ export default function OverviewPage() {
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', minHeight: 400 }}><p style={{ color: 'var(--text-muted)' }}>불러오는 중...</p></div>;
 
   return (
-    <div>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>🏪 심화교육</h1>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>심화교육</h2>
 
       {/* 요약 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 24 }}>
@@ -195,7 +193,7 @@ export default function OverviewPage() {
                       })}
                       <Td align="center">
                         {stFinal ? (
-                          <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '⭐').join('')}</span>
+                          <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '★').join('')}</span>
                         ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>미작성</span>}
                       </Td>
                     </tr>
@@ -227,7 +225,7 @@ export default function OverviewPage() {
                       <span style={{ fontSize: 17, fontWeight: 700 }}>{st.name}</span>
                       <span style={{ fontSize: 13, color: 'var(--blue-light)', marginLeft: 8 }}>{st.store_location}</span>
                     </div>
-                    {stFinal && <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '⭐').join('')}</span>}
+                    {stFinal && <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '★').join('')}</span>}
                   </div>
                   <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
                     <MiniStat label="평가" value={`${stEvals.length}/6주`} color="var(--blue)" />
@@ -242,7 +240,7 @@ export default function OverviewPage() {
                           <span key={rp.area} style={{
                             padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: cfg.bg, color: cfg.color,
-                          }}>{cfg.emoji} {rp.area}</span>
+                          }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, display: 'inline-block', marginRight: 4 }} />{rp.area}</span>
                         );
                       })}
                     </div>
@@ -262,7 +260,7 @@ export default function OverviewPage() {
 
           {/* 이름 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>👤</div>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: 'var(--blue)' }}>{selectedStudent?.name?.charAt(0) || '?'}</div>
             <div>
               <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>{selectedStudent?.name}</h2>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>{selectedStudent?.store_location || '매장 미배정'} · {studentEvals.length}주차 평가 완료</p>
@@ -274,7 +272,7 @@ export default function OverviewPage() {
             const studentScores = scores.filter((s) => s.student_id === selectedStudentId);
             const hasScores = studentScores.length > 0;
             return (
-              <Section icon="📝" title="심화교육 시험 점수" badge={hasScores ? undefined : '연동 예정'} badgeColor="var(--text-muted)">
+              <Section title="심화교육 시험 점수" badge={hasScores ? undefined : '연동 예정'} badgeColor="var(--text-muted)">
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
                   {[1, 2, 3, 4, 5, 6].map((w) => {
                     const sc = studentScores.find((s) => s.subject === `${w}주차`);
@@ -301,7 +299,7 @@ export default function OverviewPage() {
           })()}
 
           {/* ② R&P 영역별 — 잘함/보통/보완필요 카드 */}
-          <Section icon="🏪" title="R&P 영역별 상담 역량" subtitle="각 영역에서 롤플레잉 후 관리자가 평가한 결과예요">
+          <Section title="R&P 영역별 상담 역량" subtitle="각 영역에서 롤플레잉 후 관리자가 평가한 결과예요">
             {studentEvals.length === 0 ? (
               <p style={{ color: 'var(--text-muted)' }}>평가 데이터가 없어요</p>
             ) : (
@@ -316,7 +314,7 @@ export default function OverviewPage() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <span style={{ fontSize: 17, fontWeight: 700 }}>{rp.area}</span>
                         <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 13, fontWeight: 700 }}>
-                          {cfg.emoji} {cfg.label}
+                          {cfg.label}
                         </span>
                       </div>
                       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 10px' }}>
@@ -346,7 +344,7 @@ export default function OverviewPage() {
           </Section>
 
           {/* ③ 주차별 평가 기록 (타임라인 + 해결됨 표시 포함) */}
-          <Section icon="📋" title="주차별 평가 기록" subtitle="관리자가 매주 작성한 R&P 피드백이에요. 이전 주차의 개선점이 해결되면 ✅로 표시됩니다">
+          <Section title="주차별 평가 기록" subtitle="관리자가 매주 작성한 R&P 피드백이에요. 이전 주차의 개선점이 해결되면 표시됩니다">
             <div style={{ position: 'relative', paddingLeft: 28 }}>
               {/* 타임라인 세로선 */}
               <div style={{ position: 'absolute', left: 10, top: 8, bottom: 8, width: 2, background: 'var(--border)' }} />
@@ -398,15 +396,15 @@ export default function OverviewPage() {
                             }}>
                               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--green)', marginRight: 8 }}>지난주 대비 해결됨:</span>
                               {resolved.map((t) => (
-                                <span key={t} style={{ fontSize: 12, color: 'var(--green)', marginRight: 8 }}>✅ {t}</span>
+                                <span key={t} style={{ fontSize: 12, color: 'var(--green)', marginRight: 8 }}>{t}</span>
                               ))}
                             </div>
                           )}
 
                           {/* 강점/개선점 태그 */}
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                            {ev.strength_tags.map((t) => <TagPill key={`s-${t}`} type="strength">👍 {t}</TagPill>)}
-                            {ev.improvement_tags.map((t) => <TagPill key={`i-${t}`} type="improvement">📌 {t}</TagPill>)}
+                            {ev.strength_tags.map((t) => <TagPill key={`s-${t}`} type="strength">{t}</TagPill>)}
+                            {ev.improvement_tags.map((t) => <TagPill key={`i-${t}`} type="improvement">{t}</TagPill>)}
                           </div>
 
                           {/* 코멘트 */}
@@ -436,7 +434,7 @@ export default function OverviewPage() {
 
           {/* ④ 성장 차트 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 24 }}>
-            <Section icon="🕸️" title="종합 역량" subtitle="모든 주차 평가를 종합한 역량 분포예요">
+            <Section title="종합 역량" subtitle="모든 주차 평가를 종합한 역량 분포예요">
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={evalToRadar(studentEvals)}>
@@ -448,7 +446,7 @@ export default function OverviewPage() {
               </div>
             </Section>
 
-            <Section icon="📊" title="주차별 변화" subtitle="강점이 늘고 개선점이 줄면 성장하고 있다는 뜻이에요">
+            <Section title="주차별 변화" subtitle="강점이 늘고 개선점이 줄면 성장하고 있다는 뜻이에요">
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={Array.from({ length: 6 }, (_, i) => {
@@ -469,7 +467,7 @@ export default function OverviewPage() {
           </div>
 
           {/* ⑤ 벤치마킹 */}
-          <Section icon="🔍" title="벤치마킹 기록" subtitle="교육생이 직접 작성한 우수 직원 벤치마킹 기록이에요">
+          <Section title="벤치마킹 기록" subtitle="교육생이 직접 작성한 우수 직원 벤치마킹 기록이에요">
             {studentBMs.length === 0 ? (
               <p style={{ color: 'var(--text-muted)' }}>아직 교육생이 작성한 벤치마킹 기록이 없어요</p>
             ) : (
@@ -478,12 +476,12 @@ export default function OverviewPage() {
                   <div key={bm.week_number} style={{ padding: 20, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                       <span style={{ fontWeight: 700, fontSize: 15 }}>{bm.week_number}주차</span>
-                      <span style={{ fontSize: 14, color: 'var(--blue-light)', fontWeight: 600 }}>👤 {bm.target_name}</span>
+                      <span style={{ fontSize: 14, color: 'var(--blue-light)', fontWeight: 600 }}>{bm.target_name}</span>
                     </div>
                     <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: 0 }}>{bm.learnings}</p>
                     {bm.action_plan && (
                       <div style={{ marginTop: 10, padding: '10px 14px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                        <p style={{ fontSize: 13, color: 'var(--purple)', margin: 0, fontWeight: 600 }}>💡 실천 계획</p>
+                        <p style={{ fontSize: 13, color: 'var(--purple)', margin: 0, fontWeight: 600 }}>실천 계획</p>
                         <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>{bm.action_plan}</p>
                       </div>
                     )}
@@ -500,7 +498,7 @@ export default function OverviewPage() {
               border: '2px solid var(--blue)', borderRadius: 'var(--radius-lg)', padding: 32,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <span style={{ fontSize: 32 }}>🎓</span>
+                <span style={{ fontSize: 16, color: 'var(--text-muted)' }}></span>
                 <div>
                   <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>교육 총평</h2>
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>6주간의 심화교육을 마친 종합 평가예요</p>
@@ -540,7 +538,7 @@ export default function OverviewPage() {
                     )}
                     {fe.areas_to_develop && (
                       <div style={{ padding: 20, background: 'var(--orange-dim)', borderRadius: 'var(--radius-md)' }}>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--orange)', margin: '0 0 8px' }}>🎯 발전 방향</p>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--orange)', margin: '0 0 8px' }}>발전 방향</p>
                         <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.areas_to_develop}</p>
                       </div>
                     )}
@@ -554,7 +552,7 @@ export default function OverviewPage() {
               ))}
             </div>
           ) : (
-            <Section icon="🎓" title="교육 총평" badge="미작성" badgeColor="var(--text-muted)">
+            <Section title="교육 총평" badge="미작성" badgeColor="var(--text-muted)">
               <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 20, fontSize: 15 }}>
                 아직 교육 총평이 작성되지 않았어요. 매장 관리자가 총평을 작성하면 여기에 표시됩니다.
               </p>
@@ -567,13 +565,13 @@ export default function OverviewPage() {
 }
 
 /* ── 공용 컴포넌트 ── */
-function Section({ icon, title, subtitle, badge, badgeColor, children }: {
-  icon: string; title: string; subtitle?: string; badge?: string; badgeColor?: string; children: React.ReactNode;
+function Section({ title, subtitle, badge, badgeColor, children, ...rest }: {
+  icon?: string; title: string; subtitle?: string; badge?: string; badgeColor?: string; children: React.ReactNode;
 }) {
+  void rest;
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 28 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: subtitle ? 6 : 16 }}>
-        <span style={{ fontSize: 20 }}>{icon}</span>
         <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{title}</h2>
         {badge && (
           <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', color: badgeColor || 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>
@@ -581,7 +579,7 @@ function Section({ icon, title, subtitle, badge, badgeColor, children }: {
           </span>
         )}
       </div>
-      {subtitle && <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px', paddingLeft: 30 }}>{subtitle}</p>}
+      {subtitle && <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px' }}>{subtitle}</p>}
       {children}
     </div>
   );

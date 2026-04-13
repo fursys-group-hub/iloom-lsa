@@ -287,12 +287,12 @@ export default function EducationLogsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-        📓 교육일지
+        교육일지
       </h2>
 
       {notes.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}></p>
           <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
             아직 작성된 교육일지가 없어요
           </p>
@@ -325,7 +325,7 @@ export default function EducationLogsPage() {
               {/* 필터 버튼 */}
               {([
                 { key: '', label: '전체' },
-                { key: 'best', label: '⭐ 우수' },
+                { key: 'best', label: '우수' },
                 { key: 'incomplete', label: '미완료' },
               ] as const).map(f => (
                 <button
@@ -372,7 +372,7 @@ export default function EducationLogsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
               {/* 제출 현황 */}
               <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>📊 제출 현황</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>제출 현황</div>
                 <div style={{ display: 'flex', gap: 12 }}>
                   <div>
                     <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
@@ -397,29 +397,29 @@ export default function EducationLogsPage() {
               </div>
               {/* 참여도: 3/3 */}
               <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>🔥 완벽 참여 (3/3)</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>완벽 참여 (3/3)</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{participationSummary[3]}</div>
               </div>
               {/* 참여도: 2/3 */}
               <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>💪 거의 다 (2/3)</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>거의 다 (2/3)</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--blue-light)' }}>{participationSummary[2]}</div>
               </div>
               {/* 참여도: 1/3 */}
               <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>📝 시작 (1/3)</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>시작 (1/3)</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--orange)' }}>{participationSummary[1]}</div>
               </div>
               {/* 추가 설명 필요한 교육생 */}
               <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>🤔 추가 설명이 필요한 교육생</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>추가 설명이 필요한 교육생</div>
                 {(() => {
                   const needHelp = notesByDate.filter(n => {
                     if (n.tags?.includes('자율학습')) return false;
                     return ['confused', 'half', 'help_needed', 'need_help', 'uncertain'].includes(n.confidence || '');
                   });
                   if (needHelp.length === 0) return (
-                    <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>없음 👍</div>
+                    <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>없음</div>
                   );
                   return (
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -473,7 +473,7 @@ export default function EducationLogsPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 13, fontWeight: 700,
                       }}>
-                        {isSelfStudy ? '📚' : (note.students?.name?.[0] || '?')}
+                        {isSelfStudy ? '자' : (note.students?.name?.[0] || '?')}
                       </div>
                       <span style={{ fontSize: 16, fontWeight: 700, color: isDropped ? 'var(--text-muted)' : 'var(--text-primary)', minWidth: 50, textDecoration: isDropped ? 'line-through' : 'none' }}>
                         {note.students?.name || '?'}
@@ -506,8 +506,8 @@ export default function EducationLogsPage() {
                             const filled = [!!steps.step1?.trim(), !!steps.step2?.trim(), !!steps.step3?.trim()];
                             return (
                               <div style={{ display: 'flex', gap: 3 }}>
-                                {['📝', '💡', '🎯'].map((icon, i) => (
-                                  <span key={i} style={{ fontSize: 13, padding: '1px 4px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'var(--green-dim)' : 'var(--bg-hover)', opacity: filled[i] ? 1 : 0.3 }}>{icon}</span>
+                                {['1', '2', '3'].map((num, i) => (
+                                  <span key={i} style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'var(--green-dim)' : 'var(--bg-hover)', color: filled[i] ? 'var(--green)' : 'var(--text-muted)', opacity: filled[i] ? 1 : 0.3, fontWeight: 700 }}>{num}</span>
                                 ))}
                               </div>
                             );
@@ -522,12 +522,12 @@ export default function EducationLogsPage() {
                             background: (note.participation_score || 0) >= 3 ? 'var(--green-dim)' : (note.participation_score || 0) >= 1 ? 'var(--orange-dim)' : 'var(--bg-hover)',
                             color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                           }}>
-                            {note.best_learning ? '⭐ ' : ''}{note.participation_score || 0}/3
+                            {note.participation_score || 0}/3
                           </span>
                         )}
                         {/* 코멘트 */}
                         {(commentCounts[note.id] || 0) > 0 && (
-                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>💬 {commentCounts[note.id]}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>{commentCounts[note.id]}개 코멘트</span>
                         )}
                         <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
                       </div>
@@ -607,7 +607,6 @@ export default function EducationLogsPage() {
                         {/* 코멘트 영역 */}
                         <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                            <span style={{ fontSize: 14 }}>💬</span>
                             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
                               코멘트 {comments.length > 0 ? `(${comments.length})` : ''}
                             </span>
@@ -626,7 +625,7 @@ export default function EducationLogsPage() {
                                   }}
                                 >
                                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
-                                    <span>{c.author_role === 'admin' ? '🧑‍🏫' : '🧑‍🎓'} {c.author_name}</span>
+                                    <span>{c.author_name}</span>
                                     <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                   </div>
                                   <div
@@ -847,19 +846,19 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
     try {
       const steps = JSON.parse(content);
       const stepSections = [
-        { key: 'step1', label: 'STEP 1 — 핵심 필기', icon: '📝', completed: steps.step1_completed },
-        { key: 'step2', label: 'STEP 2 — LSA 비법서', icon: '💡', completed: steps.step2_completed },
-        { key: 'step3', label: 'STEP 3 — 실전 적용', icon: '🎯', completed: steps.step3_completed },
+        { key: 'step1', label: 'STEP 1 — 핵심 필기', completed: steps.step1_completed },
+        { key: 'step2', label: 'STEP 2 — LSA 비법서', completed: steps.step2_completed },
+        { key: 'step3', label: 'STEP 3 — 실전 적용', completed: steps.step3_completed },
       ];
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {stepSections.map(({ key, label, icon, completed }) => {
+          {stepSections.map(({ key, label, completed }) => {
             const text = steps[key] as string;
             const images = steps[`${key}_images`] as string[] | undefined;
             if (!text && (!images || images.length === 0)) return (
               <div key={key} style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', opacity: 0.5 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{icon} {label}</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-muted)' }}>{label}</span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 8 }}>미작성</span>
               </div>
             );
@@ -869,10 +868,10 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
                   padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   background: completed ? 'var(--step-filled-bg)' : 'var(--bg-elevated)',
                 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{icon} {label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{label}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {images && images.length > 0 && (
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>📷 {images.length}장</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{images.length}장</span>
                     )}
                     {completed && <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>✓ 완료</span>}
                   </div>

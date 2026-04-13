@@ -5,6 +5,31 @@
 
 ---
 
+## 완료된 항목 (2026-04-13)
+
+- [x] **디자인 토큰 베스트프랙티스 적용** (globals.css)
+  - `--radius-xs: 4px` 추가
+  - 간격 토큰 8px 그리드 (`--space-1` ~ `--space-12`)
+  - 컴포넌트 높이 토큰 (`--height-btn-sm/md/lg`, `--height-input`, `--height-touch`)
+  - 폰트 굵기 계층 토큰 (`--weight-normal/medium/semibold/bold`)
+  - 유동 타이포그래피 h1~h4 (`clamp()` 적용 — 모바일↔데스크톱 자동 조절)
+  - 입력 필드 iOS 줌 방지 (`font-size: max(16px, 1rem)`)
+  - 터치 타겟 최소 44px (`min-height: var(--height-touch)`)
+  - 태블릿 breakpoint 추가 (`max-width: 1023px`)
+  - body 기본 font-size 14→16px
+- [x] **이모지 전면 제거 + 폰트 굵기 위계 전환**
+  - 사이드바 네비게이션 이모지 제거 (dashboard/my/manager 3개 레이아웃)
+  - 활성 메뉴: fontWeight 600, 비활성: 400 (굵기로 위계 표현)
+  - 그룹 라벨: fontWeight 700, letterSpacing 0.06em
+  - 호버 시 text-second 색상으로 피드백
+  - 30개+ 페이지에서 장식용 이모지 제거 (섹션 헤더, 상태 뱃지, 버튼 아이콘 등)
+  - StatCard/MiniStat 컴포넌트에서 icon 속성 제거, 라벨 fontWeight 강화
+  - MEMO_CATEGORIES, DAY_TYPE_CONFIG, ADVICE_META에서 emoji 필드 삭제
+  - 상태 표시 이모지(🟠🟢🔴) → CSS 컬러 닷 span으로 교체
+  - **유지**: 자신감 이모지(😊😐😟😎🤔😵), 평가 별점(★)
+
+---
+
 ## 완료된 항목 (2026-04-12)
 
 - [x] 실습일지 새벽 5시 보정 + 날짜 드롭다운
@@ -151,6 +176,43 @@
 
 ## UI 표준 값 정리 (레퍼런스)
 
+### 간격 토큰 (8px 그리드)
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `--space-1` | 4px | 아이콘↔텍스트 |
+| `--space-2` | 8px | 최소 간격 |
+| `--space-3` | 12px | 리스트 아이템 |
+| `--space-4` | 16px | 카드 내부(모바일) |
+| `--space-6` | 24px | 카드 내부(데스크톱) |
+| `--space-8` | 32px | 섹션 간 |
+| `--space-10` | 40px | 페이지 패딩 |
+| `--space-12` | 48px | 대섹션 구분 |
+
+### 컴포넌트 높이
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `--height-btn-sm` | 32px | 작은 버튼 |
+| `--height-btn-md` | 40px | 기본 버튼 |
+| `--height-btn-lg` | 48px | 큰 버튼 |
+| `--height-input` | 44px | 입력 필드 |
+| `--height-touch` | 44px | 터치 타겟 최소 |
+
+### 폰트 굵기 계층
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `--weight-normal` | 400 | 본문, 비활성 메뉴 |
+| `--weight-medium` | 500 | 보조 라벨 |
+| `--weight-semibold` | 600 | 활성 메뉴, h3~h4, 뱃지 |
+| `--weight-bold` | 700 | h1~h2, 그룹 라벨 |
+
+### 유동 타이포그래피 (clamp)
+| 요소 | 값 | 모바일↔데스크톱 |
+|------|-----|----------------|
+| h1 | `clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)` | 28~40px |
+| h2 | `clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)` | 22~28px |
+| h3 | `clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem)` | 18~22px |
+| h4 | `clamp(1rem, 0.95rem + 0.25vw, 1.125rem)` | 16~18px |
+
 ### 페이지 구조
 | 항목 | 값 |
 |------|-----|
@@ -211,29 +273,29 @@
 
 ---
 
-## 사이드바 구조 (확정)
+## 사이드바 구조 (확정 — 이모지 없음, 폰트 굵기 위계)
 
 ```
-🏠 홈
+홈                          ← 활성: fontWeight 600 + 파란 배경
 
-일일 운영
-  📋 출결
-  📝 테스트
-  📓 교육일지
-  🏪 실습일지
-  💬 질문관리
+일일 운영                    ← 그룹 라벨: 11px, fontWeight 700, uppercase
+  출결                      ← 비활성: fontWeight 400, text-tertiary
+  테스트                    ← 호버: bg-hover + text-second
+  교육일지
+  실습일지
+  질문관리
 
 성과 분석
-  👤 개별분석
-  📈 리포트
-  📊 교육효과
+  개별분석
+  리포트
+  교육효과
 
 심화교육
-  🎓 심화교육
+  심화교육
 
 설정
-  📢 공지사항
-  📚 기수 관리
+  공지사항
+  기수 관리
 ```
 
 ---

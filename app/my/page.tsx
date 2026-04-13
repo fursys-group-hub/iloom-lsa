@@ -179,10 +179,10 @@ export default function MyPage() {
     setShowPopup(false);
   };
 
-  const PRIORITY_STYLE: Record<string, { color: string; bg: string; icon: string; label: string }> = {
-    normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢', label: '공지' },
-    important: { color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️', label: '중요' },
-    urgent: { color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨', label: '긴급' },
+  const PRIORITY_STYLE: Record<string, { color: string; bg: string; label: string }> = {
+    normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', label: '공지' },
+    important: { color: 'var(--orange)', bg: 'var(--orange-dim)', label: '중요' },
+    urgent: { color: 'var(--red)', bg: 'var(--red-dim)', label: '긴급' },
   };
 
   return (
@@ -216,7 +216,7 @@ export default function MyPage() {
                   background: ps.bg, color: ps.color,
                   fontSize: 12, fontWeight: 700,
                 }}>
-                  {ps.icon} {ps.label}
+                  {ps.label}
                 </span>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                   {new Date(a.created_at).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -289,7 +289,7 @@ export default function MyPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 24 }}>🏪</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--orange)' }}></span>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)' }}>오늘은 매장실습일이에요!</div>
                 <div style={{ fontSize: 13, color: 'var(--text-second)', marginTop: 2 }}>실습일지 작성이 필요해요</div>
@@ -337,7 +337,7 @@ export default function MyPage() {
           border: '1px solid var(--border-light)',
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
-          <span style={{ fontSize: 24 }}>📦</span>
+          <span style={{ fontSize: 16, color: 'var(--text-muted)' }}></span>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-tertiary)' }}>
               이 기수는 보관 처리되었습니다
@@ -420,11 +420,11 @@ export default function MyPage() {
       {/* 학습 피드백 */}
       {tagAnalysis.length > 0 && (
         <div style={card}>
-          <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>💬 학습 피드백</h3>
+          <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>학습 피드백</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {weakTags.length > 0 && (
               <div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>🚨 이 부분을 더 공부하세요</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {weakTags.slice(0, 5).map(t => (
                     <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
@@ -436,7 +436,7 @@ export default function MyPage() {
             )}
             {midTags.length > 0 && (
               <div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>⚠️ 조금 더 복습하면 좋아요</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {midTags.slice(0, 5).map(t => (
                     <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
@@ -448,7 +448,7 @@ export default function MyPage() {
             )}
             {strongTags.length > 0 && (
               <div style={{ fontSize: 14, color: 'var(--green)' }}>
-                ✅ <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
+                <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
               </div>
             )}
           </div>
@@ -457,7 +457,7 @@ export default function MyPage() {
 
       {/* 차시별 점수 추이 — 라인 차트 */}
       <div style={card}>
-        <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>📈 차시별 점수 추이</h3>
+        <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 20px' }}>차시별 점수 추이</h3>
         {sessionScores.length > 0 ? (
           <ScoreTrendChart
             data={sessionScores.map(s => ({
@@ -519,7 +519,7 @@ export default function MyPage() {
                     </div>
                     {w.question?.explanation && (
                       <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>
-                        💡 {w.question.explanation}
+                        {w.question.explanation}
                       </div>
                     )}
                   </div>

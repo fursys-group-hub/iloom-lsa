@@ -480,7 +480,7 @@ export default function EvaluationsPage() {
                   </div>
                   <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: 0 }}>{bm.learnings}</p>
                   {bm.action_plan && (
-                    <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '8px 0 0' }}>💡 실천 계획: {bm.action_plan}</p>
+                    <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '8px 0 0' }}>실천 계획: {bm.action_plan}</p>
                   )}
                 </div>
               ))}

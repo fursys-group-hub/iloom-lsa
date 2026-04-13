@@ -123,13 +123,13 @@ export default function FinalEvalPage() {
 
       {!selectedStudentId ? (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center' }}>
-          <p style={{ fontSize: 40, margin: '0 0 16px' }}>🎓</p>
+          <p style={{ fontSize: 40, margin: '0 0 16px' }}></p>
           <p style={{ color: 'var(--text-muted)', fontSize: 16 }}>교육생을 선택하면 총평을 작성할 수 있어요</p>
         </div>
       ) : (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🎓</div>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'var(--blue)', fontWeight: 700 }}>{selectedStudent?.name?.[0] || '?'}</div>
             <div>
               <p style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{selectedStudent?.name} 교육 총평</p>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>

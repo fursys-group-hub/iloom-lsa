@@ -9,11 +9,11 @@ const card: React.CSSProperties = {
   borderRadius: 'var(--radius-lg)', padding: 24,
 };
 
-const STATUS_MAP: Record<string, { label: string; color: string; icon: string }> = {
-  present: { label: '출근', color: 'var(--green)', icon: '✅' },
-  late: { label: '지각', color: 'var(--orange)', icon: '⏰' },
-  early_leave: { label: '조퇴', color: 'var(--orange)', icon: '🚪' },
-  absent: { label: '미출근', color: 'var(--red)', icon: '❌' },
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  present: { label: '출근', color: 'var(--green)' },
+  late: { label: '지각', color: 'var(--orange)' },
+  early_leave: { label: '조퇴', color: 'var(--orange)' },
+  absent: { label: '미출근', color: 'var(--red)' },
 };
 
 export default function MyAttendancePage() {
@@ -47,7 +47,7 @@ export default function MyAttendancePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📋 내 출결</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>내 출결</h2>
 
       {/* 요약 */}
       <div style={{ display: 'flex', gap: 16 }}>
@@ -99,7 +99,7 @@ export default function MyAttendancePage() {
                     padding: '4px 12px', borderRadius: 20,
                     background: s.color + '18',
                   }}>
-                    <span style={{ fontSize: 14 }}>{s.icon}</span>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, display: 'inline-block' }} />
                     <span style={{ fontSize: 13, fontWeight: 600, color: s.color }}>{s.label}</span>
                   </div>
                 </div>

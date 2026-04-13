@@ -17,9 +17,9 @@ interface Announcement {
 }
 
 const PRIORITY_OPTIONS = [
-  { value: 'normal', label: '일반', color: 'var(--blue-light)', bg: 'var(--blue-dim)', icon: '📢' },
-  { value: 'important', label: '중요', color: 'var(--orange)', bg: 'var(--orange-dim)', icon: '⚠️' },
-  { value: 'urgent', label: '긴급', color: 'var(--red)', bg: 'var(--red-dim)', icon: '🚨' },
+  { value: 'normal', label: '일반', color: 'var(--blue-light)', bg: 'var(--blue-dim)' },
+  { value: 'important', label: '중요', color: 'var(--orange)', bg: 'var(--orange-dim)' },
+  { value: 'urgent', label: '긴급', color: 'var(--red)', bg: 'var(--red-dim)' },
 ];
 
 export default function AnnouncementsPage() {
@@ -116,7 +116,7 @@ export default function AnnouncementsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            📢 공지사항
+            공지사항
           </h2>
         </div>
         <button
@@ -177,7 +177,7 @@ export default function AnnouncementsPage() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {p.icon} {p.label}
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -243,7 +243,7 @@ export default function AnnouncementsPage() {
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-lg)', padding: 48, textAlign: 'center',
         }}>
-          <p style={{ fontSize: 40, margin: '0 0 12px' }}>📭</p>
+          <p style={{ fontSize: 40, margin: '0 0 12px' }}></p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)', margin: 0 }}>
             아직 작성된 공지가 없어요
           </p>
@@ -271,7 +271,7 @@ export default function AnnouncementsPage() {
                         background: p.bg, color: p.color,
                         fontSize: 11, fontWeight: 700,
                       }}>
-                        {p.icon} {p.label}
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, display: 'inline-block', marginRight: 4 }} />{p.label}
                       </span>
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dateStr}</span>
                     </div>

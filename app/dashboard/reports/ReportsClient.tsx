@@ -275,15 +275,15 @@ function PracticeReportView({ text }: { text: string }) {
 
               // 📋 제목 (큰 헤더)
               if (trimmed.startsWith('📋 매장')) {
-                return <h3 key={li} style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>{trimmed}</h3>;
+                return <h3 key={li} style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>{trimmed.replace(/^📋\s*/, '')}</h3>;
               }
               // 📊 전체 현황
               if (trimmed.startsWith('📊')) {
-                return <div key={li} style={{ fontSize: 15, fontWeight: 600, color: 'var(--blue-light)', marginBottom: 4 }}>{formatInline(trimmed.replace('📊 ', ''))}</div>;
+                return <div key={li} style={{ fontSize: 15, fontWeight: 600, color: 'var(--blue-light)', marginBottom: 4 }}>{formatInline(trimmed.replace(/^📊\s*/, ''))}</div>;
               }
               // 📌 이름 헤더
               if (trimmed.startsWith('📌')) {
-                return <div key={li} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{formatInline(trimmed)}</div>;
+                return <div key={li} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{formatInline(trimmed.replace(/^📌\s*/, ''))}</div>;
               }
               // → 피드백 라인
               if (trimmed.startsWith('→')) {
@@ -329,14 +329,14 @@ function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: boolean }
     <div className="print-card">
       <div className="print-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="print-avatar">👤</div>
+          <div className="print-avatar"></div>
           <div>
             <div className="print-name">{r.students.name}</div>
             {r.students.store_location && <div className="print-store">{r.students.store_location}</div>}
           </div>
         </div>
         <div className="print-meta">
-          {r.tag_tracking?.overcome?.map(t => <span key={`o-${t}`} className="tag tag-green">✅ {t}</span>)}
+          {r.tag_tracking?.overcome?.map(t => <span key={`o-${t}`} className="tag tag-green">{t}</span>)}
           {r.tag_tracking?.chronic?.map(t => <span key={`c-${t}`} className="tag tag-red">● {t}</span>)}
         </div>
       </div>
@@ -344,7 +344,7 @@ function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: boolean }
         <div className="print-col">
           {leftSections.map((s, i) => (
             <div key={i} className="print-section">
-              <div className="print-section-title">{s.icon} {s.title}</div>
+              <div className="print-section-title">{s.title}</div>
               {renderSectionContent(s.icon, s.content, isPrint)}
             </div>
           ))}
@@ -352,7 +352,7 @@ function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: boolean }
         <div className="print-col">
           {rightSections.map((s, i) => (
             <div key={i} className="print-section">
-              <div className="print-section-title">{s.icon} {s.title}</div>
+              <div className="print-section-title">{s.title}</div>
               {renderSectionContent(s.icon, s.content, isPrint)}
             </div>
           ))}
@@ -552,7 +552,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
     <div style={{ maxWidth: 1200 }}>
       {/* 헤더 */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>📈 AI 분석 리포트</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>AI 분석 리포트</h2>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14 }}>
@@ -560,7 +560,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
           </select>
           <button onClick={refreshReports}
             style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>
-            🔄
+            새로고침
           </button>
         </div>
       </div>
@@ -568,31 +568,31 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
       {/* 분석 카드 */}
       <div className="report-cards-grid no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 32 }}>
         <div style={{ ...card, borderColor: 'var(--blue)' }}>
-          <h3 style={sTitle}>📋 종합 분석</h3>
+          <h3 style={sTitle}>종합 분석</h3>
           <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: '0 0 8px', lineHeight: 1.6 }}>
             매장 관리자에게 전달하는 인수인계 리포트. 교육생 {students.length}명 대상
           </p>
           <button onClick={() => copyPrompt('comprehensive')}
             style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--blue)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
-            📋 프롬프트 복사
+            프롬프트 복사
           </button>
         </div>
         <div style={card}>
-          <h3 style={sTitle}>🔍 분야별 분석</h3>
+          <h3 style={sTitle}>분야별 분석</h3>
           <select value={subjectCategory} onChange={e => setSubjectCategory(e.target.value as typeof REPORT_CATEGORIES[number])}
             style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14, marginBottom: 12 }}>
             {REPORT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <button onClick={() => copyPrompt('subject')}
             style={{ width: '100%', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
-            📋 프롬프트 복사
+            프롬프트 복사
           </button>
         </div>
       </div>
 
       {/* 리포트 목록 */}
       <div className="no-print" style={card}>
-        <h3 style={sTitle}>📋 생성된 리포트</h3>
+        <h3 style={sTitle}>생성된 리포트</h3>
         {reportGroups.length === 0 ? (
           <p style={{ fontSize: 14, color: 'var(--text-muted)', textAlign: 'center', padding: '40px 0' }}>
             아직 생성된 리포트가 없습니다.
@@ -621,11 +621,11 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
                     <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                       <button onClick={() => setPreviewMode(!previewMode)}
                         style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: previewMode ? 'var(--blue)' : 'transparent', color: previewMode ? '#fff' : 'var(--text-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                        {previewMode ? '📝 편집 모드' : '👁️ 인쇄 미리보기'}
+                        {previewMode ? '편집 모드' : '인쇄 미리보기'}
                       </button>
                       <button onClick={() => printToPDF()}
                         style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                        📄 PDF 다운로드
+                        PDF 다운로드
                       </button>
                     </div>
 
@@ -659,7 +659,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
                                   <button onClick={() => { setEditingId(r.id); setEditText(r.manager_report); }}
                                     style={{ padding: '5px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 12, cursor: 'pointer' }}>
-                                    ✏️ 원본 수정
+                                    원본 수정
                                   </button>
                                 </div>
                               )}

@@ -63,11 +63,36 @@
   --step-border: var(--border);
 
   /* 반지름 */
+  --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-pill: 9999px;
+
+  /* 간격 (8px 그리드) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* 컴포넌트 높이 */
+  --height-btn-sm: 32px;
+  --height-btn-md: 40px;
+  --height-btn-lg: 48px;
+  --height-input: 44px;
+  --height-touch: 44px;
+
+  /* 폰트 굵기 계층 */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 }
 
 /* 라이트모드 */
@@ -133,11 +158,30 @@ body {
   background: var(--bg-main) !important;
   color: var(--text-primary);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* 유동 타이포그래피 */
+h1 { font-size: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem); font-weight: var(--weight-bold); line-height: 1.15; }
+h2 { font-size: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem); font-weight: var(--weight-bold); line-height: 1.2; }
+h3 { font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem); font-weight: var(--weight-semibold); line-height: 1.3; }
+h4 { font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); font-weight: var(--weight-semibold); line-height: 1.35; }
+
+/* 입력 필드 — iOS 줌 방지 (16px 이상 필수) */
+input, select, textarea {
+  font-size: max(16px, 1rem);
+}
+
+/* 터치 타겟 최소 크기 */
+button, a, [role="button"] {
+  min-height: var(--height-touch);
+}
+
+/* 인라인 작은 버튼은 예외 */
+.btn-inline { min-height: auto; }
 
 * {
   box-sizing: border-box;
@@ -174,14 +218,20 @@ body {
   animation: fadeInUp 0.25s ease forwards;
 }
 
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-  body { font-size: 14px; }
-  .note-tag-desktop { display: none !important; }
+/* ──────────────────────────────────────
+   반응형: 태블릿 (768px ~ 1023px)
+   ────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* 카드 패딩 축소 */
+  [style*="padding: 24px"] { padding: 16px !important; }
+}
 
-  /* 제목 크기 축소 */
-  h2 { font-size: 22px !important; }
-  h3 { font-size: 17px !important; }
+/* ──────────────────────────────────────
+   반응형: 모바일 (< 768px)
+   ────────────────────────────────────── */
+@media (max-width: 768px) {
+  body { font-size: 15px; }
+  .note-tag-desktop { display: none !important; }
 
   /* 테이블 가로 스크롤 보장 */
   table { font-size: 13px !important; min-width: 600px; }
@@ -197,14 +247,11 @@ body {
   [style*="width: 420px"],
   [style*="width: 480px"] { width: 92vw !important; }
 
-  /* 긴 버튼 → 이모지만 표시 */
-  .btn-label { display: none !important; }
-
   /* 버튼/뱃지 줄바꿈 방지 */
   button, a { white-space: nowrap; }
 
   /* 버튼 패딩 축소 */
-  button, a[style*="padding"] { padding: 8px 12px !important; font-size: 13px !important; }
+  button, a[style*="padding"] { padding: 8px 12px !important; font-size: 14px !important; }
 
   /* 날짜 선택: 버튼 → 드롭다운 */
   .date-buttons-desktop { display: none !important; }

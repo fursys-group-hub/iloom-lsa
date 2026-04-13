@@ -105,7 +105,7 @@ export default function GrowthPage() {
 
       {!selectedStudentId ? (
         <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center' }}>
-          <p style={{ fontSize: 40, margin: '0 0 16px' }}>📊</p>
+          <p style={{ fontSize: 40, margin: '0 0 16px' }}></p>
           <p style={{ color: 'var(--text-muted)', fontSize: 16 }}>교육생을 선택하면 성장 차트를 볼 수 있어요</p>
         </div>
       ) : (

@@ -52,11 +52,11 @@ export interface StudentMemo {
 }
 
 export const MEMO_CATEGORIES = {
-  behavior: { label: '수업태도', emoji: '📋', color: 'var(--blue)' },
-  counsel: { label: '상담', emoji: '💬', color: 'var(--purple)' },
-  praise: { label: '칭찬', emoji: '⭐', color: 'var(--green)' },
-  caution: { label: '주의', emoji: '⚠️', color: 'var(--orange)' },
-  general: { label: '일반', emoji: '📝', color: 'var(--text-tertiary)' },
+  behavior: { label: '수업태도', color: 'var(--blue)' },
+  counsel: { label: '상담', color: 'var(--purple)' },
+  praise: { label: '칭찬', color: 'var(--green)' },
+  caution: { label: '주의', color: 'var(--orange)' },
+  general: { label: '일반', color: 'var(--text-tertiary)' },
 } as const;
 
 export interface WrongAnswer {

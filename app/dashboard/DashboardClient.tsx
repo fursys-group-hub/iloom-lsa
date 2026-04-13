@@ -313,7 +313,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            안녕하세요, 수지님 👋
+            안녕하세요, 수지님
           </h2>
           <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
             오늘의 교육 현황이에요
@@ -394,12 +394,12 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
       {/* 출결 요약 카드 */}
       <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: droppedStudents.length > 0 ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
-        <StatCard icon="👥" label="교육 인원" value={todayAttendance.total} unit="명" />
-        <StatCard icon="✅" label="출석" value={todayAttendance.present} unit="명" accent="var(--green)" />
-        <StatCard icon="⏰" label="지각" value={todayAttendance.late} unit="명" accent="var(--orange)" />
-        <StatCard icon="❌" label="결석" value={todayAttendance.absent} unit="명" accent="var(--red)" />
+        <StatCard label="교육 인원" value={todayAttendance.total} unit="명" />
+        <StatCard label="출석" value={todayAttendance.present} unit="명" accent="var(--green)" />
+        <StatCard label="지각" value={todayAttendance.late} unit="명" accent="var(--orange)" />
+        <StatCard label="결석" value={todayAttendance.absent} unit="명" accent="var(--red)" />
         {droppedStudents.length > 0 && (
-          <StatCard icon="🚪" label="퇴사" value={droppedStudents.length} unit="명" accent="var(--text-muted)" />
+          <StatCard label="퇴사" value={droppedStudents.length} unit="명" accent="var(--text-muted)" />
         )}
       </div>
 
@@ -412,7 +412,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           {/* 🆕 주의 교육생 — 교육생 종합 분석과 동일 로직 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <h3 style={{ ...sectionTitle, marginBottom: 0 }}>⚠️ 주의 교육생 ({riskStudentsDetailed.length}명)</h3>
+              <h3 style={{ ...sectionTitle, marginBottom: 0 }}>주의 교육생 ({riskStudentsDetailed.length}명)</h3>
               <Link href="/dashboard/students?tab=analysis" style={{
                 fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none',
               }}>종합 분석 →</Link>
@@ -429,7 +429,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                     green:  { bg: 'var(--green-dim)',  text: 'var(--green)' },
                   };
                   const badgeColor = advice ? typeColorMap[advice.typeColor] : typeColorMap.orange;
-                  const badgeLabel = advice ? `${advice.typeEmoji} ${advice.typeLabel}` : '주의';
+                  const badgeLabel = advice ? advice.typeLabel : '주의';
 
                   return (
                     <Link key={student.id} href="/dashboard/students?tab=analysis"
@@ -473,14 +473,14 @@ export default function DashboardClient({ batches, students: allStudents, scores
                 })}
               </div>
             ) : (
-              <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '16px 0' }}>모든 교육생이 양호해요! 🎉</p>
+              <p style={{ fontSize: 14, color: 'var(--text-tertiary)', padding: '16px 0' }}>모든 교육생이 양호해요</p>
             )}
           </div>
 
           {/* 차시별 평균 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ ...sectionTitle, margin: 0 }}>📊 차시별 평균</h3>
+              <h3 style={{ ...sectionTitle, margin: 0 }}>차시별 평균</h3>
               <Link href="/dashboard/tests" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
             </div>
             {subjectAverages.length > 0 ? (
@@ -510,7 +510,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
           {/* 평균 추이 */}
           <div style={cardStyle}>
-            <h3 style={sectionTitle}>📈 평균 추이</h3>
+            <h3 style={sectionTitle}>평균 추이</h3>
             {dailyAverages.length > 0 ? (
               <ScoreTrendChart data={dailyAverages} height={180} />
             ) : (
@@ -533,20 +533,20 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <div style={cardStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <h3 style={{ ...sectionTitle, margin: 0 }}>📓 오늘 교육일지</h3>
+                    <h3 style={{ ...sectionTitle, margin: 0 }}>오늘 교육일지</h3>
                     <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: dayConfig.bg, color: dayConfig.color }}>
-                      {dayConfig.emoji} {dayConfig.label}
+                      {dayConfig.label}
                     </span>
                   </div>
                   <Link href="/dashboard/education-logs" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
                 </div>
                 {isOffDay ? (
                   <div style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>
-                    🌙 오늘은 휴무일이에요. 교육일지 제출이 필요하지 않아요!
+                    오늘은 휴무일이에요. 교육일지 제출이 필요하지 않아요.
                   </div>
                 ) : isPracticeDay ? (
                   <div style={{ fontSize: 14, color: 'var(--text-second)' }}>
-                    🏪 오늘은 매장실습일이에요. <Link href="/dashboard/practice" style={{ color: 'var(--blue-light)', textDecoration: 'underline' }}>실습일지</Link>를 확인해주세요!
+                    오늘은 매장실습일이에요. <Link href="/dashboard/practice" style={{ color: 'var(--blue-light)', textDecoration: 'underline' }}>실습일지</Link>를 확인해주세요.
                     {todayNotes.length > 0 && (
                       <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-muted)' }}>
                         자율학습 제출: {noteSubmitted.size}명
@@ -581,15 +581,15 @@ export default function DashboardClient({ batches, students: allStudents, scores
           {/* 실습일지 실적 요약 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ ...sectionTitle, margin: 0 }}>🏪 실습일지 실적</h3>
+              <h3 style={{ ...sectionTitle, margin: 0 }}>실습일지 실적</h3>
               <Link href="/dashboard/practice" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
             </div>
             {practiceStats.count > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                <MiniStat icon="🗣️" label="상담" value={practiceStats.consult} unit="건" color="var(--green)" />
-                <MiniStat icon="📋" label="견적" value={practiceStats.estimate} unit="건" color="var(--blue-light)" />
-                <MiniStat icon="✅" label="수주" value={practiceStats.order} unit="건" color="var(--orange)" />
-                <MiniStat icon="💰" label="수주금액" value={practiceStats.amount} unit="원" color="var(--purple)" isAmount />
+                <MiniStat label="상담" value={practiceStats.consult} unit="건" color="var(--green)" />
+                <MiniStat label="견적" value={practiceStats.estimate} unit="건" color="var(--blue-light)" />
+                <MiniStat label="수주" value={practiceStats.order} unit="건" color="var(--orange)" />
+                <MiniStat label="수주금액" value={practiceStats.amount} unit="원" color="var(--purple)" isAmount />
               </div>
             ) : (
               <p style={{ fontSize: 14, color: 'var(--text-muted)', padding: '16px 0' }}>아직 실습일지가 없어요</p>
@@ -603,7 +603,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <h3 style={{ ...sectionTitle, margin: 0 }}>💬 질문관리</h3>
+                <h3 style={{ ...sectionTitle, margin: 0 }}>질문관리</h3>
                 {questions.filter(q => q.status === 'open').length > 0 && (
                   <span style={{
                     padding: '2px 10px', borderRadius: 'var(--radius-pill)',
@@ -662,7 +662,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           {/* 최근 공지사항 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ ...sectionTitle, margin: 0 }}>📢 최근 공지</h3>
+              <h3 style={{ ...sectionTitle, margin: 0 }}>최근 공지</h3>
               <Link href="/dashboard/announcements" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
             </div>
             {announcements.length > 0 ? (
@@ -706,7 +706,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
           {/* 미확인 코멘트 */}
           <div style={cardStyle}>
-            <h3 style={sectionTitle}>💬 최근 교육생 답글</h3>
+            <h3 style={sectionTitle}>최근 교육생 답글</h3>
             {studentComments.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {studentComments.map(c => {
@@ -768,14 +768,13 @@ const sectionTitle: React.CSSProperties = {
 
 /* ─── 하위 컴포넌트 ─── */
 
-function StatCard({ icon, label, value, unit, accent }: {
-  icon: string; label: string; value: number; unit: string; accent?: string;
+function StatCard({ label, value, unit, accent }: {
+  label: string; value: number; unit: string; accent?: string;
 }) {
   return (
     <div style={cardStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ fontSize: 18 }}>{icon}</span>
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</span>
+      <div style={{ marginBottom: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: accent || 'var(--text-tertiary)' }}>{label}</span>
       </div>
       <p style={{ fontSize: 28, fontWeight: 800, color: accent || 'var(--text-primary)', margin: 0 }}>
         {value}
@@ -785,21 +784,18 @@ function StatCard({ icon, label, value, unit, accent }: {
   );
 }
 
-function MiniStat({ icon, label, value, unit, color, isAmount }: {
-  icon: string; label: string; value: number; unit: string; color: string; isAmount?: boolean;
+function MiniStat({ label, value, unit, color, isAmount }: {
+  label: string; value: number; unit: string; color: string; isAmount?: boolean;
 }) {
   return (
     <div style={{
       padding: '12px 14px', borderRadius: 'var(--radius-md)',
-      background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', gap: 10,
+      background: 'var(--bg-elevated)',
     }}>
-      <span style={{ fontSize: 16 }}>{icon}</span>
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{label}</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color }}>
-          {isAmount ? value.toLocaleString() : value}
-          <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{unit}</span>
-        </div>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color }}>
+        {isAmount ? value.toLocaleString() : value}
+        <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{unit}</span>
       </div>
     </div>
   );

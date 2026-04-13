@@ -252,7 +252,7 @@ export default function SettingsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          📚 기수 관리
+          기수 관리
         </h2>
       </div>
 
@@ -283,9 +283,9 @@ export default function SettingsPage() {
             {/* 스텝 인디케이터 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 4 }}>
               {[
-                { step: 1, label: '기본 정보', icon: '📋' },
-                { step: 2, label: '교육 스케줄', icon: '📅' },
-                { step: 3, label: '심화교육', icon: '🏪' },
+                { step: 1, label: '기본 정보' },
+                { step: 2, label: '교육 스케줄' },
+                { step: 3, label: '심화교육' },
               ].map((s, i) => (
                 <div key={s.step} style={{ display: 'flex', alignItems: 'center' }}>
                   <div
@@ -298,7 +298,7 @@ export default function SettingsPage() {
                       fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                     }}
                   >
-                    <span>{wizardStep > s.step ? '✓' : s.icon}</span>
+                    {wizardStep > s.step && <span>{'✓'}</span>}
                     <span>{s.label}</span>
                   </div>
                   {i < 2 && <div style={{ width: 24, height: 2, background: wizardStep > s.step ? 'var(--green)' : 'var(--border)', margin: '0 4px' }} />}
@@ -357,8 +357,8 @@ export default function SettingsPage() {
                   </div>
                   <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
                     {([
-                      { type: 'education' as DayType, label: '📚 정규교육', bg: 'var(--blue)', bgDim: 'var(--blue-dim)', color: 'var(--blue)' },
-                      { type: 'practice' as DayType, label: '🏪 매장실습', bg: 'var(--orange)', bgDim: 'var(--orange-dim)', color: 'var(--orange)' },
+                      { type: 'education' as DayType, label: '정규교육', bg: 'var(--blue)', bgDim: 'var(--blue-dim)', color: 'var(--blue)' },
+                      { type: 'practice' as DayType, label: '매장실습', bg: 'var(--orange)', bgDim: 'var(--orange-dim)', color: 'var(--orange)' },
                       { type: 'off' as DayType, label: '🌙 휴무', bg: 'var(--text-muted)', bgDim: 'var(--bg-hover)', color: 'var(--text-muted)' },
                     ]).map(opt => (
                       <button key={opt.type} type="button" onClick={() => setPaintMode(opt.type)}
@@ -439,8 +439,8 @@ export default function SettingsPage() {
                     const counts = { education: 0, practice: 0, off: 0 };
                     Object.values(scheduleEdit).forEach(t => counts[t as DayType]++);
                     return <>
-                      <span style={{ fontWeight: 700 }}>📚 정규 {counts.education}일</span>
-                      <span style={{ fontWeight: 700 }}>🏪 실습 {counts.practice}일</span>
+                      <span style={{ fontWeight: 700 }}>정규 {counts.education}일</span>
+                      <span style={{ fontWeight: 700 }}>실습 {counts.practice}일</span>
                       <span style={{ fontWeight: 700 }}>🌙 휴무 {counts.off}일</span>
                       <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>총 {counts.education + counts.practice + counts.off}일</span>
                     </>;
@@ -466,7 +466,7 @@ export default function SettingsPage() {
                   {(() => {
                     const counts = { education: 0, practice: 0, off: 0 };
                     Object.values(scheduleEdit).forEach(t => counts[t as DayType]++);
-                    return <span style={{ marginLeft: 12, color: 'var(--text-muted)' }}>📚{counts.education} 🏪{counts.practice} 🌙{counts.off}</span>;
+                    return <span style={{ marginLeft: 12, color: 'var(--text-muted)' }}>교육{counts.education} 실습{counts.practice} 휴무{counts.off}</span>;
                   })()}
                 </div>
 
@@ -519,7 +519,7 @@ export default function SettingsPage() {
                       {batch.name}
                     </p>
                     {(() => {
-                      if (batch.is_archived) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>📦 보관됨</span>;
+                      if (batch.is_archived) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>보관됨</span>;
                       const today = new Date().toISOString().slice(0, 10);
                       if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
                       if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
@@ -535,7 +535,7 @@ export default function SettingsPage() {
                     {batch.schedule && Object.keys(batch.schedule).length > 0 && (() => {
                       const counts = { education: 0, practice: 0, off: 0 };
                       Object.values(batch.schedule).forEach(t => counts[t as DayType]++);
-                      return <span style={{ marginLeft: 8 }}>📚{counts.education} 🏪{counts.practice} 🌙{counts.off}</span>;
+                      return <span style={{ marginLeft: 8 }}>교육{counts.education} 실습{counts.practice} 휴무{counts.off}</span>;
                     })()}
                   </p>
                 </div>
@@ -595,7 +595,7 @@ export default function SettingsPage() {
                             }}
                             style={{ ...tinyBtnStyle, color: 'var(--text-muted)' }}
                           >
-                            📦 보관
+                            보관
                           </button>
                         );
                       })()}
@@ -620,7 +620,7 @@ export default function SettingsPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div>
               <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-                👥 {selectedBatch?.name} 교육생
+                {selectedBatch?.name} 교육생
               </h3>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 2 }}>
                 {students.length}명 등록됨
@@ -743,7 +743,7 @@ export default function SettingsPage() {
                             onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5'; }}
                           >
-                            🔑
+                            비번 초기화
                           </button>
                           <button
                             onClick={() => handleDrop(s)}

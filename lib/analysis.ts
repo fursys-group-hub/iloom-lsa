@@ -477,15 +477,15 @@ export function calculateRiskChecklist(params: {
 // 체크된 항목 조합을 보고 7가지 유형 중 하나로 판정
 // + 적응 지수의 breakdown을 참고해서 구체적인 액션 추천
 
-const ADVICE_META: Record<AdviceType, { emoji: string; label: string; color: HRAdvice['typeColor'] }> = {
-  knowledge:  { emoji: '📘', label: '지식 부족형',    color: 'red' },
-  category:   { emoji: '🎯', label: '약점 편중형',    color: 'orange' },
-  psych:      { emoji: '💔', label: '심리 위축형',    color: 'purple' },
-  attendance: { emoji: '🚪', label: '근태/동기 이슈형', color: 'orange' },
-  behavior:   { emoji: '🔍', label: '행동 관찰형',    color: 'orange' },
-  complex:    { emoji: '🚨', label: '복합 위기형',    color: 'red' },
-  partial:    { emoji: '💎', label: '부분 주의형',    color: 'blue' },
-  descent:    { emoji: '🌊', label: '하락 징후형',    color: 'orange' },
+const ADVICE_META: Record<AdviceType, { label: string; color: HRAdvice['typeColor'] }> = {
+  knowledge:  { label: '지식 부족형',    color: 'red' },
+  category:   { label: '약점 편중형',    color: 'orange' },
+  psych:      { label: '심리 위축형',    color: 'purple' },
+  attendance: { label: '근태/동기 이슈형', color: 'orange' },
+  behavior:   { label: '행동 관찰형',    color: 'orange' },
+  complex:    { label: '복합 위기형',    color: 'red' },
+  partial:    { label: '부분 주의형',    color: 'blue' },
+  descent:    { label: '하락 징후형',    color: 'orange' },
 };
 
 // 체크 라벨 상수 (calculateRiskChecklist와 매칭)
@@ -550,7 +550,7 @@ export function generateHRAdvice(
   return {
     studentId: riskCheck.studentId,
     type,
-    typeEmoji: meta.emoji,
+    typeEmoji: '',
     typeLabel: meta.label,
     typeColor: meta.color,
     difficulty,
@@ -610,7 +610,7 @@ function buildAdviceContent(
       return {
         difficulty: `시험 점수(${examAvg}점)는 실제 실력에 비해 본인이 스스로를 과소평가하고 있을 가능성이 커요. 자신감이 3회 연속 낮게 나왔어요.`,
         actions: [
-          '💬 개인 면담 필수 — 어떤 부분이 불안한지 구체적으로 듣기',
+          '개인 면담 필수 — 어떤 부분이 불안한지 구체적으로 듣기',
           '작은 성공 경험 제공 (쉬운 과제 → 성취 인정 → 난이도 점증)',
           '상위 그룹 멘토/동료 연결해서 심리적 안전망 제공',
         ],
@@ -732,7 +732,7 @@ function buildAdviceContent(
           ? `지금까지 누적 점수(${adaptation?.total ?? 0}점)는 양호하지만, 최근 들어 ${declineWhat} — 표면상 문제없어 보여도 속으로 무너지고 있을 가능성이 커요. 점수만 보면 놓치기 쉬운 사각지대예요.`
           : `전반 점수는 아직 괜찮은데 최근 ${declineWhat} 신호가 나왔어요. 지금 잡아주지 않으면 본격적으로 무너질 수 있어요.`,
         actions: [
-          '💬 "요즘 어때?" 가벼운 티타임 면담부터 시작 (추궁 X)',
+          '"요즘 어때?" 가벼운 티타임 면담부터 시작 (추궁 X)',
           '최근 어려웠던 부분 구체적으로 물어보기 — 학습/관계/개인사',
           isHigh
             ? '완벽주의/번아웃 징후 체크 — 잘하던 애가 무너질 때 가장 위험'

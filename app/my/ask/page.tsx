@@ -178,7 +178,7 @@ export default function AskPage() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>💬 질문하기</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>질문하기</h2>
         {!showForm && !isArchived && (
           <button onClick={() => { setShowForm(true); setSelectedId(null); }} style={{
             padding: '10px 20px', borderRadius: 'var(--radius-md)',
@@ -269,7 +269,7 @@ export default function AskPage() {
                       {st.label}
                     </span>
                     {q.reply_count > 0 && (
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>💬 {q.reply_count}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{q.reply_count}개 답변</span>
                     )}
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                       {new Date(q.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
@@ -471,7 +471,7 @@ export default function AskPage() {
                     padding: '10px 16px', borderRadius: 'var(--radius-md)',
                     background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 14,
                   }}>
-                    📦 이 질문은 보관처리 되었습니다
+                    이 질문은 보관처리 되었습니다
                   </div>
                 </div>
               ) : (

@@ -5,10 +5,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const nav = [
-  { href: '/manager', label: '홈', icon: '🏠' },
-  { href: '/manager/tests', label: '테스트', icon: '📝', disabled: true },
-  { href: '/manager/evaluations', label: 'R&P', icon: '🏪' },
-  { href: '/manager/final', label: '교육 총평', icon: '🎓' },
+  { href: '/manager', label: '홈' },
+  { href: '/manager/tests', label: '테스트', disabled: true },
+  { href: '/manager/evaluations', label: 'R&P' },
+  { href: '/manager/final', label: '교육 총평' },
 ];
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
@@ -64,11 +64,10 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
             if (isDisabled) {
               return (
                 <div key={item.href} style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500,
+                  display: 'flex', alignItems: 'center', padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 400,
                   color: 'var(--text-muted)', opacity: 0.5, cursor: 'default',
                 }}>
-                  <span style={{ fontSize: 16 }}>{item.icon}</span>
                   {item.label}
                   <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
                 </div>
@@ -78,16 +77,17 @@ export default function ManagerLayout({ children }: { children: React.ReactNode 
             return (
               <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-                  borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, textDecoration: 'none',
+                  display: 'flex', alignItems: 'center', padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)', fontSize: 15,
+                  fontWeight: isActive ? 600 : 400,
+                  textDecoration: 'none',
                   transition: 'all 0.15s ease',
                   background: isActive ? 'var(--blue)' : 'transparent',
                   color: isActive ? '#fff' : 'var(--text-tertiary)',
                 }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-second)'; } }}
+                onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; } }}
               >
-                <span style={{ fontSize: 16 }}>{item.icon}</span>
                 {item.label}
               </Link>
             );

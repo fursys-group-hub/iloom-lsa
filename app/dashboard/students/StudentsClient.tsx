@@ -219,7 +219,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          👤 개별분석
+          개별분석
         </h2>
         <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
           {([['list', '명단'], ['analysis', '종합 분석']] as const).map(([key, label]) => (
@@ -239,9 +239,9 @@ export default function StudentsClient({ batches, students: initialStudents, sco
           {/* 적응 지수 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>🎯 입문교육 적응 지수</h3>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>입문교육 적응 지수</h3>
               <details style={{ cursor: 'pointer', position: 'relative' }}>
-                <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>ℹ️ 계산 기준</summary>
+                <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>계산 기준</summary>
                 <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 480 }}>
                   <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
                     적응 지수는 8가지를 종합해서 계산해요
@@ -259,18 +259,18 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     </thead>
                     <tbody>
                       {[
-                        { emoji: '📝', name: '시험 평균',     weight: '30%', note: '전체 차시 시험 점수의 평균' },
-                        { emoji: '🗺️', name: '하위 분야',     weight: '15%', note: '60점 미만인 제품 카테고리 개수' },
-                        { emoji: '📋', name: '출석률',        weight: '13%', note: '출석/지각/결석 (지각은 0.5로 계산)' },
-                        { emoji: '📓', name: '교육일지 참여', weight: '15%', note: '일지 제출과 STEP 작성 충실도' },
-                        { emoji: '📈', name: '성장 기울기',   weight: '10%', note: '최근 3차시와 초반 3차시 점수 비교' },
-                        { emoji: '💪', name: '자신감 추이',   weight: '8%',  note: '일지 자신감 단계의 변화 (상승/유지/하락)' },
-                        { emoji: '🔁', name: '만성 오답',     weight: '5%',  note: '계속 반복해서 틀리는 문항이 얼마나 되는지' },
-                        { emoji: '🗒️', name: '메모 톤',       weight: '4%',  note: '교육자가 남긴 칭찬/주의 메모의 비율' },
+                        { name: '시험 평균',     weight: '30%', note: '전체 차시 시험 점수의 평균' },
+                        { name: '하위 분야',     weight: '15%', note: '60점 미만인 제품 카테고리 개수' },
+                        { name: '출석률',        weight: '13%', note: '출석/지각/결석 (지각은 0.5로 계산)' },
+                        { name: '교육일지 참여', weight: '15%', note: '일지 제출과 STEP 작성 충실도' },
+                        { name: '성장 기울기',   weight: '10%', note: '최근 3차시와 초반 3차시 점수 비교' },
+                        { name: '자신감 추이',   weight: '8%',  note: '일지 자신감 단계의 변화 (상승/유지/하락)' },
+                        { name: '만성 오답',     weight: '5%',  note: '계속 반복해서 틀리는 문항이 얼마나 되는지' },
+                        { name: '메모 톤',       weight: '4%',  note: '교육자가 남긴 칭찬/주의 메모의 비율' },
                       ].map((row, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
                           <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                            {row.emoji} {row.name}
+                            {row.name}
                           </td>
                           <td style={{ padding: '6px 8px', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
                           <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.note}</td>
@@ -287,7 +287,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     borderRadius: 'var(--radius-sm)',
                   }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)', marginBottom: 4 }}>
-                      ⚠️ 최근 무너지는 신호가 있으면 추가 감점돼요 <span style={{ fontSize: 11, fontWeight: 500 }}>(최대 −8점)</span>
+                      최근 무너지는 신호가 있으면 추가 감점돼요 <span style={{ fontSize: 11, fontWeight: 500 }}>(최대 −8점)</span>
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
                       점수가 괜찮아도 &quot;조용히 무너지는&quot; 학생을 놓치지 않기 위해서예요
@@ -299,7 +299,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   </div>
 
                   <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                    💡 학생 카드를 클릭하면 각 항목의 상세 근거를 볼 수 있어요
+                    학생 카드를 클릭하면 각 항목의 상세 근거를 볼 수 있어요
                   </div>
                 </div>
               </details>
@@ -328,17 +328,17 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                       </div>
                       {isExpanded && (
                         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <DetailRow label="📝 시험 평균" score={idx.breakdown.examAvg} detail={`전체 시험 평균 ${idx.breakdown.examAvg}점`} />
-                          <DetailRow label="🗺️ 하위 분야" score={idx.breakdown.weakCategories} detail={`${idx.breakdown.totalCategories}개 분야 중 60점 미만 ${idx.breakdown.weakCategoryCount}개${idx.breakdown.weakCategoryNames.length > 0 ? ` (${idx.breakdown.weakCategoryNames.slice(0, 3).join('/')}${idx.breakdown.weakCategoryNames.length > 3 ? '…' : ''})` : ''}`} />
-                          <DetailRow label="📋 출석률" score={idx.breakdown.attendanceRate} detail={`출석률 ${idx.breakdown.attendanceRate}% (지각=0.5 반영)`} />
-                          <DetailRow label="📓 교육일지 참여" score={idx.breakdown.participation} detail={idx.breakdown.participationDetail} />
-                          <DetailRow label="📈 성장 기울기" score={idx.breakdown.growthSlope} detail={idx.breakdown.growthDetail} />
-                          <DetailRow label={`💪 자신감 추이${!idx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={idx.breakdown.confidenceTrend} detail={`${idx.breakdown.confidenceDetail}${!idx.breakdown.hasConfidenceData ? ' → 시험/참여로 분산' : ''}`} />
-                          <DetailRow label="🔁 만성 오답" score={idx.breakdown.chronicScore} detail={idx.breakdown.chronicDetail} />
-                          <DetailRow label="🗒️ 메모 톤" score={idx.breakdown.memoBalance} detail={idx.breakdown.memoBalanceDetail} />
+                          <DetailRow label="시험 평균" score={idx.breakdown.examAvg} detail={`전체 시험 평균 ${idx.breakdown.examAvg}점`} />
+                          <DetailRow label="하위 분야" score={idx.breakdown.weakCategories} detail={`${idx.breakdown.totalCategories}개 분야 중 60점 미만 ${idx.breakdown.weakCategoryCount}개${idx.breakdown.weakCategoryNames.length > 0 ? ` (${idx.breakdown.weakCategoryNames.slice(0, 3).join('/')}${idx.breakdown.weakCategoryNames.length > 3 ? '…' : ''})` : ''}`} />
+                          <DetailRow label="출석률" score={idx.breakdown.attendanceRate} detail={`출석률 ${idx.breakdown.attendanceRate}% (지각=0.5 반영)`} />
+                          <DetailRow label="교육일지 참여" score={idx.breakdown.participation} detail={idx.breakdown.participationDetail} />
+                          <DetailRow label="성장 기울기" score={idx.breakdown.growthSlope} detail={idx.breakdown.growthDetail} />
+                          <DetailRow label={`자신감 추이${!idx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={idx.breakdown.confidenceTrend} detail={`${idx.breakdown.confidenceDetail}${!idx.breakdown.hasConfidenceData ? ' → 시험/참여로 분산' : ''}`} />
+                          <DetailRow label="만성 오답" score={idx.breakdown.chronicScore} detail={idx.breakdown.chronicDetail} />
+                          <DetailRow label="메모 톤" score={idx.breakdown.memoBalance} detail={idx.breakdown.memoBalanceDetail} />
                           {idx.breakdown.deltaDeduction > 0 && (
                             <div style={{ marginTop: 4, padding: '8px 10px', background: 'var(--red-dim)', borderRadius: 6, fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>
-                              ⚠️ 부정 신호 감점 −{idx.breakdown.deltaDeduction}점 ({idx.breakdown.deltaDetail})
+                              부정 신호 감점 −{idx.breakdown.deltaDeduction}점 ({idx.breakdown.deltaDetail})
                             </div>
                           )}
                         </div>
@@ -354,14 +354,14 @@ export default function StudentsClient({ batches, students: initialStudents, sco
           {riskChecks.length > 0 && (
             <div style={cardStyle}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>⚠️ 주의가 필요한 교육생 ({riskChecks.length}명)</h3>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>주의가 필요한 교육생 ({riskChecks.length}명)</h3>
                 <details style={{ cursor: 'pointer', position: 'relative' }}>
-                  <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>ℹ️ 판정 기준</summary>
+                  <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>판정 기준</summary>
                   <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 520 }}>
 
                     {/* Part 1: 체크 항목 */}
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
-                      1️⃣ 먼저 6가지 신호를 체크해요
+                      먼저 6가지 신호를 체크해요
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
                       하나라도 해당되면 주의 교육생으로 표시해요
@@ -383,7 +383,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           { name: '최근 하락 신호', cond: '성적 5점↓ 하락 또는 자신감 급락' },
                         ].map((row, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>⚠️ {row.name}</td>
+                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.name}</td>
                             <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.cond}</td>
                           </tr>
                         ))}
@@ -392,7 +392,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
 
                     {/* Part 2: 유형 판정 */}
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
-                      2️⃣ 해당된 신호 조합으로 유형을 정해요
+                      해당된 신호 조합으로 유형을 정해요
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
                       각 유형에 맞춰 맞춤 HR 조언이 자동으로 붙어요
@@ -406,18 +406,18 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                       </thead>
                       <tbody>
                         {[
-                          { emoji: '🚨', name: '복합 위기형',    when: '주의 신호 3개 이상 동시 해당' },
-                          { emoji: '📘', name: '지식 부족형',    when: '시험 낮음 + 하위 분야 많음' },
-                          { emoji: '🎯', name: '약점 편중형',    when: '시험은 양호한데 하위 분야만 많음' },
-                          { emoji: '💔', name: '심리 위축형',    when: '자신감이 계속 낮은 상태' },
-                          { emoji: '🌊', name: '하락 징후형',    when: '성적이나 자신감이 최근 하락 중' },
-                          { emoji: '🚪', name: '근태/동기 이슈형', when: '출석률만 낮은 경우' },
-                          { emoji: '🔍', name: '행동 관찰형',    when: '주의 메모만 쌓인 경우' },
-                          { emoji: '💎', name: '부분 주의형',    when: '적응 점수 \'상\' 그룹인데 한두 가지 주의' },
+                          { name: '복합 위기형',    when: '주의 신호 3개 이상 동시 해당' },
+                          { name: '지식 부족형',    when: '시험 낮음 + 하위 분야 많음' },
+                          { name: '약점 편중형',    when: '시험은 양호한데 하위 분야만 많음' },
+                          { name: '심리 위축형',    when: '자신감이 계속 낮은 상태' },
+                          { name: '하락 징후형',    when: '성적이나 자신감이 최근 하락 중' },
+                          { name: '근태/동기 이슈형', when: '출석률만 낮은 경우' },
+                          { name: '행동 관찰형',    when: '주의 메모만 쌓인 경우' },
+                          { name: '부분 주의형',    when: '적응 점수 \'상\' 그룹인데 한두 가지 주의' },
                         ].map((row, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
                             <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                              {row.emoji} {row.name}
+                              {row.name}
                             </td>
                             <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.when}</td>
                           </tr>
@@ -426,7 +426,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     </table>
 
                     <div style={{ marginTop: 12, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                      💡 카드 배경색: <strong style={{ color: 'var(--red)' }}>빨강</strong> = 3개+ 위험 · <strong style={{ color: 'var(--orange)' }}>주황</strong> = 1~2개 주의 · <strong style={{ color: 'var(--blue)' }}>파랑</strong> = 부분 주의
+                      카드 배경색: <strong style={{ color: 'var(--red)' }}>빨강</strong> = 3개+ 위험 · <strong style={{ color: 'var(--orange)' }}>주황</strong> = 1~2개 주의 · <strong style={{ color: 'var(--blue)' }}>파랑</strong> = 부분 주의
                     </div>
                   </div>
                 </details>
@@ -450,12 +450,12 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                       rCardBg = 'var(--orange-dim)';
                       badgeBg = 'var(--orange)';
                       badgeText = '하락 경고';
-                      topHint = { text: '🌊 전반은 양호하나 최근 하락 징후가 있어요', color: 'var(--orange)' };
+                      topHint = { text: '전반은 양호하나 최근 하락 징후가 있어요', color: 'var(--orange)' };
                     } else {
                       rCardBg = 'var(--blue-dim)';
                       badgeBg = 'var(--blue)';
                       badgeText = '부분 주의';
-                      topHint = { text: '💡 전체적으로 양호하지만 이 부분은 주의', color: 'var(--blue)' };
+                      topHint = { text: '전체적으로 양호하지만 이 부분은 주의', color: 'var(--blue)' };
                     }
                   }
 
@@ -478,7 +478,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           if (c.label.includes('자신감') && c.value !== '미입력') displayValue = c.value.split(', ').map(v => confToKor(v)).join(' → ');
                           return (
                             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-                              <span style={{ color: 'var(--red)', fontSize: 14 }}>⚠️</span>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', display: 'inline-block', flexShrink: 0 }} />
                               <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{c.label}</span>
                               <span style={{ color: 'var(--red)', fontWeight: 700, marginLeft: 'auto' }}>{displayValue}</span>
                             </div>
@@ -506,7 +506,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
 
           {/* 태도/참여 현황 */}
           <div style={cardStyle}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>🙋 태도/참여 현황</h3>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>태도/참여 현황</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
               {[
                 { label: '평균 출석률', value: `${participationStats.avgAttendance}%`, color: 'var(--green)', desc: '지각=0.5 반영' },
@@ -581,7 +581,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
               }}>퇴사자{droppedCount > 0 ? ` (${droppedCount})` : ''}</button>
             </div>
             <details style={{ cursor: 'pointer', marginLeft: 'auto' }}>
-              <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>ℹ️ 기준</summary>
+              <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>기준</summary>
               <div style={{ position: 'absolute', right: 40, marginTop: 8, padding: '14px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.8, zIndex: 10, width: 340 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <div><span style={{ color: 'var(--red)', fontWeight: 700 }}>● 위험</span> — 결석 2회+ 또는 최근 3회 평균 60점 미만</div>
@@ -687,18 +687,18 @@ function HRAdviceBox({ advice }: { advice: HRAdvice }) {
           padding: '3px 10px',
           borderRadius: 'var(--radius-pill)',
         }}>
-          {advice.typeEmoji} {advice.typeLabel}
+          {advice.typeLabel}
         </span>
       </div>
 
       {/* 어려움 서술 */}
       <div style={{ fontSize: 12.5, color: 'var(--text-second)', lineHeight: 1.55 }}>
-        💬 <strong style={{ color: 'var(--text-primary)' }}>어려움</strong> — {advice.difficulty}
+        <strong style={{ color: 'var(--text-primary)' }}>어려움</strong> — {advice.difficulty}
       </div>
 
       {/* 권장 액션 */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 700 }}>✅ 권장 액션</div>
+        <div style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: 700 }}>권장 액션</div>
         {advice.actions.map((action, i) => (
           <div key={i} style={{
             display: 'flex',

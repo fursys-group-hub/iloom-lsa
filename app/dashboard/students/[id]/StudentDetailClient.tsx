@@ -191,12 +191,12 @@ export default function StudentDetailClient({
 
       {/* 학습 피드백 (1열) */}
       <div style={card}>
-          <h3 style={sectionTitle}>💬 학습 피드백</h3>
+          <h3 style={sectionTitle}>학습 피드백</h3>
           {tagAnalysis.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {weakTags.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>🚨 이 부분을 더 공부하세요</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {weakTags.slice(0, 5).map((t) => (
                       <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
@@ -208,7 +208,7 @@ export default function StudentDetailClient({
               )}
               {midTags.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>⚠️ 조금 더 복습하면 좋아요</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {midTags.slice(0, 5).map((t) => (
                       <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
@@ -221,7 +221,7 @@ export default function StudentDetailClient({
               )}
               {strongTags.length > 0 && (
                 <div style={{ fontSize: 14, color: 'var(--green)' }}>
-                  ✅ <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
+                  <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
                 </div>
               )}
             </div>
@@ -232,7 +232,7 @@ export default function StudentDetailClient({
 
       {/* 점수 추이 (1열) */}
       <div style={card}>
-        <h3 style={sectionTitle}>📈 차시별 점수 추이</h3>
+        <h3 style={sectionTitle}>차시별 점수 추이</h3>
         {dailyAverages.length > 0 ? (
           <ScoreTrendChart
             data={dailyAverages.map((d) => {
@@ -251,12 +251,12 @@ export default function StudentDetailClient({
       <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* 카테고리별 학습 현황 */}
         <div style={card}>
-          <h3 style={sectionTitle}>🏷️ 카테고리별 학습 현황</h3>
+          <h3 style={sectionTitle}>카테고리별 학습 현황</h3>
           {categoryGroups.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {categoryGroups.map(({ category, rate, totalQ, correctQ, tags }) => {
                 const catColor = rate >= 80 ? 'var(--green)' : rate >= 60 ? 'var(--orange)' : 'var(--red)';
-                const catIcon = rate >= 80 ? '✅' : rate >= 60 ? '⚠️' : '🚨';
+                void 0; // catIcon removed
                 return (
                   <details key={category}>
                     <summary style={{
@@ -269,7 +269,7 @@ export default function StudentDetailClient({
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span>{catIcon}</span>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: catColor, display: 'inline-block' }} />
                         <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{category}</span>
                         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{totalQ}문항</span>
                       </div>
@@ -278,12 +278,11 @@ export default function StudentDetailClient({
                     {tags.length > 0 && (
                       <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {tags.map((t) => {
-                          const icon = t.rate >= 80 ? '✅' : t.rate >= 60 ? '⚠️' : '❌';
                           const color = t.rate >= 80 ? 'var(--green)' : t.rate >= 60 ? 'var(--orange)' : 'var(--red)';
                           const msg = t.correct === t.total ? '전문항 정답' : `${t.total - t.correct}문항 오답`;
                           return (
                             <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
-                              <span style={{ fontSize: 12 }}>{icon}</span>
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
                               <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1 }}>{t.label}</span>
                               <span style={{ fontSize: 12, fontWeight: 600, color }}>{msg}</span>
                             </div>
@@ -397,9 +396,9 @@ export default function StudentDetailClient({
                   <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                     {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>✅ {t}</span>)}
-                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>🔴 {t}</span>)}
-                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>⚠️ {t}</span>)}
+                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
+                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
+                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
                       </div>
                     ) : null}
                     {report.manager_report}
@@ -467,7 +466,7 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
 
   return (
     <div style={card}>
-      <h3 style={sectionTitle}>📝 교육 메모</h3>
+      <h3 style={sectionTitle}>교육 메모</h3>
 
       {/* 입력 영역 */}
       <div style={{ marginBottom: 20 }}>
@@ -488,7 +487,7 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
                   transition: 'all 0.15s ease',
                 }}
               >
-                {cat.emoji} {cat.label}
+                {cat.label}
               </button>
             );
           })}
@@ -553,7 +552,7 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
                     background: `color-mix(in srgb, ${cat.color} 15%, transparent)`,
                     color: cat.color,
                   }}>
-                    {cat.emoji} {cat.label}
+                    {cat.label}
                   </span>
                   <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{memo.date}</span>
                 </div>
