@@ -6,61 +6,70 @@
   --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* ════════════════════════════════════════
+   라이트모드 (기본값)
+   ════════════════════════════════════════ */
 :root {
-  /* 배경 */
-  --bg-main: #0A0A0A;
-  --bg-surface: #141414;
-  --bg-elevated: #1C1C1E;
-  --bg-hover: #242424;
+  /* 배경 — 살짝 tint된 배경 + 흰 카드 */
+  --bg-main: #F7F8FA;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F2F3F5;
+  --bg-hover: #ECEDF0;
 
-  /* 테두리 */
-  --border: #2C2C2E;
-  --border-light: #3A3A3C;
+  /* 테두리 — Notion 스타일 "속삭임" */
+  --border: rgba(0, 0, 0, 0.10);
+  --border-light: rgba(0, 0, 0, 0.06);
 
-  /* 텍스트 */
-  --text-primary: #FFFFFF;
-  --text-second: rgba(235, 235, 245, 0.8);
-  --text-tertiary: rgba(235, 235, 245, 0.6);
-  --text-muted: rgba(235, 235, 245, 0.3);
+  /* 텍스트 — 원래 색상 */
+  --text-primary: #111827;
+  --text-second: #374151;
+  --text-tertiary: #6B7280;
+  --text-muted: #9CA3AF;
 
-  /* 액센트 */
-  --blue: #007AFF;
-  --blue-light: #0A84FF;
-  --blue-dim: rgba(10, 132, 255, 0.15);
-  --green: #30D158;
-  --green-dim: rgba(48, 209, 88, 0.15);
-  --orange: #FF9F0A;
-  --orange-dim: rgba(255, 159, 10, 0.12);
-  --red: #FF453A;
-  --red-dim: rgba(255, 69, 58, 0.15);
-  --purple: #BF5AF2;
-  --purple-dim: rgba(191, 90, 242, 0.15);
-  --gray-dim: rgba(142, 142, 147, 0.12);
+  /* 액센트 — 원래 색상 */
+  --blue: #3B82F6;
+  --blue-light: #60A5FA;
+  --blue-dim: rgba(59, 130, 246, 0.10);
+  --green: #22C55E;
+  --green-dim: rgba(34, 197, 94, 0.10);
+  --orange: #F59E0B;
+  --orange-dim: rgba(245, 158, 11, 0.10);
+  --red: #EF4444;
+  --red-dim: rgba(239, 68, 68, 0.10);
+  --purple: #A855F7;
+  --purple-dim: rgba(168, 85, 247, 0.10);
+  --gray-dim: rgba(107, 114, 128, 0.10);
 
   /* 오버레이 */
-  --overlay: rgba(0, 0, 0, 0.7);
-  --overlay-heavy: rgba(0, 0, 0, 0.85);
+  --overlay: rgba(0, 0, 0, 0.5);
+  --overlay-heavy: rgba(0, 0, 0, 0.7);
 
   /* 메시지 버블 */
-  --bubble-assistant: #2C2C2E;
-  --bubble-user: #007AFF;
+  --bubble-assistant: #EEF0F4;
+  --bubble-user: #3B82F6;
 
-  /* 그림자 */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  /* 그림자 — 다층 (자연광 느낌) */
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.03);
+  --shadow-md:
+    rgba(0, 0, 0, 0.04) 0px 4px 18px,
+    rgba(0, 0, 0, 0.027) 0px 2px 8px,
+    rgba(0, 0, 0, 0.02) 0px 0.8px 3px,
+    rgba(0, 0, 0, 0.01) 0px 0.2px 1px;
 
-  /* 경고 강조 (다크: 기존 dim 스타일 유지) */
-  --red-solid-bg: var(--red-dim);
-  --red-solid-text: var(--red);
-  --orange-solid-bg: var(--orange-dim);
-  --orange-solid-text: var(--orange);
-  --green-solid-bg: var(--green-dim);
-  --green-solid-text: var(--green);
+  /* 경고 강조 (라이트: filled 스타일) */
+  --red-solid-bg: #EF4444;
+  --red-solid-text: #FFFFFF;
+  --orange-solid-bg: #F59E0B;
+  --orange-solid-text: #FFFFFF;
+  --green-solid-bg: #22C55E;
+  --green-solid-text: #FFFFFF;
 
   /* STEP 완료 */
-  --step-filled-bg: rgba(48, 209, 88, 0.06);
-  --step-filled-badge-bg: #30D158;
-  --step-border: var(--border);
+  --step-filled-bg: rgba(59, 130, 246, 0.06);
+  --step-filled-badge-bg: #3B82F6;
+  --step-border: rgba(59, 130, 246, 0.15);
 
   /* 반지름 */
   --radius-xs: 4px;
@@ -95,62 +104,71 @@
   --weight-bold: 700;
 }
 
-/* 라이트모드 */
-body.light {
-  --bg-main: #F7F8FA;
-  --bg-surface: #FFFFFF;
-  --bg-elevated: #F7F8FA;
-  --bg-hover: #F2F3F5;
+/* ════════════════════════════════════════
+   다크모드 (body.dark)
+   ════════════════════════════════════════ */
+body.dark {
+  --bg-main: #0A0A0A;
+  --bg-surface: #141414;
+  --bg-elevated: #1C1C1E;
+  --bg-hover: #242424;
 
-  --border: rgba(0, 0, 0, 0.05);
-  --border-light: rgba(0, 0, 0, 0.03);
+  --border: #2C2C2E;
+  --border-light: #3A3A3C;
 
-  --text-primary: #111827;
-  --text-second: #374151;
-  --text-tertiary: #6B7280;
-  --text-muted: #9CA3AF;
+  --text-primary: #FFFFFF;
+  --text-second: rgba(235, 235, 245, 0.8);
+  --text-tertiary: rgba(235, 235, 245, 0.6);
+  --text-muted: rgba(235, 235, 245, 0.3);
 
-  /* 액센트: 밝고 선명하게 */
-  --blue: #3B82F6;
-  --blue-light: #60A5FA;
-  --blue-dim: rgba(59, 130, 246, 0.10);
-  --green: #22C55E;
-  --green-dim: rgba(34, 197, 94, 0.10);
-  --orange: #F59E0B;
-  --orange-dim: rgba(245, 158, 11, 0.10);
-  --red: #EF4444;
-  --red-dim: rgba(239, 68, 68, 0.10);
-  --purple: #A855F7;
-  --purple-dim: rgba(168, 85, 247, 0.10);
-  --gray-dim: rgba(107, 114, 128, 0.10);
+  --blue: #007AFF;
+  --blue-light: #0A84FF;
+  --blue-dim: rgba(10, 132, 255, 0.15);
+  --green: #30D158;
+  --green-dim: rgba(48, 209, 88, 0.15);
+  --orange: #FF9F0A;
+  --orange-dim: rgba(255, 159, 10, 0.12);
+  --red: #FF453A;
+  --red-dim: rgba(255, 69, 58, 0.15);
+  --purple: #BF5AF2;
+  --purple-dim: rgba(191, 90, 242, 0.15);
+  --gray-dim: rgba(142, 142, 147, 0.12);
 
-  --overlay: rgba(0, 0, 0, 0.5);
-  --overlay-heavy: rgba(0, 0, 0, 0.7);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --overlay-heavy: rgba(0, 0, 0, 0.85);
 
-  /* 라이트 전용: 경고 강조 (filled 스타일) */
-  --red-solid-bg: #EF4444;
-  --red-solid-text: #FFFFFF;
-  --orange-solid-bg: #F59E0B;
-  --orange-solid-text: #FFFFFF;
-  --green-solid-bg: #22C55E;
-  --green-solid-text: #FFFFFF;
+  --bubble-assistant: #2C2C2E;
+  --bubble-user: #007AFF;
 
-  --bubble-assistant: #EEF0F4;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md:
+    0 4px 18px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.25);
 
-  /* STEP: 파란 톤 */
-  --step-filled-bg: rgba(59, 130, 246, 0.06);
-  --step-filled-badge-bg: #3B82F6;
-  --step-border: rgba(59, 130, 246, 0.15);
+  --red-solid-bg: rgba(255, 69, 58, 0.15);
+  --red-solid-text: #FF453A;
+  --orange-solid-bg: rgba(255, 159, 10, 0.12);
+  --orange-solid-text: #FF9F0A;
+  --green-solid-bg: rgba(48, 209, 88, 0.15);
+  --green-solid-text: #30D158;
+
+  --step-filled-bg: rgba(48, 209, 88, 0.06);
+  --step-filled-badge-bg: #30D158;
+  --step-border: var(--border);
 }
 
+/* ════════════════════════════════════════
+   기본 색상 스킴
+   ════════════════════════════════════════ */
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-html:has(body.light) {
-  color-scheme: light;
+html:has(body.dark) {
+  color-scheme: dark;
 }
 
 body {
@@ -159,16 +177,38 @@ body {
   color: var(--text-primary);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 유동 타이포그래피 */
-h1 { font-size: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem); font-weight: var(--weight-bold); line-height: 1.15; }
-h2 { font-size: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem); font-weight: var(--weight-bold); line-height: 1.2; }
-h3 { font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem); font-weight: var(--weight-semibold); line-height: 1.3; }
-h4 { font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); font-weight: var(--weight-semibold); line-height: 1.35; }
+/* ════════════════════════════════════════
+   타이포그래피 — 큰 글씨에 마이너스 자간
+   ════════════════════════════════════════ */
+h1 {
+  font-size: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+h2 {
+  font-size: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem);
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+h3 {
+  font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+h4 {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  font-weight: var(--weight-semibold);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
 
 /* 입력 필드 — iOS 줌 방지 (16px 이상 필수) */
 input, select, textarea {
@@ -201,7 +241,7 @@ button, a, [role="button"] {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-light);
+  background: var(--border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {

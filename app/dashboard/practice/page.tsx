@@ -36,7 +36,8 @@ interface StudentBasic {
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 const STATS_FIELDS = [
@@ -81,7 +82,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
       {lightboxIdx !== null && (
         <div onClick={() => setLightboxIdx(null)}
           style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--overlay-heavy)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          <img src={images[lightboxIdx]} alt="확대 보기" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} onClick={e => e.stopPropagation()} />
+          <img src={images[lightboxIdx]} alt="확대 보기" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 'var(--radius-sm)' }} onClick={e => e.stopPropagation()} />
           {images.length > 1 && (
             <div style={{ position: 'absolute', bottom: 32, display: 'flex', gap: 12 }}>
               <button onClick={e => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + images.length) % images.length); }}
@@ -365,7 +366,7 @@ ${studentSections}
               value={selectedDate}
               onChange={e => { setSelectedDate(e.target.value); setExpandedNoteId(null); }}
               style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
                 color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
                 cursor: 'pointer', outline: 'none',
@@ -406,9 +407,9 @@ ${studentSections}
             {/* 학생 필터 */}
             <select value={filterStudentId} onChange={e => setFilterStudentId(e.target.value)}
               style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
-                color: 'var(--text-primary)', fontSize: 14, marginLeft: 'auto',
+                color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, marginLeft: 'auto',
                 cursor: 'pointer', outline: 'none',
               }}>
               <option value="">전체 교육생</option>
@@ -500,10 +501,10 @@ ${studentSections}
                       </span>
                       {/* 실적 뱃지 */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, flexWrap: 'wrap' }}>
-                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>상담 {statsData.stats_consult}</span>}
-                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>견적 {statsData.stats_estimate}</span>}
-                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>수주 {statsData.stats_order}</span>}
-                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>{statsData.stats_amount.toLocaleString()}원</span>}
+                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>상담 {statsData.stats_consult}</span>}
+                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>견적 {statsData.stats_estimate}</span>}
+                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>수주 {statsData.stats_order}</span>}
+                        {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>{statsData.stats_amount.toLocaleString()}원</span>}
                       </div>
                       {/* 섹션 완료 + 코멘트 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -529,9 +530,9 @@ ${studentSections}
                         })()}
                         {(commentCounts[note.id] || 0) > 0 && (
                           <span style={{
-                            padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                             background: 'var(--blue-dim)', color: 'var(--blue-light)',
-                            fontSize: 11, fontWeight: 700,
+                            fontSize: 12, fontWeight: 600,
                           }}>{commentCounts[note.id]}개 코멘트</span>
                         )}
                         <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>

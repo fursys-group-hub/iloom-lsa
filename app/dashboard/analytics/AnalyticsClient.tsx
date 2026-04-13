@@ -73,7 +73,7 @@ function generateMockSalesData(students: Student[]): SalesData[] {
 }
 
 // ── 스타일 ──
-const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
+const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' };
 const sectionTitle: React.CSSProperties = { fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 };
 
 // ── 유틸 ──
@@ -265,12 +265,12 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 효과 분석</h2>
-          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 14px', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
+          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
             {archivedBatches.length > 0 && <optgroup label="보관됨">{archivedBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
           </select>
         </div>
-        <div style={{ background: 'var(--orange-dim)', color: 'var(--orange)', borderRadius: 'var(--radius-pill)', padding: '6px 14px', fontSize: 13, fontWeight: 600 }}>
+        <div style={{ background: 'var(--orange-dim)', color: 'var(--orange)', borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
           가상 수주 데이터로 미리보기
         </div>
       </div>
@@ -369,14 +369,14 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                     <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.category}</td>
                     <td style={{ textAlign: 'center', padding: '10px 14px', fontWeight: 700, color: rc.text }}>{row.examRate}%</td>
                     <td style={{ padding: '10px 14px', width: 120 }}>
-                      <div style={{ background: 'var(--bg-hover)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${row.examRate}%`, background: rc.text, borderRadius: 4 }} />
+                      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${row.examRate}%`, background: rc.text, borderRadius: 'var(--radius-xs)' }} />
                       </div>
                     </td>
                     <td style={{ textAlign: 'right', padding: '10px 14px', fontWeight: 600, color: 'var(--blue)' }}>{row.salesAmount.toLocaleString()}</td>
                     <td style={{ padding: '10px 14px', width: 120 }}>
-                      <div style={{ background: 'var(--bg-hover)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${Math.round((row.salesAmount / maxAmount) * 100)}%`, background: 'var(--blue)', borderRadius: 4 }} />
+                      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${Math.round((row.salesAmount / maxAmount) * 100)}%`, background: 'var(--blue)', borderRadius: 'var(--radius-xs)' }} />
                       </div>
                     </td>
                   </tr>
@@ -400,7 +400,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
               <div key={row.name} style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 14, textAlign: 'center' }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{row.name}</div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ background: `${gc}33`, color: gc, borderRadius: 'var(--radius-pill)', padding: '2px 8px', fontSize: 12, fontWeight: 700 }}>적응 {row.adaptationScore}</span>
+                  <span style={{ background: `${gc}33`, color: gc, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>적응 {row.adaptationScore}</span>
                 </div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--blue)' }}>{row.conversionRate}%</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>전환율</div>

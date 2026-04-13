@@ -59,7 +59,7 @@ function rateColor(rate: number) {
   return { bg: '#FF453A33', text: 'var(--red)' };
 }
 
-const analysisCardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
+const analysisCardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' };
 
 export default function TestsClient({ batches, students, scores, attendance, notes, allTestResponses, allQuestions }: Props) {
   const [syncing, setSyncing] = useState(false);
@@ -410,22 +410,11 @@ export default function TestsClient({ batches, students, scores, attendance, not
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
             테스트
           </h2>
-          <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
-            {([['manage', '차시별 성적'], ['analysis', '시험 분석']] as const).map(([key, label]) => (
-              <button key={key} onClick={() => setPageTab(key)} style={{
-                padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                background: pageTab === key ? 'var(--blue)' : 'transparent',
-                color: pageTab === key ? '#fff' : 'var(--text-tertiary)',
-                border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
-              }}>{label}</button>
-            ))}
-          </div>
-        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <a
             href={`/api/export-tests?batchId=${batchId}`}
@@ -467,6 +456,21 @@ export default function TestsClient({ batches, students, scores, attendance, not
           >
             <span className="btn-label">{syncing ? '동기화 중...' : '+ 새 응답만 추가'}</span>
           </button>
+        </div>
+        </div>
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+          {([['manage', '차시별 성적'], ['analysis', '시험 분석']] as const).map(([key, label], i) => (
+            <button key={key} onClick={() => setPageTab(key)} style={{
+              padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+              background: 'transparent',
+              color: pageTab === key ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: 'none',
+              borderBottom: pageTab === key ? '2px solid var(--blue)' : '2px solid transparent',
+              fontSize: 15, fontWeight: pageTab === key ? 600 : 400,
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              marginBottom: -1,
+            }}>{label}</button>
+          ))}
         </div>
       </div>
 
@@ -530,7 +534,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
 
             <div style={analysisCardStyle}>
               <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>교육생별 성장 곡선</h3>
-              <select value={analysisStudentId} onChange={e => setAnalysisStudentId(e.target.value)} style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '4px 10px', fontSize: 13, marginBottom: 12 }}>
+              <select value={analysisStudentId} onChange={e => setAnalysisStudentId(e.target.value)} style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none', marginBottom: 12 }}>
                 <option value="">교육생 선택</option>
                 {batchStudents.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
@@ -600,17 +604,17 @@ export default function TestsClient({ batches, students, scores, attendance, not
                 <div style={{ display: 'grid', gridTemplateColumns: `140px repeat(${heatmapData.categories.length}, minmax(80px, 1fr))`, gap: 3 }}>
                   <div style={{ padding: 8, fontWeight: 800, fontSize: 12, color: 'var(--text-second)' }}>소분류 ↓ / 대분류 →</div>
                   {heatmapData.categories.map(cat => (
-                    <div key={cat} style={{ textAlign: 'center', padding: 8, fontWeight: 700, color: 'var(--text-primary)', fontSize: 12, background: 'var(--bg-elevated)', borderRadius: 4 }}>{cat}</div>
+                    <div key={cat} style={{ textAlign: 'center', padding: 8, fontWeight: 700, color: 'var(--text-primary)', fontSize: 12, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)' }}>{cat}</div>
                   ))}
                   {heatmapData.details.map(det => (
                     <div key={det} style={{ display: 'contents' }}>
-                      <div style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-second)', fontSize: 12, display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)', borderRadius: 4 }}>{det}</div>
+                      <div style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-second)', fontSize: 12, display: 'flex', alignItems: 'center', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xs)' }}>{det}</div>
                       {heatmapData.categories.map(cat => {
                         const cell = heatmapData.data.find(d => d.category === cat && d.detail === det);
-                        if (!cell) return <div key={`${cat}-${det}`} style={{ textAlign: 'center', padding: 8, color: 'var(--text-muted)', fontSize: 12, background: 'var(--bg-hover)', borderRadius: 4 }}>—</div>;
+                        if (!cell) return <div key={`${cat}-${det}`} style={{ textAlign: 'center', padding: 8, color: 'var(--text-muted)', fontSize: 12, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)' }}>—</div>;
                         const rc = rateColor(cell.rate);
                         return (
-                          <div key={`${cat}-${det}`} onClick={() => setHeatmapModal({ category: cat, detail: det })} style={{ textAlign: 'center', padding: 8, background: rc.bg, color: rc.text, fontSize: 13, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }} title={`${cat} > ${det}: ${cell.rate}% (${cell.totalQ}문항)`}>
+                          <div key={`${cat}-${det}`} onClick={() => setHeatmapModal({ category: cat, detail: det })} style={{ textAlign: 'center', padding: 8, background: rc.bg, color: rc.text, fontSize: 13, fontWeight: 700, borderRadius: 'var(--radius-xs)', cursor: 'pointer' }} title={`${cat} > ${det}: ${cell.rate}% (${cell.totalQ}문항)`}>
                             {cell.rate}%
                           </div>
                         );
@@ -638,8 +642,8 @@ export default function TestsClient({ batches, students, scores, attendance, not
               <button onClick={() => setAnalysisDate(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer' }}>✕</button>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-              {dateAnalysis.sessions.map(s => <span key={s} style={{ background: 'var(--blue-dim)', color: 'var(--blue)', borderRadius: 'var(--radius-pill)', padding: '4px 12px', fontSize: 13, fontWeight: 600 }}>{s}</span>)}
-              {dateAnalysis.categories.map(cat => <span key={cat} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', padding: '4px 12px', fontSize: 13, color: 'var(--text-second)' }}>{cat}</span>)}
+              {dateAnalysis.sessions.map(s => <span key={s} style={{ background: 'var(--blue-dim)', color: 'var(--blue)', borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{s}</span>)}
+              {dateAnalysis.categories.map(cat => <span key={cat} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600, color: 'var(--text-second)' }}>{cat}</span>)}
             </div>
             {dateAnalysis.questionStats.length > 0 && (
               <div style={{ marginBottom: 24 }}>
@@ -654,14 +658,14 @@ export default function TestsClient({ batches, students, scores, attendance, not
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                             <span style={{ fontSize: 12, color: 'var(--green)' }}>정답 {q.correct}명</span>
                             <span style={{ fontSize: 12, color: 'var(--red)' }}>오답 {q.wrong}명</span>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: rc.text, background: rc.bg, borderRadius: 'var(--radius-pill)', padding: '2px 8px' }}>오답률 {q.wrongRate}%</span>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: rc.text, background: rc.bg, borderRadius: 'var(--radius-pill)', padding: '3px 10px' }}>오답률 {q.wrongRate}%</span>
                           </div>
                         </div>
                         {q.questionText && <p style={{ fontSize: 13, color: 'var(--text-second)', margin: 0, lineHeight: 1.5 }}>{q.questionText.length > 100 ? q.questionText.slice(0, 100) + '...' : q.questionText}</p>}
                         {(q.category || q.detail) && (
                           <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                            {q.category && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px' }}>{q.category}</span>}
-                            {q.detail && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px' }}>{q.detail}</span>}
+                            {q.category && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '1px 6px' }}>{q.category}</span>}
+                            {q.detail && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '1px 6px' }}>{q.detail}</span>}
                           </div>
                         )}
                       </div>
@@ -724,8 +728,8 @@ export default function TestsClient({ batches, students, scores, attendance, not
                       </div>
                       {q.questionText && <p style={{ fontSize: 13, color: 'var(--text-second)', margin: '0 0 6px', lineHeight: 1.5 }}>{q.questionText.length > 120 ? q.questionText.slice(0, 120) + '...' : q.questionText}</p>}
                       <div style={{ display: 'flex', gap: 6 }}>
-                        {q.category && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px', color: 'var(--text-muted)' }}>{q.category}</span>}
-                        {q.detail && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 4, padding: '1px 6px', color: 'var(--text-muted)' }}>{q.detail}</span>}
+                        {q.category && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '1px 6px', color: 'var(--text-muted)' }}>{q.category}</span>}
+                        {q.detail && <span style={{ fontSize: 11, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', padding: '1px 6px', color: 'var(--text-muted)' }}>{q.detail}</span>}
                       </div>
                     </div>
                   ))}
@@ -780,21 +784,21 @@ export default function TestsClient({ batches, students, scores, attendance, not
             {heatmapModalData.length > 0 ? (
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                 <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-second)' }}>차시</th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', color: 'var(--text-second)' }}>문항</th>
-                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--green)' }}>정답</th>
-                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--red)' }}>오답</th>
-                  <th style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--text-second)' }}>오답률</th>
+                  <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>차시</th>
+                  <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>문항</th>
+                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--green)' }}>정답</th>
+                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--red)' }}>오답</th>
+                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>오답률</th>
                 </tr></thead>
                 <tbody>{heatmapModalData.map((q, i) => {
                   const rc = rateColor(100 - q.wrongRate);
                   return (
                     <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>{q.session}</td>
-                      <td style={{ padding: '8px 12px', color: 'var(--text-primary)' }}>Q{q.questionId}</td>
-                      <td style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--green)', fontWeight: 600 }}>{q.correct}명</td>
-                      <td style={{ textAlign: 'center', padding: '8px 12px', color: 'var(--red)', fontWeight: 600 }}>{q.wrong}명</td>
-                      <td style={{ textAlign: 'center', padding: '8px 12px', fontWeight: 700, color: rc.text }}>{q.wrongRate}%</td>
+                      <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>{q.session}</td>
+                      <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>Q{q.questionId}</td>
+                      <td style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--green)', fontWeight: 600 }}>{q.correct}명</td>
+                      <td style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--red)', fontWeight: 600 }}>{q.wrong}명</td>
+                      <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, color: rc.text }}>{q.wrongRate}%</td>
                     </tr>
                   );
                 })}</tbody>
@@ -809,9 +813,6 @@ export default function TestsClient({ batches, students, scores, attendance, not
 
       {/* 차시 카드 */}
       <div>
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
-          차시별 성적 현황
-        </h3>
         {sessions.length === 0 ? (
           <div style={{
             padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 16,
@@ -848,36 +849,42 @@ export default function TestsClient({ batches, students, scores, attendance, not
       {selectedSession && (
         <div>
           {/* 보기 모드 토글 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text-primary)', margin: 0, marginRight: 4 }}>
-              {selectedSession}
-            </h3>
-            {/* 시험 날짜 표시 */}
-            {(() => {
-              const sessionDates = [...new Set(
-                responses.filter((r) => r.submitted_at).map((r) => r.submitted_at!.split(' ')[0])
-              )].sort();
-              return sessionDates.length > 0 ? (
-                <span style={{ fontSize: 14, color: 'var(--text-muted)', marginRight: 12 }}>
-                  ({sessionDates.map(formatDisplayDate).join(', ')})
-                </span>
-              ) : null;
-            })()}
-            {(['scores', 'questions'] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                style={{
-                  padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-                  border: viewMode === mode ? 'none' : '1px solid var(--border)',
-                  background: viewMode === mode ? 'var(--blue)' : 'transparent',
-                  color: viewMode === mode ? '#fff' : 'var(--text-tertiary)',
-                  fontSize: 14, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s ease',
-                }}
-              >
-                {mode === 'scores' ? '학생별 성적' : '문제은행'}
-              </button>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                {selectedSession}
+              </h3>
+              {(() => {
+                const sessionDates = [...new Set(
+                  responses.filter((r) => r.submitted_at).map((r) => r.submitted_at!.split(' ')[0])
+                )].sort();
+                return sessionDates.length > 0 ? (
+                  <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+                    ({sessionDates.map(formatDisplayDate).join(', ')})
+                  </span>
+                ) : null;
+              })()}
+            </div>
+            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+              {(['scores', 'questions'] as const).map((mode, i) => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  style={{
+                    padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+                    background: 'transparent',
+                    color: viewMode === mode ? 'var(--text-primary)' : 'var(--text-muted)',
+                    border: 'none',
+                    borderBottom: viewMode === mode ? '2px solid var(--blue)' : '2px solid transparent',
+                    fontSize: 15, fontWeight: viewMode === mode ? 600 : 400,
+                    cursor: 'pointer', transition: 'all 0.15s ease',
+                    marginBottom: -1,
+                  }}
+                >
+                  {mode === 'scores' ? '학생별 성적' : '문제은행'}
+                </button>
+              ))}
+            </div>
           </div>
 
           {loading ? (
@@ -923,7 +930,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                         <Avatar name={row.student.name} />
                         <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{row.student.name}</span>
                         <span style={{
-                          fontSize: 12, fontWeight: 600, padding: '2px 10px',
+                          fontSize: 12, fontWeight: 600, padding: '3px 10px',
                           borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)',
                         }}>미응시</span>
                       </div>
@@ -1187,10 +1194,10 @@ export default function TestsClient({ batches, students, scores, attendance, not
                                       value={editMode}
                                       onChange={(e) => setEditMode(e.target.value)}
                                       style={{
-                                        padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                                        border: '2px solid var(--purple)', background: 'var(--bg-elevated)',
-                                        color: 'var(--text-primary)', fontSize: 14, outline: 'none',
-                                        cursor: 'pointer',
+                                        padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                                        border: '2px solid var(--purple)', background: 'var(--bg-surface)',
+                                        color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+                                        cursor: 'pointer', outline: 'none',
                                       }}
                                     >
                                       {SCORING_MODES.map((m) => (
@@ -1288,7 +1295,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                                   <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>정답:</span>
                                   <span style={{ fontSize: 15, color: 'var(--blue-light)', fontWeight: 600 }}>{q.correct_answer}</span>
                                   <span style={{
-                                    fontSize: 12, color: 'var(--purple)', padding: '2px 8px',
+                                    fontSize: 12, fontWeight: 600, color: 'var(--purple)', padding: '3px 10px',
                                     borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)',
                                     marginLeft: 8,
                                   }}>{q.scoring_mode}</span>
@@ -1473,10 +1480,10 @@ function Row({ label, value, color }: { label: string; value: string; color?: st
 function Avatar({ name }: { name: string }) {
   return (
     <div style={{
-      width: 36, height: 36, borderRadius: '50%',
+      width: 32, height: 32, borderRadius: '50%',
       background: 'var(--blue-dim)', color: 'var(--blue-light)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 14, fontWeight: 700, flexShrink: 0,
+      fontSize: 13, fontWeight: 700, flexShrink: 0,
     }}>
       {name[0]}
     </div>
@@ -1486,7 +1493,7 @@ function Avatar({ name }: { name: string }) {
 function OXBadge({ correct }: { correct: boolean }) {
   return (
     <span style={{
-      flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+      flexShrink: 0, width: 32, height: 32, borderRadius: '50%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 13, fontWeight: 700,
       background: correct ? 'var(--green-dim)' : 'var(--red-dim)',

@@ -172,7 +172,13 @@ export default function OverviewPage() {
                     <tr key={st.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <Td>
                         <button onClick={() => setSelectedStudentId(st.id)}
-                          style={{ background: 'none', border: 'none', color: 'var(--blue-light)', fontWeight: 600, fontSize: 15, cursor: 'pointer', padding: 0 }}>
+                          style={{ background: 'none', border: 'none', color: 'var(--blue-light)', fontWeight: 600, fontSize: 15, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{
+                            width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                            background: 'var(--blue-dim)', color: 'var(--blue)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 13, fontWeight: 700,
+                          }}>{st.name[0]}</span>
                           {st.name}
                         </button>
                       </Td>
@@ -215,8 +221,8 @@ export default function OverviewPage() {
                   style={{
                     background: stFinal ? 'var(--bg-surface)' : 'var(--bg-surface)',
                     border: stFinal ? '1px solid var(--green)' : '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)', padding: 24, cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    borderRadius: 'var(--radius-lg)', padding: '20px 24px', cursor: 'pointer',
+                    transition: 'all 0.15s ease', boxShadow: 'var(--shadow-sm)',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
@@ -313,7 +319,7 @@ export default function OverviewPage() {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <span style={{ fontSize: 17, fontWeight: 700 }}>{rp.area}</span>
-                        <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 13, fontWeight: 700 }}>
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 12, fontWeight: 600 }}>
                           {cfg.label}
                         </span>
                       </div>
@@ -379,7 +385,7 @@ export default function OverviewPage() {
                         </div>
                         {ev ? (
                           <span style={{
-                            padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
                             color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
                           }}>{ev.status === 'completed' ? '완료' : ev.status === 'partial' ? '일부' : '미진행'}</span>
@@ -456,7 +462,7 @@ export default function OverviewPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="week" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} />
                     <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 13 }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+                    <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 13 }} />
                     <Legend wrapperStyle={{ fontSize: 13 }} />
                     <Bar dataKey="강점" fill="#30D158" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="개선점" fill="#FF9F0A" radius={[4, 4, 0, 0]} />
@@ -570,7 +576,7 @@ function Section({ title, subtitle, badge, badgeColor, children, ...rest }: {
 }) {
   void rest;
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 28 }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: subtitle ? 6 : 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{title}</h2>
         {badge && (
@@ -587,7 +593,7 @@ function Section({ title, subtitle, badge, badgeColor, children, ...rest }: {
 
 function SumCard({ label, value, unit, color }: { label: string; value: number; unit: string; color: string }) {
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '20px 24px' }}>
+    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 8px' }}>{label}</p>
       <p style={{ fontSize: 28, fontWeight: 700, color, margin: 0 }}>{value}<span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span></p>
     </div>
@@ -616,21 +622,21 @@ function ScoreCard({ label, score, color }: { label: string; score: number; colo
 }
 
 function Th({ children, align }: { children: React.ReactNode; align?: string }) {
-  return <th style={{ padding: '14px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textAlign: (align as 'left' | 'center') || 'left', background: 'var(--bg-elevated)' }}>{children}</th>;
+  return <th style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textAlign: (align as 'left' | 'center') || 'left', background: 'var(--bg-elevated)' }}>{children}</th>;
 }
 function Td({ children, align }: { children: React.ReactNode; align?: string }) {
   return <td style={{ padding: '12px 16px', fontSize: 15, color: 'var(--text-primary)', textAlign: (align as 'left' | 'center') || 'left' }}>{children}</td>;
 }
 function StoreBadge({ children }: { children: React.ReactNode }) {
-  return <span style={{ padding: '3px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 500 }}>{children}</span>;
+  return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 600 }}>{children}</span>;
 }
 function TagPill({ children, type }: { children: React.ReactNode; type: 'strength' | 'improvement' }) {
   const c = type === 'strength' ? { bg: 'var(--green-dim)', color: 'var(--green)' } : { bg: 'var(--orange-dim)', color: 'var(--orange)' };
   return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: c.bg, color: c.color, fontSize: 12, fontWeight: 600 }}>{children}</span>;
 }
 function FilterBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button onClick={onClick} style={{ padding: '6px 14px', borderRadius: 'var(--radius-pill)', border: active ? '1px solid var(--blue)' : '1px solid var(--border)', background: active ? 'var(--blue-dim)' : 'transparent', color: active ? 'var(--blue-light)' : 'var(--text-tertiary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>{children}</button>;
+  return <button onClick={onClick} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: active ? 'none' : '1px solid var(--border)', background: active ? 'var(--blue)' : 'transparent', color: active ? '#fff' : 'var(--text-tertiary)', fontSize: 14, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s ease' }}>{children}</button>;
 }
 
 const miniLabel: React.CSSProperties = { fontSize: 13, color: 'var(--text-muted)', display: 'block', marginBottom: 6 };
-const selectStyle: React.CSSProperties = { width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 15, outline: 'none' };
+const selectStyle: React.CSSProperties = { width: '100%', padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' };

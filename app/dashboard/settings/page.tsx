@@ -278,7 +278,7 @@ export default function SettingsPage() {
 
         {/* 기수 등록/수정 — 단계별 마법사 */}
         {showBatchForm && (
-          <div style={{ marginBottom: 20, padding: 24, borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ marginBottom: 20, padding: '20px 24px', borderRadius: 'var(--radius-lg)', background: 'var(--bg-surface)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 20, boxShadow: 'var(--shadow-sm)' }}>
 
             {/* 스텝 인디케이터 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 4 }}>
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>입문</span>
+                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 600 }}>입문</span>
                     입문교육 일정 *
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }}>
@@ -472,7 +472,7 @@ export default function SettingsPage() {
 
                 <div>
                   <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 11, fontWeight: 700 }}>심화</span>
+                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 12, fontWeight: 600 }}>심화</span>
                     심화교육 일정 <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(선택 — 나중에 설정해도 돼요)</span>
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }}>
@@ -519,13 +519,13 @@ export default function SettingsPage() {
                       {batch.name}
                     </p>
                     {(() => {
-                      if (batch.is_archived) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>보관됨</span>;
+                      if (batch.is_archived) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>보관됨</span>;
                       const today = new Date().toISOString().slice(0, 10);
-                      if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
-                      if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
-                      if (batch.advanced_end && today > batch.advanced_end) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>완료</span>;
-                      if (today > batch.end_date && (!batch.advanced_start || today < batch.advanced_start)) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--orange-dim)', color: 'var(--orange)' }}>매장 배치 대기</span>;
-                      if (today < batch.start_date) return <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>예정</span>;
+                      if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
+                      if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
+                      if (batch.advanced_end && today > batch.advanced_end) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>완료</span>;
+                      if (today > batch.end_date && (!batch.advanced_start || today < batch.advanced_start)) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>매장 배치 대기</span>;
+                      if (today < batch.start_date) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>예정</span>;
                       return null;
                     })()}
                   </div>
@@ -723,7 +723,7 @@ export default function SettingsPage() {
                           <span style={{ textDecoration: s.is_dropped ? 'line-through' : 'none' }}>{s.name}</span>
                           {s.is_dropped && (
                             <span style={{
-                              padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700,
+                              padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                               background: 'var(--red-dim)', color: 'var(--red)',
                             }}>퇴사{s.dropped_at ? ` ${s.dropped_at.slice(5)}` : ''}</span>
                           )}
@@ -879,7 +879,8 @@ const card: React.CSSProperties = {
   background: 'var(--bg-surface)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-lg)',
-  padding: 24,
+  padding: '20px 24px',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 const tdStyle: React.CSSProperties = {

@@ -137,7 +137,7 @@ export default function AnnouncementsPage() {
           value={selectedBatchId}
           onChange={e => setSelectedBatchId(e.target.value)}
           style={{
-            padding: '8px 14px', borderRadius: 'var(--radius-md)',
+            padding: '8px 14px', borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border)', background: 'var(--bg-surface)',
             color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
             cursor: 'pointer', outline: 'none',
@@ -153,7 +153,8 @@ export default function AnnouncementsPage() {
       {showForm && (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 24,
+          borderRadius: 'var(--radius-lg)', padding: '20px 24px',
+          boxShadow: 'var(--shadow-sm)',
           display: 'flex', flexDirection: 'column', gap: 16,
         }}>
           <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
@@ -267,9 +268,9 @@ export default function AnnouncementsPage() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <span style={{
-                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                        padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                         background: p.bg, color: p.color,
-                        fontSize: 11, fontWeight: 700,
+                        fontSize: 12, fontWeight: 600,
                       }}>
                         <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, display: 'inline-block', marginRight: 4 }} />{p.label}
                       </span>

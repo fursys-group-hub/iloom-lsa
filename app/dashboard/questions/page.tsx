@@ -142,9 +142,9 @@ export default function AdminQuestionsPage() {
         <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>질문 관리</h2>
         {openCount > 0 && (
           <span style={{
-            padding: '4px 12px', borderRadius: 'var(--radius-pill)',
+            padding: '3px 10px', borderRadius: 'var(--radius-pill)',
             background: 'var(--red-dim)', color: 'var(--red)',
-            fontSize: 13, fontWeight: 700,
+            fontSize: 12, fontWeight: 600,
           }}>
             {openCount}개 답변 대기
           </span>
@@ -152,20 +152,23 @@ export default function AdminQuestionsPage() {
       </div>
 
       {/* 필터 탭 */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '보관됨']] as const).map(([key, label]) => (
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+        {([['all', '전체'], ['open', '답변 대기'], ['answered', '답변 완료'], ['archived', '보관됨']] as const).map(([key, label], i) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
             style={{
-              padding: '6px 14px', borderRadius: 'var(--radius-sm)',
-              fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: filter === key ? 'none' : '1px solid var(--border)',
-              background: filter === key ? 'var(--blue)' : 'transparent',
-              color: filter === key ? '#fff' : 'var(--text-tertiary)',
+              padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+              background: 'transparent',
+              color: filter === key ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: 'none',
+              borderBottom: filter === key ? '2px solid var(--blue)' : '2px solid transparent',
+              fontSize: 15, fontWeight: filter === key ? 600 : 400,
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              marginBottom: -1,
             }}
           >
-            {label} {key === 'open' && openCount > 0 ? `(${openCount})` : ''}
+            {label}{key === 'open' && openCount > 0 ? ` (${openCount})` : ''}
           </button>
         ))}
       </div>
@@ -201,10 +204,10 @@ export default function AdminQuestionsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{
-                        width: 28, height: 28, borderRadius: '50%',
+                        width: 32, height: 32, borderRadius: '50%',
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 700,
+                        fontSize: 13, fontWeight: 700,
                       }}>
                         {(q.student_name || '?')[0]}
                       </div>
@@ -213,7 +216,7 @@ export default function AdminQuestionsPage() {
                       </span>
                     </div>
                     <span style={{
-                      padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                      padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                       fontSize: 12, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: st.color, display: 'inline-block', marginRight: 4 }} />{st.label}
@@ -255,10 +258,10 @@ export default function AdminQuestionsPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
-                    width: 36, height: 36, borderRadius: '50%',
+                    width: 32, height: 32, borderRadius: '50%',
                     background: 'var(--blue-dim)', color: 'var(--blue)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 700,
+                    fontSize: 13, fontWeight: 700,
                   }}>
                     {(selectedQ.student_name || '?')[0]}
                   </div>
@@ -422,11 +425,11 @@ export default function AdminQuestionsPage() {
                                 padding: '3px 4px', boxShadow: 'var(--shadow-sm)', whiteSpace: 'nowrap',
                               }}>
                                 <button onClick={(e) => { e.stopPropagation(); setEditingReplyId(r.id); setEditingContent(r.content); }} style={{
-                                  padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                                  padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'transparent',
                                   border: 'none', fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer',
                                 }}>수정</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(r.id); }} style={{
-                                  padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                                  padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'transparent',
                                   border: 'none', fontSize: 11, color: 'var(--red)', cursor: 'pointer',
                                 }}>삭제</button>
                               </div>

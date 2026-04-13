@@ -54,6 +54,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authName, setAuthName] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -127,50 +128,69 @@ export default function DashboardLayout({
         {/* 네비게이션 */}
         <nav style={{ flex: 1, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'space-between', overflowY: 'auto' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {navGroups.map((group, gi) => (
-            <div key={gi}>
-              {group.label && (
-                <div style={{
-                  fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
-                  padding: '16px 14px 6px', letterSpacing: '0.06em',
-                  textTransform: 'uppercase' as const,
-                }}>
-                  {group.label}
-                </div>
-              )}
-              {group.items.map((item) => {
-                const isActive =
-                  item.href === '/dashboard'
-                    ? pathname === '/dashboard'
-                    : pathname.startsWith(item.href);
+          {navGroups.map((group, gi) => {
+            const isCollapsed = group.label ? collapsed[group.label] : false;
+            const hasActiveChild = group.items.some(item =>
+              item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href)
+            );
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
+            return (
+              <div key={gi}>
+                {group.label && (
+                  <button
+                    onClick={() => setCollapsed(prev => ({ ...prev, [group.label]: !prev[group.label] }))}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '9px 14px',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: 14,
-                      fontWeight: isActive ? 600 : 400,
-                      textDecoration: 'none',
-                      transition: 'all 0.15s ease',
-                      background: isActive ? 'var(--blue)' : 'transparent',
-                      color: isActive ? '#fff' : 'var(--text-tertiary)',
-                      letterSpacing: isActive ? '0.01em' : '0',
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
+                      padding: '16px 14px 6px', letterSpacing: '0.06em',
+                      textTransform: 'uppercase' as const,
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      transition: 'color 0.15s ease',
                     }}
-                    onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-second)'; } }}
-                    onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; } }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
                   >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                    {group.label}
+                    <span style={{
+                      fontSize: 10, transition: 'transform 0.2s ease',
+                      transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                    }}>▼</span>
+                  </button>
+                )}
+                {(!isCollapsed || hasActiveChild) && group.items.map((item) => {
+                  const isActive =
+                    item.href === '/dashboard'
+                      ? pathname === '/dashboard'
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '9px 14px',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: 14,
+                        fontWeight: isActive ? 600 : 400,
+                        textDecoration: 'none',
+                        transition: 'all 0.15s ease',
+                        background: isActive ? 'var(--blue)' : 'transparent',
+                        color: isActive ? '#fff' : 'var(--text-tertiary)',
+                        letterSpacing: isActive ? '0.01em' : '0',
+                      }}
+                      onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.color = 'var(--text-second)'; } }}
+                      onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-tertiary)'; } }}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
           </div>
         </nav>
 

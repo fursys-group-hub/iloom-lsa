@@ -61,7 +61,7 @@ const GROUP_COLORS = {
   low: { bg: 'var(--red-dim)', text: 'var(--red)', label: '하' },
 };
 
-const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
+const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' };
 
 export default function StudentsClient({ batches, students: initialStudents, scores, attendance, notes, testResponses, questions, memos, coachingReports }: Props) {
   const searchParams = useSearchParams();
@@ -217,17 +217,21 @@ export default function StudentsClient({ batches, students: initialStudents, sco
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           개별분석
         </h2>
-        <div style={{ display: 'flex', gap: 4, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 3 }}>
-          {([['list', '명단'], ['analysis', '종합 분석']] as const).map(([key, label]) => (
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+          {([['list', '명단'], ['analysis', '종합 분석']] as const).map(([key, label], i) => (
             <button key={key} onClick={() => setPageTab(key)} style={{
-              padding: '8px 16px', borderRadius: 'var(--radius-sm)',
-              background: pageTab === key ? 'var(--blue)' : 'transparent',
-              color: pageTab === key ? '#fff' : 'var(--text-tertiary)',
-              border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
+              padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+              background: 'transparent',
+              color: pageTab === key ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: 'none',
+              borderBottom: pageTab === key ? '2px solid var(--blue)' : '2px solid transparent',
+              fontSize: 15, fontWeight: pageTab === key ? 600 : 400,
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              marginBottom: -1,
             }}>{label}</button>
           ))}
         </div>
@@ -252,9 +256,9 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>항목</th>
-                        <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)', width: 60 }}>비율</th>
-                        <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>무엇을 보나요?</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>항목</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)', width: 60 }}>비율</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>무엇을 보나요?</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -269,11 +273,11 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                         { name: '메모 톤',       weight: '4%',  note: '교육자가 남긴 칭찬/주의 메모의 비율' },
                       ].map((row, i) => (
                         <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                          <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             {row.name}
                           </td>
-                          <td style={{ padding: '6px 8px', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
-                          <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.note}</td>
+                          <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
+                          <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.note}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -315,10 +319,10 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     <div key={idx.studentId} onClick={() => setExpandedCard(isExpanded ? null : idx.studentId)} style={{ background: idx.group === 'low' ? gc.bg : 'var(--bg-elevated)', border: `1px solid ${isExpanded ? gc.text : idx.group === 'low' ? gc.text : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 16, cursor: 'pointer', transition: 'border-color 0.2s' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{idx.studentName}</span>
-                        <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '2px 10px', fontSize: 13, fontWeight: 700 }}>{gc.label} {idx.total}점</span>
+                        <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{gc.label} {idx.total}점</span>
                       </div>
-                      <div style={{ background: 'var(--bg-hover)', borderRadius: 6, height: 8, overflow: 'hidden', marginBottom: 8 }}>
-                        <div style={{ height: '100%', width: `${Math.min(idx.total, 100)}%`, background: gc.text, borderRadius: 6, transition: 'width 0.5s ease' }} />
+                      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden', marginBottom: 8 }}>
+                        <div style={{ height: '100%', width: `${Math.min(idx.total, 100)}%`, background: gc.text, borderRadius: 'var(--radius-xs)', transition: 'width 0.5s ease' }} />
                       </div>
                       <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
                         <span>시험 {idx.breakdown.examAvg}점</span>
@@ -337,7 +341,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           <DetailRow label="만성 오답" score={idx.breakdown.chronicScore} detail={idx.breakdown.chronicDetail} />
                           <DetailRow label="메모 톤" score={idx.breakdown.memoBalance} detail={idx.breakdown.memoBalanceDetail} />
                           {idx.breakdown.deltaDeduction > 0 && (
-                            <div style={{ marginTop: 4, padding: '8px 10px', background: 'var(--red-dim)', borderRadius: 6, fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>
+                            <div style={{ marginTop: 4, padding: '8px 10px', background: 'var(--red-dim)', borderRadius: 'var(--radius-xs)', fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>
                               부정 신호 감점 −{idx.breakdown.deltaDeduction}점 ({idx.breakdown.deltaDetail})
                             </div>
                           )}
@@ -369,8 +373,8 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, marginBottom: 14 }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>체크 항목</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>해당 조건</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>체크 항목</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>해당 조건</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -383,8 +387,8 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           { name: '최근 하락 신호', cond: '성적 5점↓ 하락 또는 자신감 급락' },
                         ].map((row, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.name}</td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.cond}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.name}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.cond}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -400,8 +404,8 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>유형</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>언제 이 유형이 되나요?</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>유형</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>언제 이 유형이 되나요?</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -416,10 +420,10 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           { name: '부분 주의형',    when: '적응 점수 \'상\' 그룹인데 한두 가지 주의' },
                         ].map((row, i) => (
                           <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                               {row.name}
                             </td>
-                            <td style={{ padding: '6px 8px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.when}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.when}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -470,7 +474,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           {r.studentName}
                           {idx && <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 400, marginLeft: 6 }}>적응 {idx.total}점</span>}
                         </span>
-                        <span style={{ background: badgeBg, color: '#fff', borderRadius: 'var(--radius-pill)', padding: '2px 10px', fontSize: 12, fontWeight: 700 }}>{badgeText} {r.riskCount}개 해당</span>
+                        <span style={{ background: badgeBg, color: '#fff', borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{badgeText} {r.riskCount}개 해당</span>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         {r.checks.filter(c => c.triggered).map((c, i) => {
@@ -565,7 +569,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
             <div style={{ display: 'flex', gap: 8 }}>
               {!showDropped && (['all', 'high', 'medium', 'low'] as const).map((level) => (
                 <button key={level} onClick={() => setFilter(level)} style={{
-                  padding: '10px 18px', borderRadius: 'var(--radius-md)',
+                  padding: '8px 16px', borderRadius: 'var(--radius-sm)',
                   border: filter === level ? 'none' : '1px solid var(--border)',
                   background: filter === level ? 'var(--blue)' : 'transparent',
                   color: filter === level ? '#fff' : 'var(--text-tertiary)',
@@ -573,7 +577,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                 }}>{filterLabels[level]}</button>
               ))}
               <button onClick={() => setShowDropped(!showDropped)} style={{
-                padding: '10px 18px', borderRadius: 'var(--radius-md)',
+                padding: '8px 16px', borderRadius: 'var(--radius-sm)',
                 border: showDropped ? 'none' : '1px solid var(--border)',
                 background: showDropped ? 'var(--red)' : 'transparent',
                 color: showDropped ? '#fff' : 'var(--text-muted)',
@@ -600,7 +604,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     {['이름', '평균 점수', '결석', '지각', '상태'].map((h) => (
-                      <th key={h} style={{ padding: '14px 20px', textAlign: h === '이름' ? 'left' : 'center', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ padding: '12px 16px', textAlign: h === '이름' ? 'left' : 'center', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -609,25 +613,25 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     <tr key={s.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.15s ease', opacity: s.is_dropped ? 0.5 : 1 }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
-                      <td style={{ padding: '14px 20px' }}>
+                      <td style={{ padding: '12px 16px' }}>
                         <Link href={`/dashboard/students/${s.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'var(--text-primary)' }}>
-                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)', color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{s.name[0]}</div>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)', color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.name[0]}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ fontSize: 15, fontWeight: 600, textDecoration: s.is_dropped ? 'line-through' : 'none' }}>{s.name}</span>
-                            {s.is_dropped && <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>}
+                            {s.is_dropped && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>}
                           </div>
                         </Link>
                       </td>
-                      <td style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 600, color: 'var(--text-primary)' }}>{s.avg_score}점</td>
-                      <td style={{ padding: '14px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>{s.absent_count}회</td>
-                      <td style={{ padding: '14px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>{s.late_count}회</td>
-                      <td style={{ padding: '14px 20px', textAlign: 'center' }}>
+                      <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: 'var(--text-primary)' }}>{s.avg_score}점</td>
+                      <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-tertiary)' }}>{s.absent_count}회</td>
+                      <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-tertiary)' }}>{s.late_count}회</td>
+                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                         {s.is_dropped ? <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{s.dropped_at}</span> : <RiskBadge level={s.risk_level} />}
                       </td>
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={5} style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 16 }}>교육생 데이터가 없어요.</td></tr>
+                    <tr><td colSpan={5} style={{ padding: '48px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 16 }}>교육생 데이터가 없어요.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -645,8 +649,8 @@ function DetailRow({ label, score, detail }: { label: string; score: number; det
     <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 13, color: 'var(--text-second)', minWidth: 130 }}>{label}</span>
-        <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${Math.min(score, 100)}%`, background: color, borderRadius: 4 }} />
+        <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 6, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${Math.min(score, 100)}%`, background: color, borderRadius: 'var(--radius-xs)' }} />
         </div>
         <span style={{ fontSize: 13, fontWeight: 700, color, minWidth: 40, textAlign: 'right' }}>{score}</span>
       </div>
@@ -683,7 +687,7 @@ function HRAdviceBox({ advice }: { advice: HRAdvice }) {
           background: c.bg,
           color: c.text,
           fontSize: 12,
-          fontWeight: 700,
+          fontWeight: 600,
           padding: '3px 10px',
           borderRadius: 'var(--radius-pill)',
         }}>

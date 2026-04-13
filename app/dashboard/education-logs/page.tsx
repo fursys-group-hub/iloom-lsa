@@ -37,7 +37,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
           <img
             src={images[lightboxIdx]}
             alt="확대 보기"
-            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }}
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 'var(--radius-sm)' }}
             onClick={e => e.stopPropagation()}
           />
           {images.length > 1 && (
@@ -115,7 +115,8 @@ const confidenceMap: Record<string, { label: string; emoji: string; color: strin
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 // UTC → 한국시간(KST) 날짜 문자열 (YYYY-MM-DD)
@@ -308,7 +309,7 @@ export default function EducationLogsPage() {
               value={selectedDate}
               onChange={e => { setSelectedDate(e.target.value); setExpandedNoteId(null); }}
               style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
                 color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
                 cursor: 'pointer', outline: 'none',
@@ -322,34 +323,38 @@ export default function EducationLogsPage() {
             </select>
 
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {/* 필터 버튼 */}
-              {([
-                { key: '', label: '전체' },
-                { key: 'best', label: '우수' },
-                { key: 'incomplete', label: '미완료' },
-              ] as const).map(f => (
-                <button
-                  key={f.key}
-                  onClick={() => { setFilterType(filterType === f.key ? '' : f.key as '' | 'best' | 'incomplete'); setExpandedNoteId(null); }}
-                  style={{
-                    padding: '6px 14px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                    border: filterType === f.key ? 'none' : '1px solid var(--border)',
-                    background: filterType === f.key ? (f.key === 'best' ? 'var(--green-dim)' : f.key === 'incomplete' ? 'var(--orange-dim)' : 'var(--blue)') : 'transparent',
-                    color: filterType === f.key ? (f.key === 'best' ? 'var(--green)' : f.key === 'incomplete' ? 'var(--orange)' : '#fff') : 'var(--text-tertiary)',
-                    fontSize: 13, fontWeight: 600,
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
+              {/* 필터: 밑줄 탭 */}
+              <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+                {([
+                  { key: '', label: '전체' },
+                  { key: 'best', label: '우수' },
+                  { key: 'incomplete', label: '미완료' },
+                ] as const).map((f, i) => (
+                  <button
+                    key={f.key}
+                    onClick={() => { setFilterType(filterType === f.key ? '' : f.key as '' | 'best' | 'incomplete'); setExpandedNoteId(null); }}
+                    style={{
+                      padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+                      background: 'transparent', cursor: 'pointer',
+                      border: 'none',
+                      borderBottom: filterType === f.key ? '2px solid var(--blue)' : '2px solid transparent',
+                      color: filterType === f.key ? 'var(--text-primary)' : 'var(--text-muted)',
+                      fontSize: 15, fontWeight: filterType === f.key ? 600 : 400,
+                      transition: 'all 0.15s ease', marginBottom: -1,
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
               {/* 학생 필터 */}
               <select
                 value={filterStudentId}
                 onChange={e => { setFilterStudentId(e.target.value); setExpandedNoteId(null); }}
                 style={{
-                  padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                  padding: '8px 14px', borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border)', background: 'var(--bg-surface)',
-                  color: 'var(--text-primary)', fontSize: 14, cursor: 'pointer', outline: 'none',
+                  color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none',
                 }}
               >
                 <option value="">전체 교육생</option>
@@ -427,7 +432,7 @@ export default function EducationLogsPage() {
                         const c = n.confidence ? confidenceMap[n.confidence] : null;
                         return (
                           <span key={n.id} style={{
-                            padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: c?.bg || 'var(--orange-dim)', color: c?.color || 'var(--orange)',
                           }}>
                             {c?.emoji} {n.students?.name || '?'}
@@ -468,8 +473,8 @@ export default function EducationLogsPage() {
                       {/* 아바타 + 이름 */}
                       <div style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                        background: isSelfStudy ? 'var(--purple-dim)' : (conf?.bg || 'var(--blue-dim)'),
-                        color: isSelfStudy ? 'var(--purple)' : (conf?.color || 'var(--blue-light)'),
+                        background: isSelfStudy ? 'var(--purple-dim)' : 'var(--blue-dim)',
+                        color: isSelfStudy ? 'var(--purple)' : 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 13, fontWeight: 700,
                       }}>
@@ -484,14 +489,14 @@ export default function EducationLogsPage() {
                           {note.one_word || note.title}
                         </span>
                         {isDropped && (
-                          <span style={{ padding: '1px 6px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>
+                          <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>
                         )}
                         {isSelfStudy && (
-                          <span style={{ padding: '1px 7px', borderRadius: 'var(--radius-pill)', fontSize: 10, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>
+                          <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>
                         )}
                         {displayTags.length > 0 && (
                           <span style={{
-                            padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600,
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-hover)',
                             color: isSelfStudy ? 'var(--purple)' : 'var(--text-tertiary)',
                           }}>{displayTags[0]}{displayTags.length > 1 ? ` +${displayTags.length - 1}` : ''}</span>
@@ -507,7 +512,7 @@ export default function EducationLogsPage() {
                             return (
                               <div style={{ display: 'flex', gap: 3 }}>
                                 {['1', '2', '3'].map((num, i) => (
-                                  <span key={i} style={{ fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'var(--green-dim)' : 'var(--bg-hover)', color: filled[i] ? 'var(--green)' : 'var(--text-muted)', opacity: filled[i] ? 1 : 0.3, fontWeight: 700 }}>{num}</span>
+                                  <span key={i} style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: filled[i] ? 'var(--green-dim)' : 'var(--bg-hover)', color: filled[i] ? 'var(--green)' : 'var(--text-muted)', opacity: filled[i] ? 1 : 0.3, fontWeight: 600 }}>{num}</span>
                                 ))}
                               </div>
                             );
@@ -518,7 +523,7 @@ export default function EducationLogsPage() {
                         {/* 참여 점수 */}
                         {!isSelfStudy && (
                           <span style={{
-                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: (note.participation_score || 0) >= 3 ? 'var(--green-dim)' : (note.participation_score || 0) >= 1 ? 'var(--orange-dim)' : 'var(--bg-hover)',
                             color: (note.participation_score || 0) >= 3 ? 'var(--green)' : (note.participation_score || 0) >= 1 ? 'var(--orange)' : 'var(--text-muted)',
                           }}>
@@ -527,7 +532,7 @@ export default function EducationLogsPage() {
                         )}
                         {/* 코멘트 */}
                         {(commentCounts[note.id] || 0) > 0 && (
-                          <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 700 }}>{commentCounts[note.id]}개 코멘트</span>
+                          <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 600 }}>{commentCounts[note.id]}개 코멘트</span>
                         )}
                         <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{isExpanded ? '▲' : '▼'}</span>
                       </div>
@@ -545,8 +550,8 @@ export default function EducationLogsPage() {
                           <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
                             {note.tags.map(tag => (
                               <span key={tag} style={{
-                                padding: '4px 12px', borderRadius: 'var(--radius-pill)',
-                                fontSize: 13, fontWeight: 500, background: 'var(--blue-dim)', color: 'var(--blue-light)',
+                                padding: '3px 10px', borderRadius: 'var(--radius-pill)',
+                                fontSize: 12, fontWeight: 600, background: 'var(--blue-dim)', color: 'var(--blue-light)',
                               }}>
                                 {tag}
                               </span>

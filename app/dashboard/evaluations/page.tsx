@@ -65,16 +65,28 @@ export default function AdminEvaluationsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>매장 교육 평가 현황</h1>
-          <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>
-            매장 관리자들이 작성한 주차별 교육생 평가를 종합적으로 확인합니다
-          </p>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>매장 교육 평가 현황</h1>
+            <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>
+              매장 관리자들이 작성한 주차별 교육생 평가를 종합적으로 확인합니다
+            </p>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setViewMode('table')} style={tabBtnStyle(viewMode === 'table')}>전체 현황</button>
-          <button onClick={() => setViewMode('student')} style={tabBtnStyle(viewMode === 'student')}>교육생별</button>
+        <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+          {([['table', '전체 현황'], ['student', '교육생별']] as const).map(([key, label], i) => (
+            <button key={key} onClick={() => setViewMode(key)} style={{
+              padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+              background: 'transparent',
+              color: viewMode === key ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: 'none',
+              borderBottom: viewMode === key ? '2px solid var(--blue)' : '2px solid transparent',
+              fontSize: 15, fontWeight: viewMode === key ? 600 : 400,
+              cursor: 'pointer', transition: 'all 0.15s ease',
+              marginBottom: -1,
+            }}>{label}</button>
+          ))}
         </div>
       </div>
 
@@ -164,9 +176,10 @@ export default function AdminEvaluationsPage() {
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
               style={{
-                padding: '12px 16px', borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border)', background: 'var(--bg-elevated)',
-                color: 'var(--text-primary)', fontSize: 15, outline: 'none', minWidth: 280,
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)', background: 'var(--bg-surface)',
+                color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+                cursor: 'pointer', outline: 'none', minWidth: 280,
               }}
             >
               <option value="">교육생을 선택하세요</option>

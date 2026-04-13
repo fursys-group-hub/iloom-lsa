@@ -12,7 +12,7 @@ interface ReportDetail {
   students: { name: string; store_location: string | null };
 }
 
-const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 };
+const card: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' };
 const sTitle: React.CSSProperties = { fontSize: 17, fontWeight: 700, margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 };
 
 // 리포트 텍스트를 섹션으로 파싱
@@ -555,7 +555,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
         <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>AI 분석 리포트</h2>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
-            style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14 }}>
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
           <button onClick={refreshReports}
@@ -580,7 +580,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
         <div style={card}>
           <h3 style={sTitle}>분야별 분석</h3>
           <select value={subjectCategory} onChange={e => setSubjectCategory(e.target.value as typeof REPORT_CATEGORIES[number])}
-            style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 14, marginBottom: 12 }}>
+            style={{ width: '100%', padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none', marginBottom: 12 }}>
             {REPORT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <button onClick={() => copyPrompt('subject')}

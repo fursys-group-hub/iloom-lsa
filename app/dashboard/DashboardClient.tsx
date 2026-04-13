@@ -321,23 +321,23 @@ export default function DashboardClient({ batches, students: allStudents, scores
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {dDayInfo && (
-            <div style={{
-              padding: '8px 16px', borderRadius: 'var(--radius-md)',
-              background: 'var(--blue-dim)', border: '1px solid var(--blue-dim)',
-              display: 'flex', alignItems: 'center', gap: 8,
+            <span style={{
+              padding: '6px 14px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--blue-dim)',
+              fontSize: 13, fontWeight: 600, color: 'var(--blue)',
+              whiteSpace: 'nowrap',
             }}>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{dDayInfo.label}</span>
-              <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--blue-light)' }}>{dDayInfo.dday}</span>
-            </div>
+              {dDayInfo.label} <span style={{ fontWeight: 800 }}>{dDayInfo.dday}</span>
+            </span>
           )}
           <select
             value={selectedBatchId}
             onChange={e => setSelectedBatchId(e.target.value)}
             style={{
-              padding: '10px 16px', borderRadius: 'var(--radius-md)',
+              padding: '8px 14px', borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)', background: 'var(--bg-surface)',
-              color: 'var(--text-primary)', fontSize: 15, fontWeight: 600, cursor: 'pointer',
-              minWidth: 180,
+              color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              outline: 'none',
             }}
           >
             {batches.filter(b => !b.is_archived).map(b => (
@@ -351,36 +351,24 @@ export default function DashboardClient({ batches, students: allStudents, scores
               </optgroup>
             )}
           </select>
-          {selectedBatch && (() => {
-            const status = getBatchStatus(selectedBatch);
-            return (
-              <span style={{
-                padding: '6px 14px', borderRadius: 'var(--radius-pill)',
-                fontSize: 13, fontWeight: 700, background: status.bg, color: status.color,
-                whiteSpace: 'nowrap',
-              }}>
-                {status.label}
-              </span>
-            );
-          })()}
         </div>
       </div>
 
       {/* 교육 일정 타임라인 */}
       {selectedBatch && (
         <div style={{
-          display: 'flex', gap: 12, padding: '16px 20px', borderRadius: 'var(--radius-md)',
+          display: 'flex', gap: 12, padding: '12px 20px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
         }}>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>입문</span>
+            <span style={{ ...badgeBase, background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>입문</span>
             <span style={{ fontSize: 14, color: today >= selectedBatch.start_date && today <= selectedBatch.end_date ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: today >= selectedBatch.start_date && today <= selectedBatch.end_date ? 600 : 400 }}>
               {selectedBatch.start_date} ~ {selectedBatch.end_date}
             </span>
           </div>
           <div style={{ width: 1, background: 'var(--border)' }} />
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화</span>
+            <span style={{ ...badgeBase, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화</span>
             {selectedBatch.advanced_start ? (
               <span style={{ fontSize: 14, color: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: today >= (selectedBatch.advanced_start||'') && today <= (selectedBatch.advanced_end||'') ? 600 : 400 }}>
                 {selectedBatch.advanced_start} ~ {selectedBatch.advanced_end}
@@ -413,9 +401,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <h3 style={{ ...sectionTitle, marginBottom: 0 }}>주의 교육생 ({riskStudentsDetailed.length}명)</h3>
-              <Link href="/dashboard/students?tab=analysis" style={{
-                fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none',
-              }}>종합 분석 →</Link>
+              <Link href="/dashboard/students?tab=analysis" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {riskStudentsDetailed.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -443,10 +429,10 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                     >
                       <div style={{
-                        width: 28, height: 28, borderRadius: '50%',
-                        background: 'var(--bg-surface)', color: 'var(--text-primary)',
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 700, flexShrink: 0,
+                        fontSize: 13, fontWeight: 700, flexShrink: 0,
                       }}>{student.name[0]}</div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 }}>
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -457,14 +443,10 @@ export default function DashboardClient({ batches, students: allStudents, scores
                         </span>
                       </div>
                       <span style={{
+                        ...badgeBase,
                         flexShrink: 0,
                         background: badgeColor.bg,
                         color: badgeColor.text,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: '3px 8px',
-                        borderRadius: 'var(--radius-pill)',
-                        whiteSpace: 'nowrap',
                       }}>
                         {badgeLabel}
                       </span>
@@ -481,7 +463,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>차시별 평균</h3>
-              <Link href="/dashboard/tests" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+              <Link href="/dashboard/tests" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {subjectAverages.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -534,11 +516,11 @@ export default function DashboardClient({ batches, students: allStudents, scores
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <h3 style={{ ...sectionTitle, margin: 0 }}>오늘 교육일지</h3>
-                    <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: dayConfig.bg, color: dayConfig.color }}>
+                    <span style={{ ...badgeBase, background: dayConfig.bg, color: dayConfig.color }}>
                       {dayConfig.label}
                     </span>
                   </div>
-                  <Link href="/dashboard/education-logs" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+                  <Link href="/dashboard/education-logs" style={cardLinkStyle}>전체보기 →</Link>
                 </div>
                 {isOffDay ? (
                   <div style={{ fontSize: 14, color: 'var(--text-tertiary)' }}>
@@ -582,7 +564,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>실습일지 실적</h3>
-              <Link href="/dashboard/practice" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+              <Link href="/dashboard/practice" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {practiceStats.count > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
@@ -605,16 +587,12 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <h3 style={{ ...sectionTitle, margin: 0 }}>질문관리</h3>
                 {questions.filter(q => q.status === 'open').length > 0 && (
-                  <span style={{
-                    padding: '2px 10px', borderRadius: 'var(--radius-pill)',
-                    background: 'var(--red-dim)', color: 'var(--red)',
-                    fontSize: 12, fontWeight: 700,
-                  }}>
+                  <span style={{ ...badgeBase, background: 'var(--red-dim)', color: 'var(--red)' }}>
                     {questions.filter(q => q.status === 'open').length}개 대기
                   </span>
                 )}
               </div>
-              <Link href="/dashboard/questions" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+              <Link href="/dashboard/questions" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {questions.filter(q => q.status !== 'archived').length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -631,15 +609,12 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                     >
+                      <span style={{ ...badgeBase, background: st.bg, color: st.color, flexShrink: 0 }}>{st.label}</span>
                       <span style={{
-                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                        fontSize: 11, fontWeight: 700, background: st.bg, color: st.color, flexShrink: 0,
-                      }}>{st.label}</span>
-                      <span style={{
-                        width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                        width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 700,
+                        fontSize: 13, fontWeight: 700,
                       }}>{(q.student_name || '?')[0]}</span>
                       <span style={{ fontSize: 14, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {q.title}
@@ -663,7 +638,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>최근 공지</h3>
-              <Link href="/dashboard/announcements" style={{ fontSize: 13, color: 'var(--blue-light)', textDecoration: 'none' }}>전체보기 →</Link>
+              <Link href="/dashboard/announcements" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {announcements.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -683,11 +658,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                     >
                       {priorityStyle && (
-                        <span style={{
-                          padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                          fontSize: 11, fontWeight: 700, background: priorityStyle.bg, color: priorityStyle.color,
-                          flexShrink: 0,
-                        }}>{priorityStyle.label}</span>
+                        <span style={{ ...badgeBase, background: priorityStyle.bg, color: priorityStyle.color, flexShrink: 0 }}>{priorityStyle.label}</span>
                       )}
                       <span style={{ fontSize: 14, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {a.title}
@@ -756,7 +727,8 @@ const cardStyle: React.CSSProperties = {
   background: 'var(--bg-surface)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-lg)',
-  padding: 20,
+  padding: '20px 24px',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 const sectionTitle: React.CSSProperties = {
@@ -764,6 +736,23 @@ const sectionTitle: React.CSSProperties = {
   fontWeight: 700,
   color: 'var(--text-primary)',
   margin: '0 0 16px',
+  letterSpacing: '-0.01em',
+};
+
+const cardLinkStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 400,
+  color: 'var(--text-muted)',
+  textDecoration: 'none',
+};
+
+/* 통일 뱃지 스타일 (pill 형태 태그) */
+const badgeBase: React.CSSProperties = {
+  padding: '3px 10px',
+  borderRadius: 'var(--radius-pill)',
+  fontSize: 12,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
 };
 
 /* ─── 하위 컴포넌트 ─── */
@@ -774,7 +763,7 @@ function StatCard({ label, value, unit, accent }: {
   return (
     <div style={cardStyle}>
       <div style={{ marginBottom: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: accent || 'var(--text-tertiary)' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</span>
       </div>
       <p style={{ fontSize: 28, fontWeight: 800, color: accent || 'var(--text-primary)', margin: 0 }}>
         {value}

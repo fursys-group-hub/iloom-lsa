@@ -395,7 +395,7 @@ export default function AttendancePage() {
               value={selectedDate}
               onChange={e => setSelectedDate(e.target.value)}
               style={{
-                padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)', background: 'var(--bg-surface)',
                 color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
                 cursor: 'pointer', outline: 'none',
@@ -423,10 +423,10 @@ export default function AttendancePage() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: 'var(--blue-dim)', color: 'var(--blue-light)',
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 14, fontWeight: 700,
+                        fontSize: 13, fontWeight: 700,
                       }}>
                         {d.students?.name?.[0] || '?'}
                       </div>
@@ -486,8 +486,16 @@ export default function AttendancePage() {
                           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                         >
                           <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {d.students?.name || '알 수 없음'}
-                            {isDropped && <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontWeight: 700 }}>퇴사</span>}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{
+                                width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                                background: 'var(--blue-dim)', color: 'var(--blue)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 13, fontWeight: 700,
+                              }}>{(d.students?.name || '?')[0]}</span>
+                              {d.students?.name || '알 수 없음'}
+                              {isDropped && <span style={{ marginLeft: 6, fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontWeight: 600 }}>퇴사</span>}
+                            </div>
                           </td>
                           <td style={tdStyle}>{times.checkIn}</td>
                           <td style={tdStyle}>{times.checkOut}</td>
@@ -544,17 +552,18 @@ const card: React.CSSProperties = {
   background: 'var(--bg-surface)',
   border: '1px solid var(--border)',
   borderRadius: 'var(--radius-lg)',
-  padding: 24,
+  padding: '20px 24px',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: '14px 16px',
+  padding: '12px 16px',
   color: 'var(--text-second)',
   whiteSpace: 'nowrap',
 };
 
 const tdCompact: React.CSSProperties = {
-  padding: '10px 14px',
+  padding: '12px 16px',
   color: 'var(--text-second)',
   whiteSpace: 'nowrap',
 };
@@ -562,7 +571,7 @@ const tdCompact: React.CSSProperties = {
 const smallBtnStyle: React.CSSProperties = {
   padding: '6px 14px',
   borderRadius: 'var(--radius-sm)',
-  border: '1px solid var(--border)',
+  border: 'none',
   background: 'transparent',
   color: 'var(--text-tertiary)',
   fontSize: 13,
@@ -575,10 +584,12 @@ const selectStyle: React.CSSProperties = {
   padding: '6px 12px',
   borderRadius: 'var(--radius-sm)',
   border: '1px solid var(--border)',
-  background: 'var(--bg-elevated)',
+  background: 'var(--bg-surface)',
   color: 'var(--text-primary)',
   fontSize: 14,
+  fontWeight: 600,
   cursor: 'pointer',
+  outline: 'none',
 };
 
 // ── 컴포넌트 ──
@@ -614,8 +625,8 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
   const c = colors[status] || colors.present;
   return (
     <span style={{
-      display: 'inline-flex', padding: '4px 12px',
-      borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 600,
+      display: 'inline-flex', padding: '3px 10px',
+      borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
       background: c.bg, color: c.color,
     }}>
       {label}
