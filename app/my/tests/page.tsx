@@ -8,7 +8,7 @@ interface Question { question_id: string; session: string; question_text: string
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 export default function MyTestsPage() {

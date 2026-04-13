@@ -25,7 +25,7 @@ interface Note {
 // ── 상수 ──
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
@@ -626,16 +626,16 @@ export default function MyPracticePage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{month}/{day} ({dayName})</span>
                     <span style={{
-                      padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                      padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                       background: 'var(--blue-dim)', color: 'var(--blue)',
                     }}>실습일지</span>
                   </div>
                   {/* 실적 요약 */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>상담 {statsData.stats_consult}</span>}
-                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>견적 {statsData.stats_estimate}</span>}
-                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>수주 {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount.toLocaleString()}</span>}
+                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>상담 {statsData.stats_consult}</span>}
+                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>견적 {statsData.stats_estimate}</span>}
+                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>수주 {statsData.stats_order}</span>}
+                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount.toLocaleString()}</span>}
                   </div>
                   {/* 수주 내역 미리보기 */}
                   {noteOrderDetail && (
@@ -667,9 +667,9 @@ export default function MyPracticePage() {
                   {/* 코멘트 뱃지 */}
                   {(commentCounts[note.id] || 0) > 0 && (
                     <span style={{
-                      padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                      padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                       background: 'var(--blue-dim)', color: 'var(--blue-light)',
-                      fontSize: 11, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3,
+                      fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3,
                     }}>{commentCounts[note.id]}개 코멘트</span>
                   )}
                 </button>
@@ -689,7 +689,7 @@ export default function MyPracticePage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{note.title}</h3>
                       <span style={{
-                        padding: '2px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                        padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                       }}>실습일지</span>
                     </div>

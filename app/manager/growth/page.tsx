@@ -111,7 +111,7 @@ export default function GrowthPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* 역량 레이더 차트 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>
               {selectedStudent?.name}님의 역량 레이더
             </h2>
@@ -127,7 +127,7 @@ export default function GrowthPage() {
           </div>
 
           {/* 주차별 강점/개선점 추이 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>주차별 강점 / 개선점 변화</h2>
             <div style={{ height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -135,7 +135,7 @@ export default function GrowthPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="week" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} />
                   <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 13 }} />
-                  <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+                  <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 13 }} />
                   <Legend wrapperStyle={{ fontSize: 13 }} />
                   <Bar dataKey="강점" fill="#30D158" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="개선점" fill="#FF9F0A" radius={[4, 4, 0, 0]} />
@@ -148,7 +148,7 @@ export default function GrowthPage() {
           </div>
 
           {/* 주차별 개선점 변화 트래킹 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>개선점 변화 추적</h2>
             {studentEvals.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>아직 평가 데이터가 없어요</p>
@@ -189,7 +189,7 @@ export default function GrowthPage() {
           </div>
 
           {/* 벤치마킹 기록 (교육생이 작성한 것) */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
             <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>벤치마킹 기록</h2>
             {studentBMs.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>아직 교육생이 작성한 벤치마킹이 없어요</p>

@@ -531,18 +531,18 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   {confidenceTrendData.map(d => (
                     <div key={d.date} style={{ flex: 1, minWidth: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        {d.높음 > 0 && <div style={{ height: Math.max(d.높음 * 0.8, 3), background: 'var(--green)', borderRadius: 2 }} title={`높음 ${d.높음}%`} />}
-                        {d.보통 > 0 && <div style={{ height: Math.max(d.보통 * 0.8, 3), background: 'var(--orange)', borderRadius: 2 }} title={`보통 ${d.보통}%`} />}
-                        {d.낮음 > 0 && <div style={{ height: Math.max(d.낮음 * 0.8, 3), background: 'var(--red)', borderRadius: 2 }} title={`낮음 ${d.낮음}%`} />}
+                        {d.높음 > 0 && <div style={{ height: Math.max(d.높음 * 0.8, 3), background: 'var(--green)', borderRadius: 'var(--radius-xs)' }} title={`높음 ${d.높음}%`} />}
+                        {d.보통 > 0 && <div style={{ height: Math.max(d.보통 * 0.8, 3), background: 'var(--orange)', borderRadius: 'var(--radius-xs)' }} title={`보통 ${d.보통}%`} />}
+                        {d.낮음 > 0 && <div style={{ height: Math.max(d.낮음 * 0.8, 3), background: 'var(--red)', borderRadius: 'var(--radius-xs)' }} title={`낮음 ${d.낮음}%`} />}
                       </div>
                       <span style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 4 }}>{d.date}</span>
                     </div>
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 12, color: 'var(--text-tertiary)' }}>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--green)', borderRadius: 2, marginRight: 4 }} />높음</span>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--orange)', borderRadius: 2, marginRight: 4 }} />보통</span>
-                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--red)', borderRadius: 2, marginRight: 4 }} />낮음</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--green)', borderRadius: 'var(--radius-xs)', marginRight: 4 }} />높음</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--orange)', borderRadius: 'var(--radius-xs)', marginRight: 4 }} />보통</span>
+                  <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--red)', borderRadius: 'var(--radius-xs)', marginRight: 4 }} />낮음</span>
                 </div>
               </div>
             )}

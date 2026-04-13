@@ -5,7 +5,7 @@ import type { StudentQuestion, QuestionReply } from '@/lib/types';
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)',
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {

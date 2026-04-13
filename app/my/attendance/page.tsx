@@ -6,7 +6,7 @@ interface Attendance { id: string; date: string; status: string; note: string | 
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -96,7 +96,7 @@ export default function MyAttendancePage() {
                   <div style={{ width: 1, height: 32, background: 'var(--border)' }} />
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '4px 12px', borderRadius: 20,
+                    padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                     background: s.color + '18',
                   }}>
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, display: 'inline-block' }} />

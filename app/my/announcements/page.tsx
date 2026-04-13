@@ -73,7 +73,7 @@ export default function MyAnnouncementsPage() {
                 key={a.id}
                 style={{
                   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)', overflow: 'hidden',
+                  borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
                 }}
               >
                 <div

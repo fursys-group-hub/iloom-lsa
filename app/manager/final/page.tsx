@@ -122,12 +122,12 @@ export default function FinalEvalPage() {
       </div>
 
       {!selectedStudentId ? (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center', boxShadow: 'var(--shadow-sm)' }}>
           <p style={{ fontSize: 40, margin: '0 0 16px' }}></p>
           <p style={{ color: 'var(--text-muted)', fontSize: 16 }}>교육생을 선택하면 총평을 작성할 수 있어요</p>
         </div>
       ) : (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 32 }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
             <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: 'var(--blue)', fontWeight: 700 }}>{selectedStudent?.name?.[0] || '?'}</div>
             <div>
@@ -207,7 +207,7 @@ function ScoreSlider({ label, value, onChange, color }: { label: string; value: 
   return (
     <div style={{ padding: '12px 16px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-second)' }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)' }}>{label}</span>
         <span style={{ fontSize: 14, fontWeight: 700, color }}>{value}/5</span>
       </div>
       <div style={{ display: 'flex', gap: 4 }}>
@@ -225,6 +225,6 @@ function ScoreSlider({ label, value, onChange, color }: { label: string; value: 
   );
 }
 
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-second)', marginBottom: 10 };
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 10 };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 15, outline: 'none', boxSizing: 'border-box' };
 const textareaStyle: React.CSSProperties = { ...inputStyle, resize: 'vertical' as const, lineHeight: 1.7, fontFamily: 'inherit' };

@@ -44,7 +44,7 @@ interface Props {
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 const sectionTitle: React.CSSProperties = {
@@ -199,7 +199,7 @@ export default function StudentDetailClient({
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {weakTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
+                      <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 12, fontWeight: 600 }}>
                         {t.label} ({t.correct}/{t.total})
                       </span>
                     ))}
@@ -211,11 +211,11 @@ export default function StudentDetailClient({
                   <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {midTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
+                      <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>
                         {t.label} ({t.correct}/{t.total})
                       </span>
                     ))}
-                    {midTags.length > 5 && <span style={{ padding: '5px 12px', fontSize: 13, color: 'var(--text-muted)' }}>외 {midTags.length - 5}개</span>}
+                    {midTags.length > 5 && <span style={{ padding: '3px 10px', fontSize: 12, color: 'var(--text-muted)' }}>외 {midTags.length - 5}개</span>}
                   </div>
                 </div>
               )}
@@ -389,16 +389,16 @@ export default function StudentDetailClient({
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
+                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
                     {report.test_date} 분석
                     {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
                   </summary>
                   <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                     {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
-                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
-                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
+                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
+                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
+                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
                       </div>
                     ) : null}
                     {report.manager_report}

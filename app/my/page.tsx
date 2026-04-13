@@ -13,7 +13,7 @@ interface Announcement { id: string; title: string; content: string; priority: '
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 export default function MyPage() {
@@ -427,7 +427,7 @@ export default function MyPage() {
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {weakTags.slice(0, 5).map(t => (
-                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 13, fontWeight: 600 }}>
+                    <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 12, fontWeight: 600 }}>
                       {t.label} ({t.correct}/{t.total})
                     </span>
                   ))}
@@ -439,7 +439,7 @@ export default function MyPage() {
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {midTags.slice(0, 5).map(t => (
-                    <span key={t.label} style={{ padding: '5px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 13, fontWeight: 600 }}>
+                    <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>
                       {t.label} ({t.correct}/{t.total})
                     </span>
                   ))}

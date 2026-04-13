@@ -119,7 +119,7 @@ export default function ManagerHomePage() {
             const rpAreas = rpAreaSummary(stEvals);
             return (
               <div key={st.id} onClick={() => setSelectedStudentId(st.id)}
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24, cursor: 'pointer', transition: 'all 0.15s' }}
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)', cursor: 'pointer', transition: 'all 0.15s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -160,10 +160,10 @@ export default function ManagerHomePage() {
             const studentScores = scores.filter((s) => s.student_id === selectedStudentId);
             const hasScores = studentScores.length > 0;
             return (
-              <div style={{ background: 'var(--bg-surface)', border: hasScores ? '1px solid var(--border)' : '1px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+              <div style={{ background: 'var(--bg-surface)', border: hasScores ? '1px solid var(--border)' : '1px dashed var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                   <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>심화교육 시험 점수</h3>
-                  {!hasScores && <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', color: 'var(--text-muted)', fontSize: 11 }}>연동 예정</span>}
+                  {!hasScores && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', color: 'var(--text-muted)', fontSize: 12 }}>연동 예정</span>}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
                   {[1, 2, 3, 4, 5, 6].map((w) => {
@@ -187,7 +187,7 @@ export default function ManagerHomePage() {
 
           {/* R&P 영역별 */}
           {studentEvals.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px' }}>R&P 영역별 상담 역량</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
                 {rpAreaSummary(studentEvals).map((rp) => {
@@ -196,12 +196,12 @@ export default function ManagerHomePage() {
                     <div key={rp.area} style={{ padding: 18, borderRadius: 'var(--radius-md)', background: cfg.bg, border: `1px solid ${cfg.border}30` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                         <span style={{ fontSize: 16, fontWeight: 700 }}>{rp.area}</span>
-                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 12, fontWeight: 700 }}>{cfg.label}</span>
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 12, fontWeight: 600 }}>{cfg.label}</span>
                       </div>
                       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 8px' }}>{rp.weeks.map((w) => `${w}주차`).join(', ')}</p>
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                        {rp.topStrengths.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 11, fontWeight: 600 }}>{t}</span>)}
-                        {rp.topImprovements.map((t) => <span key={t} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 11, fontWeight: 600 }}>{t}</span>)}
+                        {rp.topStrengths.map((t) => <span key={t} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12, fontWeight: 600 }}>{t}</span>)}
+                        {rp.topImprovements.map((t) => <span key={t} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>{t}</span>)}
                       </div>
                     </div>
                   );
@@ -211,7 +211,7 @@ export default function ManagerHomePage() {
           )}
 
           {/* 주차별 타임라인 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 16px' }}>주차별 평가 기록</h3>
             <div style={{ position: 'relative', paddingLeft: 28 }}>
               <div style={{ position: 'absolute', left: 10, top: 8, bottom: 8, width: 2, background: 'var(--border)' }} />
@@ -263,7 +263,7 @@ export default function ManagerHomePage() {
 
           {/* 차트 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 24 }}>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px' }}>종합 역량</h3>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -275,7 +275,7 @@ export default function ManagerHomePage() {
                 </ResponsiveContainer>
               </div>
             </div>
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px' }}>주차별 변화</h3>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -286,7 +286,7 @@ export default function ManagerHomePage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="week" tick={{ fill: 'var(--text-muted)', fontSize: 13 }} />
                     <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 13 }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+                    <Tooltip contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: 13 }} />
                     <Legend wrapperStyle={{ fontSize: 13 }} />
                     <Bar dataKey="강점" fill="#30D158" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="개선점" fill="#FF9F0A" radius={[4, 4, 0, 0]} />
@@ -298,7 +298,7 @@ export default function ManagerHomePage() {
 
           {/* 벤치마킹 */}
           {studentBMs.length > 0 && (
-            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24 }}>
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px' }}>벤치마킹 기록</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {studentBMs.map((bm) => (

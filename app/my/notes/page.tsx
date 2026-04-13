@@ -37,7 +37,7 @@ interface Block {
 // ── 상수 ──
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
@@ -1155,7 +1155,7 @@ function renderInlineFormat(text: string, searchQuery?: string): React.ReactNode
     const segs = t.split(regex);
     return segs.map((seg, i) =>
       regex.test(seg)
-        ? <mark key={i} style={{ background: 'rgba(255,230,0,0.35)', color: 'var(--text-primary)', borderRadius: 3, padding: '1px 3px', fontWeight: 600 }}>{seg}</mark>
+        ? <mark key={i} style={{ background: 'rgba(255,230,0,0.35)', color: 'var(--text-primary)', borderRadius: 'var(--radius-xs)', padding: '1px 3px', fontWeight: 600 }}>{seg}</mark>
         : seg
     );
   };
@@ -1182,7 +1182,7 @@ function renderInlineFormat(text: string, searchQuery?: string): React.ReactNode
       // `코드`
       parts.push(
         <code key={key++} style={{
-          background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4,
+          background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 'var(--radius-xs)',
           fontFamily: 'monospace', fontSize: '0.9em', color: 'var(--blue-light)',
         }}>{highlightText(match[10])}</code>
       );
@@ -1617,7 +1617,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
           <img
             src={images[lightboxIdx]}
             alt="확대 보기"
-            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }}
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 'var(--radius-sm)' }}
             onClick={e => e.stopPropagation()}
           />
           {images.length > 1 && (

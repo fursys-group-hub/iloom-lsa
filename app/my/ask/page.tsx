@@ -5,7 +5,7 @@ import type { StudentQuestion, QuestionReply } from '@/lib/types';
 
 const card: React.CSSProperties = {
   background: 'var(--bg-surface)', border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-lg)', padding: 24,
+  borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -263,7 +263,7 @@ export default function AskPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{
-                      padding: '2px 10px', borderRadius: 'var(--radius-pill)',
+                      padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                       fontSize: 12, fontWeight: 600, background: st.bg, color: st.color,
                     }}>
                       {st.label}
@@ -360,11 +360,11 @@ export default function AskPage() {
                         padding: '3px 4px', boxShadow: 'var(--shadow-sm)', whiteSpace: 'nowrap',
                       }}>
                         <button onClick={() => { setEditingQuestionId(selectedQ.id); setEditingQuestionTitle(selectedQ.title); }} style={{
-                          padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                          padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
                           border: 'none', fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer',
                         }}>수정</button>
                         <button onClick={() => handleDeleteQuestion(selectedQ.id)} style={{
-                          padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                          padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
                           border: 'none', fontSize: 11, color: 'var(--red)', cursor: 'pointer',
                         }}>삭제</button>
                       </div>
@@ -440,11 +440,11 @@ export default function AskPage() {
                                 padding: '3px 4px', boxShadow: 'var(--shadow-sm)', whiteSpace: 'nowrap',
                               }}>
                                 <button onClick={(e) => { e.stopPropagation(); setEditingReplyId(r.id); setEditingContent(r.content); }} style={{
-                                  padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                                  padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
                                   border: 'none', fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer',
                                 }}>수정</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(r.id); }} style={{
-                                  padding: '2px 8px', borderRadius: 4, background: 'transparent',
+                                  padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
                                   border: 'none', fontSize: 11, color: 'var(--red)', cursor: 'pointer',
                                 }}>삭제</button>
                               </div>

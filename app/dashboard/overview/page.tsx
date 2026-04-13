@@ -615,7 +615,7 @@ function ScoreCard({ label, score, color }: { label: string; score: number; colo
       <p style={{ fontSize: 26, fontWeight: 800, color, margin: '0 0 4px' }}>{score}<span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>/5</span></p>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{label}</p>
       <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 6 }}>
-        {[1, 2, 3, 4, 5].map((n) => <div key={n} style={{ width: 18, height: 5, borderRadius: 2, background: n <= score ? color : 'var(--bg-hover)' }} />)}
+        {[1, 2, 3, 4, 5].map((n) => <div key={n} style={{ width: 18, height: 5, borderRadius: 'var(--radius-xs)', background: n <= score ? color : 'var(--bg-hover)' }} />)}
       </div>
     </div>
   );

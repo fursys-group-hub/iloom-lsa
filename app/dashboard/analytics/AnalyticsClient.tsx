@@ -353,11 +353,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>카테고리</th>
-                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>시험 정답률</th>
-                <th style={{ padding: '12px 16px', color: 'var(--text-second)' }}>정답률 바</th>
-                <th style={{ textAlign: 'right', padding: '12px 16px', color: 'var(--text-second)' }}>수주 금액 (만원)</th>
-                <th style={{ padding: '12px 16px', color: 'var(--text-second)' }}>수주 바</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>카테고리</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>시험 정답률</th>
+                <th style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>정답률 바</th>
+                <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>수주 금액 (만원)</th>
+                <th style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>수주 바</th>
               </tr>
             </thead>
             <tbody>
@@ -366,15 +366,15 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                 const maxAmount = Math.max(...crossCategoryVsSales.map(r => r.salesAmount), 1);
                 return (
                   <tr key={row.category} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.category}</td>
-                    <td style={{ textAlign: 'center', padding: '10px 14px', fontWeight: 700, color: rc.text }}>{row.examRate}%</td>
-                    <td style={{ padding: '10px 14px', width: 120 }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.category}</td>
+                    <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, color: rc.text }}>{row.examRate}%</td>
+                    <td style={{ padding: '12px 16px', width: 120 }}>
                       <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${row.examRate}%`, background: rc.text, borderRadius: 'var(--radius-xs)' }} />
                       </div>
                     </td>
-                    <td style={{ textAlign: 'right', padding: '10px 14px', fontWeight: 600, color: 'var(--blue)' }}>{row.salesAmount.toLocaleString()}</td>
-                    <td style={{ padding: '10px 14px', width: 120 }}>
+                    <td style={{ textAlign: 'right', padding: '12px 16px', fontWeight: 600, color: 'var(--blue)' }}>{row.salesAmount.toLocaleString()}</td>
+                    <td style={{ padding: '12px 16px', width: 120 }}>
                       <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${Math.round((row.salesAmount / maxAmount) * 100)}%`, background: 'var(--blue)', borderRadius: 'var(--radius-xs)' }} />
                       </div>
@@ -421,11 +421,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>교육생</th>
-                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>출석률</th>
-                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>일지 제출률</th>
-                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>수주 전환율</th>
-                <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>상관 신호</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>교육생</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>출석률</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>일지 제출률</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>수주 전환율</th>
+                <th style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>상관 신호</th>
               </tr>
             </thead>
             <tbody>
@@ -437,11 +437,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                 const signal = isHighAtt && row.conversionRate >= 30 ? '일치' : isHighAtt && row.conversionRate < 20 ? '불일치' : row.attRate < 70 && row.conversionRate >= 30 ? '역전' : '—';
                 return (
                   <tr key={row.name} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.name}</td>
-                    <td style={{ textAlign: 'center', padding: '10px 14px', fontWeight: 600, color: attColor.text }}>{row.attRate}%</td>
-                    <td style={{ textAlign: 'center', padding: '10px 14px', fontWeight: 600, color: subColor.text }}>{row.submitRate}%</td>
-                    <td style={{ textAlign: 'center', padding: '10px 14px', fontWeight: 700, color: 'var(--blue)' }}>{row.conversionRate}%</td>
-                    <td style={{ textAlign: 'center', padding: '10px 14px', fontSize: 13 }}>{signal}</td>
+                    <td style={{ padding: '12px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>{row.name}</td>
+                    <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 600, color: attColor.text }}>{row.attRate}%</td>
+                    <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 600, color: subColor.text }}>{row.submitRate}%</td>
+                    <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, color: 'var(--blue)' }}>{row.conversionRate}%</td>
+                    <td style={{ textAlign: 'center', padding: '12px 16px', fontSize: 13 }}>{signal}</td>
                   </tr>
                 );
               })}

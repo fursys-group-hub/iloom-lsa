@@ -593,9 +593,9 @@ export default function TestsClient({ batches, students, scores, attendance, not
             <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16, marginTop: -8 }}>
               <b>가로축</b> = 대분류 (제품군), <b>세로축</b> = 소분류 (지식 유형). 셀 색상은 전체 교육생 정답률이에요.
               <span style={{ marginLeft: 8 }}>
-                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#30D15833', borderRadius: 2, marginRight: 2 }} />80%+
-                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF9F0A33', borderRadius: 2, marginLeft: 8, marginRight: 2 }} />60~79%
-                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF453A33', borderRadius: 2, marginLeft: 8, marginRight: 2 }} />60% 미만
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#30D15833', borderRadius: 'var(--radius-xs)', marginRight: 2 }} />80%+
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF9F0A33', borderRadius: 'var(--radius-xs)', marginLeft: 8, marginRight: 2 }} />60~79%
+                <span style={{ display: 'inline-block', width: 10, height: 10, background: '#FF453A33', borderRadius: 'var(--radius-xs)', marginLeft: 8, marginRight: 2 }} />60% 미만
               </span>
               <br />셀을 <b>클릭</b>하면 해당 문항 목록과 오답률을 볼 수 있어요.
             </p>
@@ -1112,9 +1112,9 @@ export default function TestsClient({ batches, students, scores, attendance, not
                         </div>
                         {/* 그룹 정답률 바 */}
                         {allResp.length > 0 && (
-                          <div style={{ height: 5, borderRadius: 3, background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+                          <div style={{ height: 5, borderRadius: 'var(--radius-xs)', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
                             <div style={{
-                              height: '100%', borderRadius: 3, width: `${groupRate}%`,
+                              height: '100%', borderRadius: 'var(--radius-xs)', width: `${groupRate}%`,
                               background: groupColor, transition: 'width 0.3s ease',
                             }} />
                           </div>

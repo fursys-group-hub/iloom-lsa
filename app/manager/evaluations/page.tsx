@@ -201,7 +201,7 @@ export default function EvaluationsPage() {
       {!selectedStudentId ? (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center',
+          borderRadius: 'var(--radius-lg)', padding: 60, textAlign: 'center', boxShadow: 'var(--shadow-sm)',
         }}>
           <p style={{ fontSize: 40, margin: '0 0 16px' }}>👆</p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)' }}>위에서 교육생을 선택해주세요</p>
@@ -209,7 +209,7 @@ export default function EvaluationsPage() {
       ) : (
         <div style={{
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 32,
+          borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
         }}>
           {/* 교육생 정보 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
@@ -493,7 +493,7 @@ export default function EvaluationsPage() {
 }
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-second)', marginBottom: 10,
+  display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 10,
 };
 
 const selectStyle: React.CSSProperties = {
