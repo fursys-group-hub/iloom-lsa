@@ -310,7 +310,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
       {/* 인사 + 기수 선택 + D-day */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+      <div className="greeting-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
             안녕하세요, 수지님
@@ -380,15 +380,22 @@ export default function DashboardClient({ batches, students: allStudents, scores
         </div>
       )}
 
-      {/* 출결 요약 카드 */}
-      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: droppedStudents.length > 0 ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
-        <StatCard label="교육 인원" value={todayAttendance.total} unit="명" />
-        <StatCard label="출석" value={todayAttendance.present} unit="명" accent="var(--green)" />
-        <StatCard label="지각" value={todayAttendance.late} unit="명" accent="var(--orange)" />
-        <StatCard label="결석" value={todayAttendance.absent} unit="명" accent="var(--red)" />
-        {droppedStudents.length > 0 && (
-          <StatCard label="퇴사" value={droppedStudents.length} unit="명" accent="var(--text-muted)" />
-        )}
+      {/* 출결 요약 — 1개 카드 통합 */}
+      <div style={{ ...cardStyle, padding: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: droppedStudents.length > 0 ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)' }}>
+          {[
+            { label: '교육 인원', value: todayAttendance.total, color: 'var(--text-primary)' },
+            { label: '출석', value: todayAttendance.present, color: 'var(--green)' },
+            { label: '지각', value: todayAttendance.late, color: 'var(--orange)' },
+            { label: '결석', value: todayAttendance.absent, color: 'var(--red)' },
+            ...(droppedStudents.length > 0 ? [{ label: '퇴사', value: droppedStudents.length, color: 'var(--text-muted)' }] : []),
+          ].map((s, i) => (
+            <div key={i} style={{ padding: '14px 12px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>명</span></div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 2컬럼 메인 */}
@@ -716,10 +723,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           .main-grid { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
-          .summary-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important; gap: 8px !important; }
-          .summary-grid > div { padding: 12px !important; }
-          .summary-grid .stat-label { font-size: 11px !important; }
-          .summary-grid .stat-value { font-size: 20px !important; }
+          .greeting-row { flex-direction: column; align-items: center !important; text-align: center; }
           .risk-grid { grid-template-columns: 1fr !important; }
           .hide-mobile { display: none !important; }
         }

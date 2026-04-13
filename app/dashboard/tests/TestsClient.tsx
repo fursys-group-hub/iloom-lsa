@@ -900,9 +900,9 @@ export default function TestsClient({ batches, students, scores, attendance, not
               background: 'var(--bg-surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-lg)', overflow: 'hidden',
             }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 100px 80px 60px 60px', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+              <div className="score-row" style={{ display: 'grid', gridTemplateColumns: '40px 1fr 100px 80px 60px 60px', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
                 {['순위', '이름', '제출 시간', '점수', '정답', '오답'].map((h) => (
-                  <div key={h} className={h === '제출 시간' || h === '오답' ? 'hide-mobile' : ''} style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textAlign: h === '이름' ? 'left' : 'center' }}>{h}</div>
+                  <div key={h} style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textAlign: h === '이름' ? 'left' : 'center' }}>{h}</div>
                 ))}
               </div>
               {selectedScores.map((row, idx) => {
@@ -920,7 +920,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                 // 미응시
                 if (!row.took) {
                   return (
-                    <div key={row.student.id} style={{
+                    <div key={row.student.id} className="score-row" style={{
                       display: 'grid', gridTemplateColumns: '40px 1fr 100px 80px 60px 60px',
                       alignItems: 'center', padding: '14px 20px',
                       borderBottom: '1px solid var(--border)', opacity: 0.5,
@@ -945,6 +945,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
                 return (
                   <div key={row.student.id}>
                     <div
+                      className="score-row"
                       onClick={() => setSelectedStudent(isSelected ? null : row.student.id)}
                       style={{
                         display: 'grid', gridTemplateColumns: '40px 1fr 100px 80px 60px 60px',

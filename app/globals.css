@@ -309,4 +309,9 @@ button, a, [role="button"] {
    ────────────────────────────────────── */
 @media (max-width: 1023px) {
   .hide-mobile { display: none !important; }
+
+  /* 테스트 점수 테이블: 제출시간(3번째), 오답(6번째) 숨김 */
+  .score-row { grid-template-columns: 40px 1fr 80px 60px !important; }
+  .score-row > :nth-child(3),
+  .score-row > :nth-child(6) { display: none !important; }
 }
