@@ -501,9 +501,9 @@ ${studentSections}
                       </span>
                       {/* 실적 뱃지 */}
                       <div style={{ display: 'flex', gap: 6, flex: 1, flexWrap: 'wrap' }}>
-                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}>상담 {statsData.stats_consult}</span>}
-                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}>견적 {statsData.stats_estimate}</span>}
-                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}>수주 {statsData.stats_order}</span>}
+                        {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600 }}><span className="hide-mobile">상담 </span>{statsData.stats_consult}</span>}
+                        {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontWeight: 600 }}><span className="hide-mobile">견적 </span>{statsData.stats_estimate}</span>}
+                        {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontWeight: 600 }}><span className="hide-mobile">수주 </span>{statsData.stats_order}</span>}
                         {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontWeight: 600 }}>{statsData.stats_amount.toLocaleString()}원</span>}
                       </div>
                       {/* 섹션 완료 + 코멘트 */}
