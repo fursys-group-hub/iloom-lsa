@@ -293,4 +293,5 @@ export const REPORT_TYPE_LABELS: Record<string, string> = {
   subject: '분야별 분석',
   weekly: '주간 분석',
   comprehensive: '종합 분석',
+  practice: '매장 실습 보고서',
 };

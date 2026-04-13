@@ -108,6 +108,119 @@ export default function DashboardPracticePage() {
   const [filterStudentId, setFilterStudentId] = useState('');
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
 
+  // 보고서
+  const [reportStatus, setReportStatus] = useState<Record<string, { exists: boolean; groupId: string | null; practiceCount: number }>>({});
+  const [copyingPrompt, setCopyingPrompt] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
+
+  // 해당 날짜 보고서 존재 여부 확인
+  const checkReportStatus = useCallback(async (date: string) => {
+    try {
+      const res = await fetch(`/api/practice-report?date=${date}`);
+      const data = await res.json();
+      setReportStatus(prev => ({ ...prev, [date]: { exists: data.exists, groupId: data.groupId, practiceCount: data.practiceCount } }));
+    } catch {
+      setReportStatus(prev => ({ ...prev, [date]: { exists: false, groupId: null, practiceCount: 0 } }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) checkReportStatus(selectedDate);
+  }, [selectedDate, checkReportStatus]);
+
+  // 프롬프트 복사
+  const copyPracticePrompt = useCallback(async () => {
+    if (!selectedDate || copyingPrompt) return;
+    setCopyingPrompt(true);
+    try {
+      const res = await fetch(`/api/practice-report?date=${selectedDate}`);
+      const data = await res.json();
+      if (!data.students || data.students.length === 0) {
+        showToast('해당 날짜에 실습일지가 없습니다.');
+        setCopyingPrompt(false);
+        return;
+      }
+
+      const d = new Date(selectedDate + 'T00:00:00');
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      const dateLabel = `${d.getMonth() + 1}/${d.getDate()} (${dayNames[d.getDay()]})`;
+
+      const totalConsult = data.students.reduce((s: number, a: { consult: number }) => s + a.consult, 0);
+      const totalEstimate = data.students.reduce((s: number, a: { estimate: number }) => s + a.estimate, 0);
+      const totalOrder = data.students.reduce((s: number, a: { order: number }) => s + a.order, 0);
+      const totalAmount = data.students.reduce((s: number, a: { amount: number }) => s + a.amount, 0);
+
+      let studentSections = '';
+      for (const s of data.students) {
+        studentSections += `
+===== ${s.name} (id: ${s.studentId}) =====
+실적: 어프로치 ${s.consult} / 견적 ${s.estimate} / 수주 ${s.order} / 수주금액 ${s.amount.toLocaleString()}원
+${s.orderDetail ? `상담/수주 내역: ${s.orderDetail}` : ''}
+[기억에 남는 고객] ${(s.step1 || '').substring(0, 1000)}
+[선배에게 배운 점] ${(s.step2 || '').substring(0, 800)}
+[칭찬할 점] ${(s.step3 || '').substring(0, 800)}
+[보완할 점] ${(s.step4 || '').substring(0, 800)}
+
+`;
+      }
+
+      const prompt = `# 일룸 매장 실습 보고서 생성 — ${dateLabel}
+
+## 역할
+당신은 일룸(iloom) 가구 브랜드의 신입 영업사원 입문교육 트레이너입니다.
+아래는 ${dateLabel} 매장 실습 후 교육생들이 작성한 실습일지 데이터입니다.
+
+## 전체 현황
+총 ${data.students.length}명 / 어프로치 ${totalConsult}건 / 견적 ${totalEstimate}건 / 수주 ${totalOrder}건 / 수주금액 ${totalAmount.toLocaleString()}원
+
+## 교육생별 실습일지 데이터
+${studentSections}
+
+## 작업 지시
+
+위 데이터를 바탕으로 각 교육생에 대해 **전문적인 코칭 피드백**을 작성하고 Supabase \`coaching_reports\` 테이블에 저장하세요.
+
+### 피드백 작성 규칙
+1. 각 교육생의 피드백은 "→"로 시작하는 3~5줄
+2. 첫 줄: **핵심 강점** (예: "고객지향적인 응대로 편안한 분위기 속에서 대화를 잘 이끌며 공감 능력이 우수함")
+3. 중간: **구체적 칭찬 포인트** (실습일지 내용에서 근거를 찾아 언급)
+4. 마지막: **보완 포인트** (부정적이 아닌 건설적인 톤, "~보완 시 ~기대됨" 형식)
+5. 톤: 공식 보고서 문체 ("~함", "~됨", "~임")
+6. 수주 실적 없는 교육생도 성장 가능성이나 태도 측면에서 긍정 포인트 찾기
+
+### DB 저장 형식
+각 교육생별로 \`coaching_reports\`에 INSERT:
+- \`student_id\`: 위 데이터의 id
+- \`report_type\`: 'practice'
+- \`report_group_id\`: 'practice_${selectedDate}_' + Date.now()
+- \`test_date\`: '${selectedDate}'
+- \`subject\`: '매장 실습'
+- \`student_message\`: '' (빈 문자열)
+- \`manager_report\`: 아래 형식의 마크다운
+
+\`\`\`
+📋 인원별 코칭 피드백
+
+어프로치 N / 견적 N / 수주 N / 수주금액 N원
+상담/수주 품목: ...
+
+→ 피드백 1
+→ 피드백 2
+→ 피드백 3
+\`\`\`
+
+모든 교육생에 대해 한 번에 INSERT하세요.`;
+
+      await navigator.clipboard.writeText(prompt);
+      showToast(`📋 ${data.students.length}명 실습일지 프롬프트가 복사되었습니다!`);
+    } catch {
+      showToast('프롬프트 복사에 실패했습니다.');
+    }
+    setCopyingPrompt(false);
+  }, [selectedDate, copyingPrompt]);
+
   // 코멘트
   const [comments, setComments] = useState<NoteComment[]>([]);
   const [commentInput, setCommentInput] = useState('');
@@ -264,6 +377,32 @@ export default function DashboardPracticePage() {
                 return <option key={date} value={date}>{d.getMonth() + 1}/{d.getDate()} ({dayNames[d.getDay()]})</option>;
               })}
             </select>
+            {/* 보고서 버튼 */}
+            {reportStatus[selectedDate]?.exists && (
+              <a
+                href="/dashboard/reports"
+                style={{
+                  padding: '8px 16px', borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--green)', background: 'transparent',
+                  color: 'var(--green)', fontSize: 13, fontWeight: 600,
+                  textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                📊 보고서 보기
+              </a>
+            )}
+            <button
+              onClick={copyPracticePrompt}
+              disabled={copyingPrompt}
+              style={{
+                padding: '8px 16px', borderRadius: 'var(--radius-md)',
+                border: 'none', background: copyingPrompt ? 'var(--bg-hover)' : 'var(--blue)',
+                color: copyingPrompt ? 'var(--text-muted)' : '#fff',
+                fontSize: 13, fontWeight: 600, cursor: copyingPrompt ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+              {copyingPrompt ? '⏳ 준비 중...' : '📋 보고서 프롬프트 복사'}
+            </button>
+
             {/* 학생 필터 */}
             <select value={filterStudentId} onChange={e => setFilterStudentId(e.target.value)}
               style={{
@@ -554,6 +693,19 @@ export default function DashboardPracticePage() {
             </div>
           )}
         </>
+      )}
+
+      {/* 토스트 */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          padding: '12px 24px', borderRadius: 'var(--radius-md)',
+          background: 'var(--bg-elevated)', border: '1px solid var(--border)',
+          color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
+          boxShadow: 'var(--shadow-lg)', zIndex: 9999,
+        }}>
+          {toast}
+        </div>
       )}
     </div>
   );

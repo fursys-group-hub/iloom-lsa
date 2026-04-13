@@ -256,6 +256,65 @@ function renderSectionContent(icon: string, content: string, isPrint = false) {
   return renderText(content);
 }
 
+// Practice 보고서 전용 렌더러 (일자별 통합)
+function PracticeReportView({ text }: { text: string }) {
+  const blocks = text.split('\n---\n');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {blocks.map((block, bi) => {
+        const lines = block.split('\n');
+        return (
+          <div key={bi} style={{
+            padding: '20px 0',
+            borderBottom: bi < blocks.length - 1 ? '1px solid var(--border)' : 'none',
+          }}>
+            {lines.map((line, li) => {
+              const trimmed = line.trim();
+              if (!trimmed) return <div key={li} style={{ height: 8 }} />;
+
+              // 📋 제목 (큰 헤더)
+              if (trimmed.startsWith('📋 매장')) {
+                return <h3 key={li} style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 12px' }}>{trimmed}</h3>;
+              }
+              // 📊 전체 현황
+              if (trimmed.startsWith('📊')) {
+                return <div key={li} style={{ fontSize: 15, fontWeight: 600, color: 'var(--blue-light)', marginBottom: 4 }}>{formatInline(trimmed.replace('📊 ', ''))}</div>;
+              }
+              // 📌 이름 헤더
+              if (trimmed.startsWith('📌')) {
+                return <div key={li} style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>{formatInline(trimmed)}</div>;
+              }
+              // → 피드백 라인
+              if (trimmed.startsWith('→')) {
+                return (
+                  <div key={li} style={{
+                    fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7,
+                    paddingLeft: 16, position: 'relative', marginBottom: 4,
+                  }}>
+                    <span style={{ position: 'absolute', left: 0, color: 'var(--blue)' }}>→</span>
+                    {formatInline(trimmed.substring(1).trim())}
+                  </div>
+                );
+              }
+              // 어프로치 N / ... 실적 라인
+              if (trimmed.startsWith('어프로치') || trimmed.startsWith('상담 품목')) {
+                return <div key={li} style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 2 }}>{formatInline(trimmed)}</div>;
+              }
+              // 견적 전환율 등 부가 정보
+              if (trimmed.startsWith('견적 전환율') || trimmed.startsWith('총 ')) {
+                return <div key={li} style={{ fontSize: 14, color: 'var(--text-second)', marginBottom: 4 }}>{formatInline(trimmed)}</div>;
+              }
+              // 기본
+              return <div key={li} style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6 }}>{formatInline(trimmed)}</div>;
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // 인쇄용 학생 카드 (A4 가로 2단)
 function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: boolean }) {
   const sections = parseSections(r.manager_report);
@@ -547,7 +606,7 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
                   onMouseEnter={e => { if (selectedGroupId !== g.groupId) e.currentTarget.style.background = 'var(--bg-hover)'; }}
                   onMouseLeave={e => { if (selectedGroupId !== g.groupId) e.currentTarget.style.background = 'transparent'; }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: g.reportType === 'comprehensive' ? 'var(--blue-dim)' : 'rgba(191,90,242,0.15)', color: g.reportType === 'comprehensive' ? 'var(--blue-light)' : 'var(--purple)' }}>
+                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: g.reportType === 'practice' ? 'rgba(48,209,88,0.15)' : g.reportType === 'comprehensive' ? 'var(--blue-dim)' : 'rgba(191,90,242,0.15)', color: g.reportType === 'practice' ? 'var(--green)' : g.reportType === 'comprehensive' ? 'var(--blue-light)' : 'var(--purple)' }}>
                       {REPORT_TYPE_LABELS[g.reportType] || g.reportType}
                     </span>
                     {g.subject && <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{g.subject}</span>}
@@ -589,7 +648,13 @@ export default function ReportsClient({ batches }: { batches: BatchItem[] }) {
                             </div>
                           ) : (
                             <div className={previewMode ? 'print-preview-container' : ''}>
-                              <PrintCard r={r} isPrint={false} />
+                              {g.reportType === 'practice' ? (
+                                <div style={{ ...card, padding: 28 }}>
+                                  <PracticeReportView text={r.manager_report} />
+                                </div>
+                              ) : (
+                                <PrintCard r={r} isPrint={false} />
+                              )}
                               {!previewMode && (
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
                                   <button onClick={() => { setEditingId(r.id); setEditText(r.manager_report); }}
