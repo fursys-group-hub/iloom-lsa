@@ -423,8 +423,8 @@ ${studentSections}
           {/* 요약 카드 — 1개 카드에 통합 */}
           {!filterStudentId && (
             <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-              {/* 상단: 제출 + 상담 + 견적 + 수주 한 줄 */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--border)' }}>
+              {/* 제출 + 상담 + 견적 + 수주 + 수주금액 한 줄 */}
+              <div className="practice-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
                 <div style={{ padding: '14px 12px', textAlign: 'center' }}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--blue)' }}>{submissionStatus.submitted.length}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>/{submissionStatus.submitted.length + submissionStatus.notSubmitted.length}</span></div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>제출</div>
@@ -441,20 +441,17 @@ ${studentSections}
                   <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--orange)' }}>{totalStats.stats_order}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>수주</div>
                 </div>
-              </div>
-              {/* 하단: 수주금액 + 미제출 */}
-              <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>수주금액 </span>
-                  <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--purple)' }}>{totalStats.stats_amount.toLocaleString()}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>원</span>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--purple)' }}>{totalStats.stats_amount.toLocaleString()}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>원</span></div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>수주금액</div>
                 </div>
-                {submissionStatus.notSubmitted.length > 0 && (
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}
-                  </div>
-                )}
               </div>
+              {/* 미제출 명단 */}
+              {submissionStatus.notSubmitted.length > 0 && (
+                <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
+                  미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}
+                </div>
+              )}
             </div>
           )}
 
@@ -711,6 +708,12 @@ ${studentSections}
           {toast}
         </div>
       )}
+      <style>{`
+        @media (max-width: 768px) {
+          .practice-summary-grid { grid-template-columns: repeat(4, 1fr) !important; }
+          .practice-summary-grid > div:last-child { grid-column: 1 / -1; border-top: 1px solid var(--border); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -283,12 +283,12 @@ export default function AnnouncementsPage() {
                       {a.content}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 6 }}>
                     <button
                       onClick={() => startEdit(a)}
                       style={{
                         padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border)', background: 'transparent',
+                        border: 'none', background: 'transparent',
                         color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer',
                       }}
                     >수정</button>
@@ -296,7 +296,7 @@ export default function AnnouncementsPage() {
                       onClick={() => handleDelete(a.id)}
                       style={{
                         padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border)', background: 'transparent',
+                        border: 'none', background: 'transparent',
                         color: 'var(--red)', fontSize: 12, cursor: 'pointer',
                       }}
                     >삭제</button>

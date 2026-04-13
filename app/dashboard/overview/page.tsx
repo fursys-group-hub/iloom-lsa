@@ -121,12 +121,19 @@ export default function OverviewPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>심화교육</h2>
 
-      {/* 요약 카드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <SumCard label="전체 교육생" value={activeStudents.length} unit="명" color="var(--blue)" />
-        <SumCard label="주차 평가" value={evaluations.length} unit="건" color="var(--green)" />
-        <SumCard label="총평 완료" value={new Set(finals.map((f) => f.student_id)).size} unit="명" color="var(--purple)" />
-        <SumCard label="벤치마킹" value={benchmarks.length} unit="건" color="var(--orange)" />
+      {/* 요약 카드 — 1개 통합 */}
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24, overflow: 'hidden' }}>
+        {[
+          { label: '교육생', value: activeStudents.length, unit: '명', color: 'var(--blue)' },
+          { label: '평가', value: evaluations.length, unit: '건', color: 'var(--green)' },
+          { label: '총평', value: new Set(finals.map((f) => f.student_id)).size, unit: '명', color: 'var(--purple)' },
+          { label: '벤치마킹', value: benchmarks.length, unit: '건', color: 'var(--orange)' },
+        ].map((s, i) => (
+          <div key={i} style={{ padding: '14px 12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{s.unit}</span></div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+          </div>
+        ))}
       </div>
 
       {/* 매장 필터 + 교육생 선택 */}

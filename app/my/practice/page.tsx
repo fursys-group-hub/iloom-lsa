@@ -635,7 +635,7 @@ export default function MyPracticePage() {
                     {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>상담 {statsData.stats_consult}</span>}
                     {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>견적 {statsData.stats_estimate}</span>}
                     {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>수주 {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount >= 10000 ? `${Math.round(statsData.stats_amount / 10000).toLocaleString()}만원` : `${statsData.stats_amount.toLocaleString()}원`}</span>}
+                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount.toLocaleString()}원</span>}
                   </div>
                   {/* 수주 내역 미리보기 */}
                   {noteOrderDetail && (

@@ -935,7 +935,7 @@ const smallBtnStyle: React.CSSProperties = {
 const tinyBtnStyle: React.CSSProperties = {
   padding: '4px 10px',
   borderRadius: 'var(--radius-sm)',
-  border: '1px solid var(--border)',
+  border: 'none',
   background: 'transparent',
   color: 'var(--text-tertiary)',
   fontSize: 12,
