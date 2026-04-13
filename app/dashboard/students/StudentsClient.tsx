@@ -615,7 +615,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
                       <td style={{ padding: '12px 16px' }}>
                         <Link href={`/dashboard/students/${s.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'var(--text-primary)' }}>
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)', color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.name[0]}</div>
+                          <div className="hide-mobile" style={{ width: 32, height: 32, borderRadius: '50%', background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)', color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{s.name[0]}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ fontSize: 15, fontWeight: 600, textDecoration: s.is_dropped ? 'line-through' : 'none' }}>{s.name}</span>
                             {s.is_dropped && <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>}

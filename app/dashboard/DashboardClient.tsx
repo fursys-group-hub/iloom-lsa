@@ -354,9 +354,9 @@ export default function DashboardClient({ batches, students: allStudents, scores
         </div>
       </div>
 
-      {/* 교육 일정 타임라인 */}
+      {/* 교육 일정 타임라인 — 모바일에서 숨김 */}
       {selectedBatch && (
-        <div style={{
+        <div className="hide-mobile" style={{
           display: 'flex', gap: 12, padding: '12px 20px', borderRadius: 'var(--radius-sm)',
           background: 'var(--bg-surface)', border: '1px solid var(--border)',
         }}>
@@ -404,7 +404,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
               <Link href="/dashboard/students?tab=analysis" style={cardLinkStyle}>전체보기 →</Link>
             </div>
             {riskStudentsDetailed.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              <div className="risk-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                 {riskStudentsDetailed.map(({ student, adaptation, riskCheck, advice }) => {
                   // 유형별 배지 색상 매핑
                   const typeColorMap: Record<string, { bg: string; text: string }> = {
@@ -428,7 +428,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                     >
-                      <div style={{
+                      <div className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%',
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -437,7 +437,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 }}>
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                           {student.name}
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginLeft: 5 }}>
+                          <span className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginLeft: 5 }}>
                             적응 {adaptation.total}점 · {riskCheck.riskCount}개 해당
                           </span>
                         </span>
@@ -610,7 +610,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
                     >
                       <span style={{ ...badgeBase, background: st.bg, color: st.color, flexShrink: 0 }}>{st.label}</span>
-                      <span style={{
+                      <span className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -712,9 +712,16 @@ export default function DashboardClient({ batches, students: allStudents, scores
 
       {/* 반응형 */}
       <style>{`
-        @media (max-width: 768px) {
-          .summary-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        @media (max-width: 1023px) {
           .main-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 768px) {
+          .summary-grid { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important; gap: 8px !important; }
+          .summary-grid > div { padding: 12px !important; }
+          .summary-grid .stat-label { font-size: 11px !important; }
+          .summary-grid .stat-value { font-size: 20px !important; }
+          .risk-grid { grid-template-columns: 1fr !important; }
+          .hide-mobile { display: none !important; }
         }
       `}</style>
     </div>
@@ -762,11 +769,11 @@ function StatCard({ label, value, unit, accent }: {
 }) {
   return (
     <div style={cardStyle}>
-      <div style={{ marginBottom: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</span>
+      <div style={{ marginBottom: 4 }}>
+        <span className="stat-label" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</span>
       </div>
-      <p style={{ fontSize: 28, fontWeight: 800, color: accent || 'var(--text-primary)', margin: 0 }}>
-        {value}
+      <p style={{ margin: 0 }}>
+        <span className="stat-value" style={{ fontSize: 28, fontWeight: 800, color: accent || 'var(--text-primary)' }}>{value}</span>
         <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span>
       </p>
     </div>

@@ -273,12 +273,11 @@ button, a, [role="button"] {
   body { font-size: 15px; }
   .note-tag-desktop { display: none !important; }
 
-  /* 테이블 가로 스크롤 보장 */
-  table { font-size: 13px !important; min-width: 600px; }
-  th, td { padding: 8px 10px !important; }
+  /* 테이블 가로 스크롤 방지 */
+  table { font-size: 13px !important; width: 100%; table-layout: auto; }
+  th, td { padding: 8px 10px !important; word-break: keep-all; }
 
-  /* 카드 내부 패딩 축소 */
-  [style*="padding: 24px"] { padding: 14px !important; }
+  /* 카드 내부 패딩 축소 — 모바일 */
 
   /* 필터 버튼 줄 — 가로 스크롤 */
   .filter-row { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
@@ -287,11 +286,8 @@ button, a, [role="button"] {
   [style*="width: 420px"],
   [style*="width: 480px"] { width: 92vw !important; }
 
-  /* 버튼/뱃지 줄바꿈 방지 */
-  button, a { white-space: nowrap; }
-
   /* 버튼 패딩 축소 */
-  button, a[style*="padding"] { padding: 8px 12px !important; font-size: 14px !important; }
+  button { font-size: 14px !important; }
 
   /* 날짜 선택: 버튼 → 드롭다운 */
   .date-buttons-desktop { display: none !important; }
@@ -299,4 +295,18 @@ button, a, [role="button"] {
 
   /* 교육일지 노트 카드 간결화 */
   .note-subtitle { display: none !important; }
+
+  /* 전역 overflow 방지 — 앱 수준 */
+  html, body { overflow-x: hidden; }
+  * { max-width: 100vw; }
+
+  /* 모바일에서 테이블 이름 컬럼 줄바꿈 방지 */
+  td, th { white-space: nowrap; }
+}
+
+/* ──────────────────────────────────────
+   반응형: 태블릿 이하 (< 1024px)
+   ────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .hide-mobile { display: none !important; }
 }

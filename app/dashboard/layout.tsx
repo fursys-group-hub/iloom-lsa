@@ -264,7 +264,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* 메인 영역 */}
-      <div className="main-area" style={{ flex: 1, marginLeft: 240, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="main-area" style={{ flex: 1, marginLeft: 240, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'auto' }}>
 
         {/* 모바일 헤더 */}
         <header
@@ -277,6 +277,9 @@ export default function DashboardLayout({
             height: 56,
             background: 'var(--bg-surface)',
             borderBottom: '1px solid var(--border)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 90,
           }}
         >
           <button
@@ -295,7 +298,7 @@ export default function DashboardLayout({
         </header>
 
         {/* 콘텐츠 */}
-        <main style={{ flex: 1, overflow: 'auto' }}>
+        <main style={{ flex: 1 }}>
           <div className="content-wrapper" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>
             {children}
           </div>
@@ -304,7 +307,7 @@ export default function DashboardLayout({
 
       {/* 반응형 CSS */}
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
           .sidebar {
             transform: translateX(-100%);
           }
@@ -313,18 +316,26 @@ export default function DashboardLayout({
           }
           .main-area {
             margin-left: 0 !important;
+            padding-top: 56px !important;
           }
           .mobile-header {
             display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 90 !important;
           }
           .mobile-overlay {
             display: block;
           }
+        }
+        @media (max-width: 768px) {
           .content-wrapper {
             padding: 16px 12px !important;
           }
         }
-        @media (min-width: 769px) {
+        @media (min-width: 1024px) {
           .sidebar {
             transform: translateX(0) !important;
           }

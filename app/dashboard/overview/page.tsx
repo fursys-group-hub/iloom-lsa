@@ -173,7 +173,7 @@ export default function OverviewPage() {
                       <Td>
                         <button onClick={() => setSelectedStudentId(st.id)}
                           style={{ background: 'none', border: 'none', color: 'var(--blue-light)', fontWeight: 600, fontSize: 15, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{
+                          <span className="hide-mobile" style={{
                             width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                             background: 'var(--blue-dim)', color: 'var(--blue)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',

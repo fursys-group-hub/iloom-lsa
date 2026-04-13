@@ -392,6 +392,7 @@ ${studentSections}
               </a>
             )}
             <button
+              className="hide-mobile"
               onClick={copyPracticePrompt}
               disabled={copyingPrompt}
               style={{
@@ -419,39 +420,41 @@ ${studentSections}
             </select>
           </div>
 
-          {/* 요약 카드 */}
+          {/* 요약 카드 — 1개 카드에 통합 */}
           {!filterStudentId && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-              {/* 제출 현황 */}
-              <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>제출 현황</div>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--blue)' }}>{submissionStatus.submitted.length}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>제출</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--red)' }}>{submissionStatus.notSubmitted.length}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>미제출</div>
-                  </div>
+            <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+              {/* 상단: 제출 + 상담 + 견적 + 수주 한 줄 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--blue)' }}>{submissionStatus.submitted.length}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>/{submissionStatus.submitted.length + submissionStatus.notSubmitted.length}</span></div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>제출</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>{totalStats.stats_consult}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>상담</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>{totalStats.stats_estimate}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>견적</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--orange)' }}>{totalStats.stats_order}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>수주</div>
+                </div>
+              </div>
+              {/* 하단: 수주금액 + 미제출 */}
+              <div style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>수주금액 </span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--purple)' }}>{totalStats.stats_amount.toLocaleString()}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>원</span>
                 </div>
                 {submissionStatus.notSubmitted.length > 0 && (
-                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                     미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}
                   </div>
                 )}
               </div>
-              {/* 실적 합계 */}
-              {STATS_FIELDS.map(sf => (
-                <div key={sf.key} style={{ ...card, padding: 16, textAlign: 'center' }}>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>{sf.label}</div>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {sf.key === 'stats_amount'
-                      ? totalStats[sf.key].toLocaleString()
-                      : totalStats[sf.key]}
-                  </div>
-                </div>
-              ))}
             </div>
           )}
 
@@ -488,7 +491,7 @@ ${studentSections}
                         display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                       }}>
                       {/* 아바타 + 이름 */}
-                      <div style={{
+                      <div className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',

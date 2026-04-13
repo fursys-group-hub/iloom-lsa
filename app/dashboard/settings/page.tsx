@@ -539,7 +539,7 @@ export default function SettingsPage() {
                     })()}
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {batch.is_archived ? (
                     <button
                       onClick={async (e) => {
@@ -711,7 +711,7 @@ export default function SettingsPage() {
                     >
                       <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{
+                          <div className="hide-mobile" style={{
                             width: 32, height: 32, borderRadius: '50%',
                             background: s.is_dropped ? 'var(--bg-hover)' : 'var(--blue-dim)',
                             color: s.is_dropped ? 'var(--text-muted)' : 'var(--blue-light)',

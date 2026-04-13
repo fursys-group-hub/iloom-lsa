@@ -137,12 +137,13 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* 메인 */}
-      <div className="my-main" style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="my-main" style={{ flex: 1, marginLeft: 220, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'auto' }}>
 
         {/* 모바일 헤더 */}
         <header className="my-mobile-header" style={{
           display: 'none', alignItems: 'center', gap: 12, padding: '0 20px', height: 56,
           background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)',
+          position: 'sticky', top: 0, zIndex: 90,
         }}>
           <button onClick={() => setSidebarOpen(true)} style={{
             padding: 8, borderRadius: 'var(--radius-sm)', background: 'transparent',
@@ -155,7 +156,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
           <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>일룸 LSA 입문교육</span>
         </header>
 
-        <main style={{ flex: 1, overflow: 'auto' }}>
+        <main style={{ flex: 1 }}>
           <div className="my-content-wrapper" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
             {children}
           </div>
@@ -164,15 +165,17 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
 
       {/* 반응형 CSS */}
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
           .my-sidebar { transform: translateX(-100%); }
           .my-sidebar.my-sidebar-open { transform: translateX(0); }
-          .my-main { margin-left: 0 !important; }
-          .my-mobile-header { display: flex !important; }
+          .my-main { margin-left: 0 !important; padding-top: 56px !important; }
+          .my-mobile-header { display: flex !important; position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 90 !important; }
           .mobile-overlay { display: block; }
+        }
+        @media (max-width: 768px) {
           .my-content-wrapper { padding: 16px 12px !important; }
         }
-        @media (min-width: 769px) {
+        @media (min-width: 1024px) {
           .my-sidebar { transform: translateX(0) !important; }
           .mobile-overlay { display: none !important; }
         }

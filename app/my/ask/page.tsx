@@ -379,7 +379,7 @@ export default function AskPage() {
                   return (
                     <div key={r.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: 8 }}>
                       {!isMe && (
-                        <div style={{
+                        <div className="hide-mobile" style={{
                           width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                           background: 'var(--blue-dim)', color: 'var(--blue)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,

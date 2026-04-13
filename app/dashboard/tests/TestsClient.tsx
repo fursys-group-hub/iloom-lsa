@@ -1479,7 +1479,7 @@ function Row({ label, value, color }: { label: string; value: string; color?: st
 
 function Avatar({ name }: { name: string }) {
   return (
-    <div style={{
+    <div className="hide-mobile" style={{
       width: 32, height: 32, borderRadius: '50%',
       background: 'var(--blue-dim)', color: 'var(--blue-light)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',

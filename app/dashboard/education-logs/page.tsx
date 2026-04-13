@@ -372,67 +372,55 @@ export default function EducationLogsPage() {
             </div>
           </div>
 
-          {/* 요약 카드 */}
+          {/* 요약 카드 — 1개 카드에 통합 */}
           {selectedDate && !filterStudentId && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-              {/* 제출 현황 */}
-              <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>제출 현황</div>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>제출</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: submissionStatus.notSubmitted.length > 0 ? 'var(--red)' : 'var(--green)' }}>
-                      {submissionStatus.notSubmitted.length}
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>미제출</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{activeStudents.length}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>전체</div>
-                  </div>
+            <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+              {/* 상단: 제출 + 참여도 한 줄 */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--green)' }}>{submissionStatus.submitted.length}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>제출</div>
                 </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center', borderRight: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: submissionStatus.notSubmitted.length > 0 ? 'var(--red)' : 'var(--text-muted)' }}>{submissionStatus.notSubmitted.length}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>미제출</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--green)' }}>{participationSummary[3]}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>완벽 3/3</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--blue-light)' }}>{participationSummary[2]}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>거의다 2/3</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--orange)' }}>{participationSummary[1]}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>시작 1/3</div>
+                </div>
+                <div style={{ padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)' }}>{activeStudents.length}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>전체</div>
+                </div>
+              </div>
+              {/* 하단: 미제출 명단 + 추가 설명 필요 */}
+              <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
                 {submissionStatus.notSubmitted.length > 0 && (
-                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                    미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}
-                  </div>
+                  <span>미제출: {submissionStatus.notSubmitted.map(s => s.name).join(', ')}</span>
                 )}
-              </div>
-              {/* 참여도: 3/3 */}
-              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>완벽 참여 (3/3)</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{participationSummary[3]}</div>
-              </div>
-              {/* 참여도: 2/3 */}
-              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>거의 다 (2/3)</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--blue-light)' }}>{participationSummary[2]}</div>
-              </div>
-              {/* 참여도: 1/3 */}
-              <div style={{ ...card, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>시작 (1/3)</div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--orange)' }}>{participationSummary[1]}</div>
-              </div>
-              {/* 추가 설명 필요한 교육생 */}
-              <div style={{ ...card, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>추가 설명이 필요한 교육생</div>
                 {(() => {
                   const needHelp = notesByDate.filter(n => {
                     if (n.tags?.includes('자율학습')) return false;
                     return ['confused', 'half', 'help_needed', 'need_help', 'uncertain'].includes(n.confidence || '');
                   });
-                  if (needHelp.length === 0) return (
-                    <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>없음</div>
-                  );
+                  if (needHelp.length === 0) return null;
                   return (
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <div style={{ width: '100%', display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>추가 설명 필요:</span>
                       {needHelp.map(n => {
                         const c = n.confidence ? confidenceMap[n.confidence] : null;
                         return (
                           <span key={n.id} style={{
-                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                            padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                             background: c?.bg || 'var(--orange-dim)', color: c?.color || 'var(--orange)',
                           }}>
                             {c?.emoji} {n.students?.name || '?'}
@@ -471,7 +459,7 @@ export default function EducationLogsPage() {
                       }}
                     >
                       {/* 아바타 + 이름 */}
-                      <div style={{
+                      <div className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                         background: isSelfStudy ? 'var(--purple-dim)' : 'var(--blue-dim)',
                         color: isSelfStudy ? 'var(--purple)' : 'var(--blue)',

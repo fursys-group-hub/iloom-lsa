@@ -422,7 +422,7 @@ export default function AttendancePage() {
                     padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{
+                      <div className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%',
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',

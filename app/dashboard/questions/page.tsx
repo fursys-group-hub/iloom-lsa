@@ -203,7 +203,7 @@ export default function AdminQuestionsPage() {
                   {/* 학생 이름 + 상태 */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{
+                      <div className="hide-mobile" style={{
                         width: 32, height: 32, borderRadius: '50%',
                         background: 'var(--blue-dim)', color: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -257,7 +257,7 @@ export default function AdminQuestionsPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{
+                  <div className="hide-mobile" style={{
                     width: 32, height: 32, borderRadius: '50%',
                     background: 'var(--blue-dim)', color: 'var(--blue)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -328,7 +328,7 @@ export default function AdminQuestionsPage() {
 
                 {/* 첫 질문 (학생 — 좌측 회색) */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-                  <div style={{
+                  <div className="hide-mobile" style={{
                     width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                     background: 'var(--blue-dim)', color: 'var(--blue)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -481,7 +481,10 @@ export default function AdminQuestionsPage() {
 
       <style>{`
         @media (max-width: 900px) {
-          .questions-layout { grid-template-columns: 1fr !important; }
+          .questions-layout { grid-template-columns: 1fr !important; min-height: auto !important; }
+        }
+        @media (max-width: 768px) {
+          .questions-layout { gap: 12px !important; }
         }
         .reply-bubble:hover .reply-actions {
           display: flex !important;
