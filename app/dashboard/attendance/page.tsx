@@ -194,6 +194,7 @@ export default function AttendancePage() {
           </h2>
         </div>
         <button
+          className="hide-mobile"
           onClick={() => setShowUpload(!showUpload)}
           style={{
             padding: '10px 20px',
@@ -487,7 +488,7 @@ export default function AttendancePage() {
                         >
                           <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <span style={{
+                              <span className="hide-mobile" style={{
                                 width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                                 background: 'var(--blue-dim)', color: 'var(--blue)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',

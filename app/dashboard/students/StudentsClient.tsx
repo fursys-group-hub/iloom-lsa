@@ -311,7 +311,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
             {adaptationIndices.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>교육생 데이터가 없습니다.</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
                 {adaptationIndices.map(idx => {
                   const gc = GROUP_COLORS[idx.group];
                   const isExpanded = expandedCard === idx.studentId;
@@ -435,7 +435,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   </div>
                 </details>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
                 {riskChecks.map(r => {
                   const idx = adaptationIndices.find(a => a.studentId === r.studentId);
                   const isHighGroup = idx?.group === 'high';
@@ -511,7 +511,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
           {/* 태도/참여 현황 */}
           <div style={cardStyle}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>태도/참여 현황</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, marginBottom: 20 }}>
               {[
                 { label: '평균 출석률', value: `${participationStats.avgAttendance}%`, color: 'var(--green)', desc: '지각=0.5 반영' },
                 { label: '교육일지 제출률', value: `${participationStats.avgSubmitRate}%`, color: 'var(--blue)', desc: `교육일 ${totalEducationDays}일 기준` },
