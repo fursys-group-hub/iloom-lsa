@@ -415,7 +415,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
             테스트
           </h2>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="hide-mobile" style={{ display: 'flex', gap: 8 }}>
           <a
             href={`/api/export-tests?batchId=${batchId}`}
             style={{

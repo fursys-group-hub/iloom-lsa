@@ -122,7 +122,7 @@ export default function OverviewPage() {
       <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>심화교육</h2>
 
       {/* 요약 카드 — 1개 통합 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', overflow: 'hidden' }}>
         {[
           { label: '교육생', value: activeStudents.length, unit: '명', color: 'var(--blue)' },
           { label: '평가', value: evaluations.length, unit: '건', color: 'var(--green)' },
