@@ -934,6 +934,7 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
     if (s === 'practice') dots.push('#F59E0B');
     if (testSet.has(dateStr)) dots.push('#22C55E');
     if (annSet.has(dateStr)) dots.push('#EF4444');
+    if (calMemos[dateStr]?.length) dots.push('#A855F7');
     return dots;
   };
 
@@ -1050,6 +1051,7 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#F59E0B', marginRight: 3 }} />실습</span>
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#22C55E', marginRight: 3 }} />테스트</span>
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#EF4444', marginRight: 3 }} />공지</span>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#A855F7', marginRight: 3 }} />메모</span>
         </div>
       </div>
     </div>
