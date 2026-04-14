@@ -84,13 +84,12 @@ function unformatKRW(val: string): string {
 
 /** KST 기준 오늘 날짜 (새벽 5시 이전이면 전날로 보정) */
 function getKSTTodayWithCutoff(): string {
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kstNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
   // 새벽 5시 이전이면 전날
-  if (kst.getUTCHours() < 5) {
-    kst.setUTCDate(kst.getUTCDate() - 1);
+  if (kstNow.getHours() < 5) {
+    kstNow.setDate(kstNow.getDate() - 1);
   }
-  return kst.toISOString().slice(0, 10);
+  return kstNow.toLocaleDateString('sv-SE');
 }
 
 // ── 메인 ──
@@ -694,7 +693,7 @@ export default function MyPracticePage() {
                       }}>실습일지</span>
                     </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                      {new Date(note.created_at).toLocaleDateString('ko', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(note.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>

@@ -146,13 +146,12 @@ export default function MyNotesPage() {
   const [isSelfStudyMode, setIsSelfStudyMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => {
-    const now = new Date();
-    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const kstNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
     // 새벽 5시 이전이면 전날
-    if (kst.getUTCHours() < 5) {
-      kst.setUTCDate(kst.getUTCDate() - 1);
+    if (kstNow.getHours() < 5) {
+      kstNow.setDate(kstNow.getDate() - 1);
     }
-    return kst.toISOString().slice(0, 10);
+    return kstNow.toLocaleDateString('sv-SE');
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [stepImages, setStepImages] = useState<Record<string, string[]>>({ step1: [], step2: [], step3: [] });
@@ -987,7 +986,7 @@ export default function MyNotesPage() {
                       )}
                     </div>
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                      {new Date(note.created_at).toLocaleDateString('ko', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(note.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

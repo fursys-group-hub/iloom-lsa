@@ -272,7 +272,7 @@ export default function AskPage() {
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{q.reply_count}개 답변</span>
                     )}
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                      {new Date(q.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                      {new Date(q.created_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                 </div>

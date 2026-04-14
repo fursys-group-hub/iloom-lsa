@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = createServerClient();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
 
     // 진행중인 기수 조회 (입문교육 또는 심화교육 기간)
     const { data: batches } = await supabase

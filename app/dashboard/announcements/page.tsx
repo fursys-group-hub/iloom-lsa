@@ -43,7 +43,7 @@ export default function AnnouncementsPage() {
       if (Array.isArray(data) && data.length > 0) {
         setBatches(data);
         // 진행중인 기수 자동 선택
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
         const active = data.find((b: Batch & { start_date: string; end_date: string; advanced_end?: string }) =>
           today >= b.start_date && (b.advanced_end ? today <= b.advanced_end : today <= b.end_date)
         );

@@ -264,7 +264,7 @@ export default function AdminEvaluationsPage() {
                         )}
                         {ev.managers && (
                           <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '8px 0 0' }}>
-                            작성: {ev.managers.name} ({ev.managers.store_name}) · {new Date(ev.updated_at).toLocaleDateString('ko-KR')}
+                            작성: {ev.managers.name} ({ev.managers.store_name}) · {new Date(ev.updated_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}
                           </p>
                         )}
                       </>

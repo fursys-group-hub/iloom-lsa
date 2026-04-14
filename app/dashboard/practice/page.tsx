@@ -55,8 +55,7 @@ const SECTION_DEFS = [
 ];
 
 function toKSTDate(utcStr: string): string {
-  const d = new Date(utcStr);
-  return new Date(d.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return new Date(utcStr).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
 }
 
 // ── 이미지 그리드 ──

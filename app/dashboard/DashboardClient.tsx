@@ -6,6 +6,7 @@ import type { Student, TestScore, Attendance, TagTracking } from '@/lib/types';
 import { calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
 import type { ScheduleMap } from '@/lib/schedule';
+import { getKSTToday, getKSTYesterday, toKSTDateString } from '@/lib/date';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 
 interface BatchInfo {
@@ -86,7 +87,7 @@ interface Props {
 }
 
 function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: string } {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getKSTToday();
   if (today >= batch.start_date && today <= batch.end_date)
     return { label: '입문교육 진행중', color: 'var(--green)', bg: 'var(--green-dim)' };
   if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end)
@@ -100,15 +101,11 @@ function getBatchStatus(batch: BatchInfo): { label: string; color: string; bg: s
   return { label: '', color: '', bg: '' };
 }
 
-function toKSTDate(utcStr: string): string {
-  const d = new Date(utcStr);
-  return new Date(d.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-}
 
 function getDDay(targetDate: string): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(targetDate + 'T00:00:00');
+  const todayStr = getKSTToday();
+  const today = new Date(todayStr + 'T00:00:00+09:00');
+  const target = new Date(targetDate + 'T00:00:00+09:00');
   const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   if (diff === 0) return 'D-DAY';
   if (diff > 0) return `D-${diff}`;
@@ -116,9 +113,9 @@ function getDDay(targetDate: string): string {
 }
 
 function getEducationDay(startDate: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const start = new Date(startDate + 'T00:00:00');
+  const todayStr = getKSTToday();
+  const today = new Date(todayStr + 'T00:00:00+09:00');
+  const start = new Date(startDate + 'T00:00:00+09:00');
   const diff = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(diff + 1, 0);
 }
@@ -141,7 +138,7 @@ function parseNoteMeta(content: string) {
 }
 
 export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments, questions, memos, testResponses, examQuestions, coachingReports }: Props) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getKSTToday();
   const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const toggle = (key: string) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
@@ -260,27 +257,16 @@ export default function DashboardClient({ batches, students: allStudents, scores
       });
   }, [scores]);
 
-  const yesterday = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d.toISOString().split('T')[0];
-  }, []);
+  const yesterday = useMemo(() => getKSTYesterday(), []);
 
   // KST 기준 날짜 (스케줄 조회 전용 — 스케줄 키가 KST 날짜로 저장됨)
-  const kstToday = useMemo(() => {
-    const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    return d.toISOString().split('T')[0];
-  }, []);
-  const kstYesterday = useMemo(() => {
-    const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    d.setUTCDate(d.getUTCDate() - 1);
-    return d.toISOString().split('T')[0];
-  }, []);
+  const kstToday = today;
+  const kstYesterday = yesterday;
 
   // 오늘 교육일지 제출 현황
   const todayNotes = useMemo(() => {
     return notes.filter(n => {
-      const kstDate = toKSTDate(n.created_at);
+      const kstDate = toKSTDateString(n.created_at);
       if (kstDate !== today) return false;
       try { const p = JSON.parse(n.content); return !(p.meta?.tags || []).includes('실습일지'); } catch { return true; }
     });
@@ -292,7 +278,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
   // 어제 교육일지 미제출자
   const yesterdayNotes = useMemo(() => {
     return notes.filter(n => {
-      const kstDate = toKSTDate(n.created_at);
+      const kstDate = toKSTDateString(n.created_at);
       if (kstDate !== yesterday) return false;
       try { const p = JSON.parse(n.content); return !(p.meta?.tags || []).includes('실습일지'); } catch { return true; }
     });

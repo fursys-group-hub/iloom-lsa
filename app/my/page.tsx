@@ -54,7 +54,7 @@ export default function MyPage() {
     if (!studentId) return;
 
     const checkAttendance = () => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
       fetch(`/api/attendance?studentId=${studentId}`)
         .then(r => r.json())
         .then((data) => {

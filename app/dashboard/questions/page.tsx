@@ -328,7 +328,7 @@ export default function AdminQuestionsPage() {
                     padding: '4px 14px', borderRadius: 'var(--radius-pill)',
                     background: 'var(--bg-elevated)', fontSize: 12, color: 'var(--text-muted)',
                   }}>
-                    {new Date(selectedQ.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(selectedQ.created_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
                 </div>
 
@@ -509,5 +509,5 @@ function timeAgo(dateStr: string): string {
   if (hr < 24) return `${hr}시간 전`;
   const day = Math.floor(hr / 24);
   if (day < 7) return `${day}일 전`;
-  return new Date(dateStr).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+  return new Date(dateStr).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'short', day: 'numeric' });
 }

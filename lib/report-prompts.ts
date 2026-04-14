@@ -21,7 +21,7 @@ interface BatchInfo {
 // 종합분석 프롬프트
 export function buildComprehensivePrompt(batch: BatchInfo, students: StudentInfo[]): string {
   const studentList = students.map(s => `- ${s.name} (id: ${s.id}${s.store_location ? `, 매장: ${s.store_location}` : ''})`).join('\n');
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
   const groupId = `comp_${today}_${Date.now()}`;
 
   return `# 일룸 입문교육 종합 분석 리포트 생성
@@ -203,7 +203,7 @@ await supabase.from('coaching_reports').upsert({
 // 분야별 분석 프롬프트
 export function buildSubjectPrompt(batch: BatchInfo, students: StudentInfo[], subjectCategory: string): string {
   const studentList = students.map(s => `- ${s.name} (id: ${s.id})`).join('\n');
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
   const groupId = `subj_${today}_${Date.now()}`;
 
   return `# 일룸 입문교육 분야별 분석 리포트 생성

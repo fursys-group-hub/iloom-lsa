@@ -55,7 +55,7 @@ export default function SettingsPage() {
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [savingStudent, setSavingStudent] = useState(false);
   const [dropModal, setDropModal] = useState<{ student: StudentRow; show: boolean } | null>(null);
-  const [dropDate, setDropDate] = useState(new Date().toISOString().slice(0, 10));
+  const [dropDate, setDropDate] = useState(new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }));
   const [dropReason, setDropReason] = useState('');
 
   // 기수 불러오기
@@ -209,7 +209,7 @@ export default function SettingsPage() {
       if (res.ok && selectedBatchId) await fetchStudents(selectedBatchId);
     } else {
       setDropReason('');
-      setDropDate(new Date().toISOString().slice(0, 10));
+      setDropDate(new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }));
       setDropModal({ student, show: true });
     }
   };
@@ -520,7 +520,7 @@ export default function SettingsPage() {
                     </p>
                     {(() => {
                       if (batch.is_archived) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>보관됨</span>;
-                      const today = new Date().toISOString().slice(0, 10);
+                      const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
                       if (today >= batch.start_date && today <= batch.end_date) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>입문교육 진행중</span>;
                       if (batch.advanced_start && batch.advanced_end && today >= batch.advanced_start && today <= batch.advanced_end) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--purple-dim)', color: 'var(--purple)' }}>심화교육 진행중</span>;
                       if (batch.advanced_end && today > batch.advanced_end) return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--bg-hover)', color: 'var(--text-muted)' }}>완료</span>;
@@ -577,7 +577,7 @@ export default function SettingsPage() {
                         수정
                       </button>
                       {(() => {
-                        const today = new Date().toISOString().slice(0, 10);
+                        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
                         const isCompleted = (batch.advanced_end && today > batch.advanced_end) ||
                           (!batch.advanced_end && today > batch.end_date);
                         if (!isCompleted) return null;

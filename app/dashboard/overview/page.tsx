@@ -433,7 +433,7 @@ export default function OverviewPage() {
 
                           {ev.managers && (
                             <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '8px 0 0' }}>
-                              — {ev.managers.name} ({ev.managers.store_name}){ev.updated_at && ` · ${new Date(ev.updated_at).toLocaleDateString('ko-KR')}`}
+                              — {ev.managers.name} ({ev.managers.store_name}){ev.updated_at && ` · ${new Date(ev.updated_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}`}
                             </p>
                           )}
                         </>

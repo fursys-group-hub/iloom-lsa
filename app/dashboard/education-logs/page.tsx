@@ -121,8 +121,7 @@ const card: React.CSSProperties = {
 
 // UTC → 한국시간(KST) 날짜 문자열 (YYYY-MM-DD)
 function toKSTDate(utcStr: string): string {
-  const d = new Date(utcStr);
-  return new Date(d.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return new Date(utcStr).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
 }
 
 export default function EducationLogsPage() {

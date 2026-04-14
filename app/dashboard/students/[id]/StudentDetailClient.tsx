@@ -509,7 +509,7 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
   const [category, setCategory] = useState<MemoCategory>('general');
   const [saving, setSaving] = useState(false);
 
-  const todayStr = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
+  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }); // YYYY-MM-DD KST
 
   const handleSave = useCallback(async () => {
     if (!content.trim() || saving) return;
@@ -895,7 +895,7 @@ function QuestionsTab({ studentId }: { studentId: string }) {
                     <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{q.title}</span>
                   </div>
                   <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {new Date(q.created_at).toLocaleDateString('ko', { month: 'numeric', day: 'numeric' })}
+                    {new Date(q.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' })}
                     {q.replies && q.replies.length > 0 && ` · 답글 ${q.replies.length}`}
                   </span>
                 </summary>
@@ -912,7 +912,7 @@ function QuestionsTab({ studentId }: { studentId: string }) {
                       marginLeft: r.author_role === 'admin' ? 20 : 0,
                     }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: r.author_role === 'admin' ? 'var(--blue)' : 'var(--text-muted)', marginBottom: 4 }}>
-                        {r.author_name} · {new Date(r.created_at).toLocaleDateString('ko', { month: 'numeric', day: 'numeric' })}
+                        {r.author_name} · {new Date(r.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' })}
                       </div>
                       <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.content}</div>
                     </div>
