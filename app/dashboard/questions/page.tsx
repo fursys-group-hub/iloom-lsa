@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import type { StudentQuestion, QuestionReply } from '@/lib/types';
 
 const card: React.CSSProperties = {
@@ -266,8 +267,13 @@ export default function AdminQuestionsPage() {
                     {(selectedQ.student_name || '?')[0]}
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {selectedQ.student_name || '알 수 없음'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
+                        {selectedQ.student_name || '알 수 없음'}
+                      </span>
+                      <Link href={`/dashboard/students/${selectedQ.student_id}`} style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', textDecoration: 'none' }}>
+                        개별분석 보기 →
+                      </Link>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                       {new Date(selectedQ.created_at).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}

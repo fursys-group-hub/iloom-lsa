@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     supabase.from('test_scores').select('*').order('test_date', { ascending: false }).limit(500),
     supabase.from('attendance').select('*'),
     supabase.from('student_notes').select('id, student_id, title, content, created_at').order('created_at', { ascending: false }).limit(500),
-    supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(5),
+    supabase.from('announcements').select('id, title, created_at, batch_id').order('created_at', { ascending: false }),
     supabase.from('note_comments').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('student_questions').select('*, students(name)').order('updated_at', { ascending: false }).limit(20),
     supabase.from('student_memos').select('student_id, category'),
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
       scores={scores || []}
       attendance={attendance || []}
       notes={notes || []}
-      announcements={announcements || []}
+      announcements={(announcements || []).map((a: Record<string, unknown>) => ({ id: a.id as string, title: a.title as string, created_at: a.created_at as string, batch_id: a.batch_id as string }))}
       noteComments={noteComments || []}
       questions={questionsWithName}
       memoCounts={memoCounts}

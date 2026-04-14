@@ -289,10 +289,6 @@ button, a, [role="button"] {
   /* 버튼 패딩 축소 */
   button { font-size: 14px !important; }
 
-  /* 날짜 선택: 버튼 → 드롭다운 */
-  .date-buttons-desktop { display: none !important; }
-  .date-select-mobile { display: block !important; }
-
   /* 교육일지 노트 카드 간결화 */
   .note-subtitle { display: none !important; }
 

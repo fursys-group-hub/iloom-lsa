@@ -227,7 +227,8 @@
 | background | `var(--bg-surface)` |
 | border | `1px solid var(--border)` |
 | borderRadius | `var(--radius-lg)` |
-| padding | `24` |
+| padding | `20px 24px` |
+| boxShadow | `var(--shadow-sm)` |
 
 ### 버튼
 | 유형 | 스타일 |
@@ -243,7 +244,7 @@
 | padding | `8px 14px` |
 | fontSize | `14` |
 | fontWeight | `600` |
-| borderRadius | `var(--radius-md)` |
+| borderRadius | `var(--radius-sm)` |
 | border | `1px solid var(--border)` |
 | background | `var(--bg-surface)` |
 
@@ -251,7 +252,7 @@
 | 항목 | 값 |
 |------|-----|
 | fontSize | `12` |
-| padding | `2px 10px` |
+| padding | `3px 10px` |
 | borderRadius | `var(--radius-pill)` |
 | fontWeight | `600` |
 

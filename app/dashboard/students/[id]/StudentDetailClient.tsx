@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance, StudentMemo, CoachingReport } from '@/lib/types';
 import { MEMO_CATEGORIES } from '@/lib/types';
@@ -91,10 +91,19 @@ export default function StudentDetailClient({
       .sort((a, b) => a.rate - b.rate);
   }, [responses, questions]);
 
-  // 약점 / 강점 분리
   const weakTags = tagAnalysis.filter((t) => t.rate < 60);
   const midTags = tagAnalysis.filter((t) => t.rate >= 60 && t.rate < 80);
   const strongTags = tagAnalysis.filter((t) => t.rate >= 80);
+
+  // 탭 상태
+  type TabKey = 'summary' | 'attendance' | 'notes' | 'questions';
+  const [activeTab, setActiveTab] = useState<TabKey>('summary');
+  const tabs: [TabKey, string][] = [
+    ['summary', '요약'],
+    ['attendance', '출결'],
+    ['notes', '일지'],
+    ['questions', '질문'],
+  ];
 
   // 카테고리별 그룹 (영역별 정답률용)
   const categoryGroups = useMemo(() => {
@@ -189,228 +198,298 @@ export default function StudentDetailClient({
         </div>
       </div>
 
-      {/* 학습 피드백 (1열) */}
-      <div style={card}>
-          <h3 style={sectionTitle}>학습 피드백</h3>
-          {tagAnalysis.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {weakTags.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {weakTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 12, fontWeight: 600 }}>
-                        {t.label} ({t.correct}/{t.total})
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {midTags.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {midTags.slice(0, 5).map((t) => (
-                      <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>
-                        {t.label} ({t.correct}/{t.total})
-                      </span>
-                    ))}
-                    {midTags.length > 5 && <span style={{ padding: '3px 10px', fontSize: 12, color: 'var(--text-muted)' }}>외 {midTags.length - 5}개</span>}
-                  </div>
-                </div>
-              )}
-              {strongTags.length > 0 && (
-                <div style={{ fontSize: 14, color: 'var(--green)' }}>
-                  <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
-                </div>
-              )}
-            </div>
-          ) : (
-            <p style={emptyStyle}>시험 데이터가 필요해요</p>
-          )}
-        </div>
-
-      {/* 점수 추이 (1열) */}
-      <div style={card}>
-        <h3 style={sectionTitle}>차시별 점수 추이</h3>
-        {dailyAverages.length > 0 ? (
-          <ScoreTrendChart
-            data={dailyAverages.map((d) => {
-              const classAvg = classAverages.find((c) => c.date === d.date);
-              return { ...d, classAvg: classAvg?.avg ?? 0 };
-            })}
-            lines={[
-              { key: 'avg', color: '#3b82f6', name: student.name },
-              { key: 'classAvg', color: '#6b7280', name: '반 평균' },
-            ]}
-          />
-        ) : <p style={emptyStyle}>데이터 없음</p>}
+      {/* 탭 네비게이션 */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
+        {tabs.map(([key, label], i) => (
+          <button key={key} onClick={() => setActiveTab(key)} style={{
+            padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+            background: 'transparent',
+            color: activeTab === key ? 'var(--text-primary)' : 'var(--text-muted)',
+            border: 'none',
+            borderBottom: activeTab === key ? '2px solid var(--blue)' : '2px solid transparent',
+            fontSize: 15,
+            fontWeight: activeTab === key ? 600 : 400,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            marginBottom: -1,
+          }}>{label}</button>
+        ))}
       </div>
 
-      {/* 2열: 카테고리별 학습 현황 + 차시별 오답 */}
-      <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* 카테고리별 학습 현황 */}
-        <div style={card}>
-          <h3 style={sectionTitle}>카테고리별 학습 현황</h3>
-          {categoryGroups.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {categoryGroups.map(({ category, rate, totalQ, correctQ, tags }) => {
-                const catColor = rate >= 80 ? 'var(--green)' : rate >= 60 ? 'var(--orange)' : 'var(--red)';
-                void 0; // catIcon removed
-                return (
-                  <details key={category}>
-                    <summary style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer', transition: 'background 0.15s ease',
-                      border: '1px solid var(--border)',
-                    }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: catColor, display: 'inline-block' }} />
-                        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{category}</span>
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{totalQ}문항</span>
-                      </div>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: catColor }}>{correctQ}/{totalQ}</span>
-                    </summary>
-                    {tags.length > 0 && (
-                      <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {tags.map((t) => {
-                          const color = t.rate >= 80 ? 'var(--green)' : t.rate >= 60 ? 'var(--orange)' : 'var(--red)';
-                          const msg = t.correct === t.total ? '전문항 정답' : `${t.total - t.correct}문항 오답`;
-                          return (
-                            <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
-                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
-                              <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1 }}>{t.label}</span>
-                              <span style={{ fontSize: 12, fontWeight: 600, color }}>{msg}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </details>
-                );
-              })}
-            </div>
-          ) : (
-            <p style={emptyStyle}>데이터 없음</p>
-          )}
-        </div>
-
-        {/* 차시별 오답 */}
-        <div style={card}>
-          <h3 style={sectionTitle}>❌ 차시별 오답 문항</h3>
-          {sessionWrongs.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {sessionWrongs.map(({ session, total, wrongs }) => (
-                <details key={session}>
-                  <summary style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                    fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',
-                    cursor: 'pointer', transition: 'background 0.15s ease',
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span>{session}</span>
-                    <span style={{
-                      fontSize: 14, fontWeight: 600,
-                      color: wrongs.length === 0 ? 'var(--green)' : wrongs.length > 5 ? 'var(--red)' : 'var(--orange)',
-                    }}>
-                      {wrongs.length === 0 ? '전문항 정답!' : `오답 ${wrongs.length}/${total}`}
-                    </span>
-                  </summary>
-                  {wrongs.length > 0 && (
-                    <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {wrongs.map((w) => (
-                        <div key={w.id} style={{
-                          padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                          background: 'var(--red-dim)', border: '1px solid var(--red-dim)',
-                        }}>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>
-                            Q{w.question_id} · {w.question?.series || w.question?.category}
-                          </div>
-                          <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.4 }}>
-                            {w.question?.question_text || ''}
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--red-dim)', fontSize: 12 }}>
-                              <span style={{ color: 'var(--text-muted)' }}>답: </span>
-                              <span style={{ color: 'var(--red)', fontWeight: 500 }}>{w.user_answer || '(미입력)'}</span>
-                            </div>
-                            <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--blue-dim)', fontSize: 12 }}>
-                              <span style={{ color: 'var(--text-muted)' }}>정답: </span>
-                              <span style={{ color: 'var(--blue-light)', fontWeight: 500 }}>{w.question?.correct_answer || ''}</span>
-                            </div>
-                          </div>
-                        </div>
+      {/* ━━━ 요약 탭 ━━━ */}
+      {activeTab === 'summary' && (
+        <>
+          {/* 학습 피드백 */}
+          <div style={card}>
+            <h3 style={sectionTitle}>학습 피드백</h3>
+            {tagAnalysis.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {weakTags.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--red)', marginBottom: 10 }}>이 부분을 더 공부하세요</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {weakTags.slice(0, 5).map((t) => (
+                        <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--red-dim)', color: 'var(--red)', fontSize: 12, fontWeight: 600 }}>
+                          {t.label} ({t.correct}/{t.total})
+                        </span>
                       ))}
                     </div>
-                  )}
-                </details>
-              ))}
+                  </div>
+                )}
+                {midTags.length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--orange)', marginBottom: 10 }}>조금 더 복습하면 좋아요</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {midTags.slice(0, 5).map((t) => (
+                        <span key={t.label} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)', fontSize: 12, fontWeight: 600 }}>
+                          {t.label} ({t.correct}/{t.total})
+                        </span>
+                      ))}
+                      {midTags.length > 5 && <span style={{ padding: '3px 10px', fontSize: 12, color: 'var(--text-muted)' }}>외 {midTags.length - 5}개</span>}
+                    </div>
+                  </div>
+                )}
+                {strongTags.length > 0 && (
+                  <div style={{ fontSize: 14, color: 'var(--green)' }}>
+                    <span style={{ fontWeight: 600 }}>{strongTags.length}개 영역</span> 잘하고 있어요
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p style={emptyStyle}>시험 데이터가 필요해요</p>
+            )}
+          </div>
+
+          {/* 점수 추이 */}
+          <div style={card}>
+            <h3 style={sectionTitle}>차시별 점수 추이</h3>
+            {dailyAverages.length > 0 ? (
+              <ScoreTrendChart
+                data={dailyAverages.map((d) => {
+                  const classAvg = classAverages.find((c) => c.date === d.date);
+                  return { ...d, classAvg: classAvg?.avg ?? 0 };
+                })}
+                lines={[
+                  { key: 'avg', color: '#3b82f6', name: student.name },
+                  { key: 'classAvg', color: '#6b7280', name: '반 평균' },
+                ]}
+              />
+            ) : <p style={emptyStyle}>데이터 없음</p>}
+          </div>
+
+          {/* 2열: 카테고리별 학습 현황 + 차시별 오답 */}
+          <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div style={card}>
+              <h3 style={sectionTitle}>카테고리별 학습 현황</h3>
+              {categoryGroups.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {categoryGroups.map(({ category, rate, totalQ, correctQ, tags }) => {
+                    const catColor = rate >= 80 ? 'var(--green)' : rate >= 60 ? 'var(--orange)' : 'var(--red)';
+                    return (
+                      <details key={category}>
+                        <summary style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                          cursor: 'pointer', transition: 'background 0.15s ease',
+                          border: '1px solid var(--border)',
+                        }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ width: 8, height: 8, borderRadius: '50%', background: catColor, display: 'inline-block' }} />
+                            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{category}</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{totalQ}문항</span>
+                          </div>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: catColor }}>{correctQ}/{totalQ}</span>
+                        </summary>
+                        {tags.length > 0 && (
+                          <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            {tags.map((t) => {
+                              const color = t.rate >= 80 ? 'var(--green)' : t.rate >= 60 ? 'var(--orange)' : 'var(--red)';
+                              const msg = t.correct === t.total ? '전문항 정답' : `${t.total - t.correct}문항 오답`;
+                              return (
+                                <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
+                                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
+                                  <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1 }}>{t.label}</span>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color }}>{msg}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </details>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p style={emptyStyle}>데이터 없음</p>
+              )}
             </div>
+
+            <div style={card}>
+              <h3 style={sectionTitle}>차시별 오답 문항</h3>
+              {sessionWrongs.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {sessionWrongs.map(({ session, total, wrongs }) => (
+                    <details key={session}>
+                      <summary style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                        fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',
+                        cursor: 'pointer', transition: 'background 0.15s ease',
+                      }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <span>{session}</span>
+                        <span style={{
+                          fontSize: 14, fontWeight: 600,
+                          color: wrongs.length === 0 ? 'var(--green)' : wrongs.length > 5 ? 'var(--red)' : 'var(--orange)',
+                        }}>
+                          {wrongs.length === 0 ? '전문항 정답!' : `오답 ${wrongs.length}/${total}`}
+                        </span>
+                      </summary>
+                      {wrongs.length > 0 && (
+                        <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {wrongs.map((w) => (
+                            <div key={w.id} style={{
+                              padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                              background: 'var(--red-dim)', border: '1px solid var(--red-dim)',
+                            }}>
+                              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 3 }}>
+                                Q{w.question_id} · {w.question?.series || w.question?.category}
+                              </div>
+                              <div style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 4, lineHeight: 1.4 }}>
+                                {w.question?.question_text || ''}
+                              </div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                                <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--red-dim)', fontSize: 12 }}>
+                                  <span style={{ color: 'var(--text-muted)' }}>답: </span>
+                                  <span style={{ color: 'var(--red)', fontWeight: 500 }}>{w.user_answer || '(미입력)'}</span>
+                                </div>
+                                <div style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--blue-dim)', fontSize: 12 }}>
+                                  <span style={{ color: 'var(--text-muted)' }}>정답: </span>
+                                  <span style={{ color: 'var(--blue-light)', fontWeight: 500 }}>{w.question?.correct_answer || ''}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </details>
+                  ))}
+                </div>
+              ) : (
+                <p style={emptyStyle}>시험 데이터가 없어요</p>
+              )}
+            </div>
+          </div>
+
+          {/* 교육 메모 */}
+          <MemoSection studentId={student.id} initialMemos={memos} />
+
+          {/* AI 코칭 리포트 */}
+          <div style={card}>
+            <h3 style={sectionTitle}>AI 코칭 리포트</h3>
+            {coachingReports.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {coachingReports.map((report) => {
+                  const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
+                  const typeColor: Record<string, { bg: string; color: string }> = {
+                    comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
+                    subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
+                    daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
+                    weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
+                  };
+                  const rt = (report as { report_type?: string }).report_type || 'daily';
+                  const tc = typeColor[rt] || typeColor.daily;
+                  const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
+                  return (
+                    <details key={report.id}>
+                      <summary style={{
+                        padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
+                        cursor: 'pointer', transition: 'background 0.15s ease',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
+                        {report.test_date} 분석
+                        {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
+                      </summary>
+                      <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                        {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                            {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
+                            {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
+                            {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
+                          </div>
+                        ) : null}
+                        {report.manager_report}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ━━━ 출결 탭 ━━━ */}
+      {activeTab === 'attendance' && (
+        <div style={card}>
+          <h3 style={sectionTitle}>출결 이력</h3>
+          {attendance.length > 0 ? (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>날짜</th>
+                  <th style={thStyle}>상태</th>
+                  <th style={thStyle}>비고</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...attendance].reverse().map((a) => {
+                  const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+                    present: { label: '출석', color: 'var(--green)', bg: 'var(--green-dim)' },
+                    late: { label: '지각', color: 'var(--orange)', bg: 'var(--orange-dim)' },
+                    absent: { label: '결석', color: 'var(--red)', bg: 'var(--red-dim)' },
+                    early_leave: { label: '조퇴', color: 'var(--purple)', bg: 'var(--purple-dim)' },
+                  };
+                  const st = statusMap[a.status] || statusMap.present;
+                  return (
+                    <tr key={a.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={tdStyle}>{a.date}</td>
+                      <td style={tdStyle}>
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: st.bg, color: st.color }}>{st.label}</span>
+                      </td>
+                      <td style={tdStyle}>{a.note || '-'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           ) : (
-            <p style={emptyStyle}>시험 데이터가 없어요</p>
+            <p style={emptyStyle}>출결 데이터가 없어요</p>
           )}
         </div>
-      </div>
+      )}
 
-      {/* 교육 메모 (1열) */}
-      <MemoSection studentId={student.id} initialMemos={memos} />
+      {/* ━━━ 일지 탭 ━━━ */}
+      {activeTab === 'notes' && (
+        <NotesTab studentId={student.id} studentName={student.name} />
+      )}
 
-      {/* AI 코칭 (1열) */}
-      <div style={card}>
-        <h3 style={sectionTitle}>🤖 AI 코칭 리포트</h3>
-        {coachingReports.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {coachingReports.map((report) => {
-              const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
-              const typeColor: Record<string, { bg: string; color: string }> = {
-                comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
-                subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
-                daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
-                weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
-              };
-              const rt = (report as { report_type?: string }).report_type || 'daily';
-              const tc = typeColor[rt] || typeColor.daily;
-              const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
-              return (
-                <details key={report.id}>
-                  <summary style={{
-                    padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                    fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
-                    cursor: 'pointer', transition: 'background 0.15s ease',
-                    display: 'flex', alignItems: 'center', gap: 8,
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
-                    {report.test_date} 분석
-                    {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
-                  </summary>
-                  <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                    {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                        {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
-                        {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
-                        {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
-                      </div>
-                    ) : null}
-                    {report.manager_report}
-                  </div>
-                </details>
-              );
-            })}
-          </div>
-        ) : (
-          <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>
-        )}
-      </div>
+      {/* ━━━ 질문 탭 ━━━ */}
+      {activeTab === 'questions' && (
+        <QuestionsTab studentId={student.id} />
+      )}
 
       <style>{`
         @media (max-width: 1024px) {
@@ -615,6 +694,237 @@ function StatItem({ label, value, color }: { label: string; value: string; color
     <div style={{ textAlign: 'center' }}>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 4px' }}>{label}</p>
       <p style={{ fontSize: 22, fontWeight: 700, color: color || 'var(--text-primary)', margin: 0 }}>{value}</p>
+    </div>
+  );
+}
+
+/* ── 테이블 스타일 ── */
+const thStyle: React.CSSProperties = {
+  padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)',
+  borderBottom: '1px solid var(--border)',
+};
+const tdStyle: React.CSSProperties = {
+  padding: '12px 16px', color: 'var(--text-second)', fontSize: 14,
+};
+
+/* ── 일지 탭 컴포넌트 ── */
+interface NoteData {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  content_type?: string;
+  participation_score?: number;
+  participation_max?: number;
+  tags?: string[];
+  confidence?: string;
+}
+
+function NotesTab({ studentId, studentName }: { studentId: string; studentName: string }) {
+  const [notes, setNotes] = useState<NoteData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/notes?student_id=${studentId}&all=true`)
+      .then(res => res.json())
+      .then(data => { setNotes(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [studentId]);
+
+  if (loading) return <p style={{ ...emptyStyle, padding: '48px 0' }}>불러오는 중...</p>;
+
+  const educationNotes = notes.filter(n => !(n.tags || []).includes('실습일지'));
+  const practiceNotes = notes.filter(n => (n.tags || []).includes('실습일지'));
+
+  const formatDate = (d: string) => {
+    const date = new Date(d);
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  const parseSteps = (content: string) => {
+    try {
+      const p = JSON.parse(content);
+      return p.steps || {};
+    } catch { return {}; }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* 교육일지 */}
+      <div style={card}>
+        <h3 style={sectionTitle}>교육일지 ({educationNotes.length}건)</h3>
+        {educationNotes.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {educationNotes.map(n => {
+              const steps = parseSteps(n.content);
+              const confMap: Record<string, { label: string; color: string }> = {
+                high: { label: '😊 높음', color: 'var(--green)' },
+                medium: { label: '😐 보통', color: 'var(--orange)' },
+                low: { label: '😟 낮음', color: 'var(--red)' },
+              };
+              const conf = n.confidence ? confMap[n.confidence] : null;
+              return (
+                <details key={n.id}>
+                  <summary style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer', transition: 'background 0.15s ease',
+                  }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{formatDate(n.created_at)}</span>
+                      <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{n.title || '교육일지'}</span>
+                      {(n.tags || []).includes('자율학습') && (
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {conf && <span style={{ fontSize: 12, color: conf.color }}>{conf.label}</span>}
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>참여 {n.participation_score || 0}/{n.participation_max || 3}</span>
+                    </div>
+                  </summary>
+                  <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {steps.step1 && <NoteStep label="STEP 1 — 오늘 배운 것" content={steps.step1} />}
+                    {steps.step2 && <NoteStep label="STEP 2 — 궁금한 점" content={steps.step2} />}
+                    {steps.step3 && <NoteStep label="STEP 3 — 소감" content={steps.step3} />}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        ) : (
+          <p style={emptyStyle}>교육일지가 없어요</p>
+        )}
+      </div>
+
+      {/* 실습일지 */}
+      {practiceNotes.length > 0 && (
+        <div style={card}>
+          <h3 style={sectionTitle}>실습일지 ({practiceNotes.length}건)</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {practiceNotes.map(n => {
+              const steps = parseSteps(n.content);
+              return (
+                <details key={n.id}>
+                  <summary style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer', transition: 'background 0.15s ease',
+                  }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{formatDate(n.created_at)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+                      {steps.stats_consult != null && <span>상담 {steps.stats_consult}</span>}
+                      {steps.stats_order != null && <span>수주 {steps.stats_order}</span>}
+                      {steps.stats_amount != null && <span>{Number(steps.stats_amount).toLocaleString()}원</span>}
+                    </div>
+                  </summary>
+                  <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {steps.step1 && <NoteStep label="기억에 남는 고객" content={steps.step1} />}
+                    {steps.step2 && <NoteStep label="선배의 비법" content={steps.step2} />}
+                    {steps.step3 && <NoteStep label="칭찬할 점" content={steps.step3} />}
+                    {steps.step4 && <NoteStep label="보완할 점" content={steps.step4} />}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NoteStep({ label, content }: { label: string; content: string }) {
+  return (
+    <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-elevated)' }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(content)}</div>
+    </div>
+  );
+}
+
+/* ── 질문 탭 컴포넌트 ── */
+interface QuestionThread {
+  id: string;
+  title: string;
+  content: string;
+  status: string;
+  created_at: string;
+  replies?: { id: string; content: string; author_role: string; author_name: string; created_at: string }[];
+}
+
+function QuestionsTab({ studentId }: { studentId: string }) {
+  const [threadList, setThreadList] = useState<QuestionThread[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/student-questions?student_id=${studentId}`)
+      .then(res => res.json())
+      .then(data => { setThreadList(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [studentId]);
+
+  if (loading) return <p style={{ ...emptyStyle, padding: '48px 0' }}>불러오는 중...</p>;
+
+  return (
+    <div style={card}>
+      <h3 style={sectionTitle}>질문 이력 ({threadList.length}건)</h3>
+      {threadList.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {threadList.map(q => {
+            const statusStyle = q.status === 'open'
+              ? { label: '대기', bg: 'var(--orange-dim)', color: 'var(--orange)' }
+              : { label: '답변완료', bg: 'var(--green-dim)', color: 'var(--green)' };
+            return (
+              <details key={q.id}>
+                <summary style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer', transition: 'background 0.15s ease',
+                }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: statusStyle.bg, color: statusStyle.color }}>{statusStyle.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{q.title}</span>
+                  </div>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {new Date(q.created_at).toLocaleDateString('ko', { month: 'numeric', day: 'numeric' })}
+                    {q.replies && q.replies.length > 0 && ` · 답글 ${q.replies.length}`}
+                  </span>
+                </summary>
+                <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {/* 질문 본문 */}
+                  <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-elevated)', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                    {q.content}
+                  </div>
+                  {/* 답글 */}
+                  {q.replies?.map(r => (
+                    <div key={r.id} style={{
+                      padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+                      background: r.author_role === 'admin' ? 'var(--blue-dim)' : 'var(--bg-elevated)',
+                      marginLeft: r.author_role === 'admin' ? 20 : 0,
+                    }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: r.author_role === 'admin' ? 'var(--blue)' : 'var(--text-muted)', marginBottom: 4 }}>
+                        {r.author_name} · {new Date(r.created_at).toLocaleDateString('ko', { month: 'numeric', day: 'numeric' })}
+                      </div>
+                      <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{r.content}</div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      ) : (
+        <p style={emptyStyle}>질문이 없어요</p>
+      )}
     </div>
   );
 }
