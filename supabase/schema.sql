@@ -224,3 +224,43 @@ CREATE TABLE question_replies (
   content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 교육 설문 (자기효능감 + 만족도, 사전-사후 2회)
+CREATE TABLE education_surveys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id UUID NOT NULL REFERENCES batches(id),
+  student_id UUID NOT NULL REFERENCES students(id),
+  phase TEXT NOT NULL CHECK (phase IN ('intro_end', 'advanced_end')),
+  -- 파트 A: 자기효능감 (1~5)
+  eff_product INTEGER CHECK (eff_product BETWEEN 1 AND 5),
+  eff_customer INTEGER CHECK (eff_customer BETWEEN 1 AND 5),
+  eff_sales INTEGER CHECK (eff_sales BETWEEN 1 AND 5),
+  eff_teamwork INTEGER CHECK (eff_teamwork BETWEEN 1 AND 5),
+  eff_overall INTEGER CHECK (eff_overall BETWEEN 1 AND 5),
+  -- 파트 B: 교육 만족도 (1~5)
+  sat_content INTEGER CHECK (sat_content BETWEEN 1 AND 5),
+  sat_method INTEGER CHECK (sat_method BETWEEN 1 AND 5),
+  sat_duration INTEGER CHECK (sat_duration BETWEEN 1 AND 5),
+  -- 파트 C: 주관식
+  open_strength TEXT,
+  open_worry TEXT,
+  open_goal TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(batch_id, student_id, phase)
+);
+
+-- 심화교육 주간 수주 실적 (엑셀 업로드)
+CREATE TABLE weekly_sales (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id UUID NOT NULL REFERENCES batches(id),
+  student_id UUID NOT NULL REFERENCES students(id),
+  week INTEGER NOT NULL CHECK (week BETWEEN 1 AND 12),
+  consult INTEGER DEFAULT 0,
+  estimate INTEGER DEFAULT 0,
+  orders INTEGER DEFAULT 0,
+  amount INTEGER DEFAULT 0,
+  categories TEXT[],
+  note TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(batch_id, student_id, week)
+);

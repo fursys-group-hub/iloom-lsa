@@ -12,6 +12,7 @@ const nav = [
   { href: '/my/notes', label: '교육일지' },
   { href: '/my/practice', label: '실습일지' },
   { href: '/my/ask', label: '질문하기' },
+  { href: '/my/survey', label: '교육 설문' },
   { href: '/my/training', label: '심화교육', disabled: true },
 ];
 

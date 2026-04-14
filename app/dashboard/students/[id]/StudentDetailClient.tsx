@@ -50,6 +50,7 @@ interface Props {
   allAttendance?: { student_id: string; status: string }[];
   allNotes?: { student_id: string; content: string }[];
   notes?: NoteForAnalysis[];
+  surveys?: { id: string; phase: string; eff_product: number | null; eff_customer: number | null; eff_sales: number | null; eff_teamwork: number | null; eff_overall: number | null; open_strength: string | null; open_worry: string | null; open_goal: string | null }[];
 }
 
 const card: React.CSSProperties = {
@@ -78,7 +79,7 @@ function parseNoteMeta(content: string) {
 }
 
 export default function StudentDetailClient({
-  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [],
+  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [], surveys = [],
 }: Props) {
   const avgScore = useMemo(() => calculateAvgScore(scores), [scores]);
   const dailyAverages = useMemo(() => calculateDailyAverages(scores), [scores]);
@@ -408,6 +409,105 @@ export default function StudentDetailClient({
             })()}
           </div>
 
+          {/* 성장 여정 (IDP) */}
+          <div className="section-growth" style={card}>
+            <h3 style={sectionTitle}>성장 여정</h3>
+            {(() => {
+              const introSurvey = surveys.find(s => s.phase === 'intro_end');
+              const advSurvey = surveys.find(s => s.phase === 'advanced_end');
+              const effKeys = ['eff_product', 'eff_customer', 'eff_sales', 'eff_teamwork', 'eff_overall'] as const;
+              const effLabels: Record<string, string> = { eff_product: '제품 지식', eff_customer: '고객 응대', eff_sales: '판매 성사', eff_teamwork: '팀워크', eff_overall: '전반적 준비도' };
+
+              // 자신감 타임라인 (교육일지 기반)
+              const confEmojiMap: Record<string, string> = {
+                very_high: '😎', high: '😊', confident: '😊', half: '😐',
+                medium: '😐', normal: '🤔', low: '😟', not_confident: '😟', very_low: '😵',
+                '😎': '😎', '😊': '😊', '😐': '😐', '🤔': '🤔', '😟': '😟', '😵': '😵',
+              };
+              const eduNotes = (rawNotes || []).map(n => {
+                const meta = parseNoteMeta(n.content);
+                return { date: n.created_at.slice(0, 10), confidence: meta.confidence, participation: meta.participation_score, tags: meta.tags };
+              }).filter(n => !n.tags.includes('실습일지') && !n.tags.includes('자율학습')).sort((a, b) => a.date.localeCompare(b.date));
+
+              const first3Part = eduNotes.slice(0, 3);
+              const last3Part = eduNotes.slice(-3);
+              const firstAvg = first3Part.length > 0 ? Math.round((first3Part.reduce((s, n) => s + n.participation, 0) / first3Part.length) * 10) / 10 : 0;
+              const lastAvg = last3Part.length > 0 ? Math.round((last3Part.reduce((s, n) => s + n.participation, 0) / last3Part.length) * 10) / 10 : 0;
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* 자기효능감 사전-사후 */}
+                  {introSurvey ? (
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>자기효능감 변화</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {effKeys.map(k => {
+                          const introVal = introSurvey[k] || 0;
+                          const advVal = advSurvey?.[k] || 0;
+                          const hasAdv = !!advSurvey;
+                          return (
+                            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 70, flexShrink: 0 }}>{effLabels[k]}</span>
+                              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 6, flex: 1, overflow: 'hidden' }}>
+                                  <div style={{ height: '100%', width: `${(introVal / 5) * 100}%`, background: 'var(--blue)', borderRadius: 'var(--radius-xs)' }} />
+                                </div>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--blue)', width: 16, textAlign: 'center' }}>{introVal}</span>
+                                {hasAdv && <>
+                                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>→</span>
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: advVal > introVal ? 'var(--green)' : advVal < introVal ? 'var(--red)' : 'var(--text-muted)', width: 16, textAlign: 'center' }}>{advVal}</span>
+                                </>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {advSurvey && (() => {
+                        const introAvg = effKeys.reduce((s, k) => s + (introSurvey[k] || 0), 0) / effKeys.length;
+                        const advAvg = effKeys.reduce((s, k) => s + (advSurvey[k] || 0), 0) / effKeys.length;
+                        const diff = Math.round((advAvg - introAvg) * 10) / 10;
+                        return <div style={{ fontSize: 12, color: diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--text-muted)', marginTop: 6, fontWeight: 600 }}>평균 {Math.round(introAvg * 10) / 10} → {Math.round(advAvg * 10) / 10} ({diff > 0 ? '+' : ''}{diff}점)</div>;
+                      })()}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>설문 미실시</div>
+                  )}
+
+                  {/* 자신감 타임라인 */}
+                  {eduNotes.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>자신감 타임라인</div>
+                      <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        {eduNotes.map((n, i) => (
+                          <span key={i} title={n.date} style={{ fontSize: 16, cursor: 'default' }}>{n.confidence ? (confEmojiMap[n.confidence] || '➖') : '➖'}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 참여도 변화 */}
+                  {eduNotes.length >= 3 && (
+                    <div style={{ fontSize: 12, color: lastAvg > firstAvg ? 'var(--green)' : 'var(--text-muted)' }}>
+                      참여 깊이: 초반 {firstAvg}점 → 후반 {lastAvg}점{lastAvg > firstAvg ? ` (+${Math.round((lastAvg - firstAvg) * 10) / 10})` : ''}
+                    </div>
+                  )}
+
+                  {/* 주관식 하이라이트 */}
+                  {introSurvey?.open_strength && (
+                    <div style={{ padding: '8px 12px', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.5 }}>
+                      <span style={{ fontWeight: 600, color: 'var(--green)', marginRight: 4 }}>성장</span>{introSurvey.open_strength}
+                    </div>
+                  )}
+                  {introSurvey?.open_worry && (
+                    <div style={{ padding: '8px 12px', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.5 }}>
+                      <span style={{ fontWeight: 600, color: 'var(--orange)', marginRight: 4 }}>걱정</span>{introSurvey.open_worry}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+
           {/* 출결 이력 */}
           <div className="section-attendance" style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -582,12 +682,13 @@ export default function StudentDetailClient({
           .detail-col-left, .detail-col-right { display: contents !important; }
           .section-hr-advice { order: 0; }
           .section-adaptation { order: 1; }
-          .section-calendar { order: 2; }
-          .section-attendance { order: 3; }
-          .section-scores { order: 4; }
-          .section-category { order: 5; }
-          .section-notes { order: 6; }
-          .section-questions { order: 7; }
+          .section-growth { order: 2; }
+          .section-calendar { order: 3; }
+          .section-attendance { order: 4; }
+          .section-scores { order: 5; }
+          .section-category { order: 6; }
+          .section-notes { order: 7; }
+          .section-questions { order: 8; }
         }
       `}</style>
     </div>
@@ -679,7 +780,7 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
               border: 'none', borderRadius: 'var(--radius-sm)',
               resize: 'vertical', lineHeight: 1.5, outline: 'none',
             }}
-            onFocus={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+            onFocus={(e) => { e.currentTarget.style.background = 'var(--bg-main)'; }}
             onBlur={(e) => { e.currentTarget.style.background = 'var(--bg-main)'; }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSave();
@@ -1014,7 +1115,7 @@ function NotesTab({ studentId, submitInfo }: { studentId: string; studentName?: 
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {conf && <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', fontSize: 14 }}>{conf.icon} {conf.label}</span>}
+                {conf && <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-main)', fontSize: 14 }}>{conf.icon} {conf.label}</span>}
                 {!isSelfStudy && expandedNote.participation_score != null && (
                   <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700, background: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green-dim)' : 'var(--orange-dim)', color: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green)' : 'var(--orange)' }}>참여 {expandedNote.participation_score}/{expandedNote.participation_max || 3}</span>
                 )}
@@ -1046,7 +1147,7 @@ function NotesTab({ studentId, submitInfo }: { studentId: string; studentName?: 
 
 function NoteStep({ label, content }: { label: string; content: string }) {
   return (
-    <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-elevated)' }}>
+    <div style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-main)' }}>
       <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{String(content)}</div>
     </div>
@@ -1106,14 +1207,14 @@ function QuestionsTab({ studentId }: { studentId: string }) {
                 </summary>
                 <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {/* 질문 본문 */}
-                  <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-elevated)', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                  <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-main)', fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                     {q.content}
                   </div>
                   {/* 답글 */}
                   {q.replies?.map(r => (
                     <div key={r.id} style={{
                       padding: '10px 14px', borderRadius: 'var(--radius-sm)',
-                      background: r.author_role === 'admin' ? 'var(--blue-dim)' : 'var(--bg-elevated)',
+                      background: r.author_role === 'admin' ? 'var(--blue-dim)' : 'var(--bg-main)',
                       marginLeft: r.author_role === 'admin' ? 20 : 0,
                     }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: r.author_role === 'admin' ? 'var(--blue)' : 'var(--text-muted)', marginBottom: 4 }}>

@@ -39,6 +39,9 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     supabase.from('student_notes').select('id, student_id, content, created_at').eq('student_id', id),
   ]);
 
+  // 설문 데이터
+  const { data: surveysData } = await supabase.from('education_surveys').select('*').eq('student_id', id);
+
   // 반 전체 데이터 (평균 비교용)
   const { data: batchStudents } = await supabase.from('students').select('id').eq('batch_id', student.batch_id).eq('is_dropped', false);
   const batchStudentIds = (batchStudents || []).map(s => s.id);
@@ -61,6 +64,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
       responses={responses || []}
       questions={questions || []}
       notes={notes || []}
+      surveys={surveysData || []}
     />
   );
 }

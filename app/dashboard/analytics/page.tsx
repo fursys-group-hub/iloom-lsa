@@ -15,6 +15,9 @@ export default async function AnalyticsPage() {
     { data: testResponses },
     { data: questions },
     { data: memos },
+    { data: surveys },
+    { data: weeklySales },
+    { data: evaluations },
   ] = await Promise.all([
     supabase.from('batches').select('*').order('start_date', { ascending: false }),
     supabase.from('students').select('*').order('name'),
@@ -39,6 +42,9 @@ export default async function AnalyticsPage() {
     })(),
     supabase.from('questions').select('id, batch_id, session, question_id, category, series, detail, question_text'),
     supabase.from('student_memos').select('student_id, category'),
+    supabase.from('education_surveys').select('*'),
+    supabase.from('weekly_sales').select('*').order('week'),
+    supabase.from('weekly_evaluations').select('*'),
   ]);
 
   return (
@@ -51,6 +57,9 @@ export default async function AnalyticsPage() {
       testResponses={testResponses || []}
       questions={questions || []}
       memos={memos || []}
+      surveys={surveys || []}
+      weeklySales={weeklySales || []}
+      evaluations={evaluations || []}
     />
   );
 }
