@@ -24,7 +24,7 @@ const navGroups = [
   {
     label: '성과 분석',
     items: [
-      { href: '/dashboard/students', label: '개별분석' },
+      { href: '/dashboard/students', label: '교육생 분석' },
       { href: '/dashboard/reports', label: 'AI 리포트' },
       { href: '/dashboard/analytics', label: '교육효과' },
     ],

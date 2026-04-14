@@ -272,7 +272,7 @@ export default function AdminQuestionsPage() {
                         {selectedQ.student_name || '알 수 없음'}
                       </span>
                       <Link href={`/dashboard/students/${selectedQ.student_id}`} style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', textDecoration: 'none' }}>
-                        개별분석 보기 →
+                        교육생 분석 →
                       </Link>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>

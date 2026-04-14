@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Batch, Student, TestScore, Attendance, TagTracking, HRAdvice } from '@/lib/types';
 import { calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 
@@ -158,6 +159,10 @@ export default function StudentsClient({ batches, students: initialStudents, sco
     return { avgAttendance: Math.round(totalAttRate / count), avgSubmitRate: Math.round(totalSubmitRate / count), avgParticipation: Math.round(totalPart / count) };
   }, [batchStudents, attendance, notes, totalEducationDays]);
 
+  // 비교 모드
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
   // 자신감 추이 (5단계 → 차트는 높음/보통/낮음 3색으로 그룹핑)
   const confidenceTrendData = useMemo(() => {
     const dateMap = new Map<string, { high: number; mid: number; low: number; total: number }>();
@@ -188,14 +193,25 @@ export default function StudentsClient({ batches, students: initialStudents, sco
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-        개별분석
+        교육생 분석
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* 적응 지수 */}
           <div style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>입문교육 적응 지수</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>입문교육 적응 지수</h3>
+                <button
+                  onClick={() => { setCompareMode(prev => !prev); setSelectedIds([]); }}
+                  style={{
+                    padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
+                    background: compareMode ? 'var(--blue)' : 'transparent',
+                    color: compareMode ? '#fff' : 'var(--text-tertiary)',
+                    fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  }}
+                >{compareMode ? '비교 해제' : '비교'}</button>
+              </div>
               <details style={{ cursor: 'pointer', position: 'relative' }}>
                 <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>계산 기준</summary>
                 <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 480 }}>
@@ -277,53 +293,179 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     green: { bg: 'var(--green-dim)', text: 'var(--green)' },
                   };
                   const ac = advice ? (adviceColorMap[advice.typeColor] || adviceColorMap.orange) : null;
-                  return (
-                    <Link key={idx.studentId} href={`/dashboard/students/${idx.studentId}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: 0 }}>
-                      <div style={{
-                        background: advice?.typeColor === 'red' ? 'var(--red-dim)' : 'var(--bg-main)', border: 'none',
-                        borderRadius: 'var(--radius-md)', padding: '16px 20px',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                        height: '100%', display: 'flex', flexDirection: 'column',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-main)'; }}
-                      >
-                        {/* 상단: 사진 + 이름 + 정보 */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                          {student?.photo_url ? (
-                            <img src={student.photo_url} alt={idx.studentName} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                          ) : (
-                            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>{idx.studentName[0]}</div>
-                          )}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{idx.studentName}</div>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {[birthYear ? `${birthYear}년생` : null, student?.education].filter(Boolean).join(' · ') || '\u00A0'}
-                            </div>
+                  const isSelected = selectedIds.includes(idx.studentId);
+
+                  const handleCardClick = (e: React.MouseEvent) => {
+                    if (!compareMode) return; // 일반 모드에서는 Link가 처리
+                    e.preventDefault();
+                    setSelectedIds(prev =>
+                      prev.includes(idx.studentId)
+                        ? prev.filter(id => id !== idx.studentId)
+                        : prev.length < 3 ? [...prev, idx.studentId] : prev
+                    );
+                  };
+
+                  const cardContent = (
+                    <div style={{
+                      background: advice?.typeColor === 'red' ? 'var(--red-dim)' : 'var(--bg-main)',
+                      border: compareMode && isSelected ? '2px solid var(--blue)' : '2px solid transparent',
+                      borderRadius: 'var(--radius-md)', padding: '16px 20px',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s, border-color 0.2s',
+                      height: '100%', display: 'flex', flexDirection: 'column',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = advice?.typeColor === 'red' ? 'var(--red-dim)' : 'var(--bg-main)'; }}
+                    >
+                      {/* 상단: 사진 + 이름 + 정보 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                        {compareMode && (
+                          <div style={{
+                            width: 20, height: 20, borderRadius: 'var(--radius-xs)', flexShrink: 0,
+                            border: isSelected ? 'none' : '2px solid var(--border)',
+                            background: isSelected ? 'var(--blue)' : 'transparent',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            {isSelected && <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>V</span>}
                           </div>
-                        </div>
-                        {/* 하단: 시험평균 + HR뱃지 + 적응지수 */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--border-light)' }}>
-                          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-                            시험 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.examAvg}</span>
-                            <span style={{ margin: '0 6px', color: 'var(--border)' }}>|</span>
-                            출석 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.attendanceRate}%</span>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {ac && advice && (
-                              <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: ac.bg, color: ac.text }}>{advice.typeLabel}</span>
-                            )}
-                            <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{gc.label} {idx.total}점</span>
+                        )}
+                        {student?.photo_url ? (
+                          <img src={student.photo_url} alt={idx.studentName} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>{idx.studentName[0]}</div>
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{idx.studentName}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {[birthYear ? `${birthYear}년생` : null, student?.education].filter(Boolean).join(' · ') || '\u00A0'}
                           </div>
                         </div>
                       </div>
+                      {/* 하단: 시험평균 + HR뱃지 + 적응지수 */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--border-light)' }}>
+                        <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                          시험 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.examAvg}</span>
+                          <span style={{ margin: '0 6px', color: 'var(--border)' }}>|</span>
+                          출석 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.attendanceRate}%</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {ac && advice && (
+                            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: ac.bg, color: ac.text }}>{advice.typeLabel}</span>
+                          )}
+                          <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{gc.label} {idx.total}점</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+
+                  return compareMode ? (
+                    <div key={idx.studentId} onClick={handleCardClick} style={{ minWidth: 0 }}>
+                      {cardContent}
+                    </div>
+                  ) : (
+                    <Link key={idx.studentId} href={`/dashboard/students/${idx.studentId}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: 0 }}>
+                      {cardContent}
                     </Link>
                   );
                 })}
               </div>
             )}
           </div>
+
+          {/* 비교 패널 */}
+          {compareMode && selectedIds.length >= 2 && (() => {
+            const COMPARE_COLORS = ['var(--blue)', 'var(--purple)', 'var(--orange)'];
+            const selectedData = selectedIds.map((id, i) => {
+              const idx = adaptationIndices.find(a => a.studentId === id);
+              return idx ? { ...idx, color: COMPARE_COLORS[i] } : null;
+            }).filter(Boolean) as (typeof adaptationIndices[0] & { color: string })[];
+
+            const radarItems = ['시험', '하위분야', '출석', '일지참여', '성장', '자신감', '만성오답', '메모톤'];
+            const radarData = radarItems.map((label, i) => {
+              const keys = ['examAvg', 'weakCategories', 'attendanceRate', 'participation', 'growthSlope', 'confidenceTrend', 'chronicScore', 'memoBalance'] as const;
+              const entry: Record<string, string | number> = { label };
+              selectedData.forEach((d, j) => { entry[`s${j}`] = d.breakdown[keys[i]]; });
+              return entry;
+            });
+
+            const compareItems = [
+              { label: '시험 평균', key: 'examAvg' as const },
+              { label: '출석률', key: 'attendanceRate' as const, suffix: '%' },
+              { label: '성장 기울기', key: 'growthSlope' as const },
+              { label: '교육일지 참여', key: 'participation' as const },
+              { label: '자신감 추이', key: 'confidenceTrend' as const },
+              { label: '하위 분야', key: 'weakCategories' as const },
+            ];
+
+            return (
+              <div style={cardStyle}>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>교육생 비교</h3>
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16, fontSize: 13 }}>
+                  {selectedData.map(d => (
+                    <span key={d.studentId} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: d.color, display: 'inline-block' }} />
+                      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{d.studentName}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>{d.total}점</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="compare-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
+                  {/* 레이더 차트 */}
+                  <div>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
+                        <PolarGrid stroke="var(--border)" gridType="polygon" />
+                        <PolarAngleAxis dataKey="label" tick={{ fontSize: 12, fill: 'var(--text-tertiary)', fontWeight: 500 }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                        {selectedData.map((d, j) => (
+                          <Radar key={d.studentId} dataKey={`s${j}`} name={d.studentName} stroke={d.color} fill={d.color} fillOpacity={0.1} strokeWidth={2} dot={{ r: 3, fill: d.color, strokeWidth: 0 }} />
+                        ))}
+                        <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                  {/* 항목별 비교 테이블 */}
+                  <div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>항목</th>
+                          {selectedData.map(d => (
+                            <th key={d.studentId} style={{ padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: d.color, borderBottom: '1px solid var(--border)' }}>{d.studentName}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {compareItems.map(item => {
+                          const values = selectedData.map(d => d.breakdown[item.key]);
+                          const max = Math.max(...values);
+                          return (
+                            <tr key={item.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                              <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{item.label}</td>
+                              {selectedData.map((d, j) => {
+                                const v = values[j];
+                                return (
+                                  <td key={d.studentId} style={{ padding: '10px 12px', textAlign: 'center', fontSize: 14, fontWeight: v === max ? 700 : 500, color: v === max ? d.color : 'var(--text-tertiary)' }}>
+                                    {v}{item.suffix || ''}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        })}
+                        <tr style={{ borderTop: '2px solid var(--border)' }}>
+                          <td style={{ padding: '10px 12px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>적응지수 합계</td>
+                          {selectedData.map(d => (
+                            <td key={d.studentId} style={{ padding: '10px 12px', textAlign: 'center', fontSize: 16, fontWeight: 700, color: d.color }}>{d.total}점</td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* 태도/참여 현황 */}
           <div style={cardStyle}>

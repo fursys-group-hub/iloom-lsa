@@ -245,8 +245,8 @@ export default function StudentDetailClient({
 
       {/* 프로필 + HR 조언 통합 카드 */}
       <div style={card}>
-        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: hrAdvice ? '3fr 2fr' : '1fr', gap: 24 }}>
-          {/* 왼쪽: 인적사항 */}
+        <div>
+          {/* 인적사항 */}
           <div>
             <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
               {student.photo_url ? (
@@ -318,16 +318,27 @@ export default function StudentDetailClient({
             )}
           </div>
 
-          {/* 오른쪽: HR 조언 */}
+        </div>
+      </div>
+
+      {/* ━━━ 2열 레이아웃 ━━━ */}
+      <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 4fr) minmax(0, 6fr)', gap: 20, alignItems: 'start' }}>
+
+        {/* ── 왼쪽: HR 조언 + 적응지수 + 출결 ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* HR 조언 (있을 때만) */}
           {hrAdvice && (() => {
             const dimMap: Record<string, string> = { red: 'var(--red-dim)', orange: 'var(--orange-dim)', blue: 'var(--blue-dim)', purple: 'var(--purple-dim)', green: 'var(--green-dim)' };
             const colorMap: Record<string, string> = { red: 'var(--red)', orange: 'var(--orange)', blue: 'var(--blue)', purple: 'var(--purple)', green: 'var(--green)' };
             const c = colorMap[hrAdvice.typeColor] || 'var(--blue)';
             const d = dimMap[hrAdvice.typeColor] || 'var(--blue-dim)';
             return (
-              <div style={{ padding: '16px 20px', borderRadius: 'var(--radius-md)', background: d, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: d, color: c, alignSelf: 'flex-start' }}>{hrAdvice.typeLabel}</span>
-                <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{hrAdvice.difficulty}</p>
+              <div style={{ ...card, background: d, border: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: d, color: c }}>{hrAdvice.typeLabel}</span>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, margin: '0 0 10px' }}>{hrAdvice.difficulty}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {hrAdvice.actions.map((action, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 13, color: 'var(--text-primary)' }}>
@@ -339,19 +350,8 @@ export default function StudentDetailClient({
               </div>
             );
           })()}
-        </div>
-      </div>
 
-      {/* 교육자 메모 — 프로필과 2열 사이 */}
-      <MemoSection studentId={student.id} initialMemos={memos} />
-
-      {/* ━━━ 2열 레이아웃 ━━━ */}
-      <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
-
-        {/* ── 왼쪽 컬럼 ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-          {/* 적응지수 산정 근거 — 레이더 차트 + 좋은 것/나쁜 것 */}
+          {/* 적응지수 산정 근거 */}
           <div style={card}>
             <h3 style={sectionTitle}>적응지수 산정 근거</h3>
             {(() => {
@@ -365,14 +365,10 @@ export default function StudentDetailClient({
                 { label: '만성오답', score: adaptationIdx.breakdown.chronicScore, detail: adaptationIdx.breakdown.chronicDetail },
                 { label: '메모톤', score: adaptationIdx.breakdown.memoBalance, detail: adaptationIdx.breakdown.memoBalanceDetail },
               ];
-              const good = items.filter(i => i.score >= 75);
-              const bad = items.filter(i => i.score < 60);
-              const mid = items.filter(i => i.score >= 60 && i.score < 75);
               return (
                 <>
-                  {/* 레이더 차트 — 크게 */}
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={280}>
                       <RadarChart data={items} cx="50%" cy="50%" outerRadius="75%">
                         <PolarGrid stroke="var(--border)" gridType="polygon" />
                         <PolarAngleAxis dataKey="label" tick={{ fontSize: 13, fill: 'var(--text-tertiary)', fontWeight: 500 }} />
@@ -381,8 +377,6 @@ export default function StudentDetailClient({
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
-
-                  {/* 항목별 상세 표 */}
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr>
@@ -392,20 +386,18 @@ export default function StudentDetailClient({
                       </tr>
                     </thead>
                     <tbody>
-                      {items.map(i => {
-                        const color = i.score >= 75 ? 'var(--green)' : i.score >= 60 ? 'var(--orange)' : 'var(--red)';
+                      {items.map(it => {
+                        const color = it.score >= 75 ? 'var(--green)' : it.score >= 60 ? 'var(--orange)' : 'var(--red)';
                         return (
-                          <tr key={i.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                            <td style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{i.label}</td>
-                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color }}>{i.score}</td>
-                            <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{i.detail}</td>
+                          <tr key={it.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                            <td style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{it.label}</td>
+                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color }}>{it.score}</td>
+                            <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{it.detail}</td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
-
-                  {/* 부정 신호 감점 */}
                   {adaptationIdx.breakdown.deltaDeduction > 0 && (
                     <div style={{ marginTop: 12, padding: '10px 14px', background: 'var(--red-dim)', borderRadius: 'var(--radius-sm)', fontSize: 13, color: 'var(--red)', fontWeight: 600 }}>
                       부정 신호 감점 −{adaptationIdx.breakdown.deltaDeduction}점 ({adaptationIdx.breakdown.deltaDetail})
@@ -416,7 +408,7 @@ export default function StudentDetailClient({
             })()}
           </div>
 
-          {/* 출결 이력 + 출석률 */}
+          {/* 출결 이력 */}
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>출결 이력</h3>
@@ -452,9 +444,7 @@ export default function StudentDetailClient({
                       early_leave: { label: '조퇴', color: 'var(--purple)', bg: 'var(--purple-dim)' },
                     };
                     const st = statusMap[a.status] || statusMap.present;
-                    // note에서 출근/퇴근 시간 파싱: "출근 08:09 / 퇴근 17:46"
-                    let checkIn = '-';
-                    let checkOut = '-';
+                    let checkIn = '-', checkOut = '-';
                     if (a.note) {
                       const inMatch = a.note.match(/출근\s*([0-9:]+)/);
                       const outMatch = a.note.match(/퇴근\s*([0-9:]+)/);
@@ -478,13 +468,15 @@ export default function StudentDetailClient({
               <p style={emptyStyle}>출결 데이터가 없어요</p>
             )}
           </div>
-
         </div>
 
-        {/* ── 오른쪽 컬럼 ── */}
+        {/* ── 오른쪽: 달력 + 점수추이 + 카테고리 + 취약부분 ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-          {/* 테스트 — 점수 추이 (바 차트: 본인 vs 반 평균) */}
+          {/* 교육 캘린더 + 메모 */}
+          <CalendarWithMemo batch={batch} scores={scores} attendance={attendance} notes={rawNotes} studentId={student.id} initialMemos={memos} />
+
+          {/* 차시별 점수 추이 */}
           <div style={card}>
             <h3 style={sectionTitle}>차시별 점수 추이</h3>
             {dailyAverages.length > 0 ? (() => {
@@ -518,9 +510,9 @@ export default function StudentDetailClient({
             })() : <p style={emptyStyle}>데이터 없음</p>}
           </div>
 
-          {/* 테스트 — 카테고리별 학습 현황 */}
+          {/* 카테고리별 학습 현황 */}
           <div style={card}>
-            <h3 style={sectionTitle}>카테고리별 학습 현황</h3>
+            <h3 style={sectionTitle}>카테고리별 학습 현황 및 취약 영역</h3>
             {categoryGroups.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {categoryGroups.map(({ category, rate, totalQ, correctQ, tags: catTags }) => {
@@ -542,11 +534,12 @@ export default function StudentDetailClient({
                         <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                           {catTags.map((t) => {
                             const color = t.rate >= 80 ? 'var(--green)' : t.rate >= 60 ? 'var(--orange)' : 'var(--red)';
+                            const isWeak = t.rate < 60;
                             return (
-                              <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)' }}>
+                              <div key={t.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: isWeak ? 'var(--red-dim)' : 'transparent' }}>
                                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
-                                <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1 }}>{t.label}</span>
-                                <span style={{ fontSize: 12, fontWeight: 600, color }}>{t.correct === t.total ? '전문항 정답' : `${t.total - t.correct}문항 오답`}</span>
+                                <span style={{ fontSize: 13, color: 'var(--text-primary)', flex: 1, fontWeight: isWeak ? 600 : 400 }}>{t.label}{isWeak ? ' ← 취약' : ''}</span>
+                                <span style={{ fontSize: 12, fontWeight: 600, color }}>{t.rate}% ({t.correct}/{t.total})</span>
                               </div>
                             );
                           })}
@@ -561,7 +554,6 @@ export default function StudentDetailClient({
             )}
           </div>
 
-          {/* 일지 */}
           {/* 일지 */}
           <NotesTab studentId={student.id} submitInfo={(() => {
             const eduNotes = parsedNotes.filter(n => !n.tags?.includes('실습일지') && !n.tags?.includes('자율학습'));
@@ -578,6 +570,8 @@ export default function StudentDetailClient({
       <style>{`
         @media (max-width: 768px) {
           .profile-grid { grid-template-columns: 1fr !important; }
+          .calendar-combo { flex-direction: column !important; }
+          .calendar-combo-left { width: 100% !important; min-width: 0 !important; }
           .detail-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
@@ -1124,3 +1118,364 @@ function QuestionsTab({ studentId }: { studentId: string }) {
     </div>
   );
 }
+
+/* ── 교육 캘린더 + 메모 통합 (홈 달력 스타일) ── */
+function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initialMemos }: {
+  batch?: Batch | null;
+  scores: TestScore[];
+  attendance: Attendance[];
+  notes: NoteForAnalysis[];
+  studentId: string;
+  initialMemos: StudentMemo[];
+}) {
+  // 메모 state
+  const [memoList, setMemoList] = useState<StudentMemo[]>(initialMemos);
+  const [memoContent, setMemoContent] = useState('');
+  const [memoCategory, setMemoCategory] = useState<StudentMemo['category']>('general');
+  const [saving, setSaving] = useState(false);
+  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+
+  const handleSaveMemo = useCallback(async () => {
+    if (!memoContent.trim() || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/student-memos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, date: todayStr, content: memoContent.trim(), category: memoCategory }),
+      });
+      if (!res.ok) throw new Error('저장 실패');
+      const saved = await res.json();
+      setMemoList(prev => [saved, ...prev]);
+      setMemoContent('');
+      setMemoCategory('general');
+    } catch {
+      alert('메모 저장에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
+  }, [memoContent, memoCategory, studentId, todayStr, saving]);
+
+  const handleDeleteMemo = useCallback(async (id: string) => {
+    if (!confirm('이 메모를 삭제할까요?')) return;
+    try {
+      const res = await fetch(`/api/student-memos?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      setMemoList(prev => prev.filter(m => m.id !== id));
+    } catch {
+      alert('삭제에 실패했습니다.');
+    }
+  }, []);
+
+  const memos = memoList;
+  // 교육 기간에 포함된 월 목록 계산
+  const months = useMemo(() => {
+    if (!batch) return [];
+    const start = new Date(batch.start_date + 'T00:00:00');
+    const end = new Date(batch.end_date + 'T00:00:00');
+    const result: { year: number; month: number }[] = [];
+    const d = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (d <= end) {
+      result.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+      d.setMonth(d.getMonth() + 1);
+    }
+    return result;
+  }, [batch]);
+
+  const [monthIdx, setMonthIdx] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  // 현재 보는 달이 교육 기간의 마지막 달이면 거기서 시작
+  useEffect(() => {
+    if (months.length > 0) setMonthIdx(months.length - 1);
+  }, [months.length]);
+
+  // 날짜별 데이터 맵 구축
+  const dataMap = useMemo(() => {
+    const scoreMap = new Map<string, number>();
+    const dateScores = new Map<string, number[]>();
+    for (const s of scores) {
+      const arr = dateScores.get(s.test_date) || [];
+      arr.push(s.score);
+      dateScores.set(s.test_date, arr);
+    }
+    for (const [date, arr] of dateScores) {
+      scoreMap.set(date, Math.round(arr.reduce((a, b) => a + b, 0) / arr.length));
+    }
+
+    const attMap = new Map<string, string>();
+    for (const a of attendance) attMap.set(a.date, a.status);
+
+    const noteSet = new Set<string>();
+    for (const n of notes) {
+      const meta = parseNoteMeta(n.content);
+      if (meta.tags?.includes('실습일지') || meta.tags?.includes('자율학습')) continue;
+      noteSet.add(n.created_at.slice(0, 10));
+    }
+
+    const memoMap = new Map<string, string[]>();
+    for (const m of memos) {
+      const arr = memoMap.get(m.date) || [];
+      arr.push(m.category);
+      memoMap.set(m.date, arr);
+    }
+
+    return { scoreMap, attMap, noteSet, memoMap };
+  }, [scores, attendance, notes, memos]);
+
+  if (months.length === 0) return null;
+
+  const current = months[Math.min(monthIdx, months.length - 1)];
+  const { year, month } = current;
+
+  // 달력 셀 생성 (홈 달력과 동일 패턴)
+  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=일
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const today = new Date();
+  const kstToday = new Date(today.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+  const attColors: Record<string, string> = { present: '#22C55E', late: '#F59E0B', absent: '#EF4444', early_leave: '#A855F7' };
+
+  const getDots = (dateStr: string) => {
+    const dots: string[] = [];
+    const att = dataMap.attMap.get(dateStr);
+    if (att) dots.push(attColors[att] || '#22C55E');
+    if (dataMap.noteSet.has(dateStr)) dots.push('#A855F7');
+    if (dataMap.scoreMap.has(dateStr)) dots.push('#3B82F6');
+    if (dataMap.memoMap.has(dateStr)) {
+      const cats = dataMap.memoMap.get(dateStr)!;
+      dots.push(cats.includes('caution') ? '#EF4444' : cats.includes('praise') ? '#22C55E' : '#6B7280');
+    }
+    return dots;
+  };
+
+  // 교육 기간 범위 체크
+  const batchStart = batch!.start_date;
+  const batchEnd = batch!.end_date;
+
+  // 선택 날짜 상세 데이터
+  const selectedInfo = useMemo(() => {
+    if (!selectedDate) return null;
+    const dt = new Date(selectedDate + 'T00:00:00');
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    const att = dataMap.attMap.get(selectedDate);
+    const score = dataMap.scoreMap.get(selectedDate) ?? null;
+    const hasNote = dataMap.noteSet.has(selectedDate);
+    const dayMemos = memos.filter(m => m.date === selectedDate);
+    const attRecord = attendance.find(a => a.date === selectedDate);
+    let checkIn = '', checkOut = '';
+    if (attRecord?.note) {
+      const inM = attRecord.note.match(/출근\s*([0-9:]+)/);
+      const outM = attRecord.note.match(/퇴근\s*([0-9:]+)/);
+      if (inM) checkIn = inM[1];
+      if (outM && outM[1] !== '-') checkOut = outM[1];
+    }
+    return { dt, dayName: dayNames[dt.getDay()], att, score, hasNote, dayMemos, checkIn, checkOut };
+  }, [selectedDate, dataMap, memos, attendance]);
+
+  const attInfoMap: Record<string, { label: string; color: string }> = {
+    present: { label: '출석', color: '#22C55E' },
+    late: { label: '지각', color: '#F59E0B' },
+    absent: { label: '결석', color: '#EF4444' },
+    early_leave: { label: '조퇴', color: '#A855F7' },
+  };
+
+  return (
+    <div style={{ ...card, padding: 0, overflow: 'hidden', display: 'flex' }} className="calendar-combo">
+      {/* 왼쪽: 파란 패널 — 선택 날짜 정보 + 메모 */}
+      <div className="calendar-combo-left" style={{
+        background: 'var(--blue)', color: '#fff',
+        padding: '20px 20px', minWidth: 200, width: '35%', flexShrink: 0,
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {selectedInfo ? (
+          <>
+            {/* 날짜 숫자 */}
+            <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1, letterSpacing: '-0.03em' }}>
+              {selectedInfo.dt.getDate()}
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 500, opacity: 0.5, marginBottom: 16 }}>
+              {selectedInfo.dt.getMonth() + 1}월 {selectedInfo.dayName}요일
+            </div>
+
+            {/* 이벤트 목록 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+              {selectedInfo.att && (() => {
+                const ai = attInfoMap[selectedInfo.att!] || attInfoMap.present;
+                let timeStr = '';
+                if (selectedInfo.checkIn) timeStr = selectedInfo.checkIn;
+                if (selectedInfo.checkOut) timeStr += ` ~ ${selectedInfo.checkOut}`;
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: ai.color, flexShrink: 0 }} />
+                    <span>{ai.label}{timeStr ? ` ${timeStr}` : ''}</span>
+                  </div>
+                );
+              })()}
+              {selectedInfo.score !== null && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
+                  <span>시험 {selectedInfo.score}점</span>
+                </div>
+              )}
+              {selectedInfo.hasNote ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#A855F7', flexShrink: 0 }} />
+                  <span>교육일지 제출</span>
+                </div>
+              ) : selectedInfo.att ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, opacity: 0.5 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', flexShrink: 0 }} />
+                  <span>교육일지 미제출</span>
+                </div>
+              ) : null}
+              {selectedInfo.dayMemos.map(m => {
+                const catLabels: Record<string, string> = { praise: '칭찬', caution: '주의', behavior: '수업태도', counsel: '상담', general: '일반' };
+                return (
+                  <div key={m.id} style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9 }}>
+                    <span style={{ fontWeight: 600 }}>{catLabels[m.category] || '메모'}</span> {m.content.length > 30 ? m.content.slice(0, 30) + '...' : m.content}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>교육 캘린더</div>
+            <div style={{ fontSize: 13, opacity: 0.6, lineHeight: 1.6 }}>
+              날짜를 클릭하면<br />그 날의 출결, 시험, 일지,<br />메모를 확인할 수 있어요
+            </div>
+          </>
+        )}
+
+        {/* 메모 입력 — 하단 */}
+        <div style={{ marginTop: 'auto', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <select
+            value={memoCategory}
+            onChange={e => setMemoCategory(e.target.value as StudentMemo['category'])}
+            style={{
+              padding: '8px 10px', fontSize: 12, fontWeight: 600, width: '100%',
+              background: 'rgba(255,255,255,0.15)', color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)', borderRadius: 'var(--radius-sm)',
+              outline: 'none', cursor: 'pointer',
+            }}
+          >
+            {(Object.entries(MEMO_CATEGORIES) as [StudentMemo['category'], typeof MEMO_CATEGORIES[keyof typeof MEMO_CATEGORIES]][]).map(([key, cat]) => (
+              <option key={key} value={key} style={{ color: '#000' }}>{cat.label}</option>
+            ))}
+          </select>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input
+              value={memoContent}
+              onChange={e => setMemoContent(e.target.value)}
+              placeholder="메모 입력..."
+              style={{
+                flex: 1, padding: '8px 10px', fontSize: 13, minWidth: 0,
+                background: 'rgba(255,255,255,0.15)', color: '#fff',
+                border: 'none', borderRadius: 'var(--radius-sm)',
+                outline: 'none',
+              }}
+              onKeyDown={e => { if (e.key === 'Enter') handleSaveMemo(); }}
+            />
+            <button
+              onClick={handleSaveMemo}
+              disabled={!memoContent.trim() || saving}
+              style={{
+                padding: '8px 14px', borderRadius: 'var(--radius-sm)',
+                background: memoContent.trim() ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+                color: '#fff', border: 'none', fontWeight: 600, fontSize: 12, cursor: memoContent.trim() ? 'pointer' : 'default',
+                flexShrink: 0,
+              }}
+            >{saving ? '...' : '저장'}</button>
+          </div>
+        </div>
+      </div>
+
+      {/* 오른쪽: 달력 그리드 */}
+      <div style={{ flex: 1, padding: '20px 24px' }}>
+        {/* 월 네비게이션 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 16 }}>
+          <button
+            onClick={() => setMonthIdx(prev => Math.max(0, prev - 1))}
+            disabled={monthIdx === 0}
+            style={{ background: 'none', border: 'none', cursor: monthIdx === 0 ? 'default' : 'pointer', fontSize: 18, color: monthIdx === 0 ? 'var(--border)' : 'var(--text-muted)', padding: '2px 8px' }}
+          >‹</button>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{year}년 {month}월</span>
+          <button
+            onClick={() => setMonthIdx(prev => Math.min(months.length - 1, prev + 1))}
+            disabled={monthIdx >= months.length - 1}
+            style={{ background: 'none', border: 'none', cursor: monthIdx >= months.length - 1 ? 'default' : 'pointer', fontSize: 18, color: monthIdx >= months.length - 1 ? 'var(--border)' : 'var(--text-muted)', padding: '2px 8px' }}
+          >›</button>
+        </div>
+
+        {/* 요일 헤더 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', textAlign: 'center', marginBottom: 6 }}>
+          {WEEKDAYS.map((w, i) => (
+            <span key={w} style={{ fontSize: 12, fontWeight: 600, color: i === 0 ? 'var(--red)' : i === 6 ? 'var(--blue)' : 'var(--text-muted)', padding: '2px 0' }}>{w}</span>
+          ))}
+        </div>
+
+        {/* 달력 그리드 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+          {cells.map((day, i) => {
+            if (day === null) return <div key={`e${i}`} style={{ padding: '5px 0' }} />;
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isToday = dateStr === kstToday;
+            const isInRange = dateStr >= batchStart && dateStr <= batchEnd;
+            const dow = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+            const dots = isInRange ? getDots(dateStr) : [];
+            const score = dataMap.scoreMap.get(dateStr) ?? null;
+            const isOutOfRange = !isInRange;
+            const isFuture = dateStr > kstToday;
+            const isSelected = dateStr === selectedDate;
+
+            return (
+              <div key={day} onClick={() => {
+                if (!isOutOfRange && !isFuture) setSelectedDate(prev => prev === dateStr ? null : dateStr);
+              }} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '5px 0',
+                opacity: isOutOfRange || isFuture ? 0.3 : 1,
+                cursor: isOutOfRange || isFuture ? 'default' : 'pointer',
+              }}>
+                <span style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: isToday || isSelected ? 700 : 400,
+                  color: isSelected ? '#fff' : isToday ? 'var(--blue)' : dow === 0 ? 'var(--red)' : dow === 6 ? 'var(--blue)' : 'var(--text-primary)',
+                  background: isSelected ? 'var(--blue)' : isToday ? 'var(--blue-dim)' : 'transparent',
+                  transition: 'all 0.1s ease',
+                }}>{day}</span>
+                <div style={{ display: 'flex', gap: 2, marginTop: 2, height: 4 }}>
+                  {dots.slice(0, 4).map((c, di) => (
+                    <span key={di} style={{ width: 3, height: 3, borderRadius: '50%', background: c }} />
+                  ))}
+                </div>
+                {score !== null && !isFuture && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, marginTop: 1,
+                    color: score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)',
+                  }}>{score}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 범례 */}
+        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#22C55E', marginRight: 3 }} />출석</span>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#F59E0B', marginRight: 3 }} />지각</span>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#EF4444', marginRight: 3 }} />결석</span>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#A855F7', marginRight: 3 }} />일지</span>
+          <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#3B82F6', marginRight: 3 }} />시험</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
