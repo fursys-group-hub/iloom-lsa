@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Student, TestScore, Attendance, TagTracking } from '@/lib/types';
 import { calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
@@ -824,28 +824,82 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
   });
   const [selectedDate, setSelectedDate] = useState<string>(kstToday);
 
-  type MemoItem = { text: string; done: boolean };
-  const storageKey = 'iloom-calendar-memos';
-  const [calMemos, setCalMemos] = useState<Record<string, MemoItem[]>>(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem(storageKey) || '{}');
-      // 기존 string[] 호환
-      const result: Record<string, MemoItem[]> = {};
-      for (const [k, v] of Object.entries(raw)) {
-        result[k] = (v as (string | MemoItem)[]).map(item => typeof item === 'string' ? { text: item, done: false } : item);
-      }
-      return result;
-    } catch { return {}; }
-  });
+  type MemoItem = { id: string; text: string; done: boolean };
+  const [calMemos, setCalMemos] = useState<Record<string, MemoItem[]>>({});
   const [memoInput, setMemoInput] = useState('');
-  const saveMemos = (next: Record<string, MemoItem[]>) => { setCalMemos(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
-  const addMemo = () => { if (!memoInput.trim()) return; saveMemos({ ...calMemos, [selectedDate]: [...(calMemos[selectedDate] || []), { text: memoInput.trim(), done: false }] }); setMemoInput(''); };
-  const toggleMemo = (date: string, idx: number) => { const list = [...(calMemos[date] || [])]; list[idx] = { ...list[idx], done: !list[idx].done }; saveMemos({ ...calMemos, [date]: list }); };
-  const removeMemo = (date: string, idx: number) => { const list = [...(calMemos[date] || [])]; list.splice(idx, 1); const next = { ...calMemos }; if (list.length > 0) next[date] = list; else delete next[date]; saveMemos(next); };
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
+
+  // 월 변경 시 메모 로드
+  useEffect(() => {
+    fetch(`/api/calendar-memos?month=${viewMonth}`)
+      .then(r => r.json())
+      .then((data: { id: string; date: string; text: string; done: boolean }[]) => {
+        if (!Array.isArray(data)) return;
+        const grouped: Record<string, MemoItem[]> = {};
+        data.forEach(m => {
+          const d = m.date.slice(0, 10);
+          if (!grouped[d]) grouped[d] = [];
+          grouped[d].push({ id: m.id, text: m.text, done: m.done });
+        });
+        setCalMemos(grouped);
+      })
+      .catch(() => {});
+  }, [viewMonth]);
+
+  const addMemo = async () => {
+    if (!memoInput.trim()) return;
+    const res = await fetch('/api/calendar-memos', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: selectedDate, text: memoInput.trim() }),
+    });
+    const saved = await res.json();
+    if (saved.id) {
+      setCalMemos(prev => ({ ...prev, [selectedDate]: [...(prev[selectedDate] || []), { id: saved.id, text: saved.text, done: saved.done }] }));
+      setMemoInput('');
+    }
+  };
+  const toggleMemo = async (date: string, idx: number) => {
+    const memo = calMemos[date]?.[idx];
+    if (!memo) return;
+    await fetch('/api/calendar-memos', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: memo.id, done: !memo.done }),
+    });
+    setCalMemos(prev => {
+      const list = [...(prev[date] || [])];
+      list[idx] = { ...list[idx], done: !list[idx].done };
+      return { ...prev, [date]: list };
+    });
+  };
+  const removeMemo = async (date: string, idx: number) => {
+    const memo = calMemos[date]?.[idx];
+    if (!memo) return;
+    await fetch(`/api/calendar-memos?id=${memo.id}`, { method: 'DELETE' });
+    setCalMemos(prev => {
+      const list = [...(prev[date] || [])];
+      list.splice(idx, 1);
+      const next = { ...prev };
+      if (list.length > 0) next[date] = list; else delete next[date];
+      return next;
+    });
+  };
   const startEdit = (idx: number, text: string) => { setEditIdx(idx); setEditText(text); };
-  const saveEdit = () => { if (editIdx === null || !editText.trim()) return; const list = [...(calMemos[selectedDate] || [])]; list[editIdx] = { ...list[editIdx], text: editText.trim() }; saveMemos({ ...calMemos, [selectedDate]: list }); setEditIdx(null); setEditText(''); };
+  const saveEdit = async () => {
+    if (editIdx === null || !editText.trim()) return;
+    const memo = calMemos[selectedDate]?.[editIdx];
+    if (!memo) return;
+    await fetch('/api/calendar-memos', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: memo.id, text: editText.trim() }),
+    });
+    setCalMemos(prev => {
+      const list = [...(prev[selectedDate] || [])];
+      list[editIdx] = { ...list[editIdx], text: editText.trim() };
+      return { ...prev, [selectedDate]: list };
+    });
+    setEditIdx(null); setEditText('');
+  };
 
   const year = parseInt(viewMonth.split('-')[0]);
   const month = parseInt(viewMonth.split('-')[1]);
