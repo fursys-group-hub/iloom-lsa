@@ -264,8 +264,8 @@ export default function AnnouncementsPage() {
                   borderRadius: 'var(--radius-lg)', padding: '20px 24px',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1 }}>
+                <div className="announce-item" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                       <span style={{
                         padding: '3px 10px', borderRadius: 'var(--radius-pill)',
@@ -283,7 +283,7 @@ export default function AnnouncementsPage() {
                       {a.content}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div className="announce-actions" style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                     <button
                       onClick={() => startEdit(a)}
                       style={{
@@ -307,6 +307,18 @@ export default function AnnouncementsPage() {
           })}
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .announce-item {
+            flex-direction: column !important;
+          }
+          .announce-actions {
+            align-self: flex-end;
+            margin-top: 8px;
+          }
+        }
+      `}</style>
     </div>
   );
 }

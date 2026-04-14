@@ -262,8 +262,8 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div className="insight-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="insight-title-row" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 인사이트</h2>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
@@ -287,7 +287,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       </div>
 
       {/* ── 1. 주간 수주 추이 ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+      <div className="insight-weekly-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
         <div style={cardStyle}>
           <h2 style={sectionTitle}>주간 수주 금액 추이</h2>
           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 12 }}>교육생 1인 평균 주간 수주 금액 (만원)</p>
@@ -296,7 +296,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
         <div style={cardStyle}>
           <h2 style={sectionTitle}>주간 전환율 추이</h2>
           <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 12 }}>상담 건수 대비 수주 건수 비율</p>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <div className="insight-conversion-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
             {weeklySalesTrend.map(w => (
               <div key={w.date} style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 16, textAlign: 'center' }}>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>{w.date}</div>
@@ -314,7 +314,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           교육생을 시험 성적 상/중/하로 나누고, 각 그룹의 수주 전환율과 수주 금액을 비교해요.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <div className="insight-score-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
           {crossScoreVsSales.map((group, i) => {
             const colors = [{ bg: 'var(--green-dim)', border: 'var(--green)', text: 'var(--green)' }, { bg: 'var(--orange-dim)', border: 'var(--orange)', text: 'var(--orange)' }, { bg: 'var(--red-dim)', border: 'var(--red)', text: 'var(--red)' }];
             const c = colors[i];
@@ -459,7 +459,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
         <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 16 }}>
           실제 수주 데이터가 쌓이면, 아래 질문에 데이터로 답할 수 있어요.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="insight-question-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {[
             { q: '시험 성적이 매장 성과를 예측하나?', status: '분석 3 참고' },
             { q: '어떤 카테고리 교육이 수주에 효과적인가?', status: '분석 2 참고' },
@@ -477,6 +477,18 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
           ))}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .insight-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+          .insight-title-row { flex-wrap: wrap; gap: 10px !important; }
+          .insight-weekly-grid { grid-template-columns: 1fr !important; }
+          .insight-score-grid { grid-template-columns: 1fr !important; }
+          .insight-conversion-row { flex-wrap: wrap !important; }
+          .insight-conversion-row > div { flex: 1 1 calc(50% - 6px) !important; min-width: 0; }
+          .insight-question-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

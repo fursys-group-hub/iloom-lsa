@@ -325,7 +325,7 @@ export default function StudentDetailClient({
       <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 4fr) minmax(0, 6fr)', gap: 20, alignItems: 'start' }}>
 
         {/* ── 왼쪽: HR 조언 + 적응지수 + 출결 ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="detail-col-left" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* HR 조언 (있을 때만) */}
           {hrAdvice && (() => {
@@ -334,7 +334,7 @@ export default function StudentDetailClient({
             const c = colorMap[hrAdvice.typeColor] || 'var(--blue)';
             const d = dimMap[hrAdvice.typeColor] || 'var(--blue-dim)';
             return (
-              <div style={{ ...card, background: d, border: 'none' }}>
+              <div className="section-hr-advice" style={{ ...card, background: d, border: 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                   <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: d, color: c }}>{hrAdvice.typeLabel}</span>
                 </div>
@@ -352,7 +352,7 @@ export default function StudentDetailClient({
           })()}
 
           {/* 적응지수 산정 근거 */}
-          <div style={card}>
+          <div className="section-adaptation" style={card}>
             <h3 style={sectionTitle}>적응지수 산정 근거</h3>
             {(() => {
               const items = [
@@ -409,7 +409,7 @@ export default function StudentDetailClient({
           </div>
 
           {/* 출결 이력 */}
-          <div style={card}>
+          <div className="section-attendance" style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>출결 이력</h3>
               {(() => {
@@ -471,13 +471,15 @@ export default function StudentDetailClient({
         </div>
 
         {/* ── 오른쪽: 달력 + 점수추이 + 카테고리 + 취약부분 ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="detail-col-right" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* 교육 캘린더 + 메모 */}
-          <CalendarWithMemo batch={batch} scores={scores} attendance={attendance} notes={rawNotes} studentId={student.id} initialMemos={memos} />
+          <div className="section-calendar">
+            <CalendarWithMemo batch={batch} scores={scores} attendance={attendance} notes={rawNotes} studentId={student.id} initialMemos={memos} />
+          </div>
 
           {/* 차시별 점수 추이 */}
-          <div style={card}>
+          <div className="section-scores" style={card}>
             <h3 style={sectionTitle}>차시별 점수 추이</h3>
             {dailyAverages.length > 0 ? (() => {
               const chartData = dailyAverages.map((d) => {
@@ -511,7 +513,7 @@ export default function StudentDetailClient({
           </div>
 
           {/* 카테고리별 학습 현황 */}
-          <div style={card}>
+          <div className="section-category" style={card}>
             <h3 style={sectionTitle}>카테고리별 학습 현황 및 취약 영역</h3>
             {categoryGroups.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -555,15 +557,19 @@ export default function StudentDetailClient({
           </div>
 
           {/* 일지 */}
-          <NotesTab studentId={student.id} submitInfo={(() => {
-            const eduNotes = parsedNotes.filter(n => !n.tags?.includes('실습일지') && !n.tags?.includes('자율학습'));
-            const submitRate = totalEducationDays > 0 ? Math.round((eduNotes.length / totalEducationDays) * 100) : 0;
-            const avgPart = eduNotes.length > 0 ? Math.round((eduNotes.reduce((s, n) => s + (n.participation_score || 0), 0) / eduNotes.length / 3) * 100) : 0;
-            return { submitRate, avgPart, classSubmitRate: classAvgStats.submitRate, classPartRate: classAvgStats.partRate };
-          })()} />
+          <div className="section-notes">
+            <NotesTab studentId={student.id} submitInfo={(() => {
+              const eduNotes = parsedNotes.filter(n => !n.tags?.includes('실습일지') && !n.tags?.includes('자율학습'));
+              const submitRate = totalEducationDays > 0 ? Math.round((eduNotes.length / totalEducationDays) * 100) : 0;
+              const avgPart = eduNotes.length > 0 ? Math.round((eduNotes.reduce((s, n) => s + (n.participation_score || 0), 0) / eduNotes.length / 3) * 100) : 0;
+              return { submitRate, avgPart, classSubmitRate: classAvgStats.submitRate, classPartRate: classAvgStats.partRate };
+            })()} />
+          </div>
 
           {/* 질문 이력 */}
-          <QuestionsTab studentId={student.id} />
+          <div className="section-questions">
+            <QuestionsTab studentId={student.id} />
+          </div>
         </div>
       </div>
 
@@ -573,6 +579,15 @@ export default function StudentDetailClient({
           .calendar-combo { flex-direction: column !important; }
           .calendar-combo-left { width: 100% !important; min-width: 0 !important; }
           .detail-grid { grid-template-columns: 1fr !important; }
+          .detail-col-left, .detail-col-right { display: contents !important; }
+          .section-hr-advice { order: 0; }
+          .section-adaptation { order: 1; }
+          .section-calendar { order: 2; }
+          .section-attendance { order: 3; }
+          .section-scores { order: 4; }
+          .section-category { order: 5; }
+          .section-notes { order: 6; }
+          .section-questions { order: 7; }
         }
       `}</style>
     </div>

@@ -381,20 +381,20 @@ export default function DashboardClient({ batches, students: allStudents, scores
       <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 20 }}>
 
         {/* ─── 왼쪽: 운영 ─── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="home-col-left" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* 0. 교육 일정 달력 */}
           {selectedBatch && (
-            <ScheduleCalendar
+            <div className="home-calendar"><ScheduleCalendar
               batch={selectedBatch}
               kstToday={kstToday}
               testDates={scores.map(s => s.test_date).filter(Boolean)}
               announcementItems={announcements.filter(a => a.batch_id === selectedBatchId).map(a => ({ date: a.created_at.slice(0, 10), title: a.title }))}
-            />
+            /></div>
           )}
 
           {/* 1. 차시별 평균 */}
-          <div style={cardStyle}>
+          <div className="home-scores" style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed.scores ? 0 : 16, cursor: 'pointer' }} onClick={() => toggle('scores')}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', transition: 'transform 0.2s', transform: collapsed.scores ? 'rotate(-90deg)' : 'rotate(0)' }}>▼</span>
@@ -448,7 +448,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
             const todayEduType = getDayType(selectedBatch?.schedule, kstToday);
             const todayEduConfig = DAY_TYPE_CONFIG[todayEduType];
             return (
-              <div style={cardStyle}>
+              <div className="home-notes" style={cardStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed.notes ? 0 : 16, cursor: 'pointer' }} onClick={() => toggle('notes')}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)', transition: 'transform 0.2s', transform: collapsed.notes ? 'rotate(-90deg)' : 'rotate(0)' }}>▼</span>
@@ -509,7 +509,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           })()}
 
           {/* 3. 질문관리 + 교육일지 답글 통합 */}
-          <div style={cardStyle}>
+          <div className="home-questions" style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed.questions ? 0 : 16, cursor: 'pointer' }} onClick={() => toggle('questions')}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', transition: 'transform 0.2s', transform: collapsed.questions ? 'rotate(-90deg)' : 'rotate(0)' }}>▼</span>
@@ -566,10 +566,10 @@ export default function DashboardClient({ batches, students: allStudents, scores
         </div>
 
         {/* ─── 오른쪽: 분석/참고 ─── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="home-col-right" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* 0. 출결 요약 */}
-          <div style={cardStyle}>
+          <div className="home-attendance" style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ ...sectionTitle, margin: 0 }}>오늘의 출결</h3>
               <Link href="/dashboard/attendance" style={cardLinkStyle}>전체보기 →</Link>
@@ -611,7 +611,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           </div>
 
           {/* 1. 주의 교육생 */}
-          <div style={cardStyle}>
+          <div className="home-risk" style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed.risk ? 0 : 12, cursor: 'pointer' }} onClick={() => toggle('risk')}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', transition: 'transform 0.2s', transform: collapsed.risk ? 'rotate(-90deg)' : 'rotate(0)' }}>▼</span>
@@ -675,7 +675,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
           </div>
 
           {/* 2. 실습일지 실적 요약 */}
-          <div style={cardStyle}>
+          <div className="home-practice" style={cardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed.practice ? 0 : 16, cursor: 'pointer' }} onClick={() => toggle('practice')}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)', transition: 'transform 0.2s', transform: collapsed.practice ? 'rotate(-90deg)' : 'rotate(0)' }}>▼</span>
@@ -747,6 +747,14 @@ export default function DashboardClient({ batches, students: allStudents, scores
       <style>{`
         @media (max-width: 1023px) {
           .main-grid { grid-template-columns: 1fr !important; }
+          .home-col-left, .home-col-right { display: contents !important; }
+          .home-calendar { order: 0; }
+          .home-attendance { order: 1; }
+          .home-risk { order: 2; }
+          .home-scores { order: 3; }
+          .home-notes { order: 4; }
+          .home-practice { order: 5; }
+          .home-questions { order: 6; }
         }
         @media (max-width: 768px) {
           .greeting-row { flex-direction: column; align-items: center !important; text-align: center; }
