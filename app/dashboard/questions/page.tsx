@@ -17,6 +17,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
 const DEFAULT_STATUS = { label: '답변 완료', color: 'var(--text-muted)', bg: 'var(--gray-dim)' };
 
 type QuestionWithMeta = StudentQuestion & { reply_count: number; student_name?: string };
+type StudentStats = { testAvg: number | null; attendanceRate: number | null; adaptationTotal: number | null; adaptationGroup: string | null };
 
 export default function AdminQuestionsPage() {
   const [questions, setQuestions] = useState<QuestionWithMeta[]>([]);
@@ -30,6 +31,8 @@ export default function AdminQuestionsPage() {
   const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -61,6 +64,18 @@ export default function AdminQuestionsPage() {
   useEffect(() => {
     if (selectedId) fetchReplies(selectedId);
   }, [selectedId, fetchReplies]);
+
+  // 질문 선택 시 해당 학생 스탯 가져오기
+  useEffect(() => {
+    const q = questions.find(q => q.id === selectedId);
+    if (!q?.student_id) { setStudentStats(null); return; }
+    setStatsLoading(true);
+    fetch(`/api/student-stats?studentId=${q.student_id}`)
+      .then(res => res.json())
+      .then(data => setStudentStats(data))
+      .catch(() => setStudentStats(null))
+      .finally(() => setStatsLoading(false));
+  }, [selectedId, questions]);
 
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedId || sending) return;
@@ -267,12 +282,11 @@ export default function AdminQuestionsPage() {
                     {(selectedQ.student_name || '?')[0]}
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
-                        {selectedQ.student_name || '알 수 없음'}
-                      </span>
-                      <Link href={`/dashboard/students/${selectedQ.student_id}`} style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', textDecoration: 'none' }}>
-                        교육생 분석 →
+                    <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {selectedQ.student_name || '알 수 없음'}
+                      {' '}
+                      <Link href={`/dashboard/students/${selectedQ.student_id}`} style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 400 }}>
+                        →
                       </Link>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
@@ -289,7 +303,7 @@ export default function AdminQuestionsPage() {
                       });
                       if (res.ok) setQuestions(prev => prev.map(q => q.id === selectedQ.id ? { ...q, status: 'answered' } : q));
                     }} style={{
-                      padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                      padding: '6px 14px', borderRadius: 'var(--radius-sm)',
                       background: 'var(--blue-dim)', color: 'var(--blue)',
                       border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
                     }}>
@@ -303,7 +317,7 @@ export default function AdminQuestionsPage() {
                       });
                       if (res.ok) setQuestions(prev => prev.map(q => q.id === selectedQ.id ? { ...q, status: 'archived' } : q));
                     }} style={{
-                      padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                      padding: '6px 14px', borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
                       border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
                     }}>
@@ -311,7 +325,7 @@ export default function AdminQuestionsPage() {
                     </button>
                   )}
                   <button onClick={() => handleDelete(selectedQ.id)} style={{
-                    padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+                    padding: '6px 14px', borderRadius: 'var(--radius-sm)',
                     background: 'var(--red-dim)', color: 'var(--red)',
                     border: 'none', fontWeight: 600, fontSize: 12, cursor: 'pointer',
                   }}>
@@ -319,6 +333,43 @@ export default function AdminQuestionsPage() {
                   </button>
                 </div>
               </div>
+
+              {/* 학생 미니 프로필 */}
+              {!statsLoading && studentStats && (studentStats.testAvg !== null || studentStats.attendanceRate !== null) && (
+                <div style={{
+                  padding: '10px 20px', borderBottom: '1px solid var(--border)',
+                  display: 'flex', gap: 20, alignItems: 'center',
+                  background: 'var(--bg-main)',
+                }}>
+                  {studentStats.testAvg !== null && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>시험 평균</span>
+                      <span style={{
+                        fontSize: 14, fontWeight: 700,
+                        color: studentStats.testAvg >= 80 ? 'var(--green)' : studentStats.testAvg >= 60 ? 'var(--orange)' : 'var(--red)',
+                      }}>{studentStats.testAvg}점</span>
+                    </div>
+                  )}
+                  {studentStats.attendanceRate !== null && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>출결률</span>
+                      <span style={{
+                        fontSize: 14, fontWeight: 700,
+                        color: studentStats.attendanceRate >= 90 ? 'var(--green)' : studentStats.attendanceRate >= 70 ? 'var(--orange)' : 'var(--red)',
+                      }}>{studentStats.attendanceRate}%</span>
+                    </div>
+                  )}
+                  {studentStats.adaptationTotal !== null && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>적응지수</span>
+                      <span style={{
+                        fontSize: 14, fontWeight: 700,
+                        color: studentStats.adaptationGroup === 'high' ? 'var(--green)' : studentStats.adaptationGroup === 'mid' ? 'var(--orange)' : 'var(--red)',
+                      }}>{studentStats.adaptationTotal}점</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* 채팅 메시지 */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 10px', display: 'flex', flexDirection: 'column', gap: 14 }}>
