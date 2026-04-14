@@ -96,11 +96,12 @@ export default function StudentDetailClient({
   const strongTags = tagAnalysis.filter((t) => t.rate >= 80);
 
   // 탭 상태
-  type TabKey = 'summary' | 'attendance' | 'notes' | 'questions';
+  type TabKey = 'summary' | 'attendance' | 'tests' | 'notes' | 'questions';
   const [activeTab, setActiveTab] = useState<TabKey>('summary');
   const tabs: [TabKey, string][] = [
     ['summary', '요약'],
     ['attendance', '출결'],
+    ['tests', '테스트'],
     ['notes', '일지'],
     ['questions', '질문'],
   ];
@@ -260,6 +261,64 @@ export default function StudentDetailClient({
             )}
           </div>
 
+          {/* 교육 메모 */}
+          <MemoSection studentId={student.id} initialMemos={memos} />
+
+          {/* AI 코칭 리포트 */}
+          <div style={card}>
+            <h3 style={sectionTitle}>AI 코칭 리포트</h3>
+            {coachingReports.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {coachingReports.map((report) => {
+                  const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
+                  const typeColor: Record<string, { bg: string; color: string }> = {
+                    comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
+                    subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
+                    daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
+                    weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
+                  };
+                  const rt = (report as { report_type?: string }).report_type || 'daily';
+                  const tc = typeColor[rt] || typeColor.daily;
+                  const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
+                  return (
+                    <details key={report.id}>
+                      <summary style={{
+                        padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
+                        cursor: 'pointer', transition: 'background 0.15s ease',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
+                        {report.test_date} 분석
+                        {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
+                      </summary>
+                      <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                        {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                            {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
+                            {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
+                            {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
+                          </div>
+                        ) : null}
+                        {report.manager_report}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ━━━ 테스트 탭 ━━━ */}
+      {activeTab === 'tests' && (
+        <>
           {/* 점수 추이 */}
           <div style={card}>
             <h3 style={sectionTitle}>차시별 점수 추이</h3>
@@ -283,7 +342,7 @@ export default function StudentDetailClient({
               <h3 style={sectionTitle}>카테고리별 학습 현황</h3>
               {categoryGroups.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {categoryGroups.map(({ category, rate, totalQ, correctQ, tags }) => {
+                  {categoryGroups.map(({ category, rate, totalQ, correctQ, tags: catTags }) => {
                     const catColor = rate >= 80 ? 'var(--green)' : rate >= 60 ? 'var(--orange)' : 'var(--red)';
                     return (
                       <details key={category}>
@@ -303,9 +362,9 @@ export default function StudentDetailClient({
                           </div>
                           <span style={{ fontSize: 14, fontWeight: 700, color: catColor }}>{correctQ}/{totalQ}</span>
                         </summary>
-                        {tags.length > 0 && (
+                        {catTags.length > 0 && (
                           <div style={{ padding: '6px 14px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            {tags.map((t) => {
+                            {catTags.map((t) => {
                               const color = t.rate >= 80 ? 'var(--green)' : t.rate >= 60 ? 'var(--orange)' : 'var(--red)';
                               const msg = t.correct === t.total ? '전문항 정답' : `${t.total - t.correct}문항 오답`;
                               return (
@@ -384,59 +443,6 @@ export default function StudentDetailClient({
                 <p style={emptyStyle}>시험 데이터가 없어요</p>
               )}
             </div>
-          </div>
-
-          {/* 교육 메모 */}
-          <MemoSection studentId={student.id} initialMemos={memos} />
-
-          {/* AI 코칭 리포트 */}
-          <div style={card}>
-            <h3 style={sectionTitle}>AI 코칭 리포트</h3>
-            {coachingReports.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {coachingReports.map((report) => {
-                  const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
-                  const typeColor: Record<string, { bg: string; color: string }> = {
-                    comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
-                    subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
-                    daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
-                    weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
-                  };
-                  const rt = (report as { report_type?: string }).report_type || 'daily';
-                  const tc = typeColor[rt] || typeColor.daily;
-                  const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
-                  return (
-                    <details key={report.id}>
-                      <summary style={{
-                        padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                        fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
-                        cursor: 'pointer', transition: 'background 0.15s ease',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
-                        {report.test_date} 분석
-                        {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
-                      </summary>
-                      <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                        {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                            {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
-                            {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
-                            {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
-                          </div>
-                        ) : null}
-                        {report.manager_report}
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            ) : (
-              <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>
-            )}
           </div>
         </>
       )}
@@ -720,14 +726,19 @@ interface NoteData {
   confidence?: string;
 }
 
-function NotesTab({ studentId, studentName }: { studentId: string; studentName: string }) {
+function NotesTab({ studentId }: { studentId: string; studentName?: string }) {
   const [notes, setNotes] = useState<NoteData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/notes?student_id=${studentId}&all=true`)
+    fetch(`/api/notes?studentId=${studentId}&all=true`)
       .then(res => res.json())
-      .then(data => { setNotes(Array.isArray(data) ? data : []); setLoading(false); })
+      .then(data => {
+        const arr = data?.notes || (Array.isArray(data) ? data : []);
+        setNotes(arr);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [studentId]);
 
@@ -738,15 +749,85 @@ function NotesTab({ studentId, studentName }: { studentId: string; studentName: 
 
   const formatDate = (d: string) => {
     const date = new Date(d);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+    const m = Number(date.toLocaleDateString('en-US', { timeZone: 'Asia/Seoul', month: 'numeric' }));
+    const day = Number(date.toLocaleDateString('en-US', { timeZone: 'Asia/Seoul', day: 'numeric' }));
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    const dow = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Seoul' })).getDay();
+    return `${m}/${day} (${dayNames[dow]})`;
   };
 
   const parseSteps = (content: string) => {
-    try {
-      const p = JSON.parse(content);
-      return p.steps || {};
-    } catch { return {}; }
+    try { const p = JSON.parse(content); return p.steps || p; } catch { return {}; }
   };
+
+  const confMap: Record<string, { icon: string; label: string; color: string }> = {
+    very_high: { icon: '😎', label: '매우 높음', color: 'var(--blue)' },
+    high: { icon: '😊', label: '높음', color: 'var(--green)' },
+    confident: { icon: '😊', label: '자신 있어요', color: 'var(--green)' },
+    medium: { icon: '😐', label: '보통', color: 'var(--orange)' },
+    normal: { icon: '🤔', label: '보통이에요', color: 'var(--orange)' },
+    low: { icon: '😟', label: '낮음', color: 'var(--red)' },
+    not_confident: { icon: '😟', label: '자신 없어요', color: 'var(--red)' },
+    very_low: { icon: '😵', label: '매우 낮음', color: 'var(--red)' },
+  };
+
+  const renderNoteCard = (n: NoteData, isPractice: boolean) => {
+    const isSelfStudy = (n.tags || []).includes('자율학습');
+    const isSelected = expandedId === n.id;
+    const conf = n.confidence ? confMap[n.confidence] : null;
+    const steps = parseSteps(n.content);
+    const displayTags = (n.tags || []).filter(t => t !== '자율학습' && t !== '실습일지');
+
+    return (
+      <button
+        key={n.id}
+        onClick={() => setExpandedId(isSelected ? null : n.id)}
+        style={{
+          padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
+          border: isSelected ? '2px solid var(--blue)' : isSelfStudy ? '1px solid var(--purple-dim)' : '1px solid var(--border)',
+          background: isSelected ? 'var(--blue-dim)' : isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-surface)',
+          cursor: 'pointer', transition: 'all 0.15s ease',
+          display: 'flex', flexDirection: 'column', gap: 8,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(n.created_at)}</span>
+          {isSelfStudy && <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>}
+        </div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+          {n.title || (isPractice ? '실습일지' : '교육일지')}
+        </div>
+        {!isSelfStudy && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {conf && <span style={{ fontSize: 13 }}>{conf.icon} {conf.label}</span>}
+            {n.participation_score != null && n.participation_score > 0 && (
+              <span style={{
+                padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                background: n.participation_score >= (n.participation_max || 3) ? 'var(--green-dim)' : n.participation_score >= 1 ? 'var(--orange-dim)' : 'var(--red-dim)',
+                color: n.participation_score >= (n.participation_max || 3) ? 'var(--green)' : n.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
+              }}>참여 {n.participation_score}/{n.participation_max || 3}</span>
+            )}
+          </div>
+        )}
+        {isPractice && (
+          <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+            {steps.stats_consult != null && <span>상담 {steps.stats_consult}</span>}
+            {steps.stats_order != null && <span>수주 {steps.stats_order}</span>}
+            {steps.stats_amount != null && <span>{Number(steps.stats_amount).toLocaleString()}원</span>}
+          </div>
+        )}
+        {displayTags.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {displayTags.slice(0, 3).map(tag => (
+              <span key={tag} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 600 }}>{tag}</span>
+            ))}
+          </div>
+        )}
+      </button>
+    );
+  };
+
+  const expandedNote = expandedId ? notes.find(n => n.id === expandedId) : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -754,45 +835,8 @@ function NotesTab({ studentId, studentName }: { studentId: string; studentName: 
       <div style={card}>
         <h3 style={sectionTitle}>교육일지 ({educationNotes.length}건)</h3>
         {educationNotes.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {educationNotes.map(n => {
-              const steps = parseSteps(n.content);
-              const confMap: Record<string, { label: string; color: string }> = {
-                high: { label: '😊 높음', color: 'var(--green)' },
-                medium: { label: '😐 보통', color: 'var(--orange)' },
-                low: { label: '😟 낮음', color: 'var(--red)' },
-              };
-              const conf = n.confidence ? confMap[n.confidence] : null;
-              return (
-                <details key={n.id}>
-                  <summary style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer', transition: 'background 0.15s ease',
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{formatDate(n.created_at)}</span>
-                      <span style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{n.title || '교육일지'}</span>
-                      {(n.tags || []).includes('자율학습') && (
-                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {conf && <span style={{ fontSize: 12, color: conf.color }}>{conf.label}</span>}
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>참여 {n.participation_score || 0}/{n.participation_max || 3}</span>
-                    </div>
-                  </summary>
-                  <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {steps.step1 && <NoteStep label="STEP 1 — 오늘 배운 것" content={steps.step1} />}
-                    {steps.step2 && <NoteStep label="STEP 2 — 궁금한 점" content={steps.step2} />}
-                    {steps.step3 && <NoteStep label="STEP 3 — 소감" content={steps.step3} />}
-                  </div>
-                </details>
-              );
-            })}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {educationNotes.map(n => renderNoteCard(n, false))}
           </div>
         ) : (
           <p style={emptyStyle}>교육일지가 없어요</p>
@@ -800,41 +844,61 @@ function NotesTab({ studentId, studentName }: { studentId: string; studentName: 
       </div>
 
       {/* 실습일지 */}
-      {practiceNotes.length > 0 && (
-        <div style={card}>
-          <h3 style={sectionTitle}>실습일지 ({practiceNotes.length}건)</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {practiceNotes.map(n => {
-              const steps = parseSteps(n.content);
-              return (
-                <details key={n.id}>
-                  <summary style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer', transition: 'background 0.15s ease',
-                  }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{formatDate(n.created_at)}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-                      {steps.stats_consult != null && <span>상담 {steps.stats_consult}</span>}
-                      {steps.stats_order != null && <span>수주 {steps.stats_order}</span>}
-                      {steps.stats_amount != null && <span>{Number(steps.stats_amount).toLocaleString()}원</span>}
-                    </div>
-                  </summary>
-                  <div style={{ padding: '8px 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {steps.step1 && <NoteStep label="기억에 남는 고객" content={steps.step1} />}
-                    {steps.step2 && <NoteStep label="선배의 비법" content={steps.step2} />}
-                    {steps.step3 && <NoteStep label="칭찬할 점" content={steps.step3} />}
-                    {steps.step4 && <NoteStep label="보완할 점" content={steps.step4} />}
-                  </div>
-                </details>
-              );
-            })}
+      <div style={card}>
+        <h3 style={sectionTitle}>실습일지 ({practiceNotes.length}건)</h3>
+        {practiceNotes.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {practiceNotes.map(n => renderNoteCard(n, true))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p style={emptyStyle}>실습일지가 없어요</p>
+        )}
+      </div>
+
+      {/* 선택된 노트 상세 */}
+      {expandedNote && (() => {
+        const steps = parseSteps(expandedNote.content);
+        const isPractice = (expandedNote.tags || []).includes('실습일지');
+        const isSelfStudy = (expandedNote.tags || []).includes('자율학습');
+        const conf = expandedNote.confidence ? confMap[expandedNote.confidence] : null;
+        return (
+          <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid var(--purple-dim)' } : {}) }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
+                  {expandedNote.title || (isPractice ? '실습일지' : '교육일지')}
+                </h3>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                  {new Date(expandedNote.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {conf && <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', fontSize: 14 }}>{conf.icon} {conf.label}</span>}
+                {!isSelfStudy && expandedNote.participation_score != null && (
+                  <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700, background: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green-dim)' : 'var(--orange-dim)', color: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green)' : 'var(--orange)' }}>참여 {expandedNote.participation_score}/{expandedNote.participation_max || 3}</span>
+                )}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {isPractice ? (
+                <>
+                  {steps.step1 && <NoteStep label="기억에 남는 고객" content={steps.step1} />}
+                  {steps.step2 && <NoteStep label="선배의 비법" content={steps.step2} />}
+                  {steps.step3 && <NoteStep label="칭찬할 점" content={steps.step3} />}
+                  {steps.step4 && <NoteStep label="보완할 점" content={steps.step4} />}
+                  {steps.order_detail && <NoteStep label="상담/수주 내역" content={steps.order_detail} />}
+                </>
+              ) : (
+                <>
+                  {steps.step1 && <NoteStep label="STEP 1 — 오늘 배운 것" content={steps.step1} />}
+                  {steps.step2 && <NoteStep label="STEP 2 — 궁금한 점" content={steps.step2} />}
+                  {steps.step3 && <NoteStep label="STEP 3 — 소감" content={steps.step3} />}
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
