@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
   if (date) {
     query = query.eq('date', date);
   } else if (month) {
-    query = query.gte('date', `${month}-01`).lte('date', `${month}-31`);
+    const [y, m] = month.split('-').map(Number);
+    const lastDay = new Date(y, m, 0).getDate();
+    query = query.gte('date', `${month}-01`).lte('date', `${month}-${String(lastDay).padStart(2, '0')}`);
   }
 
   const { data, error } = await query;
