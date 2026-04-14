@@ -264,7 +264,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 효과 분석</h2>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 인사이트</h2>
           <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
             {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
             {archivedBatches.length > 0 && <optgroup label="보관됨">{archivedBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}

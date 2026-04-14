@@ -279,7 +279,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
             {adaptationIndices.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>교육생 데이터가 없습니다.</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, maxWidth: '100%' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, maxWidth: '100%' }}>
                 {adaptationIndices.map(idx => {
                   const gc = GROUP_COLORS[idx.group];
                   const student = batchStudents.find(s => s.id === idx.studentId);
@@ -409,7 +409,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                     </span>
                   ))}
                 </div>
-                <div className="compare-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
+                <div className="compare-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, alignItems: 'start' }}>
                   {/* 레이더 차트 */}
                   <div>
                     <ResponsiveContainer width="100%" height={300}>
