@@ -16,6 +16,9 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
 
   if (!student) notFound();
 
+  // 기수 정보 (교육일수 계산용)
+  const { data: batch } = await supabase.from('batches').select('*').eq('id', student.batch_id).single();
+
   const [
     { data: scores },
     { data: allScores },
@@ -24,6 +27,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     { data: coaching },
     { data: responses },
     { data: questions },
+    { data: notes },
   ] = await Promise.all([
     supabase.from('test_scores').select('*').eq('student_id', id).order('test_date'),
     supabase.from('test_scores').select('*'),
@@ -32,11 +36,13 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     supabase.from('coaching_reports').select('*').eq('student_id', id).order('test_date', { ascending: false }).limit(5),
     supabase.from('test_responses').select('*').eq('student_id', id).order('session,question_id'),
     supabase.from('questions').select('*'),
+    supabase.from('student_notes').select('id, student_id, content, created_at').eq('student_id', id),
   ]);
 
   return (
     <StudentDetailClient
       student={student}
+      batch={batch}
       scores={scores || []}
       allScores={allScores || []}
       attendance={attendance || []}
@@ -44,6 +50,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
       coachingReports={coaching || []}
       responses={responses || []}
       questions={questions || []}
+      notes={notes || []}
     />
   );
 }

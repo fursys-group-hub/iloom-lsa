@@ -2,9 +2,9 @@
 
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import type { Student, TestScore, Attendance, StudentMemo, CoachingReport } from '@/lib/types';
+import type { Student, TestScore, Attendance, StudentMemo, CoachingReport, Batch } from '@/lib/types';
 import { MEMO_CATEGORIES } from '@/lib/types';
-import { calculateRiskLevel, calculateAvgScore, calculateDailyAverages } from '@/lib/analysis';
+import { calculateRiskLevel, calculateAvgScore, calculateDailyAverages, calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import RiskBadge from '@/components/RiskBadge';
 
@@ -31,8 +31,16 @@ interface TestResponse {
   max_score: number;
 }
 
+interface NoteForAnalysis {
+  id: string;
+  student_id: string;
+  content: string;
+  created_at: string;
+}
+
 interface Props {
   student: Student;
+  batch?: Batch | null;
   scores: TestScore[];
   attendance: Attendance[];
   memos: StudentMemo[];
@@ -40,6 +48,7 @@ interface Props {
   responses: TestResponse[];
   questions: Question[];
   allScores: TestScore[];
+  notes?: NoteForAnalysis[];
 }
 
 const card: React.CSSProperties = {
@@ -51,8 +60,24 @@ const sectionTitle: React.CSSProperties = {
   fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px',
 };
 
+function parseNoteMeta(content: string) {
+  try {
+    const parsed = JSON.parse(content);
+    const meta = parsed.meta || {};
+    const steps = parsed.steps || {};
+    let pScore = meta.participation_score;
+    if (pScore === undefined) {
+      pScore = 0;
+      if (steps.step1 && String(steps.step1).trim()) pScore++;
+      if (steps.step2 && String(steps.step2).trim()) pScore++;
+      if (steps.step3 && String(steps.step3).trim()) pScore++;
+    }
+    return { participation_score: pScore as number, confidence: (meta.confidence || null) as string | null, tags: (meta.tags || []) as string[] };
+  } catch { return { participation_score: 0, confidence: null, tags: [] as string[] }; }
+}
+
 export default function StudentDetailClient({
-  student, scores, allScores, attendance, memos, coachingReports, responses, questions,
+  student, batch, scores, allScores, attendance, memos, coachingReports, responses, questions, notes: rawNotes = [],
 }: Props) {
   const avgScore = useMemo(() => calculateAvgScore(scores), [scores]);
   const riskLevel = useMemo(() => calculateRiskLevel(scores, attendance), [scores, attendance]);
@@ -95,11 +120,55 @@ export default function StudentDetailClient({
   const midTags = tagAnalysis.filter((t) => t.rate >= 60 && t.rate < 80);
   const strongTags = tagAnalysis.filter((t) => t.rate >= 80);
 
+  // 적응지수 계산
+  const totalEducationDays = useMemo(() => {
+    if (!batch) return 20;
+    const start = new Date(batch.start_date);
+    const end = new Date(batch.end_date);
+    const today = new Date();
+    const effectiveEnd = today < end ? today : end;
+    let days = 0;
+    const d = new Date(start);
+    while (d <= effectiveEnd) { if (d.getDay() !== 0 && d.getDay() !== 6) days++; d.setDate(d.getDate() + 1); }
+    return Math.max(days, 1);
+  }, [batch]);
+
+  const parsedNotes = useMemo(() => rawNotes.map(n => ({ ...parseNoteMeta(n.content), created_at: n.created_at })), [rawNotes]);
+
+  const studentCategoryRates = useMemo(() => {
+    const catMap = new Map<string, { correct: number; total: number }>();
+    for (const r of responses) {
+      const q = questions.find(qq => qq.question_id === r.question_id && qq.session === r.session);
+      if (!q?.category) continue;
+      const cell = catMap.get(q.category) || { correct: 0, total: 0 };
+      cell.total++; if (r.is_correct) cell.correct++;
+      catMap.set(q.category, cell);
+    }
+    return [...catMap.entries()].map(([category, v]) => ({ category, rate: v.total > 0 ? Math.round((v.correct / v.total) * 100) : 0 }));
+  }, [responses, questions]);
+
+  const adaptationIdx = useMemo(() => calculateAdaptationIndex({
+    studentId: student.id, studentName: student.name,
+    scores, attendance, notes: parsedNotes,
+    totalEducationDays, categoryRates: studentCategoryRates,
+    memoCategories: memos.map(m => m.category),
+    tagTrackings: coachingReports.map(r => r.tag_tracking),
+  }), [student, scores, attendance, parsedNotes, totalEducationDays, studentCategoryRates, memos, coachingReports]);
+
+  const riskCheck = useMemo(() => calculateRiskChecklist({
+    studentId: student.id, studentName: student.name,
+    scores, attendance, notes: parsedNotes,
+    memoCategories: memos.map(m => m.category),
+    totalEducationDays, categoryRates: studentCategoryRates,
+  }), [student, scores, attendance, parsedNotes, memos, totalEducationDays, studentCategoryRates]);
+
+  const hrAdvice = useMemo(() => generateHRAdvice(riskCheck, adaptationIdx), [riskCheck, adaptationIdx]);
+
   // 탭 상태
-  type TabKey = 'summary' | 'attendance' | 'tests' | 'notes' | 'questions';
-  const [activeTab, setActiveTab] = useState<TabKey>('summary');
+  type TabKey = 'overview' | 'attendance' | 'tests' | 'notes' | 'questions';
+  const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const tabs: [TabKey, string][] = [
-    ['summary', '요약'],
+    ['overview', '적응지수'],
     ['attendance', '출결'],
     ['tests', '테스트'],
     ['notes', '일지'],
@@ -189,12 +258,15 @@ export default function StudentDetailClient({
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            {(() => {
+              const gc = { high: { bg: 'var(--green-dim)', text: 'var(--green)' }, mid: { bg: 'var(--orange-dim)', text: 'var(--orange)' }, low: { bg: 'var(--red-dim)', text: 'var(--red)' } }[adaptationIdx.group];
+              return <StatItem label="적응지수" value={`${adaptationIdx.total}점`} color={gc.text} />;
+            })()}
             <StatItem label="평균" value={`${avgScore}점`} />
             <StatItem label="출석" value={`${presentCount}일`} color="var(--green)" />
             <StatItem label="결석" value={`${absentCount}회`} color={absentCount > 0 ? 'var(--red)' : undefined} />
             <StatItem label="지각" value={`${lateCount}회`} color={lateCount > 0 ? 'var(--orange)' : undefined} />
-            <RiskBadge level={riskLevel} />
           </div>
         </div>
       </div>
@@ -217,9 +289,64 @@ export default function StudentDetailClient({
         ))}
       </div>
 
-      {/* ━━━ 요약 탭 ━━━ */}
-      {activeTab === 'summary' && (
+      {/* ━━━ 적응지수 탭 ━━━ */}
+      {activeTab === 'overview' && (
         <>
+          {/* 적응지수 상세 */}
+          <div style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={sectionTitle}>적응지수 산정 근거</h3>
+              {(() => {
+                const gc = { high: { bg: 'var(--green-dim)', text: 'var(--green)', label: '상' }, mid: { bg: 'var(--orange-dim)', text: 'var(--orange)', label: '중' }, low: { bg: 'var(--red-dim)', text: 'var(--red)', label: '하' } }[adaptationIdx.group];
+                return <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '4px 14px', fontSize: 14, fontWeight: 700 }}>{gc.label} {adaptationIdx.total}점</span>;
+              })()}
+            </div>
+            {/* 진행 바 */}
+            <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 10, overflow: 'hidden', marginBottom: 20 }}>
+              <div style={{ height: '100%', width: `${Math.min(adaptationIdx.total, 100)}%`, background: { high: 'var(--green)', mid: 'var(--orange)', low: 'var(--red)' }[adaptationIdx.group], borderRadius: 'var(--radius-xs)', transition: 'width 0.5s ease' }} />
+            </div>
+            {/* 8개 항목 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <DetailRow label="시험 평균" score={adaptationIdx.breakdown.examAvg} detail={`전체 시험 평균 ${adaptationIdx.breakdown.examAvg}점`} />
+              <DetailRow label="하위 분야" score={adaptationIdx.breakdown.weakCategories} detail={`${adaptationIdx.breakdown.totalCategories}개 분야 중 60점 미만 ${adaptationIdx.breakdown.weakCategoryCount}개${adaptationIdx.breakdown.weakCategoryNames.length > 0 ? ` (${adaptationIdx.breakdown.weakCategoryNames.slice(0, 3).join('/')}${adaptationIdx.breakdown.weakCategoryNames.length > 3 ? '…' : ''})` : ''}`} />
+              <DetailRow label="출석률" score={adaptationIdx.breakdown.attendanceRate} detail={`출석률 ${adaptationIdx.breakdown.attendanceRate}% (지각=0.5 반영)`} />
+              <DetailRow label="교육일지 참여" score={adaptationIdx.breakdown.participation} detail={adaptationIdx.breakdown.participationDetail} />
+              <DetailRow label="성장 기울기" score={adaptationIdx.breakdown.growthSlope} detail={adaptationIdx.breakdown.growthDetail} />
+              <DetailRow label={`자신감 추이${!adaptationIdx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={adaptationIdx.breakdown.confidenceTrend} detail={`${adaptationIdx.breakdown.confidenceDetail}${!adaptationIdx.breakdown.hasConfidenceData ? ' → 시험/참여로 분산' : ''}`} />
+              <DetailRow label="만성 오답" score={adaptationIdx.breakdown.chronicScore} detail={adaptationIdx.breakdown.chronicDetail} />
+              <DetailRow label="메모 톤" score={adaptationIdx.breakdown.memoBalance} detail={adaptationIdx.breakdown.memoBalanceDetail} />
+              {adaptationIdx.breakdown.deltaDeduction > 0 && (
+                <div style={{ marginTop: 4, padding: '10px 14px', background: 'var(--red-dim)', borderRadius: 'var(--radius-sm)', fontSize: 13, color: 'var(--red)', fontWeight: 600 }}>
+                  부정 신호 감점 −{adaptationIdx.breakdown.deltaDeduction}점 ({adaptationIdx.breakdown.deltaDetail})
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* HR 조언 */}
+          {hrAdvice && (() => {
+            const colorMap: Record<string, string> = { red: 'var(--red)', orange: 'var(--orange)', blue: 'var(--blue)', purple: 'var(--purple)', green: 'var(--green)' };
+            const dimMap: Record<string, string> = { red: 'var(--red-dim)', orange: 'var(--orange-dim)', blue: 'var(--blue-dim)', purple: 'var(--purple-dim)', green: 'var(--green-dim)' };
+            const c = colorMap[hrAdvice.typeColor] || 'var(--blue)';
+            const d = dimMap[hrAdvice.typeColor] || 'var(--blue-dim)';
+            return (
+              <div style={{ ...card, background: d, borderColor: c }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: d, color: c }}>{hrAdvice.typeLabel}</span>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>{hrAdvice.difficulty}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {hrAdvice.actions.map((action, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, color: 'var(--text-primary)' }}>
+                      <span style={{ color: c, fontWeight: 700, flexShrink: 0 }}>•</span>
+                      <span>{action}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* 학습 피드백 */}
           <div style={card}>
             <h3 style={sectionTitle}>학습 피드백</h3>
@@ -263,56 +390,6 @@ export default function StudentDetailClient({
 
           {/* 교육 메모 */}
           <MemoSection studentId={student.id} initialMemos={memos} />
-
-          {/* AI 코칭 리포트 */}
-          <div style={card}>
-            <h3 style={sectionTitle}>AI 코칭 리포트</h3>
-            {coachingReports.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {coachingReports.map((report) => {
-                  const typeLabel: Record<string, string> = { daily: '일일', subject: '분야별', weekly: '주간', comprehensive: '종합' };
-                  const typeColor: Record<string, { bg: string; color: string }> = {
-                    comprehensive: { bg: 'var(--blue-dim)', color: 'var(--blue-light)' },
-                    subject: { bg: 'rgba(191,90,242,0.15)', color: 'var(--purple)' },
-                    daily: { bg: 'var(--green-dim)', color: 'var(--green)' },
-                    weekly: { bg: 'var(--orange-dim)', color: 'var(--orange)' },
-                  };
-                  const rt = (report as { report_type?: string }).report_type || 'daily';
-                  const tc = typeColor[rt] || typeColor.daily;
-                  const tt = (report as { tag_tracking?: { overcome?: string[]; newWeak?: string[]; chronic?: string[] } | null }).tag_tracking;
-                  return (
-                    <details key={report.id}>
-                      <summary style={{
-                        padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                        fontSize: 14, fontWeight: 500, color: 'var(--text-primary)',
-                        cursor: 'pointer', transition: 'background 0.15s ease',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: tc.bg, color: tc.color }}>{typeLabel[rt] || rt}</span>
-                        {report.test_date} 분석
-                        {(report as { subject?: string }).subject && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>({(report as { subject?: string }).subject})</span>}
-                      </summary>
-                      <div style={{ marginTop: 6, padding: 14, borderRadius: 'var(--radius-md)', background: 'var(--bg-hover)', fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                        {tt && (tt.overcome?.length || tt.chronic?.length || tt.newWeak?.length) ? (
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
-                            {tt.overcome?.map(t => <span key={`o-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--green-dim)', color: 'var(--green)' }}>{t}</span>)}
-                            {tt.chronic?.map(t => <span key={`c-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>{t}</span>)}
-                            {tt.newWeak?.map(t => <span key={`n-${t}`} style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--orange-dim)', color: 'var(--orange)' }}>{t}</span>)}
-                          </div>
-                        ) : null}
-                        {report.manager_report}
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            ) : (
-              <p style={emptyStyle}>아직 코칭 리포트가 없어요</p>
-            )}
-          </div>
         </>
       )}
 
@@ -674,6 +751,22 @@ function MemoSection({ studentId, initialMemos }: { studentId: string; initialMe
 const emptyStyle: React.CSSProperties = {
   padding: '32px 0', textAlign: 'center', fontSize: 15, color: 'var(--text-muted)',
 };
+
+function DetailRow({ label, score, detail }: { label: string; score: number; detail: string }) {
+  const color = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--orange)' : 'var(--red)';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 13, color: 'var(--text-second)', minWidth: 130 }}>{label}</span>
+        <div style={{ flex: 1, background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 6, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${Math.min(score, 100)}%`, background: color, borderRadius: 'var(--radius-xs)' }} />
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 700, color, minWidth: 40, textAlign: 'right' }}>{score}</span>
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', paddingLeft: 140 }}>{detail}</div>
+    </div>
+  );
+}
 
 // 카테고리 통합 매핑
 const CATEGORY_MAP: Record<string, string> = {
