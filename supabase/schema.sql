@@ -24,6 +24,10 @@ CREATE TABLE students (
   phone TEXT,
   company_email TEXT,
   store_location TEXT,
+  photo_url TEXT,                    -- 프로필 사진 URL (Supabase Storage)
+  birth_date DATE,                   -- 생년월일
+  education TEXT,                    -- 학력 (예: "한양대 경영학과")
+  experience TEXT,                   -- 경력 요약 (예: "가구 영업 2년")
   is_dropped BOOLEAN DEFAULT FALSE,
   dropped_at DATE,
   drop_reason TEXT,

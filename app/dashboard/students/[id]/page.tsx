@@ -39,6 +39,14 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
     supabase.from('student_notes').select('id, student_id, content, created_at').eq('student_id', id),
   ]);
 
+  // 반 전체 데이터 (평균 비교용)
+  const { data: batchStudents } = await supabase.from('students').select('id').eq('batch_id', student.batch_id).eq('is_dropped', false);
+  const batchStudentIds = (batchStudents || []).map(s => s.id);
+  const [{ data: allAttendance }, { data: allNotes }] = await Promise.all([
+    supabase.from('attendance').select('student_id, status').in('student_id', batchStudentIds),
+    supabase.from('student_notes').select('student_id, content').in('student_id', batchStudentIds),
+  ]);
+
   return (
     <StudentDetailClient
       student={student}
@@ -46,6 +54,8 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
       scores={scores || []}
       allScores={allScores || []}
       attendance={attendance || []}
+      allAttendance={allAttendance || []}
+      allNotes={allNotes || []}
       memos={memos || []}
       coachingReports={coaching || []}
       responses={responses || []}

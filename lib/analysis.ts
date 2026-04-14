@@ -347,7 +347,7 @@ export function calculateAdaptationIndex(params: {
 
   const total = Math.max(0, Math.min(100, Math.round(rawTotal - deltaDeduction)));
 
-  const group = total >= 75 ? 'high' : total >= 50 ? 'mid' : 'low';
+  const group = total >= 70 ? 'high' : total >= 50 ? 'mid' : 'low';
 
   return {
     studentId,

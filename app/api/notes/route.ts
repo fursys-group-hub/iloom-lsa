@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabase();
   let query = supabase.from('student_notes').select('*, students(name)').order('created_at', { ascending: false });
 
-  if (studentId && !all) query = query.eq('student_id', studentId);
+  if (studentId) query = query.eq('student_id', studentId);
 
   const { data, error } = await query.limit(all ? 2000 : 100);
   if (error) return Response.json({ message: error.message }, { status: 500 });

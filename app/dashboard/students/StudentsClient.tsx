@@ -61,7 +61,6 @@ const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border
 
 export default function StudentsClient({ batches, students: initialStudents, scores, attendance, notes, testResponses, questions, memos, coachingReports }: Props) {
   const [students] = useState(initialStudents);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // 활성 기수
   const activeBatch = batches.find(b => !b.is_archived);
@@ -124,17 +123,22 @@ export default function StudentsClient({ batches, students: initialStudents, sco
     }).sort((a, b) => b.total - a.total);
   }, [batchStudents, scores, attendance, notes, studentCategoryRates, totalEducationDays, memos, coachingReports]);
 
-  // 위험 체크리스트
-  const riskChecks = useMemo(() => {
-    return batchStudents.map(student => {
+  // 위험 체크리스트 + HR 조언 (카드 뱃지용)
+  const studentHRAdvice = useMemo(() => {
+    const result = new Map<string, HRAdvice>();
+    for (const student of batchStudents) {
       const sScores = scores.filter(s => s.student_id === student.id);
       const sAttendance = attendance.filter(a => a.student_id === student.id);
       const sNotes = notes.filter(n => n.student_id === student.id).map(n => ({ ...parseNoteMeta(n.content), created_at: n.created_at }));
       const sMemoCategories = memos.filter(m => m.student_id === student.id).map(m => m.category);
       const catRates = studentCategoryRates.get(student.id) || [];
-      return calculateRiskChecklist({ studentId: student.id, studentName: student.name, scores: sScores, attendance: sAttendance, notes: sNotes, memoCategories: sMemoCategories, totalEducationDays, categoryRates: catRates });
-    }).filter(r => r.riskCount > 0).sort((a, b) => b.riskCount - a.riskCount);
-  }, [batchStudents, scores, attendance, notes, memos, studentCategoryRates, totalEducationDays]);
+      const rc = calculateRiskChecklist({ studentId: student.id, studentName: student.name, scores: sScores, attendance: sAttendance, notes: sNotes, memoCategories: sMemoCategories, totalEducationDays, categoryRates: catRates });
+      const idx = adaptationIndices.find(a => a.studentId === student.id);
+      const advice = generateHRAdvice(rc, idx);
+      if (advice) result.set(student.id, advice);
+    }
+    return result;
+  }, [batchStudents, scores, attendance, notes, memos, studentCategoryRates, totalEducationDays, adaptationIndices]);
 
   // 태도/참여 통계
   const participationStats = useMemo(() => {
@@ -259,202 +263,67 @@ export default function StudentsClient({ batches, students: initialStudents, sco
             {adaptationIndices.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>교육생 데이터가 없습니다.</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, maxWidth: '100%' }}>
                 {adaptationIndices.map(idx => {
                   const gc = GROUP_COLORS[idx.group];
-                  const isExpanded = expandedCard === idx.studentId;
+                  const student = batchStudents.find(s => s.id === idx.studentId);
+                  const birthYear = student?.birth_date ? new Date(student.birth_date).getFullYear() : null;
+                  const advice = studentHRAdvice.get(idx.studentId);
+                  const adviceColorMap: Record<string, { bg: string; text: string }> = {
+                    red: { bg: 'var(--red-dim)', text: 'var(--red)' },
+                    orange: { bg: 'var(--orange-dim)', text: 'var(--orange)' },
+                    blue: { bg: 'var(--blue-dim)', text: 'var(--blue)' },
+                    purple: { bg: 'var(--purple-dim)', text: 'var(--purple)' },
+                    green: { bg: 'var(--green-dim)', text: 'var(--green)' },
+                  };
+                  const ac = advice ? (adviceColorMap[advice.typeColor] || adviceColorMap.orange) : null;
                   return (
-                    <div key={idx.studentId} onClick={() => setExpandedCard(isExpanded ? null : idx.studentId)} style={{ background: idx.group === 'low' ? gc.bg : 'var(--bg-elevated)', border: `1px solid ${isExpanded ? gc.text : idx.group === 'low' ? gc.text : 'var(--border)'}`, borderRadius: 'var(--radius-md)', padding: 16, cursor: 'pointer', transition: 'border-color 0.2s' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <Link href={`/dashboard/students/${idx.studentId}`} onClick={e => e.stopPropagation()} style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }} onMouseEnter={e => { e.currentTarget.style.color = 'var(--blue)'; }} onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-primary)'; }}>{idx.studentName}</Link>
-                        <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{gc.label} {idx.total}점</span>
-                      </div>
-                      <div style={{ background: 'var(--bg-hover)', borderRadius: 'var(--radius-xs)', height: 8, overflow: 'hidden', marginBottom: 8 }}>
-                        <div style={{ height: '100%', width: `${Math.min(idx.total, 100)}%`, background: gc.text, borderRadius: 'var(--radius-xs)', transition: 'width 0.5s ease' }} />
-                      </div>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
-                        <span>시험 {idx.breakdown.examAvg}점</span>
-                        <span>하위분야 {idx.breakdown.weakCategoryCount}/{idx.breakdown.totalCategories}개</span>
-                        <span>출석 {idx.breakdown.attendanceRate}%</span>
-                        <span>{isExpanded ? '▲ 접기' : '▼ 상세보기'}</span>
-                      </div>
-                      {isExpanded && (
-                        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', fontSize: 13, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <DetailRow label="시험 평균" score={idx.breakdown.examAvg} detail={`전체 시험 평균 ${idx.breakdown.examAvg}점`} />
-                          <DetailRow label="하위 분야" score={idx.breakdown.weakCategories} detail={`${idx.breakdown.totalCategories}개 분야 중 60점 미만 ${idx.breakdown.weakCategoryCount}개${idx.breakdown.weakCategoryNames.length > 0 ? ` (${idx.breakdown.weakCategoryNames.slice(0, 3).join('/')}${idx.breakdown.weakCategoryNames.length > 3 ? '…' : ''})` : ''}`} />
-                          <DetailRow label="출석률" score={idx.breakdown.attendanceRate} detail={`출석률 ${idx.breakdown.attendanceRate}% (지각=0.5 반영)`} />
-                          <DetailRow label="교육일지 참여" score={idx.breakdown.participation} detail={idx.breakdown.participationDetail} />
-                          <DetailRow label="성장 기울기" score={idx.breakdown.growthSlope} detail={idx.breakdown.growthDetail} />
-                          <DetailRow label={`자신감 추이${!idx.breakdown.hasConfidenceData ? ' (미입력)' : ''}`} score={idx.breakdown.confidenceTrend} detail={`${idx.breakdown.confidenceDetail}${!idx.breakdown.hasConfidenceData ? ' → 시험/참여로 분산' : ''}`} />
-                          <DetailRow label="만성 오답" score={idx.breakdown.chronicScore} detail={idx.breakdown.chronicDetail} />
-                          <DetailRow label="메모 톤" score={idx.breakdown.memoBalance} detail={idx.breakdown.memoBalanceDetail} />
-                          {idx.breakdown.deltaDeduction > 0 && (
-                            <div style={{ marginTop: 4, padding: '8px 10px', background: 'var(--red-dim)', borderRadius: 'var(--radius-xs)', fontSize: 12, color: 'var(--red)', fontWeight: 600 }}>
-                              부정 신호 감점 −{idx.breakdown.deltaDeduction}점 ({idx.breakdown.deltaDetail})
-                            </div>
+                    <Link key={idx.studentId} href={`/dashboard/students/${idx.studentId}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: 0 }}>
+                      <div style={{
+                        background: advice?.typeColor === 'red' ? 'var(--red-dim)' : 'var(--bg-main)', border: 'none',
+                        borderRadius: 'var(--radius-md)', padding: '16px 20px',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
+                        height: '100%', display: 'flex', flexDirection: 'column',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-main)'; }}
+                      >
+                        {/* 상단: 사진 + 이름 + 정보 */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                          {student?.photo_url ? (
+                            <img src={student.photo_url} alt={idx.studentName} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                          ) : (
+                            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--blue-dim)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, flexShrink: 0 }}>{idx.studentName[0]}</div>
                           )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{idx.studentName}</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {[birthYear ? `${birthYear}년생` : null, student?.education].filter(Boolean).join(' · ') || '\u00A0'}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
+                        {/* 하단: 시험평균 + HR뱃지 + 적응지수 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 10, borderTop: '1px solid var(--border-light)' }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                            시험 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.examAvg}</span>
+                            <span style={{ margin: '0 6px', color: 'var(--border)' }}>|</span>
+                            출석 <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{idx.breakdown.attendanceRate}%</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {ac && advice && (
+                              <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: ac.bg, color: ac.text }}>{advice.typeLabel}</span>
+                            )}
+                            <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{gc.label} {idx.total}점</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
                   );
                 })}
               </div>
             )}
           </div>
-
-          {/* 위험 체크리스트 */}
-          {riskChecks.length > 0 && (
-            <div style={cardStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, position: 'relative' }}>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>주의가 필요한 교육생 ({riskChecks.length}명)</h3>
-                <details style={{ cursor: 'pointer', position: 'relative' }}>
-                  <summary style={{ fontSize: 13, color: 'var(--text-muted)', listStyle: 'none' }}>판정 기준</summary>
-                  <div style={{ position: 'absolute', right: 0, marginTop: 8, padding: '16px 18px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg)', fontSize: 13, color: 'var(--text-second)', zIndex: 10, width: 520 }}>
-
-                    {/* Part 1: 체크 항목 */}
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
-                      먼저 6가지 신호를 체크해요
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                      하나라도 해당되면 주의 교육생으로 표시해요
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, marginBottom: 14 }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>체크 항목</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>해당 조건</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { name: '시험 평균',     cond: '전체 차시 평균이 60점 미만' },
-                          { name: '하위 분야',     cond: '60점 미만인 제품 카테고리가 4개 이상' },
-                          { name: '출석률',        cond: '출석률이 80% 미만 (지각 0.5 반영)' },
-                          { name: '자신감',        cond: '최근 일지 자신감이 3회 연속 낮음' },
-                          { name: '주의 메모',     cond: '교육자 주의 메모가 2건 이상' },
-                          { name: '최근 하락 신호', cond: '성적 5점↓ 하락 또는 자신감 급락' },
-                        ].map((row, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.name}</td>
-                            <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.cond}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    {/* Part 2: 유형 판정 */}
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4, fontSize: 14 }}>
-                      해당된 신호 조합으로 유형을 정해요
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                      각 유형에 맞춰 맞춤 HR 조언이 자동으로 붙어요
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>유형</th>
-                          <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>언제 이 유형이 되나요?</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          { name: '복합 위기형',    when: '주의 신호 3개 이상 동시 해당' },
-                          { name: '지식 부족형',    when: '시험 낮음 + 하위 분야 많음' },
-                          { name: '약점 편중형',    when: '시험은 양호한데 하위 분야만 많음' },
-                          { name: '심리 위축형',    when: '자신감이 계속 낮은 상태' },
-                          { name: '하락 징후형',    when: '성적이나 자신감이 최근 하락 중' },
-                          { name: '근태/동기 이슈형', when: '출석률만 낮은 경우' },
-                          { name: '행동 관찰형',    when: '주의 메모만 쌓인 경우' },
-                          { name: '부분 주의형',    when: '적응 점수 \'상\' 그룹인데 한두 가지 주의' },
-                        ].map((row, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                              {row.name}
-                            </td>
-                            <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.when}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    <div style={{ marginTop: 12, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                      카드 배경색: <strong style={{ color: 'var(--red)' }}>빨강</strong> = 3개+ 위험 · <strong style={{ color: 'var(--orange)' }}>주황</strong> = 1~2개 주의 · <strong style={{ color: 'var(--blue)' }}>파랑</strong> = 부분 주의
-                    </div>
-                  </div>
-                </details>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-                {riskChecks.map(r => {
-                  const idx = adaptationIndices.find(a => a.studentId === r.studentId);
-                  const isHighGroup = idx?.group === 'high';
-                  const hasDescent = r.checks.some(c => c.label === '최근 하락 신호' && c.triggered);
-
-                  // 기본 색상 — 바탕색으로만 구분 (외곽선 없음)
-                  // 1개 해당: 바깥 카드와 구분되도록 elevated 배경
-                  let rCardBg = r.riskCount >= 3 ? 'var(--red-dim)' : r.riskCount >= 2 ? 'var(--orange-dim)' : 'var(--bg-elevated)';
-                  let badgeBg = r.riskCount >= 3 ? 'var(--red)' : 'var(--orange)';
-                  let badgeText = r.riskCount >= 3 ? '위험' : '주의';
-                  let topHint: { text: string; color: string } | null = null;
-
-                  if (isHighGroup) {
-                    if (hasDescent) {
-                      // 🌊 상 그룹인데 조용히 무너지는 중 — 주황색 경고
-                      rCardBg = 'var(--orange-dim)';
-                      badgeBg = 'var(--orange)';
-                      badgeText = '하락 경고';
-                      topHint = { text: '전반은 양호하나 최근 하락 징후가 있어요', color: 'var(--orange)' };
-                    } else {
-                      rCardBg = 'var(--blue-dim)';
-                      badgeBg = 'var(--blue)';
-                      badgeText = '부분 주의';
-                      topHint = { text: '전체적으로 양호하지만 이 부분은 주의', color: 'var(--blue)' };
-                    }
-                  }
-
-                  // 🆕 HR 조언 자동 생성
-                  const advice = generateHRAdvice(r, idx);
-
-                  return (
-                    <div key={r.studentId} style={{ background: rCardBg, borderRadius: 'var(--radius-md)', padding: 16 }}>
-                      {topHint && <div style={{ fontSize: 12, color: topHint.color, fontWeight: 600, marginBottom: 6 }}>{topHint.text}</div>}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>
-                          {r.studentName}
-                          {idx && <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 400, marginLeft: 6 }}>적응 {idx.total}점</span>}
-                        </span>
-                        <span style={{ background: badgeBg, color: '#fff', borderRadius: 'var(--radius-pill)', padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>{badgeText} {r.riskCount}개 해당</span>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {r.checks.filter(c => c.triggered).map((c, i) => {
-                          let displayValue = c.value;
-                          if (c.label.includes('자신감') && c.value !== '미입력') displayValue = c.value.split(', ').map(v => confToKor(v)).join(' → ');
-                          return (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', display: 'inline-block', flexShrink: 0 }} />
-                              <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{c.label}</span>
-                              <span style={{ color: 'var(--red)', fontWeight: 700, marginLeft: 'auto' }}>{displayValue}</span>
-                            </div>
-                          );
-                        })}
-                        {r.checks.filter(c => !c.triggered && c.value !== '미입력').length > 0 && (
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4, borderTop: '1px solid var(--border)', paddingTop: 6, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            {r.checks.filter(c => !c.triggered && c.value !== '미입력').map((c, i) => {
-                              let v = c.value;
-                              if (c.label.includes('자신감')) v = c.value.split(', ').map(s => confToKor(s)).join(' → ');
-                              return <span key={i}>✓ {c.label} <span style={{ color: 'var(--green)' }}>{v}</span></span>;
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 🆕 HR 조언 박스 */}
-                      {advice && <HRAdviceBox advice={advice} />}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* 태도/참여 현황 */}
           <div style={cardStyle}>
@@ -465,7 +334,7 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                 { label: '교육일지 제출률', value: `${participationStats.avgSubmitRate}%`, color: 'var(--blue)', desc: `교육일 ${totalEducationDays}일 기준` },
                 { label: '평균 참여 점수', value: `${participationStats.avgParticipation}점`, color: 'var(--purple)', desc: 'STEP 1~3 작성 기준' },
               ].map(stat => (
-                <div key={stat.label} style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 16, textAlign: 'center' }}>
+                <div key={stat.label} style={{ background: 'var(--bg-main)', borderRadius: 'var(--radius-md)', padding: 16, textAlign: 'center' }}>
                   <div style={{ fontSize: 28, fontWeight: 800, color: stat.color }}>{stat.value}</div>
                   <div style={{ fontSize: 14, color: 'var(--text-second)', marginTop: 4 }}>{stat.label}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{stat.desc}</div>

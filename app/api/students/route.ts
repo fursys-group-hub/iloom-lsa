@@ -58,6 +58,10 @@ export async function PATCH(req: NextRequest) {
     if (body.email !== undefined) updateData.email = body.email || null;
     if (body.phone !== undefined) updateData.phone = body.phone || null;
     if (body.store_location !== undefined) updateData.store_location = body.store_location || null;
+    if (body.photo_url !== undefined) updateData.photo_url = body.photo_url || null;
+    if (body.birth_date !== undefined) updateData.birth_date = body.birth_date || null;
+    if (body.education !== undefined) updateData.education = body.education || null;
+    if (body.experience !== undefined) updateData.experience = body.experience || null;
     if (body.password !== undefined) updateData.password = body.password;
     if (body.is_dropped !== undefined) {
       updateData.is_dropped = body.is_dropped;
