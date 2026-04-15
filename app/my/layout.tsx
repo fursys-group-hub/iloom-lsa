@@ -77,7 +77,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
                   color: 'var(--text-muted)', opacity: 0.5, cursor: 'default',
                 }}>
                   {item.label}
-                  <span style={{ fontSize: 11, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
+                  <span style={{ fontSize: 12, marginLeft: 'auto', color: 'var(--text-muted)' }}>준비중</span>
                 </div>
               );
             }
@@ -119,7 +119,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
               영업지원 챗봇
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>↗</span>
             </a>
           </div>
           <div style={{ padding: '10px 20px', borderTop: '1px solid var(--border)' }}>
@@ -158,7 +158,7 @@ export default function MyLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         <main style={{ flex: 1 }}>
-          <div className="my-content-wrapper" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px' }}>
+          <div className="my-content-wrapper" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 40px' }}>
             {children}
           </div>
         </main>

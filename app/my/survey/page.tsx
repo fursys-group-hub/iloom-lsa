@@ -67,7 +67,7 @@ export default function SurveyHubPage() {
   const preCard: SurveyCard = ansanDone.pre
     ? {
         href: '/my/survey/ansan-tour',
-        emoji: '🏭',
+        emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사전 설문',
         desc: '투어 가기 전 지금 알고 있는 정도와 궁금한 점을 적었어요.',
@@ -77,7 +77,7 @@ export default function SurveyHubPage() {
       }
     : {
         href: '/my/survey/ansan-tour',
-        emoji: '🏭',
+        emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사전 설문',
         desc: '투어 가기 전 지금 알고 있는 정도와 가장 궁금한 점을 알려주세요.',
@@ -90,7 +90,7 @@ export default function SurveyHubPage() {
   const postCard: SurveyCard = ansanDone.post
     ? {
         href: '/my/survey/ansan-tour',
-        emoji: '🏭',
+        emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
         desc: '투어 후 가장 인상 깊었던 점과 새로 알게 된 점을 적었어요.',
@@ -101,7 +101,7 @@ export default function SurveyHubPage() {
     : ansanDone.pre
     ? {
         href: '/my/survey/ansan-tour',
-        emoji: '🏭',
+        emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
         desc: '투어를 마치고 가장 인상 깊었던 점과 새로 알게 된 점을 알려주세요.',
@@ -111,7 +111,7 @@ export default function SurveyHubPage() {
       }
     : {
         href: '/my/survey/ansan-tour',
-        emoji: '🏭',
+        emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
         desc: '사전 설문을 먼저 작성하면 열려요.',
@@ -127,15 +127,12 @@ export default function SurveyHubPage() {
     <div style={{ padding: '24px 16px 64px', maxWidth: 960, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{
-          fontSize: 'clamp(1.5rem, 1.3rem + 0.9vw, 2rem)',
-          fontWeight: 700, color: 'var(--text-primary)',
-          margin: '0 0 8px', letterSpacing: '-0.02em',
+          fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)',
+          fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)',
+          margin: 0, letterSpacing: '-0.025em',
         }}>
           교육 설문
         </h1>
-        <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>
-          참여할 수 있는 설문을 선택해주세요
-        </p>
       </div>
 
       {loading ? (
@@ -175,8 +172,7 @@ function SurveyCardItem({ card }: { card: SurveyCard }) {
       onMouseEnter={(e) => { if (!card.disabled) { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.transform = 'translateY(-2px)'; } }}
       onMouseLeave={(e) => { if (!card.disabled) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ fontSize: 36, lineHeight: 1 }}>{card.emoji}</div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: 12 }}>
         <span style={{
           padding: '4px 12px',
           borderRadius: 'var(--radius-pill)',
@@ -193,7 +189,8 @@ function SurveyCardItem({ card }: { card: SurveyCard }) {
       <div>
         <h3 style={{
           fontSize: 18,
-          fontWeight: 700,
+          fontWeight: 600,
+          lineHeight: 1.3,
           color: 'var(--text-primary)',
           margin: '0 0 4px',
           letterSpacing: '-0.015em',

@@ -2,3 +2,8 @@ node_modules
 .next
 .env.local
 .env
+
+# 노션 raw export (CSV/HTML 덤프) - 파싱해서 lessons-data.ts로 생성
+프로젝트_기록/ExportBlock-*/
+ExportBlock-*/
+프로젝트_기록/*.xlsx

@@ -54,21 +54,21 @@ const SAT_LABELS = ['전혀 그렇지 않다', '그렇지 않다', '보통이다
 const KNOW_QUESTIONS: { key: keyof AnsanSurvey; label: string }[] = [
   { key: 'know_products',    label: '안성공장에서 어떤 일룸 제품을 만드는지 알고 있다' },
   { key: 'know_factory',     label: '안성공장의 규모와 작업 환경을 대략 알고 있다' },
-  { key: 'know_sofa',        label: '🛋 소파가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
-  { key: 'know_mattress',    label: '🛏 매트리스가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
-  { key: 'know_steel',       label: '🪑 철제 가구(책상/책장 등)가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
-  { key: 'know_quality',     label: '🔍 일룸 가구의 품질 검사가 어떻게 이뤄지는지 알고 있다' },
+  { key: 'know_sofa',        label: '소파가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
+  { key: 'know_mattress',    label: '매트리스가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
+  { key: 'know_steel',       label: '철제 가구(책상/책장 등)가 어떤 과정을 거쳐 만들어지는지 알고 있다' },
+  { key: 'know_quality',     label: '일룸 가구의 품질 검사가 어떻게 이뤄지는지 알고 있다' },
   { key: 'know_competitive', label: '타사 가구와 비교했을 때 일룸의 강점을 자신 있게 설명할 수 있다' },
   { key: 'know_explain',     label: '매장에서 고객에게 "공장에서 어떻게 만드냐"고 물어보면 답할 수 있다' },
   { key: 'know_value',       label: '일룸 가구의 가치를 내 언어로 설명할 수 있다' },
 ];
 
 const CURIOSITY_QUESTIONS: { key: keyof AnsanSurvey; label: string; placeholder: string }[] = [
-  { key: 'curiosity_sofa',     label: '🛋 소파 제작 과정에서 가장 보고 싶거나 궁금한 점은?',     placeholder: '예) 쿠션이 어떻게 채워지는지' },
-  { key: 'curiosity_mattress', label: '🛏 매트리스 제작 과정에서 가장 보고 싶거나 궁금한 점은?', placeholder: '예) 스프링이 어떻게 만들어지는지' },
-  { key: 'curiosity_steel',    label: '🪑 철제 가구 제작 과정에서 가장 보고 싶거나 궁금한 점은?', placeholder: '예) 철판이 어떻게 절단/도색되는지' },
-  { key: 'curiosity_quality',  label: '🔍 일룸 품질 검사에 대해 가장 알고 싶은 점은?',           placeholder: '예) 어떤 항목을 어떻게 검사하는지' },
-  { key: 'curiosity_other',    label: '💬 그 외 안성공장에서 꼭 보고/배우고 싶은 점이 있다면?',    placeholder: '자유롭게 적어주세요' },
+  { key: 'curiosity_sofa',     label: '소파 제작 과정에서 가장 보고 싶거나 궁금한 점은?',     placeholder: '예) 쿠션이 어떻게 채워지는지' },
+  { key: 'curiosity_mattress', label: '매트리스 제작 과정에서 가장 보고 싶거나 궁금한 점은?', placeholder: '예) 스프링이 어떻게 만들어지는지' },
+  { key: 'curiosity_steel',    label: '철제 가구 제작 과정에서 가장 보고 싶거나 궁금한 점은?', placeholder: '예) 철판이 어떻게 절단/도색되는지' },
+  { key: 'curiosity_quality',  label: '일룸 품질 검사에 대해 가장 알고 싶은 점은?',           placeholder: '예) 어떤 항목을 어떻게 검사하는지' },
+  { key: 'curiosity_other',    label: '그 외 안성공장에서 꼭 보고/배우고 싶은 점이 있다면?',    placeholder: '자유롭게 적어주세요' },
 ];
 
 const SAT_QUESTIONS: { key: keyof AnsanSurvey; label: string }[] = [
@@ -79,14 +79,14 @@ const SAT_QUESTIONS: { key: keyof AnsanSurvey; label: string }[] = [
   { key: 'sat_duration',  label: '투어 시간이 적절했다' },
 ];
 
-const BEST_LINE_OPTIONS = ['🛋 소파', '🛏 매트리스', '🪑 철제 가구', '🔍 품질 검사', '💬 기타'] as const;
+const BEST_LINE_OPTIONS = ['소파', '매트리스', '철제 가구', '품질 검사', '기타'] as const;
 
 const POST_OPEN_QUESTIONS: { key: keyof AnsanSurvey; label: string; placeholder: string }[] = [
-  { key: 'learned_sofa',     label: '🛋 소파 라인을 보고 새로 알게 된 점은?',                      placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
-  { key: 'learned_mattress', label: '🛏 매트리스 라인을 보고 새로 알게 된 점은?',                  placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
-  { key: 'learned_steel',    label: '🪑 철제 가구 라인을 보고 새로 알게 된 점은?',                placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
-  { key: 'confident_to_say', label: '⭐ 매장에서 고객에게 자신 있게 얘기할 수 있는 부분은?',        placeholder: '예) "이 책상 철판은 1.2mm 두께라 안 휘어요"' },
-  { key: 'improvement',      label: '🤔 아쉽거나 더 보고 싶었던 점은?',                            placeholder: '솔직한 의견을 적어주세요' },
+  { key: 'learned_sofa',     label: '소파 라인을 보고 새로 알게 된 점은?',                      placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
+  { key: 'learned_mattress', label: '매트리스 라인을 보고 새로 알게 된 점은?',                  placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
+  { key: 'learned_steel',    label: '철제 가구 라인을 보고 새로 알게 된 점은?',                placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
+  { key: 'confident_to_say', label: '매장에서 고객에게 자신 있게 얘기할 수 있는 부분은?',        placeholder: '예) "이 책상 철판은 1.2mm 두께라 안 휘어요"' },
+  { key: 'improvement',      label: '아쉽거나 더 보고 싶었던 점은?',                            placeholder: '솔직한 의견을 적어주세요' },
 ];
 
 /* ── styles ── */
@@ -99,8 +99,8 @@ const card: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: 17, fontWeight: 700, color: 'var(--text-primary)',
-  margin: '0 0 16px', letterSpacing: '-0.01em',
+  fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--text-primary)',
+  margin: '0 0 16px', letterSpacing: '-0.015em',
 };
 
 const questionText: React.CSSProperties = {
@@ -364,7 +364,7 @@ export default function AnsanTourSurveyPage() {
 
             {/* D. 사후: 가장 인상 깊은 라인 */}
             <div style={card}>
-              <h3 style={sectionTitle}>🏆 가장 인상 깊었던 라인</h3>
+              <h3 style={sectionTitle}>가장 인상 깊었던 라인</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div>
                   <p style={questionText}>가장 인상 깊었던 라인을 선택해주세요</p>
@@ -409,12 +409,12 @@ export default function AnsanTourSurveyPage() {
   };
 
   const renderCompletedView = (data: AnsanSurvey, phase: 'pre' | 'post') => {
-    const title = phase === 'pre' ? '🏭 안성공장 투어 — 사전 설문' : '🏭 안성공장 투어 — 사후 설문';
+    const title = phase === 'pre' ? '안성공장 투어 — 사전 설문' : '안성공장 투어 — 사후 설문';
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.015em' }}>
+            <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
               {title}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>제출 완료</p>
@@ -467,8 +467,8 @@ export default function AnsanTourSurveyPage() {
       {showForm && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>
-            <h1 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-              🏭 {phaseTitle}
+            <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.025em' }}>
+              {phaseTitle}
             </h1>
             <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>{phaseSub}</p>
           </div>
@@ -493,8 +493,8 @@ export default function AnsanTourSurveyPage() {
       {!showForm && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
           <div>
-            <h1 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-              🏭 안성공장 인프라 투어 설문
+            <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.025em' }}>
+              안성공장 인프라 투어 설문
             </h1>
             <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>제출한 설문을 확인할 수 있어요</p>
           </div>

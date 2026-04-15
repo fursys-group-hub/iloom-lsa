@@ -47,21 +47,21 @@ export default function MyAttendancePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>내 출결</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>내 출결</h2>
 
       {/* 요약 */}
       <div style={{ display: 'flex', gap: 16 }}>
         <div style={{ ...card, flex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>출근</div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--green)' }}>{presentCount}일</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{presentCount}일</div>
         </div>
         <div style={{ ...card, flex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>지각</div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: lateCount > 0 ? 'var(--orange)' : 'var(--text-primary)' }}>{lateCount}회</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: lateCount > 0 ? 'var(--orange)' : 'var(--text-primary)' }}>{lateCount}회</div>
         </div>
         <div style={{ ...card, flex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>총 기록</div>
-          <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>{data.length}일</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)' }}>{data.length}일</div>
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export default function MyAttendancePage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     {checkIn && (
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>출근</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>출근</div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{fmtTime(checkIn)}</div>
                       </div>
                     )}
@@ -118,7 +118,7 @@ export default function MyAttendancePage() {
                     )}
                     {checkOut && (
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>퇴근</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>퇴근</div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{fmtTime(checkOut)}</div>
                       </div>
                     )}

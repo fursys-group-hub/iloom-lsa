@@ -112,7 +112,7 @@ export default function TrainingPage() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>심화교육</h1>
+        <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.025em', margin: '0 0 8px' }}>심화교육</h1>
         <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>
           매장에서 우수 직원을 벤치마킹하고 배운 점을 기록하세요
         </p>
@@ -153,7 +153,7 @@ export default function TrainingPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{selectedWeek}주차 벤치마킹</h2>
+            <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 }}>{selectedWeek}주차 벤치마킹</h2>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
               {existing ? '작성된 내용을 수정할 수 있어요' : '매장에서 관찰한 우수 직원의 노하우를 기록하세요'}
             </p>
@@ -218,7 +218,7 @@ export default function TrainingPage() {
       {/* 기록 요약 */}
       {benchmarks.length > 0 && (
         <div style={{ marginTop: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>내 벤치마킹 기록</h2>
+          <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: 16 }}>내 벤치마킹 기록</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {benchmarks.map((bm) => (
               <div key={bm.week_number}

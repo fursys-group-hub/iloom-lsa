@@ -43,7 +43,7 @@ export default function MyAnnouncementsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>
         공지사항
       </h2>
 
@@ -90,7 +90,7 @@ export default function MyAnnouncementsPage() {
                     <span style={{
                       padding: '2px 8px', borderRadius: 'var(--radius-pill)',
                       background: ps.bg, color: ps.color,
-                      fontSize: 11, fontWeight: 700, flexShrink: 0,
+                      fontSize: 12, fontWeight: 600, flexShrink: 0,
                     }}>
                       {ps.label}
                     </span>
@@ -104,7 +104,7 @@ export default function MyAnnouncementsPage() {
                       <span style={{
                         padding: '1px 6px', borderRadius: 'var(--radius-pill)',
                         background: 'var(--red)', color: '#fff',
-                        fontSize: 10, fontWeight: 700, flexShrink: 0,
+                        fontSize: 12, fontWeight: 600, flexShrink: 0,
                       }}>NEW</span>
                     )}
                   </div>

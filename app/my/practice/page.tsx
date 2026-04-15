@@ -344,7 +344,7 @@ export default function MyPracticePage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>실습일지</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>실습일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           {!isArchived && (isPracticeDay || showForm) && (
             <button
@@ -383,7 +383,7 @@ export default function MyPracticePage() {
       {showForm && (
         <div style={{ ...card, border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: 0 }}>
               {editingNoteId ? '실습일지 수정' : '오늘의 실습일지'}
             </h3>
           </div>
@@ -392,7 +392,7 @@ export default function MyPracticePage() {
           {!editingNoteId && (
             <div style={{ marginBottom: 16 }}>
               <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                📅 작성 날짜
+                작성 날짜
                 <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--text-muted)' }}>
                   새벽 5시 이전에 쓰면 전날로 자동 선택돼요
                 </span>
@@ -424,7 +424,7 @@ export default function MyPracticePage() {
               background: 'var(--blue-dim)', border: '1px solid var(--blue-dim)',
             }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--blue)', marginBottom: 6 }}>
-                🐣 신입 LSA님, 매장은 여러분의 가장 큰 교실입니다!
+                신입 LSA님, 매장은 여러분의 가장 큰 교실입니다!
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-second)', lineHeight: 1.6 }}>
                 <strong>1. 관찰이 실력입니다.</strong> 선배님이 고객님과 눈을 맞추는 법, 태블릿을 보여드리는 타이밍 하나하나가 다 소중한 교재예요.<br/>
@@ -652,13 +652,13 @@ export default function MyPracticePage() {
                         <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                           {['1', '2', '3', '4'].map((num, i) => (
                             <span key={i} style={{
-                              fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
+                              fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                               background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
                               color: filled[i] ? 'var(--blue)' : 'var(--text-muted)',
-                              opacity: filled[i] ? 1 : 0.3, fontWeight: 700,
+                              opacity: filled[i] ? 1 : 0.3, fontWeight: 600,
                             }}>{num}</span>
                           ))}
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{done}/4</span>
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{done}/4</span>
                         </div>
                       );
                     } catch { return null; }
@@ -686,7 +686,7 @@ export default function MyPracticePage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{note.title}</h3>
+                      <h3 style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: 0 }}>{note.title}</h3>
                       <span style={{
                         padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                         background: 'var(--blue-dim)', color: 'var(--blue)',
@@ -713,7 +713,7 @@ export default function MyPracticePage() {
                     return (
                       <div style={{
                         display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10,
-                        padding: 16, borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)',
+                        padding: 16, borderRadius: 'var(--radius-md)', background: 'var(--bg-main)',
                         marginBottom: 16,
                       }}>
                         {STATS_FIELDS.map(sf => (
@@ -736,7 +736,7 @@ export default function MyPracticePage() {
                     if (!steps.order_detail) return null;
                     return (
                       <div style={{
-                        padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)',
+                        padding: '12px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-main)',
                         marginBottom: 16, border: '1px solid var(--border)',
                       }}>
                         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6 }}>상담/수주 내역</div>
@@ -758,7 +758,7 @@ export default function MyPracticePage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12, maxHeight: 300, overflowY: 'auto', padding: '0 4px' }}>
                       {comments.map(c => (
                         <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start' }}>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6 }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6 }}>
                             <span>{c.author_name}</span>
                             <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>

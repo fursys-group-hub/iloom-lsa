@@ -89,7 +89,7 @@ export default function MyTestsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>내 테스트</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>내 테스트</h2>
 
       {/* 차시 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
@@ -135,7 +135,7 @@ export default function MyTestsPage() {
       {/* 선택된 차시 상세 */}
       {selectedSession && selectedDetails.length > 0 && (
         <div style={card}>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 16px' }}>
+          <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: '0 0 16px' }}>
             {selectedSession} — 문항별 결과
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

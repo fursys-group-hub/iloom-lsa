@@ -73,11 +73,12 @@ const card: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: 17,
-  fontWeight: 700,
+  fontSize: 18,
+  fontWeight: 600,
+  lineHeight: 1.3,
   color: 'var(--text-primary)',
   margin: '0 0 16px',
-  letterSpacing: '-0.01em',
+  letterSpacing: '-0.015em',
 };
 
 const questionText: React.CSSProperties = {
@@ -378,7 +379,7 @@ export default function SurveyPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.015em' }}>
+            <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
               {info?.title || phase}
             </h2>
             <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>제출 완료</p>
@@ -467,11 +468,12 @@ export default function SurveyPage() {
           {/* Header */}
           <div>
             <h1 style={{
-              fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)',
+              fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)',
               fontWeight: 700,
+              lineHeight: 1.1,
               color: 'var(--text-primary)',
               margin: '0 0 8px',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
             }}>
               {phaseInfo.title}
             </h1>
@@ -529,11 +531,12 @@ export default function SurveyPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
           <div>
             <h1 style={{
-              fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)',
+              fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)',
               fontWeight: 700,
+              lineHeight: 1.1,
               color: 'var(--text-primary)',
               margin: '0 0 8px',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.025em',
             }}>
               교육 설문
             </h1>

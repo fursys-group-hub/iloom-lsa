@@ -484,7 +484,7 @@ export default function MyNotesPage() {
         }
       `}</style>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>📓 교육일지</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>교육일지</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           {!isArchived && (
             <button
@@ -572,7 +572,7 @@ export default function MyNotesPage() {
             return null;
           })()}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: 0 }}>
               {isSelfStudyMode ? '자율학습 노트' : editingNoteId ? '교육일지 수정' : '오늘의 교육일지'}
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -599,7 +599,7 @@ export default function MyNotesPage() {
             {/* 날짜 선택 */}
             {!editingNoteId && (
               <div>
-                <label style={labelStyle}>📅 날짜 선택</label>
+                <label style={labelStyle}>날짜 선택</label>
                 <select
                   value={selectedDate}
                   onChange={(e) => {
@@ -654,7 +654,7 @@ export default function MyNotesPage() {
                     >
                       <div style={{ fontSize: 24, marginBottom: 4 }}>{opt.icon}</div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{opt.label}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -728,7 +728,7 @@ export default function MyNotesPage() {
                     display: 'flex', alignItems: 'center', gap: 4, padding: '6px 16px',
                     borderBottom: '1px solid var(--border)', background: 'var(--bg-hover)',
                   }}>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', marginRight: 4 }}>서식:</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)', marginRight: 4 }}>서식:</span>
                     <FormatBtn label="● 목록" title="줄 앞에 - 추가" onClick={() => insertFormat('- ')} />
                     <FormatBtn label="B 굵게" title="선택한 텍스트를 굵게" onClick={() => insertFormat('**', '**')} />
                     <FormatBtn label="# 제목" title="줄을 제목으로" onClick={() => insertFormat('### ')} />
@@ -873,7 +873,7 @@ export default function MyNotesPage() {
                     </span>
                     {isSelfStudy && (
                       <span style={{
-                        padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700,
+                        padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                         background: 'var(--purple-dim)', color: 'var(--purple)',
                       }}>자율학습</span>
                     )}
@@ -892,7 +892,7 @@ export default function MyNotesPage() {
                       )}
                       {note.participation_score != null && note.participation_score > 0 && (
                         <span style={{
-                          padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
+                          padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
                           background: note.participation_score >= 3 ? 'var(--green-dim)' : note.participation_score >= 1 ? 'var(--orange-dim)' : 'var(--red-dim)',
                           color: note.participation_score >= 3 ? 'var(--green)' : note.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
                         }}>
@@ -916,16 +916,16 @@ export default function MyNotesPage() {
                             const completed = filled[i];
                             return (
                               <span key={i} style={{
-                                fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-pill)',
+                                fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                                 background: completed ? 'var(--green-dim)' : 'var(--bg-hover)',
                                 color: completed ? 'var(--green)' : 'var(--text-muted)',
-                                opacity: completed ? 1 : 0.3, fontWeight: 700,
+                                opacity: completed ? 1 : 0.3, fontWeight: 600,
                               }}>
                                 {num}
                               </span>
                             );
                           })}
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{done}/3</span>
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{done}/3</span>
                         </div>
                       );
                     } catch { return null; }
@@ -935,14 +935,14 @@ export default function MyNotesPage() {
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                       {displayTags.slice(0, 3).map(tag => (
                         <span key={tag} style={{
-                          padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                          padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                           background: isSelfStudy ? 'var(--purple-dim)' : 'var(--blue-dim)',
                           color: isSelfStudy ? 'var(--purple)' : 'var(--blue-light)',
-                          fontSize: 11, fontWeight: 600,
+                          fontSize: 12, fontWeight: 600,
                         }}>{tag}</span>
                       ))}
                       {displayTags.length > 3 && (
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{displayTags.length - 3}</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>+{displayTags.length - 3}</span>
                       )}
                     </div>
                   )}
@@ -950,9 +950,9 @@ export default function MyNotesPage() {
                   {(commentCounts[note.id] || 0) > 0 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <span style={{
-                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
+                        padding: '3px 10px', borderRadius: 'var(--radius-pill)',
                         background: 'var(--blue-dim)', color: 'var(--blue-light)',
-                        fontSize: 11, fontWeight: 700,
+                        fontSize: 12, fontWeight: 600,
                         display: 'flex', alignItems: 'center', gap: 3,
                       }}>
                         {commentCounts[note.id]}개 코멘트
@@ -975,7 +975,7 @@ export default function MyNotesPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+                      <h3 style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: 0 }}>
                         {note.title}
                       </h3>
                       {isSelfStudy && (
@@ -993,7 +993,7 @@ export default function MyNotesPage() {
                     {conf && (
                       <span style={{
                         padding: '4px 12px', borderRadius: 'var(--radius-pill)',
-                        background: 'var(--bg-elevated)', fontSize: 14,
+                        background: 'var(--bg-main)', fontSize: 14,
                       }}>
                         {conf.icon} {conf.label}
                       </span>
@@ -1056,7 +1056,7 @@ export default function MyNotesPage() {
                           alignItems: c.author_role === 'student' ? 'flex-end' : 'flex-start',
                         }}
                       >
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2, display: 'flex', gap: 6, alignItems: 'center' }}>
                           <span>{c.author_name}</span>
                           <span>{new Date(c.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
@@ -1123,7 +1123,6 @@ export default function MyNotesPage() {
         </>
       ) : (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
-          <p style={{ fontSize: 40, marginBottom: 12 }}>📓</p>
           <p style={{ fontSize: 16, color: 'var(--text-muted)', marginBottom: 8 }}>
             {searchQuery ? '검색 결과가 없어요' : '아직 작성한 교육일지가 없어요'}
           </p>
@@ -1231,7 +1230,7 @@ function TextBlockEditor({ block, onChange }: { block: Block; onChange: (p: Part
           background: 'var(--bg-hover)', fontSize: 14, color: 'var(--text-second)',
           lineHeight: 1.7,
         }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>미리보기</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>미리보기</div>
           {block.content.split('\n').map((line, i) => (
             <div key={i}>{renderInlineFormat(line)}</div>
           ))}
@@ -1558,7 +1557,7 @@ function renderMarkdownLines(text: string, searchQuery: string): React.ReactNode
             minWidth: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
             background: 'var(--blue-dim)', color: 'var(--blue-light)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 700,
+            fontSize: 12, fontWeight: 700,
           }}>{numMatch[1]}</span>
           <span style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.5 }}>
             {renderInlineFormat(numMatch[2], searchQuery)}

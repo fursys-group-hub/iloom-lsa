@@ -178,7 +178,7 @@ export default function AskPage() {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>질문하기</h2>
+        <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 }}>질문하기</h2>
         {!showForm && !isArchived && (
           <button onClick={() => { setShowForm(true); setSelectedId(null); }} style={{
             padding: '10px 20px', borderRadius: 'var(--radius-md)',
@@ -193,7 +193,7 @@ export default function AskPage() {
       {/* 새 질문 작성 폼 */}
       {showForm && !isArchived && (
         <div style={{ ...card, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 600, margin: '0 0 12px' }}>새 질문 작성</h3>
+          <h3 style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.3, letterSpacing: '-0.015em', margin: '0 0 12px' }}>새 질문 작성</h3>
           <textarea
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
@@ -271,7 +271,7 @@ export default function AskPage() {
                     {q.reply_count > 0 && (
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{q.reply_count}개 답변</span>
                     )}
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                       {new Date(q.created_at).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'short', day: 'numeric' })}
                     </span>
                   </div>
@@ -361,11 +361,11 @@ export default function AskPage() {
                       }}>
                         <button onClick={() => { setEditingQuestionId(selectedQ.id); setEditingQuestionTitle(selectedQ.title); }} style={{
                           padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
-                          border: 'none', fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer',
+                          border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer',
                         }}>수정</button>
                         <button onClick={() => handleDeleteQuestion(selectedQ.id)} style={{
                           padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
-                          border: 'none', fontSize: 11, color: 'var(--red)', cursor: 'pointer',
+                          border: 'none', fontSize: 12, color: 'var(--red)', cursor: 'pointer',
                         }}>삭제</button>
                       </div>
                     </div>
@@ -382,14 +382,14 @@ export default function AskPage() {
                         <div className="hide-mobile" style={{
                           width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
                           background: 'var(--blue-dim)', color: 'var(--blue)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700,
                         }}>
-                          👩‍🏫
+                          {r.author_name?.[0] || '?'}
                         </div>
                       )}
                       <div>
                         {!isMe && (
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, marginLeft: 4 }}>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, marginLeft: 4 }}>
                             {r.author_name}
                           </div>
                         )}
@@ -441,18 +441,18 @@ export default function AskPage() {
                               }}>
                                 <button onClick={(e) => { e.stopPropagation(); setEditingReplyId(r.id); setEditingContent(r.content); }} style={{
                                   padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
-                                  border: 'none', fontSize: 11, color: 'var(--text-tertiary)', cursor: 'pointer',
+                                  border: 'none', fontSize: 12, color: 'var(--text-tertiary)', cursor: 'pointer',
                                 }}>수정</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleDeleteReply(r.id); }} style={{
                                   padding: '2px 8px', borderRadius: 'var(--radius-xs)', background: 'transparent',
-                                  border: 'none', fontSize: 11, color: 'var(--red)', cursor: 'pointer',
+                                  border: 'none', fontSize: 12, color: 'var(--red)', cursor: 'pointer',
                                 }}>삭제</button>
                               </div>
                             )}
                           </div>
                         )}
                         <div style={{
-                          fontSize: 11, color: 'var(--text-muted)', marginTop: 3,
+                          fontSize: 12, color: 'var(--text-muted)', marginTop: 3,
                           textAlign: isMe ? 'right' : 'left', paddingInline: 4,
                         }}>
                           {new Date(r.created_at).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
