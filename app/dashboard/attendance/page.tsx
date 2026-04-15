@@ -277,25 +277,23 @@ export default function AttendancePage() {
               </div>
 
               <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+                <table className="data-table">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <tr>
                       {['날짜', '이름', '부서', '출근', '퇴근', '상태'].map((h) => (
-                        <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                          {h}
-                        </th>
+                        <th key={h}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((r, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={tdCompact}>{r.date}</td>
-                        <td style={{ ...tdCompact, fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</td>
-                        <td style={tdCompact}>{r.department}</td>
-                        <td style={tdCompact}>{r.checkIn}</td>
-                        <td style={tdCompact}>{r.checkOut}</td>
-                        <td style={tdCompact}>
+                      <tr key={i}>
+                        <td style={{ whiteSpace: 'nowrap' }}>{r.date}</td>
+                        <td style={{ whiteSpace: 'nowrap', fontWeight: 600, color: 'var(--text-primary)' }}>{r.name}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>{r.department}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>{r.checkIn}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>{r.checkOut}</td>
+                        <td style={{ whiteSpace: 'nowrap' }}>
                           {editMode ? (
                             <select
                               value={r.status}
@@ -460,15 +458,11 @@ export default function AttendancePage() {
                 </div>
               </div>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+                <table className="data-table">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <tr>
                       {['이름', '출근', '퇴근', '상태', ''].map((h) => (
-                        <th key={h} style={{
-                          padding: '12px 16px',
-                          textAlign: h === '' ? 'right' : 'left',
-                          fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-                        }}>
+                        <th key={h} style={{ textAlign: h === '' ? 'right' : 'left', whiteSpace: 'nowrap' }}>
                           {h}
                         </th>
                       ))}
@@ -558,14 +552,6 @@ const card: React.CSSProperties = {
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: '12px 16px',
-  color: 'var(--text-second)',
-  whiteSpace: 'nowrap',
-};
-
-const tdCompact: React.CSSProperties = {
-  padding: '12px 16px',
-  color: 'var(--text-second)',
   whiteSpace: 'nowrap',
 };
 

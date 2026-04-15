@@ -782,23 +782,23 @@ export default function TestsClient({ batches, students, scores, attendance, not
               <button onClick={() => setHeatmapModal(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
             {heatmapModalData.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                <thead><tr style={{ borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>차시</th>
-                  <th style={{ textAlign: 'left', padding: '12px 16px', color: 'var(--text-second)' }}>문항</th>
-                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--green)' }}>정답</th>
-                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--red)' }}>오답</th>
-                  <th style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--text-second)' }}>오답률</th>
+              <table className="data-table">
+                <thead><tr>
+                  <th>차시</th>
+                  <th>문항</th>
+                  <th style={{ textAlign: 'center', color: 'var(--green)' }}>정답</th>
+                  <th style={{ textAlign: 'center', color: 'var(--red)' }}>오답</th>
+                  <th style={{ textAlign: 'center' }}>오답률</th>
                 </tr></thead>
                 <tbody>{heatmapModalData.map((q, i) => {
                   const rc = rateColor(100 - q.wrongRate);
                   return (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>{q.session}</td>
-                      <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>Q{q.questionId}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--green)', fontWeight: 600 }}>{q.correct}명</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', color: 'var(--red)', fontWeight: 600 }}>{q.wrong}명</td>
-                      <td style={{ textAlign: 'center', padding: '12px 16px', fontWeight: 700, color: rc.text }}>{q.wrongRate}%</td>
+                    <tr key={i}>
+                      <td style={{ color: 'var(--text-primary)' }}>{q.session}</td>
+                      <td style={{ color: 'var(--text-primary)' }}>Q{q.questionId}</td>
+                      <td style={{ textAlign: 'center', color: 'var(--green)', fontWeight: 600 }}>{q.correct}명</td>
+                      <td style={{ textAlign: 'center', color: 'var(--red)', fontWeight: 600 }}>{q.wrong}명</td>
+                      <td style={{ textAlign: 'center', fontWeight: 700, color: rc.text }}>{q.wrongRate}%</td>
                     </tr>
                   );
                 })}</tbody>

@@ -462,7 +462,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                   <div style={{ padding: '14px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-main)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>어제</span>
-                      <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: yesterdayEduConfig.bg, color: yesterdayEduConfig.color }}>
+                      <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: yesterdayEduConfig.bg, color: yesterdayEduConfig.color }}>
                         {yesterdayEduConfig.label}
                       </span>
                     </div>
@@ -487,7 +487,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                   <div style={{ padding: '14px 16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-main)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>오늘</span>
-                      <span style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 600, background: todayEduConfig.bg, color: todayEduConfig.color }}>
+                      <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: todayEduConfig.bg, color: todayEduConfig.color }}>
                         {todayEduConfig.label}
                       </span>
                     </div>
@@ -552,7 +552,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       <span style={{ fontSize: 14, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {q.title}
                       </span>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
+                      <span style={{ fontSize: 13, color: 'var(--text-muted)', flexShrink: 0 }}>
                         {q.student_name}
                       </span>
                     </Link>
@@ -583,8 +583,8 @@ export default function DashboardClient({ batches, students: allStudents, scores
                 ...(droppedStudents.length > 0 ? [{ label: '퇴사', value: droppedStudents.length, color: 'var(--text-muted)' }] : []),
               ].map((s, i) => (
                 <div key={i} style={{ textAlign: 'center', padding: '8px 0' }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>명</span></div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+                  <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>명</span></div>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -652,7 +652,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 }}>
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                           {student.name}
-                          <span className="hide-mobile" style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginLeft: 5 }}>
+                          <span className="hide-mobile" style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500, marginLeft: 5 }}>
                             적응 {adaptation.total}점 · {riskCheck.riskCount}개 해당
                           </span>
                         </span>
@@ -700,7 +700,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
                           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>{item.label}</div>
                           <div style={{ fontSize: 18, fontWeight: 700, color: item.isAmount ? 'var(--purple)' : 'var(--text-primary)' }}>
                             {item.isAmount ? item.value.toLocaleString() : item.value}
-                            <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{item.isAmount ? '원' : '건'}</span>
+                            <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{item.isAmount ? '원' : '건'}</span>
                           </div>
                           {/* 각 컬럼 아래에 차트 영역 배치 */}
                           {!item.isAmount && i < 3 && (
@@ -965,11 +965,11 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
               <span
                 onClick={() => toggleMemo(selectedDate, idx)}
                 style={{
-                  width: 12, height: 12, borderRadius: 2, flexShrink: 0, cursor: 'pointer',
+                  width: 14, height: 14, borderRadius: 3, flexShrink: 0, cursor: 'pointer',
                   border: m.done ? 'none' : '1.5px solid rgba(255,255,255,0.3)',
                   background: m.done ? 'rgba(255,255,255,0.6)' : 'transparent',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 9, color: 'var(--blue)',
+                  fontSize: 12, color: 'var(--blue)',
                 }}>{m.done ? '✓' : ''}</span>
               {editIdx === idx ? (
                 <input value={editText} onChange={e => setEditText(e.target.value)}
@@ -981,7 +981,7 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
                 <span onDoubleClick={() => startEdit(idx, m.text)} style={{ fontSize: 12, flex: 1, textDecoration: m.done ? 'line-through' : 'none', opacity: m.done ? 0.45 : 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}>{m.text}</span>
               )}
               <button onClick={() => removeMemo(selectedDate, idx)} style={{
-                background: 'none', border: 'none', cursor: 'pointer', fontSize: 10, color: 'rgba(255,255,255,0.25)',
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'rgba(255,255,255,0.35)',
                 padding: 0, flexShrink: 0, lineHeight: 1,
               }}>×</button>
             </div>
@@ -1040,7 +1040,7 @@ function ScheduleCalendar({ batch, kstToday, testDates = [], announcementItems =
             );
           })}
         </div>
-        <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+        <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#3B82F6', marginRight: 3 }} />정규</span>
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#F59E0B', marginRight: 3 }} />실습</span>
           <span><span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: '#22C55E', marginRight: 3 }} />테스트</span>

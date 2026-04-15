@@ -395,11 +395,11 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
               {/* 헤드라인 + 왜 보나요? popover */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, gap: 12 }}>
                 {advancedSurveys.length > 0 ? (
-                  <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
                     교육 후<br /><span style={{ color: 'var(--green)' }}>{mostGrowth.area}</span> 자신감이<br />가장 많이 자랐어요
                   </h2>
                 ) : (
-                  <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>사후 설문 대기 중</h2>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>사후 설문 대기 중</h2>
                 )}
                 <WhyPopover title="자신감(자기효능감)을 왜 측정하나요?">
                   <p style={{ margin: '0 0 10px' }}>시험 점수가 높다고 해서 매장에서 잘하는 건 아니에요. <b>&ldquo;나는 실제 고객 앞에서 자신 있게 응대할 수 있다&rdquo;</b>고 믿는 정도(자기효능감)가 실전 성과의 핵심 예측 변수예요.</p>
@@ -461,10 +461,10 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                     const diffColor = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--text-muted)';
                     return (
                       <tr key={d.area} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                        <td style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{d.area}</td>
-                        <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--blue)' }}>{d.사전}</td>
-                        {advancedSurveys.length > 0 && <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>{d.사후}</td>}
-                        {advancedSurveys.length > 0 && <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: diffColor }}>{diff > 0 ? '+' : ''}{diff}</td>}
+                        <td style={{ padding: '10px 12px', fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{d.area}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 14, fontWeight: 700, color: 'var(--blue)' }}>{d.사전}</td>
+                        {advancedSurveys.length > 0 && <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 14, fontWeight: 700, color: 'var(--green)' }}>{d.사후}</td>}
+                        {advancedSurveys.length > 0 && <td style={{ padding: '10px 12px', textAlign: 'center', fontSize: 14, fontWeight: 700, color: diffColor }}>{diff > 0 ? '+' : ''}{diff}</td>}
                       </tr>
                     );
                   })}
@@ -648,7 +648,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                 {/* 헤드라인 + popover */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12 }}>
                   <div>
-                    <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
                       {diff > 0 ? <>교육이 진행될수록<br />시험 점수가<br /><span style={{ color: 'var(--green)' }}>꾸준히 올랐어요</span></> : diff < 0 ? <>후반에<br />시험 점수가<br /><span style={{ color: 'var(--red)' }}>떨어졌어요</span></> : <>시험 점수가<br />정체 중이에요</>}
                     </h2>
                     <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '10px 0 0' }}>초반 평균 {fAvg}점 → 후반 평균 {lAvg}점 ({diff > 0 ? '+' : ''}{diff}점)</p>
@@ -686,7 +686,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
               {/* 헤드라인 + popover */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12 }}>
                 <div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
                     {highPct >= 70 ? <>대부분의 교육생이<br />프로그램에<br /><span style={{ color: 'var(--green)' }}>잘 적응했어요</span></> : highPct >= 50 ? <>절반은 적응했지만<br />케어가 필요한<br /><span style={{ color: 'var(--orange)' }}>교육생이 있어요</span></> : <>적응에 어려움을 겪는<br />교육생이<br /><span style={{ color: 'var(--red)' }}>많아요</span></>}
                   </h2>
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '10px 0 0' }}>{adaptationIndices.length}명 중 {highCount}명({highPct}%)이 적응 양호 (70점 이상)</p>
@@ -723,7 +723,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                       <div style={{ fontSize: 13, fontWeight: 600, color: g.color, marginBottom: 4 }}>{g.label} ({g.min !== undefined ? `${g.min}+` : `~${g.max}`})</div>
                       <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)' }}>{group.length}<span style={{ fontSize: 13, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>명</span></div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{pct}%</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{group.map(a => a.studentName).join(', ')}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{group.map(a => a.studentName).join(', ')}</div>
                     </div>
                   );
                 })}
@@ -898,7 +898,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
                         <span style={{ fontSize: 13, color: 'var(--text-muted)', width: 40 }}>{item.label}</span>
                         {practiceData.length > 0 && <span style={{ ...badgeBase, background: 'var(--blue-dim)', color: 'var(--blue)' }}>실습 {item.practice}</span>}
                         {batchWeeklySales.length > 0 && <span style={{ ...badgeBase, background: 'var(--green-dim)', color: 'var(--green)' }}>심화 {item.advanced}</span>}
-                        {i < 2 && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>→</span>}
+                        {i < 2 && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>→</span>}
                       </div>
                     ))}
                     <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-muted)' }}>

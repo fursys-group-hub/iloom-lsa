@@ -163,9 +163,9 @@ export default function OverviewPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* 매트릭스 */}
           <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
+            <table className="data-table" style={{ minWidth: 700 }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                <tr>
                   <Th>교육생</Th><Th>매장</Th>
                   {[1, 2, 3, 4, 5, 6].map((w) => <Th key={w} align="center">{w}주차</Th>)}
                   <Th align="center">총평</Th>
@@ -629,10 +629,10 @@ function ScoreCard({ label, score, color }: { label: string; score: number; colo
 }
 
 function Th({ children, align }: { children: React.ReactNode; align?: string }) {
-  return <th style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textAlign: (align as 'left' | 'center') || 'left', background: 'var(--bg-elevated)' }}>{children}</th>;
+  return <th style={{ textAlign: (align as 'left' | 'center') || 'left', background: 'var(--bg-elevated)' }}>{children}</th>;
 }
 function Td({ children, align }: { children: React.ReactNode; align?: string }) {
-  return <td style={{ padding: '12px 16px', fontSize: 15, color: 'var(--text-primary)', textAlign: (align as 'left' | 'center') || 'left' }}>{children}</td>;
+  return <td style={{ color: 'var(--text-primary)', textAlign: (align as 'left' | 'center') || 'left' }}>{children}</td>;
 }
 function StoreBadge({ children }: { children: React.ReactNode }) {
   return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 600 }}>{children}</span>;

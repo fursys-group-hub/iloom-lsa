@@ -23,8 +23,8 @@
   /* 텍스트 — 원래 색상 */
   --text-primary: #111827;
   --text-second: #374151;
-  --text-tertiary: #6B7280;
-  --text-muted: #9CA3AF;
+  --text-tertiary: #4B5563;
+  --text-muted: #6B7280;
 
   /* 액센트 — 원래 색상 */
   --blue: #3B82F6;
@@ -117,9 +117,9 @@ body.dark {
   --border-light: #3A3A3C;
 
   --text-primary: #FFFFFF;
-  --text-second: rgba(235, 235, 245, 0.8);
-  --text-tertiary: rgba(235, 235, 245, 0.6);
-  --text-muted: rgba(235, 235, 245, 0.3);
+  --text-second: rgba(235, 235, 245, 0.85);
+  --text-tertiary: rgba(235, 235, 245, 0.7);
+  --text-muted: rgba(235, 235, 245, 0.5);
 
   --blue: #007AFF;
   --blue-light: #0A84FF;
@@ -264,6 +264,36 @@ button, a, [role="button"] {
 @media (max-width: 1023px) {
   /* 카드 패딩 축소 */
   [style*="padding: 24px"] { padding: 16px !important; }
+}
+
+/* ──────────────────────────────────────
+   공통 테이블 스타일 (.data-table)
+   DESIGN_SYSTEM.md 섹션 11 준수
+   ────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-second);
+  border-bottom: 1px solid var(--border-light);
+}
+.data-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+.data-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 /* ──────────────────────────────────────

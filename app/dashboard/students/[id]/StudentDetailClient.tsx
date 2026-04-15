@@ -378,22 +378,22 @@ export default function StudentDetailClient({
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <table className="data-table">
                     <thead>
                       <tr>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>항목</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', width: 60 }}>점수</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>상세</th>
+                        <th>항목</th>
+                        <th style={{ textAlign: 'center', width: 60 }}>점수</th>
+                        <th>상세</th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map(it => {
                         const color = it.score >= 75 ? 'var(--green)' : it.score >= 60 ? 'var(--orange)' : 'var(--red)';
                         return (
-                          <tr key={it.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                            <td style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{it.label}</td>
-                            <td style={{ padding: '8px 12px', textAlign: 'center', fontSize: 13, fontWeight: 700, color }}>{it.score}</td>
-                            <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{it.detail}</td>
+                          <tr key={it.label}>
+                            <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{it.label}</td>
+                            <td style={{ textAlign: 'center', fontWeight: 700, color }}>{it.score}</td>
+                            <td style={{ color: 'var(--text-muted)' }}>{it.detail}</td>
                           </tr>
                         );
                       })}
@@ -526,13 +526,13 @@ export default function StudentDetailClient({
               })()}
             </div>
             {attendance.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table className="data-table">
                 <thead>
                   <tr>
-                    <th style={thStyle}>날짜</th>
-                    <th style={thStyle}>출근</th>
-                    <th style={thStyle}>퇴근</th>
-                    <th style={thStyle}>상태</th>
+                    <th>날짜</th>
+                    <th>출근</th>
+                    <th>퇴근</th>
+                    <th>상태</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -552,11 +552,11 @@ export default function StudentDetailClient({
                       if (outMatch) checkOut = outMatch[1] === '-' ? '-' : outMatch[1];
                     }
                     return (
-                      <tr key={a.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                        <td style={tdStyle}>{a.date}</td>
-                        <td style={{ ...tdStyle, fontWeight: 600 }}>{checkIn}</td>
-                        <td style={{ ...tdStyle, fontWeight: 600 }}>{checkOut}</td>
-                        <td style={tdStyle}>
+                      <tr key={a.id}>
+                        <td>{a.date}</td>
+                        <td style={{ fontWeight: 600 }}>{checkIn}</td>
+                        <td style={{ fontWeight: 600 }}>{checkOut}</td>
+                        <td>
                           <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: st.bg, color: st.color }}>{st.label}</span>
                         </td>
                       </tr>
@@ -900,15 +900,6 @@ function StatItem({ label, value, color }: { label: string; value: string; color
     </div>
   );
 }
-
-/* ── 테이블 스타일 ── */
-const thStyle: React.CSSProperties = {
-  padding: '12px 16px', textAlign: 'left', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--border)',
-};
-const tdStyle: React.CSSProperties = {
-  padding: '12px 16px', color: 'var(--text-second)', fontSize: 14,
-};
 
 /* ── 일지 탭 컴포넌트 ── */
 interface NoteData {

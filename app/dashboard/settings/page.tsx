@@ -685,14 +685,11 @@ export default function SettingsPage() {
             </p>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <table className="data-table">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <tr>
                     {['이름', '비밀번호', '회사 이메일', '개인 이메일', '전화번호', '배치 매장', '관리'].map((h) => (
-                      <th key={h} style={{
-                        padding: '12px 14px', textAlign: h === '관리' ? 'right' : 'left',
-                        fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-                      }}>
+                      <th key={h} style={{ textAlign: h === '관리' ? 'right' : 'left', whiteSpace: 'nowrap' }}>
                         {h}
                       </th>
                     ))}
@@ -884,8 +881,6 @@ const card: React.CSSProperties = {
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: '12px 14px',
-  color: 'var(--text-second)',
   whiteSpace: 'nowrap',
 };
 

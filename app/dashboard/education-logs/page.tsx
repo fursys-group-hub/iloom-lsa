@@ -784,9 +784,9 @@ function renderMdLines(text: string): React.ReactNode {
     if (!data.length) { tblRows = []; return; }
     els.push(
       <div key={k++} style={{ overflowX: 'auto', margin: '8px 0' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead><tr>{data[0].map((h, i) => <th key={i} style={{ padding: '12px 16px', textAlign: 'left', whiteSpace: 'nowrap', borderBottom: '2px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>{renderInline(h.trim())}</th>)}</tr></thead>
-          <tbody>{data.slice(1).map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', color: 'var(--text-second)', fontSize: 13, lineHeight: 1.5 }}>{renderInline(cell.trim())}</td>)}</tr>)}</tbody>
+        <table className="data-table">
+          <thead><tr>{data[0].map((h, i) => <th key={i} style={{ background: 'var(--bg-hover)' }}>{renderInline(h.trim())}</th>)}</tr></thead>
+          <tbody>{data.slice(1).map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ lineHeight: 1.5 }}>{renderInline(cell.trim())}</td>)}</tr>)}</tbody>
         </table>
       </div>
     );
@@ -916,9 +916,9 @@ function NoteContentRenderer({ content, contentType }: { content: string; conten
         if (block.type === 'table') {
           return (
             <div key={block.id} style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                <thead><tr>{block.headers.map((h, i) => <th key={i} style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '2px solid var(--border)', background: 'var(--bg-hover)', color: 'var(--text-muted)', fontSize: 13, fontWeight: 600 }}>{h}</th>)}</tr></thead>
-                <tbody>{block.rows.map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', color: 'var(--text-second)', fontSize: 13 }}>{cell}</td>)}</tr>)}</tbody>
+              <table className="data-table">
+                <thead><tr>{block.headers.map((h, i) => <th key={i} style={{ background: 'var(--bg-hover)' }}>{h}</th>)}</tr></thead>
+                <tbody>{block.rows.map((row, ri) => <tr key={ri}>{row.map((cell, ci) => <td key={ci}>{cell}</td>)}</tr>)}</tbody>
               </table>
             </div>
           );

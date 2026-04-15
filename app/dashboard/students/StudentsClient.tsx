@@ -221,12 +221,12 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
                     각 항목의 점수에 아래 비율을 곱해서 100점 만점으로 합산해요
                   </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                  <table className="data-table">
                     <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>항목</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted)', width: 60 }}>비율</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>무엇을 보나요?</th>
+                      <tr>
+                        <th>항목</th>
+                        <th style={{ textAlign: 'center', width: 60 }}>비율</th>
+                        <th>무엇을 보나요?</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -240,12 +240,12 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                         { name: '만성 오답',     weight: '5%',  note: '계속 반복해서 틀리는 문항이 얼마나 되는지' },
                         { name: '메모 톤',       weight: '4%',  note: '교육자가 남긴 칭찬/주의 메모의 비율' },
                       ].map((row, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                          <td style={{ padding: '12px 16px', color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                        <tr key={i}>
+                          <td style={{ color: 'var(--text-primary)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                             {row.name}
                           </td>
-                          <td style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
-                          <td style={{ padding: '12px 16px', color: 'var(--text-tertiary)', fontSize: 12 }}>{row.note}</td>
+                          <td style={{ textAlign: 'center', color: 'var(--text-primary)', fontWeight: 700 }}>{row.weight}</td>
+                          <td style={{ color: 'var(--text-tertiary)' }}>{row.note}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -426,12 +426,12 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                   </div>
                   {/* 항목별 비교 테이블 */}
                   <div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <table className="data-table">
                       <thead>
                         <tr>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>항목</th>
+                          <th>항목</th>
                           {selectedData.map(d => (
-                            <th key={d.studentId} style={{ padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: d.color, borderBottom: '1px solid var(--border)' }}>{d.studentName}</th>
+                            <th key={d.studentId} style={{ textAlign: 'center', color: d.color }}>{d.studentName}</th>
                           ))}
                         </tr>
                       </thead>
@@ -440,12 +440,12 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           const values = selectedData.map(d => d.breakdown[item.key]);
                           const max = Math.max(...values);
                           return (
-                            <tr key={item.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                              <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{item.label}</td>
+                            <tr key={item.label}>
+                              <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.label}</td>
                               {selectedData.map((d, j) => {
                                 const v = values[j];
                                 return (
-                                  <td key={d.studentId} style={{ padding: '10px 12px', textAlign: 'center', fontSize: 14, fontWeight: v === max ? 700 : 500, color: v === max ? d.color : 'var(--text-tertiary)' }}>
+                                  <td key={d.studentId} style={{ textAlign: 'center', fontWeight: v === max ? 700 : 500, color: v === max ? d.color : 'var(--text-tertiary)' }}>
                                     {v}{item.suffix || ''}
                                   </td>
                                 );
@@ -454,9 +454,9 @@ export default function StudentsClient({ batches, students: initialStudents, sco
                           );
                         })}
                         <tr style={{ borderTop: '2px solid var(--border)' }}>
-                          <td style={{ padding: '10px 12px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>적응지수 합계</td>
+                          <td style={{ fontWeight: 700, color: 'var(--text-primary)' }}>적응지수 합계</td>
                           {selectedData.map(d => (
-                            <td key={d.studentId} style={{ padding: '10px 12px', textAlign: 'center', fontSize: 16, fontWeight: 700, color: d.color }}>{d.total}점</td>
+                            <td key={d.studentId} style={{ textAlign: 'center', fontSize: 16, fontWeight: 700, color: d.color }}>{d.total}점</td>
                           ))}
                         </tr>
                       </tbody>
