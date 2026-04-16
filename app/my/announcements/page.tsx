@@ -72,7 +72,7 @@ export default function MyAnnouncementsPage() {
             return (
               <SummaryRow
                 key={a.id}
-                badge={{ text: pt.label, tone: pt.tone }}
+                badge={{ text: pt.label, tone: pt.tone, dot: true }}
                 title={a.title}
                 rightSlot={
                   <>

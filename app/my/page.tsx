@@ -479,17 +479,18 @@ export default function MyPage() {
           <div style={{
             ...card, padding: '16px 20px',
             background: 'var(--bg-hover)', border: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+            textAlign: 'center',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 24 }}>🌙</span>
-              <div>
+              <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-tertiary)' }}>오늘은 휴무일이에요!</div>
                 <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요!</div>
               </div>
             </div>
             <Link href="/my/notes" style={{
-              padding: '8px 16px', borderRadius: 'var(--radius-md)',
+              padding: '10px 24px', borderRadius: 'var(--radius-md)',
               background: 'var(--purple)', color: '#fff', fontSize: 14, fontWeight: 600,
               textDecoration: 'none',
             }}>

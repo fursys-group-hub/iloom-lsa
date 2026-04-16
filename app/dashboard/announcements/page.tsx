@@ -268,6 +268,7 @@ export default function AnnouncementsPage() {
             return (
               <SummaryRow
                 key={a.id}
+                compact
                 badge={{ text: pLabel, tone, dot: true }}
                 title={a.title}
                 rightSlot={

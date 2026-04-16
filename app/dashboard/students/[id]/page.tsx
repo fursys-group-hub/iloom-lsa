@@ -42,6 +42,9 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
   // 설문 데이터
   const { data: surveysData } = await supabase.from('education_surveys').select('*').eq('student_id', id);
 
+  // 안성공장 투어 설문
+  const { data: ansanSurveysData } = await supabase.from('ansan_tour_surveys').select('*').eq('student_id', id).order('phase');
+
   // 반 전체 데이터 (평균 비교용)
   const { data: batchStudents } = await supabase.from('students').select('id').eq('batch_id', student.batch_id).eq('is_dropped', false);
   const batchStudentIds = (batchStudents || []).map(s => s.id);
@@ -65,6 +68,7 @@ export default async function StudentDetailPage(props: PageProps<'/dashboard/stu
       questions={questions || []}
       notes={notes || []}
       surveys={surveysData || []}
+      ansanSurveys={ansanSurveysData || []}
     />
   );
 }

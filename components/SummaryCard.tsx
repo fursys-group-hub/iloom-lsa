@@ -60,6 +60,8 @@ export interface SummaryCardProps {
   footerRight?: FooterItem | React.ReactNode;
   /** 제목 크기 — default(18px) | lg(22px) | xl(28px) */
   titleSize?: 'default' | 'lg' | 'xl';
+  /** 카드 배경을 bg-main(회색)으로 — 흰 카드 안에 넣을 때 사용 */
+  subtle?: boolean;
 }
 
 function renderFooterItem(item: FooterItem, key: string | number) {
@@ -103,9 +105,10 @@ export function SummaryCard(props: SummaryCardProps) {
     date, typeBadge, title, sub, thumbnail,
     selected, variant = 'default', onClick, href, disabled,
     footerSignals = [], footerRight,
-    titleSize = 'default',
+    titleSize = 'default', subtle,
   } = props;
   const titleFontSize = titleSize === 'xl' ? 28 : titleSize === 'lg' ? 22 : 18;
+  const defaultBg = subtle ? 'var(--bg-main)' : 'var(--bg-surface)';
 
   const isSelfStudy = variant === 'self-study';
   const hasFooter = footerSignals.length > 0 || !!footerRight;
@@ -114,10 +117,11 @@ export function SummaryCard(props: SummaryCardProps) {
     padding: '24px', borderRadius: 'var(--radius-lg)', textAlign: 'left',
     border: selected
       ? '2px solid var(--blue)'
+      : subtle ? 'none'
       : isSelfStudy ? '1px solid var(--purple-dim)' : '1px solid var(--border)',
     background: selected
       ? 'var(--blue-dim)'
-      : isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-surface)',
+      : isSelfStudy ? 'var(--purple-dim)' : defaultBg,
     cursor: disabled ? 'not-allowed' : (onClick || href ? 'pointer' : 'default'),
     opacity: disabled ? 0.55 : 1,
     transition: 'all 0.15s ease',

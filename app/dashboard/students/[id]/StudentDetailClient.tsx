@@ -6,6 +6,8 @@ import type { Student, TestScore, Attendance, StudentMemo, CoachingReport, Batch
 import { MEMO_CATEGORIES } from '@/lib/types';
 import { calculateAvgScore, calculateDailyAverages, calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { SummaryCard, type FooterItem } from '@/components/SummaryCard';
+import { SummaryRow } from '@/components/SummaryRow';
 
 interface Question {
   id: string;
@@ -51,6 +53,17 @@ interface Props {
   allNotes?: { student_id: string; content: string }[];
   notes?: NoteForAnalysis[];
   surveys?: { id: string; phase: string; eff_product: number | null; eff_customer: number | null; eff_sales: number | null; eff_teamwork: number | null; eff_overall: number | null; open_strength: string | null; open_worry: string | null; open_goal: string | null }[];
+  ansanSurveys?: AnsanSurveyData[];
+}
+
+interface AnsanSurveyData {
+  id: string; phase: 'pre' | 'post'; created_at: string;
+  know_products: number | null; know_factory: number | null; know_sofa: number | null; know_mattress: number | null;
+  know_steel: number | null; know_quality: number | null; know_competitive: number | null; know_explain: number | null; know_value: number | null;
+  curiosity_sofa: string; curiosity_mattress: string; curiosity_steel: string; curiosity_quality: string; curiosity_other: string;
+  sat_process: number | null; sat_helpful: number | null; sat_guide: number | null; sat_operation: number | null; sat_duration: number | null;
+  nps: number | null;
+  best_line: string; best_reason: string; learned_sofa: string; learned_mattress: string; learned_steel: string; confident_to_say: string; improvement: string;
 }
 
 const card: React.CSSProperties = {
@@ -79,7 +92,7 @@ function parseNoteMeta(content: string) {
 }
 
 export default function StudentDetailClient({
-  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [], surveys = [],
+  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [], surveys = [], ansanSurveys = [],
 }: Props) {
   const avgScore = useMemo(() => calculateAvgScore(scores), [scores]);
   const dailyAverages = useMemo(() => calculateDailyAverages(scores), [scores]);
@@ -182,6 +195,7 @@ export default function StudentDetailClient({
   }), [student, scores, attendance, parsedNotes, memos, totalEducationDays, studentCategoryRates]);
 
   const hrAdvice = useMemo(() => generateHRAdvice(riskCheck, adaptationIdx), [riskCheck, adaptationIdx]);
+  const [surveyModalId, setSurveyModalId] = useState<string | null>(null);
 
   // 카테고리별 그룹 (영역별 정답률용)
   const categoryGroups = useMemo(() => {
@@ -568,6 +582,193 @@ export default function StudentDetailClient({
               <p style={emptyStyle}>출결 데이터가 없어요</p>
             )}
           </div>
+
+          {/* 안성공장 투어 설문 모달 */}
+          {surveyModalId && (() => {
+            const s = ansanSurveys.find(x => x.id === surveyModalId);
+            if (!s) return null;
+            const isPre = s.phase === 'pre';
+            const knowItems = [
+              { label: '안성공장에서 어떤 일룸 제품을 만드는지', val: s.know_products },
+              { label: '안성공장의 규모와 작업 환경', val: s.know_factory },
+              { label: '소파 제작 과정', val: s.know_sofa },
+              { label: '매트리스 제작 과정', val: s.know_mattress },
+              { label: '철제 가구 제작 과정', val: s.know_steel },
+              { label: '품질 검사 방법', val: s.know_quality },
+              { label: '타사 대비 일룸 강점 설명', val: s.know_competitive },
+              { label: '고객 질문에 답할 수 있는 정도', val: s.know_explain },
+              { label: '일룸 가치를 내 언어로 설명', val: s.know_value },
+            ];
+            const openItems = isPre ? [
+              { label: '소파 과정에서 궁금한 점', val: s.curiosity_sofa },
+              { label: '매트리스 과정에서 궁금한 점', val: s.curiosity_mattress },
+              { label: '철제 가구에서 궁금한 점', val: s.curiosity_steel },
+              { label: '품질 검사에서 알고 싶은 점', val: s.curiosity_quality },
+              { label: '기타 보고 싶은 점', val: s.curiosity_other },
+            ] : [
+              { label: '소파 라인 — 새로 알게 된 점', val: s.learned_sofa },
+              { label: '매트리스 라인 — 새로 알게 된 점', val: s.learned_mattress },
+              { label: '철제 가구 라인 — 새로 알게 된 점', val: s.learned_steel },
+              { label: '고객에게 자신 있게 말할 수 있는 부분', val: s.confident_to_say },
+              { label: '아쉽거나 더 보고 싶었던 점', val: s.improvement },
+            ];
+            const satItems = !isPre ? [
+              { label: '투어 진행 절차', val: s.sat_process },
+              { label: '매장 영업에 도움', val: s.sat_helpful },
+              { label: '가이드/설명 이해도', val: s.sat_guide },
+              { label: '운영 만족도', val: s.sat_operation },
+              { label: '투어 시간 적절성', val: s.sat_duration },
+            ] : [];
+            return (
+              <div onClick={() => setSurveyModalId(null)} style={{
+                position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.55)',
+                display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                padding: '40px 20px', overflowY: 'auto',
+              }}>
+                <div onClick={e => e.stopPropagation()} style={{
+                  position: 'relative', width: '100%', maxWidth: 880,
+                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)', padding: '28px 32px', boxShadow: 'var(--shadow-md)',
+                }}>
+                  <button onClick={() => setSurveyModalId(null)} aria-label="닫기" style={{
+                    position: 'absolute', top: 16, right: 16, zIndex: 2,
+                    width: 36, height: 36, minWidth: 36, minHeight: 36, maxWidth: 36, maxHeight: 36,
+                    boxSizing: 'border-box', padding: 0, margin: 0, borderRadius: '50%', border: 'none',
+                    background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
+                    fontSize: 20, lineHeight: '36px', textAlign: 'center', cursor: 'pointer',
+                  }}>×</button>
+
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px', paddingRight: 44 }}>
+                    안성공장 인프라 투어 — {isPre ? '사전 설문' : '사후 설문'}
+                  </h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 24px' }}>
+                    {student.name} · {new Date(s.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                    {/* 왼쪽: 자가진단 + 만족도 테이블 */}
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>자가진단 (1~5점)</div>
+                      <table className="data-table" style={{ width: '100%' }}>
+                        <thead>
+                          <tr><th style={{ textAlign: 'left' }}>항목</th><th style={{ textAlign: 'center', width: 60 }}>점수</th></tr>
+                        </thead>
+                        <tbody>
+                          {knowItems.map((item, i) => (
+                            <tr key={i}>
+                              <td>{item.label}</td>
+                              <td style={{
+                                textAlign: 'center', fontWeight: 700, fontSize: 16,
+                                color: item.val != null && item.val >= 4 ? 'var(--green)' : item.val != null && item.val >= 3 ? 'var(--text-primary)' : 'var(--orange)',
+                              }}>{item.val ?? '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      {/* 사후: 만족도 + NPS */}
+                      {!isPre && satItems.length > 0 && (
+                        <>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '24px 0 12px' }}>만족도 (1~5점)</div>
+                          <table className="data-table" style={{ width: '100%' }}>
+                            <thead>
+                              <tr><th style={{ textAlign: 'left' }}>항목</th><th style={{ textAlign: 'center', width: 60 }}>점수</th></tr>
+                            </thead>
+                            <tbody>
+                              {satItems.map((item, i) => (
+                                <tr key={i}>
+                                  <td>{item.label}</td>
+                                  <td style={{
+                                    textAlign: 'center', fontWeight: 700, fontSize: 16,
+                                    color: item.val != null && item.val >= 4 ? 'var(--green)' : 'var(--text-primary)',
+                                  }}>{item.val ?? '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: '24px 0 12px' }}>추천 및 인상</div>
+                          <table className="data-table" style={{ width: '100%' }}>
+                            <thead>
+                              <tr><th style={{ textAlign: 'left' }}>항목</th><th style={{ textAlign: 'right', width: 160 }}>응답</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>추천 점수 (NPS)</td>
+                                <td style={{
+                                  textAlign: 'right', fontWeight: 700, fontSize: 18,
+                                  color: s.nps != null && s.nps >= 9 ? 'var(--green)' : 'var(--blue)',
+                                }}>{s.nps ?? '-'}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>/10</span></td>
+                              </tr>
+                              {s.best_line && (
+                                <tr>
+                                  <td>인상 깊은 라인</td>
+                                  <td style={{ textAlign: 'right' }}>
+                                    <span style={{
+                                      padding: '4px 14px', borderRadius: 'var(--radius-pill)', fontSize: 14, fontWeight: 700,
+                                      background: 'var(--blue-dim)', color: 'var(--blue)',
+                                    }}>{s.best_line}</span>
+                                  </td>
+                                </tr>
+                              )}
+                              {s.best_reason && (
+                                <tr>
+                                  <td colSpan={2} style={{ color: 'var(--text-tertiary)', fontSize: 13, lineHeight: 1.6 }}>{s.best_reason}</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </>
+                      )}
+                    </div>
+
+                    {/* 오른쪽: 주관식 (SummaryRow 펼치기) */}
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12 }}>{isPre ? '궁금한 점' : '새로 알게 된 점'}</div>
+                      <SurveyOpenAnswers items={openItems} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 안성공장 투어 설문 */}
+          {ansanSurveys.length > 0 && (
+            <div className="section-survey" style={card}>
+              <h3 style={{ ...sectionTitle, margin: 0, marginBottom: 16 }}>안성공장 투어 설문</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+                {ansanSurveys.map(s => {
+                  const isPre = s.phase === 'pre';
+                  const knowKeys = ['know_products', 'know_factory', 'know_sofa', 'know_mattress', 'know_steel', 'know_quality', 'know_competitive', 'know_explain', 'know_value'] as const;
+                  const knowScores = knowKeys.map(k => s[k]).filter(v => v != null) as number[];
+                  const avgKnow = knowScores.length > 0 ? (knowScores.reduce((a, b) => a + b, 0) / knowScores.length).toFixed(1) : '-';
+
+                  const footerSignals: FooterItem[] = [];
+                  footerSignals.push({ type: 'pill', text: `자가진단 평균 ${avgKnow}/5`, tone: Number(avgKnow) >= 3.5 ? 'green' : Number(avgKnow) >= 2.5 ? 'orange' : 'red' });
+                  if (!isPre && s.nps != null) footerSignals.push({ type: 'pill', text: `NPS ${s.nps}/10`, tone: s.nps >= 9 ? 'green' : s.nps >= 7 ? 'blue' : 'orange' });
+                  if (!isPre && s.best_line) footerSignals.push({ type: 'tag', text: s.best_line });
+
+                  const sub = isPre
+                    ? [s.curiosity_sofa, s.curiosity_mattress, s.curiosity_steel].filter(Boolean).join(' · ')
+                    : [s.confident_to_say, s.learned_sofa, s.learned_mattress].filter(Boolean).join(' · ');
+
+                  return (
+                    <SummaryCard
+                      key={s.id}
+                      date={new Date(s.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' })}
+                      typeBadge={{ text: isPre ? '사전 설문' : '사후 설문', tone: isPre ? 'blue' : 'green' }}
+                      title={isPre ? '투어 전 자가진단' : '투어 후 평가'}
+                      sub={sub}
+                      subtle
+                      selected={surveyModalId === s.id}
+                      onClick={() => setSurveyModalId(s.id)}
+                      footerSignals={footerSignals}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── 오른쪽: 달력 + 점수추이 + 카테고리 + 취약부분 ── */}
@@ -965,53 +1166,58 @@ function NotesTab({ studentId, submitInfo }: { studentId: string; studentName?: 
     const conf = n.confidence ? confMap[n.confidence] : null;
     const steps = parseSteps(n.content);
     const displayTags = (n.tags || []).filter(t => t !== '자율학습' && t !== '실습일지');
+    const maxP = n.participation_max || 3;
+
+    // 내용 미리보기 + 대표 이미지
+    let contentPreview = '';
+    let thumbImage = '';
+    try {
+      contentPreview = [steps.step1, steps.step2, steps.step3]
+        .filter(s => s && String(s).trim())
+        .map(s => String(s).trim())
+        .join(' · ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const firstImgs = [steps.step1_images, steps.step2_images, steps.step3_images]
+        .find(arr => Array.isArray(arr) && arr.length > 0);
+      thumbImage = firstImgs?.[0] || '';
+    } catch { /* */ }
+
+    // 보일러플레이트 필터링
+    const boilerplateRe = /^\d{4}-\d{2}-\d{2}\s.+\s\/\s(교육일지|실습일지|자율학습)/;
+    const title = n.title || (isPractice ? '실습일지' : '교육일지');
+    const sub = isPractice
+      ? [
+          `상담 ${steps.stats_consult || 0} · 견적 ${steps.stats_estimate || 0} · 수주 ${steps.stats_order || 0}`,
+          steps.stats_amount ? `${Number(steps.stats_amount).toLocaleString()}원` : '',
+        ].filter(Boolean).join(' · ')
+      : contentPreview;
+
+    // 푸터 신호 조립
+    const footerSignals: FooterItem[] = [];
+    if (!isSelfStudy && conf) footerSignals.push({ type: 'emoji', value: conf.icon });
+    const partialP = !isSelfStudy && n.participation_score != null && n.participation_score > 0 && n.participation_score < maxP;
+    if (partialP) footerSignals.push({ type: 'pill', text: `참여 ${n.participation_score}/${maxP}`, tone: n.participation_score! >= 1 ? 'orange' : 'red' });
+    if (!isSelfStudy && 'best_learning' in n && n.best_learning) footerSignals.push({ type: 'pill', text: '⭐ 우수', tone: 'orange' });
+    displayTags.slice(0, 2).forEach(t => footerSignals.push({ type: 'tag', text: t }));
 
     return (
-      <button
+      <SummaryCard
         key={n.id}
-        onClick={() => setExpandedId(isSelected ? null : n.id)}
-        style={{
-          padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-          border: isSelected ? '2px solid var(--blue)' : 'none',
-          background: isSelected ? 'var(--blue-dim)' : isSelfStudy ? 'var(--purple-dim)' : 'var(--bg-main)',
-          cursor: 'pointer', transition: 'all 0.15s ease',
-          display: 'flex', flexDirection: 'column', gap: 8,
+        date={formatDate(n.created_at)}
+        typeBadge={{
+          text: isSelfStudy ? '자율학습' : isPractice ? '실습일지' : '교육일지',
+          tone: isSelfStudy ? 'purple' : isPractice ? 'orange' : 'blue',
         }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(n.created_at)}</span>
-          {isSelfStudy && <span style={{ padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 11, fontWeight: 700, background: 'var(--purple-dim)', color: 'var(--purple)' }}>자율학습</span>}
-        </div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.4 }}>
-          {n.title || (isPractice ? '실습일지' : '교육일지')}
-        </div>
-        {!isSelfStudy && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            {conf && <span style={{ fontSize: 13 }}>{conf.icon} {conf.label}</span>}
-            {n.participation_score != null && n.participation_score > 0 && (
-              <span style={{
-                padding: '1px 8px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 700,
-                background: n.participation_score >= (n.participation_max || 3) ? 'var(--green-dim)' : n.participation_score >= 1 ? 'var(--orange-dim)' : 'var(--red-dim)',
-                color: n.participation_score >= (n.participation_max || 3) ? 'var(--green)' : n.participation_score >= 1 ? 'var(--orange)' : 'var(--red)',
-              }}>참여 {n.participation_score}/{n.participation_max || 3}</span>
-            )}
-          </div>
-        )}
-        {isPractice && (
-          <div style={{ display: 'flex', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-            {steps.stats_consult != null && <span>상담 {steps.stats_consult}</span>}
-            {steps.stats_order != null && <span>수주 {steps.stats_order}</span>}
-            {steps.stats_amount != null && <span>{Number(steps.stats_amount).toLocaleString()}원</span>}
-          </div>
-        )}
-        {displayTags.length > 0 && (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {displayTags.slice(0, 3).map(tag => (
-              <span key={tag} style={{ padding: '2px 8px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 11, fontWeight: 600 }}>{tag}</span>
-            ))}
-          </div>
-        )}
-      </button>
+        title={title}
+        sub={sub}
+        thumbnail={thumbImage}
+        subtle
+        selected={isSelected}
+        variant={isSelfStudy ? 'self-study' : 'default'}
+        onClick={() => setExpandedId(isSelected ? null : n.id)}
+        footerSignals={footerSignals.length > 0 ? footerSignals : undefined}
+      />
     );
   };
 
@@ -1032,8 +1238,8 @@ function NotesTab({ studentId, submitInfo }: { studentId: string; studentName?: 
           )}
         </div>
         {educationNotes.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {educationNotes.map(n => renderNoteCard(n, false))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+              {educationNotes.map(n => renderNoteCard(n, false))}
           </div>
         ) : (
           <p style={emptyStyle}>교육일지가 없어요</p>
@@ -1080,58 +1286,111 @@ function NotesTab({ studentId, submitInfo }: { studentId: string; studentName?: 
           );
         })()}
         {practiceNotes.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-            {practiceNotes.map(n => renderNoteCard(n, true))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+              {practiceNotes.map(n => renderNoteCard(n, true))}
           </div>
         ) : (
           <p style={emptyStyle}>실습일지가 없어요</p>
         )}
       </div>
 
-      {/* 선택된 노트 상세 */}
+      {/* 선택된 노트 상세 (모달) */}
       {expandedNote && (() => {
         const steps = parseSteps(expandedNote.content);
         const isPractice = (expandedNote.tags || []).includes('실습일지');
         const isSelfStudy = (expandedNote.tags || []).includes('자율학습');
         const conf = expandedNote.confidence ? confMap[expandedNote.confidence] : null;
         return (
-          <div style={{ ...card, ...(isSelfStudy ? { border: '1px solid var(--purple-dim)' } : {}) }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div>
-                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
-                  {expandedNote.title || (isPractice ? '실습일지' : '교육일지')}
-                </h3>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                  {new Date(expandedNote.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>
+          <div
+            onClick={() => setExpandedId(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 1000,
+              background: 'rgba(0,0,0,0.55)',
+              display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+              padding: '40px 20px', overflowY: 'auto',
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'relative',
+                width: '100%', maxWidth: 880,
+                background: 'var(--bg-surface)',
+                border: isSelfStudy ? '2px solid var(--purple)' : '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '28px 32px',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              <button
+                onClick={() => setExpandedId(null)}
+                aria-label="닫기"
+                style={{
+                  position: 'absolute', top: 16, right: 16, zIndex: 2,
+                  width: 36, height: 36, minWidth: 36, minHeight: 36, maxWidth: 36, maxHeight: 36,
+                  boxSizing: 'border-box', padding: 0, margin: 0, flex: 'none',
+                  borderRadius: '50%', border: 'none',
+                  background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
+                  fontSize: 20, lineHeight: '36px', fontWeight: 400,
+                  textAlign: 'center', cursor: 'pointer',
+                }}
+              >×</button>
+
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, gap: 16, paddingRight: 44 }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
+                    {expandedNote.title || (isPractice ? '실습일지' : '교육일지')}
+                  </h3>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    {new Date(expandedNote.created_at).toLocaleDateString('ko', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' })}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {conf && <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-main)', fontSize: 14 }}>{conf.icon} {conf.label}</span>}
+                  {!isSelfStudy && expandedNote.participation_score != null && (
+                    <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700, background: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green-dim)' : 'var(--orange-dim)', color: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green)' : 'var(--orange)' }}>참여 {expandedNote.participation_score}/{expandedNote.participation_max || 3}</span>
+                  )}
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {conf && <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-main)', fontSize: 14 }}>{conf.icon} {conf.label}</span>}
-                {!isSelfStudy && expandedNote.participation_score != null && (
-                  <span style={{ padding: '4px 12px', borderRadius: 'var(--radius-pill)', fontSize: 13, fontWeight: 700, background: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green-dim)' : 'var(--orange-dim)', color: expandedNote.participation_score >= (expandedNote.participation_max || 3) ? 'var(--green)' : 'var(--orange)' }}>참여 {expandedNote.participation_score}/{expandedNote.participation_max || 3}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {isPractice ? (
+                  <>
+                    {steps.step1 && <NoteStep label="기억에 남는 고객" content={steps.step1} />}
+                    {steps.step2 && <NoteStep label="선배의 비법" content={steps.step2} />}
+                    {steps.step3 && <NoteStep label="칭찬할 점" content={steps.step3} />}
+                    {steps.step4 && <NoteStep label="보완할 점" content={steps.step4} />}
+                    {steps.order_detail && <NoteStep label="상담/수주 내역" content={steps.order_detail} />}
+                  </>
+                ) : (
+                  <>
+                    {steps.step1 && <NoteStep label="STEP 1 — 오늘 배운 것" content={steps.step1} />}
+                    {steps.step2 && <NoteStep label="STEP 2 — 궁금한 점" content={steps.step2} />}
+                    {steps.step3 && <NoteStep label="STEP 3 — 소감" content={steps.step3} />}
+                  </>
                 )}
               </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {isPractice ? (
-                <>
-                  {steps.step1 && <NoteStep label="기억에 남는 고객" content={steps.step1} />}
-                  {steps.step2 && <NoteStep label="선배의 비법" content={steps.step2} />}
-                  {steps.step3 && <NoteStep label="칭찬할 점" content={steps.step3} />}
-                  {steps.step4 && <NoteStep label="보완할 점" content={steps.step4} />}
-                  {steps.order_detail && <NoteStep label="상담/수주 내역" content={steps.order_detail} />}
-                </>
-              ) : (
-                <>
-                  {steps.step1 && <NoteStep label="STEP 1 — 오늘 배운 것" content={steps.step1} />}
-                  {steps.step2 && <NoteStep label="STEP 2 — 궁금한 점" content={steps.step2} />}
-                  {steps.step3 && <NoteStep label="STEP 3 — 소감" content={steps.step3} />}
-                </>
-              )}
             </div>
           </div>
         );
       })()}
+    </div>
+  );
+}
+
+function SurveyOpenAnswers({ items }: { items: { label: string; val: string }[] }) {
+  const filtered = items.filter(item => item.val);
+  if (filtered.length === 0) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>작성된 답변이 없어요</p>;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {filtered.map((item, i) => (
+        <div key={i} style={{
+          padding: '16px 0',
+          borderTop: i === 0 ? 'none' : '1px solid var(--border-light)',
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8 }}>{item.label}</div>
+          <div style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{item.val}</div>
+        </div>
+      ))}
     </div>
   );
 }

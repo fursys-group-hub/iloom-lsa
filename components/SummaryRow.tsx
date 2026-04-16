@@ -49,13 +49,15 @@ export interface SummaryRowProps {
   onClick?: () => void;
   /** 펼침 본문 */
   children?: React.ReactNode;
+  /** 컴팩트 모드 — 세로 패딩 축소 (16px) */
+  compact?: boolean;
 }
 
 export function SummaryRow(props: SummaryRowProps) {
   const {
     leftLabel, badge, title, rightSlot,
     expandable, expanded, onToggle, onClick,
-    children,
+    children, compact,
   } = props;
 
   const handleClick = () => {
@@ -78,8 +80,8 @@ export function SummaryRow(props: SummaryRowProps) {
         style={{
           display: 'grid',
           gridTemplateColumns: `${leftLabel ? '88px' : ''} ${badge ? 'auto' : ''} 1fr auto ${expandable ? 'auto' : ''}`.trim().replace(/\s+/g, ' '),
-          alignItems: 'center', gap: 20,
-          padding: '20px 24px',
+          alignItems: 'center', gap: compact ? 16 : 20,
+          padding: compact ? '14px 20px' : '20px 24px',
           cursor: interactive ? 'pointer' : 'default',
           transition: 'background 0.15s ease',
         }}
