@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 
 const nav = [
   { href: '/manager', label: '홈' },
+  { href: '/manager/reports', label: '인수인계 리포트' },
   { href: '/manager/tests', label: '테스트', disabled: true },
   { href: '/manager/evaluations', label: 'R&P' },
   { href: '/manager/final', label: '교육 총평' },

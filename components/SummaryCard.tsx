@@ -34,8 +34,8 @@ export type FooterItem =
   | { type: 'commentCount'; count: number };
 
 export interface SummaryCardProps {
-  /** 좌상단 날짜/라벨 */
-  date?: string;
+  /** 좌상단 날짜/라벨 — 문자열이면 기본 스타일, ReactNode면 그대로 렌더 (아바타 등) */
+  date?: string | React.ReactNode;
   /** 우상단 유형 뱃지 */
   typeBadge?: BadgeSpec;
   /** 굵은 메인 제목 */
@@ -62,6 +62,8 @@ export interface SummaryCardProps {
   titleSize?: 'default' | 'lg' | 'xl';
   /** 카드 배경을 bg-main(회색)으로 — 흰 카드 안에 넣을 때 사용 */
   subtle?: boolean;
+  /** 본문 추가 영역 (sub 아래, footer 위) — 주차 히트맵 등 커스텀 시각화 */
+  bodyExtra?: React.ReactNode;
 }
 
 function renderFooterItem(item: FooterItem, key: string | number) {
@@ -105,7 +107,7 @@ export function SummaryCard(props: SummaryCardProps) {
     date, typeBadge, title, sub, thumbnail,
     selected, variant = 'default', onClick, href, disabled,
     footerSignals = [], footerRight,
-    titleSize = 'default', subtle,
+    titleSize = 'default', subtle, bodyExtra,
   } = props;
   const titleFontSize = titleSize === 'xl' ? 28 : titleSize === 'lg' ? 22 : 18;
   const defaultBg = subtle ? 'var(--bg-main)' : 'var(--bg-surface)';
@@ -138,7 +140,9 @@ export function SummaryCard(props: SummaryCardProps) {
       {(date || typeBadge) && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
           {date ? (
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-tertiary)' }}>{date}</span>
+            typeof date === 'string'
+              ? <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-tertiary)' }}>{date}</span>
+              : <>{date}</>
           ) : <span />}
           {typeBadge && (
             <span style={{
@@ -182,6 +186,7 @@ export function SummaryCard(props: SummaryCardProps) {
             display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
           }}>{sub}</div>
         )}
+        {bodyExtra && <div>{bodyExtra}</div>}
       </div>
 
       {/* 3) 푸터 */}

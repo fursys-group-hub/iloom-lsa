@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import { SummaryCard, type FooterItem } from '@/components/SummaryCard';
 
 /* ── 타입 ── */
 interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
@@ -102,7 +103,68 @@ export default function OverviewPage() {
       fetch('/api/benchmarks').then((r) => r.json()),
       fetch('/api/scores').then((r) => r.json()).then((d) => d.scores || d || []),
     ]).then(([s, e, f, b, sc]) => {
-      setStudents(s); setEvaluations(e); setFinals(f); setBenchmarks(b); setScores(sc);
+      // [임시 목업] 곽현서 샘플 데이터 — 디자인 미리보기용. 실제 데이터 생기면 자동 비활성화됨.
+      const studentList = s as StudentItem[];
+      const evalList = e as EvalData[];
+      const finalList = f as FinalEvalData[];
+      const bmList = b as BenchmarkData[];
+      const scoreList = sc as { student_id: string; subject: string; score: number; max_score: number }[];
+      const gwak = studentList.find((x) => x.name === '곽현서');
+      const hasRealData = gwak && evalList.some((ev) => ev.student_id === gwak.id);
+      if (gwak && !hasRealData) {
+        const rpAreas = ['학생방', '침실', '옷장', '거실', '주방', '서재'];
+        const strengthByWeek: Record<number, string[]> = {
+          1: ['제품 지식 풍부', '고객 라포형성 우수'],
+          2: ['자신감 있는 상담', '고객 니즈 파악 우수'],
+          3: ['주문서 작성 정확', '빠르고 정확한 상담'],
+          4: ['SCT 활용 능숙', '차분하고 친절한 응대'],
+          5: ['업셀링 적극적'],
+          6: [],
+        };
+        const improvementByWeek: Record<number, string[]> = {
+          1: ['자신감 부족'], 2: ['상담 흐름 개선 필요'], 3: [], 4: ['업셀링 보완 필요'], 5: ['SCT 활용 미숙'], 6: [],
+        };
+        const mockEvals: EvalData[] = [1, 2, 3, 4, 5, 6].map((w) => ({
+          student_id: gwak.id,
+          week_number: w,
+          rp_area: rpAreas[w - 1],
+          status: w <= 4 ? 'completed' : w === 5 ? 'partial' : 'not_started',
+          strength_tags: strengthByWeek[w],
+          improvement_tags: improvementByWeek[w],
+          comment: w <= 5 ? `${w}주차 ${rpAreas[w - 1]} 롤플레잉 피드백: 고객 응대가 자연스러워졌고, 다음 주에는 업셀링과 SCT 활용을 훈련해봐요.` : null,
+          managers: { name: '이관리', store_name: '용산' },
+          updated_at: new Date().toISOString(),
+        }));
+        const mockBMs: BenchmarkData[] = [1, 2, 3, 4].map((w) => ({
+          student_id: gwak.id,
+          week_number: w,
+          target_name: `선배사원 ${w}번`,
+          learnings: `${w}주차 벤치마킹: 선배의 첫인사 톤과 제품 제안 순서가 인상적이었어요. 고객 니즈를 먼저 듣고 맞춤 제안하는 흐름이 안정적입니다.`,
+          action_plan: `${w}주차 실천계획: 첫인사 톤을 다음 상담에 적용하고, 니즈 파악 질문 3개를 미리 준비하기.`,
+        }));
+        const mockFinal: FinalEvalData = {
+          student_id: gwak.id,
+          overall_rating: 4,
+          summary: '곽현서 교육생은 6주간 성실하게 심화교육을 이수했고, 특히 고객 응대와 제품 지식이 빠르게 향상됐어요. 매장에 배치되면 독립 상담을 안정적으로 수행할 수 있는 수준에 도달했습니다.',
+          strengths: '고객 라포 형성이 빠르고, 제품 디테일을 스스로 학습하는 의지가 강합니다. 상담 흐름도 차분하고 논리적이에요.',
+          areas_to_develop: '업셀링 상황에서 추가 제안이 다소 약한 편이에요. SCT 활용 패턴을 더 숙지하면 주문 확정율이 올라갈 거예요.',
+          recommended_position: '용산 거실/침실 상담 담당',
+          store_fit_score: 4, independence_score: 4,
+          customer_score: 5, product_score: 4,
+          managers: { name: '이관리', store_name: '용산' },
+        };
+        const mockScores = [1, 2, 3, 4, 5, 6].map((w) => ({
+          student_id: gwak.id, subject: `${w}주차`, score: 70 + w * 3, max_score: 100,
+        }));
+        setStudents(studentList);
+        setEvaluations([...evalList, ...mockEvals]);
+        setFinals([...finalList, mockFinal]);
+        setBenchmarks([...bmList, ...mockBMs]);
+        setScores([...scoreList, ...mockScores]);
+      } else {
+        setStudents(studentList); setEvaluations(evalList); setFinals(finalList);
+        setBenchmarks(bmList); setScores(scoreList);
+      }
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -118,178 +180,162 @@ export default function OverviewPage() {
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', minHeight: 400 }}><p style={{ color: 'var(--text-muted)' }}>불러오는 중...</p></div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>심화교육</h2>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>심화교육</h2>
 
-      {/* 요약 카드 — 1개 통합 */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', overflow: 'hidden' }}>
-        {[
-          { label: '교육생', value: activeStudents.length, unit: '명', color: 'var(--blue)' },
-          { label: '평가', value: evaluations.length, unit: '건', color: 'var(--green)' },
-          { label: '총평', value: new Set(finals.map((f) => f.student_id)).size, unit: '명', color: 'var(--purple)' },
-          { label: '벤치마킹', value: benchmarks.length, unit: '건', color: 'var(--orange)' },
-        ].map((s, i) => (
-          <div key={i} style={{ padding: '14px 12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)', marginLeft: 2 }}>{s.unit}</span></div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
+      {!selectedStudentId && (
+        <>
+          {/* 요약 카드 — 1개 통합 */}
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', overflow: 'hidden' }}>
+            {[
+              { label: '교육생', value: activeStudents.length, unit: '명', color: 'var(--blue)' },
+              { label: '평가', value: evaluations.length, unit: '건', color: 'var(--green)' },
+              { label: '총평', value: new Set(finals.map((f) => f.student_id)).size, unit: '명', color: 'var(--purple)' },
+              { label: '벤치마킹', value: benchmarks.length, unit: '건', color: 'var(--orange)' },
+            ].map((s, i) => (
+              <div key={i} style={{ padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: s.color, letterSpacing: '-0.02em' }}>{s.value}<span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginLeft: 4 }}>{s.unit}</span></div>
+                <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* 매장 필터 + 교육생 선택 */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div>
-          <label style={miniLabel}>매장</label>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <FilterBtn active={!filterStore} onClick={() => setFilterStore('')}>전체</FilterBtn>
-            {stores.map((s) => <FilterBtn key={s} active={filterStore === s} onClick={() => setFilterStore(s)}>{s}</FilterBtn>)}
+          {/* 매장 필터 + 교육생 선택 */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ minWidth: 200 }}>
+              <label style={miniLabel}>매장</label>
+              <select value={filterStore} onChange={(e) => setFilterStore(e.target.value)} style={selectStyle}>
+                <option value="">전체</option>
+                {stores.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <label style={miniLabel}>교육생</label>
+              <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} style={selectStyle}>
+                <option value="">교육생을 선택하세요</option>
+                {filteredStudents.map((s) => {
+                  const hasFinal = finals.some((f) => f.student_id === s.id);
+                  const evalCount = evaluations.filter((e) => e.student_id === s.id).length;
+                  return <option key={s.id} value={s.id}>{s.name} ({s.store_location || '미배정'}) — {evalCount}주 평가{hasFinal ? ' · 총평 ✓' : ''}</option>;
+                })}
+              </select>
+            </div>
           </div>
-        </div>
-        <div style={{ flex: 1, minWidth: 240 }}>
-          <label style={miniLabel}>교육생</label>
-          <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} style={selectStyle}>
-            <option value="">교육생을 선택하세요</option>
-            {filteredStudents.map((s) => {
-              const hasFinal = finals.some((f) => f.student_id === s.id);
-              const evalCount = evaluations.filter((e) => e.student_id === s.id).length;
-              return <option key={s.id} value={s.id}>{s.name} ({s.store_location || '미배정'}) — {evalCount}주 평가{hasFinal ? ' · 총평 ✓' : ''}</option>;
-            })}
-          </select>
-        </div>
-      </div>
+        </>
+      )}
 
       {!selectedStudentId ? (
-        /* ===== 전체 목록 ===== */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* 매트릭스 */}
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'auto' }}>
-            <table className="data-table" style={{ minWidth: 700 }}>
-              <thead>
-                <tr>
-                  <Th>교육생</Th><Th>매장</Th>
-                  {[1, 2, 3, 4, 5, 6].map((w) => <Th key={w} align="center">{w}주차</Th>)}
-                  <Th align="center">총평</Th>
-                  <Th align="center">벤치마킹</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents.map((st) => {
-                  const stEvals = evaluations.filter((e) => e.student_id === st.id);
-                  const stFinal = finals.find((f) => f.student_id === st.id);
-                  return (
-                    <tr key={st.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <Td>
-                        <button onClick={() => setSelectedStudentId(st.id)}
-                          style={{ background: 'none', border: 'none', color: 'var(--blue-light)', fontWeight: 600, fontSize: 15, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span className="hide-mobile" style={{
-                            width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                            background: 'var(--blue-dim)', color: 'var(--blue)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 13, fontWeight: 700,
-                          }}>{st.name[0]}</span>
-                          {st.name}
-                        </button>
-                      </Td>
-                      <Td><StoreBadge>{st.store_location || '-'}</StoreBadge></Td>
-                      {[1, 2, 3, 4, 5, 6].map((w) => {
-                        const ev = stEvals.find((e) => e.week_number === w);
-                        return (
-                          <Td key={w} align="center">
-                            {ev ? (
-                              <span title={`${ev.rp_area || ''} — 강점 ${ev.strength_tags.length} / 개선 ${ev.improvement_tags.length}`}
-                                style={{ display: 'inline-block', width: 28, height: 28, borderRadius: '50%', lineHeight: '28px', textAlign: 'center', fontSize: 13,
-                                  background: ev.status === 'completed' ? 'var(--green-dim)' : 'var(--orange-dim)',
-                                  color: ev.status === 'completed' ? 'var(--green)' : 'var(--orange)',
-                                }}>{ev.status === 'completed' ? '✓' : '△'}</span>
-                            ) : <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>-</span>}
-                          </Td>
-                        );
-                      })}
-                      <Td align="center">
-                        {stFinal ? (
-                          <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '★').join('')}</span>
-                        ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>미작성</span>}
-                      </Td>
-                      <Td align="center">
-                        {(() => {
-                          const bmCount = benchmarks.filter((b) => b.student_id === st.id).length;
-                          return bmCount > 0 ? (
-                            <span style={{
-                              padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                              background: bmCount >= 4 ? 'var(--green-dim)' : 'var(--orange-dim)',
-                              color: bmCount >= 4 ? 'var(--green)' : 'var(--orange)',
-                            }}>{bmCount}건</span>
-                          ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>미작성</span>;
-                        })()}
-                      </Td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        /* ===== 전체 목록 — 카드 그리드 ===== */
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+          {filteredStudents.map((st) => {
+            const stEvals = evaluations.filter((e) => e.student_id === st.id);
+            const stFinal = finals.find((f) => f.student_id === st.id);
+            const rpAreas = rpAreaSummary(stEvals);
+            const levelOrder: Record<'weak' | 'normal' | 'good', number> = { weak: 0, normal: 1, good: 2 };
 
-          {/* 카드 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-            {filteredStudents.map((st) => {
-              const stEvals = evaluations.filter((e) => e.student_id === st.id);
-              const stFinal = finals.find((f) => f.student_id === st.id);
-              const bmCount = benchmarks.filter((b) => b.student_id === st.id).length;
-              const rpAreas = rpAreaSummary(stEvals);
-              return (
-                <div key={st.id} onClick={() => setSelectedStudentId(st.id)}
-                  style={{
-                    background: stFinal ? 'var(--bg-surface)' : 'var(--bg-surface)',
-                    border: stFinal ? '1px solid var(--green)' : '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)', padding: '20px 24px', cursor: 'pointer',
-                    transition: 'all 0.15s ease', boxShadow: 'var(--shadow-sm)',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--blue)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <div>
-                      <span style={{ fontSize: 17, fontWeight: 700 }}>{st.name}</span>
-                      <span style={{ fontSize: 13, color: 'var(--blue-light)', marginLeft: 8 }}>{st.store_location}</span>
-                    </div>
-                    {stFinal && <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '★').join('')}</span>}
+            const signals: FooterItem[] = rpAreas
+              .slice()
+              .sort((a, b) => levelOrder[a.level] - levelOrder[b.level])
+              .map((rp): FooterItem => ({
+                type: 'pill',
+                text: `${rp.area} ${LEVEL_CONFIG[rp.level].label}`,
+                tone: rp.level === 'good' ? 'green' : rp.level === 'normal' ? 'orange' : 'red',
+              }));
+
+            // 좌상단: 매장 뱃지
+            const headerLeft = (
+              <span style={{
+                padding: '3px 10px', borderRadius: 'var(--radius-pill)',
+                background: st.store_location ? 'var(--blue-dim)' : 'var(--bg-hover)',
+                color: st.store_location ? 'var(--blue)' : 'var(--text-tertiary)',
+                fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
+              }}>{st.store_location || '매장 미배정'}</span>
+            );
+
+            // 본문: R&P 주차별 바 + 벤치마킹 주차별 바
+            const bodyExtra = (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                    심화교육 R&amp;P 주차별 평가
                   </div>
-                  <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
-                    <MiniStat label="평가" value={`${stEvals.length}/6주`} color="var(--blue)" />
-                    <MiniStat label="벤치마킹" value={`${bmCount}건`} color="var(--purple)" />
-                    <MiniStat label="총평" value={stFinal ? '완료' : '미작성'} color={stFinal ? 'var(--green)' : 'var(--text-muted)'} />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>
+                    {[1, 2, 3, 4, 5, 6].map((w) => {
+                      const ev = stEvals.find((e) => e.week_number === w);
+                      const bg = !ev ? 'var(--bg-hover)'
+                        : ev.status === 'completed' ? 'var(--green)'
+                        : 'var(--orange)';
+                      const label = !ev ? '미진행'
+                        : ev.status === 'completed' ? '완료'
+                        : '일부';
+                      return (
+                        <div
+                          key={w}
+                          title={`${w}주차 · ${label}`}
+                          style={{ height: 6, borderRadius: 'var(--radius-xs)', background: bg }}
+                        />
+                      );
+                    })}
                   </div>
-                  {rpAreas.length > 0 && (
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {rpAreas.map((rp) => {
-                        const cfg = LEVEL_CONFIG[rp.level];
-                        return (
-                          <span key={rp.area} style={{
-                            padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                            background: cfg.bg, color: cfg.color,
-                          }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, display: 'inline-block', marginRight: 4 }} />{rp.area}</span>
-                        );
-                      })}
-                    </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
+                <div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+                    벤치마킹 주차별 작성
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 4 }}>
+                    {[1, 2, 3, 4, 5, 6].map((w) => {
+                      const bm = benchmarks.find((b) => b.student_id === st.id && b.week_number === w);
+                      return (
+                        <div
+                          key={w}
+                          title={`${w}주차 · ${bm ? '작성' : '미작성'}`}
+                          style={{
+                            height: 6, borderRadius: 'var(--radius-xs)',
+                            background: bm ? 'var(--purple)' : 'var(--bg-hover)',
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+
+            return (
+              <SummaryCard
+                key={st.id}
+                date={headerLeft}
+                title={st.name}
+                typeBadge={{
+                  text: stFinal ? '총평 ✓' : '총평 미작성',
+                  tone: stFinal ? 'green' : 'gray',
+                }}
+                onClick={() => setSelectedStudentId(st.id)}
+                bodyExtra={bodyExtra}
+                footerSignals={signals}
+                footerRight={stFinal ? (
+                  <span style={{ fontSize: 14, color: 'var(--orange)', letterSpacing: 2 }}>
+                    {'★'.repeat(stFinal.overall_rating)}
+                  </span>
+                ) : undefined}
+              />
+            );
+          })}
         </div>
       ) : (
         /* ===== 교육생 상세 ===== */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <button onClick={() => setSelectedStudentId('')}
-            style={{ alignSelf: 'flex-start', padding: '6px 14px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 13, cursor: 'pointer' }}>
-            ← 전체 목록
+            style={{ alignSelf: 'flex-start', padding: 0, border: 'none', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>
+            ← 교육생 목록
           </button>
 
           {/* 이름 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--blue-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: 'var(--blue)' }}>{selectedStudent?.name?.charAt(0) || '?'}</div>
             <div>
-              <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>{selectedStudent?.name}</h2>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>{selectedStudent?.store_location || '매장 미배정'} · {studentEvals.length}주차 평가 완료</p>
+              <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{selectedStudent?.name}</h2>
+              <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>{selectedStudent?.store_location || '매장 미배정'} · {studentEvals.length}주차 평가 완료</p>
             </div>
           </div>
 
@@ -299,18 +345,18 @@ export default function OverviewPage() {
             const hasScores = studentScores.length > 0;
             return (
               <Section title="심화교육 시험 점수" badge={hasScores ? undefined : '연동 예정'} badgeColor="var(--text-muted)">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
+                <div style={{ display: 'flex', gap: 16 }}>
                   {[1, 2, 3, 4, 5, 6].map((w) => {
                     const sc = studentScores.find((s) => s.subject === `${w}주차`);
+                    const color = sc
+                      ? (sc.score >= 80 ? 'var(--green)' : sc.score >= 60 ? 'var(--orange)' : 'var(--red)')
+                      : 'var(--text-muted)';
                     return (
-                      <div key={w} style={{ padding: 16, borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)', textAlign: 'center', opacity: sc ? 1 : 0.5 }}>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 6px' }}>{w}주차</p>
-                        <p style={{
-                          fontSize: 24, fontWeight: 700, margin: 0,
-                          color: sc ? (sc.score >= 80 ? 'var(--green)' : sc.score >= 60 ? 'var(--orange)' : 'var(--red)') : 'var(--text-muted)',
-                        }}>
+                      <div key={w} style={{ flex: 1, textAlign: 'center', padding: '4px 0', opacity: sc ? 1 : 0.5 }}>
+                        <div style={{ fontSize: 28, fontWeight: 700, color, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                           {sc ? sc.score : '—'}
-                        </p>
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 6 }}>{w}주차</div>
                       </div>
                     );
                   })}
@@ -324,53 +370,43 @@ export default function OverviewPage() {
             );
           })()}
 
-          {/* ② R&P 영역별 — 잘함/보통/보완필요 카드 */}
-          <Section title="R&P 영역별 상담 역량" subtitle="각 영역에서 롤플레잉 후 관리자가 평가한 결과예요">
-            {studentEvals.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>평가 데이터가 없어요</p>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-                {rpAreaSummary(studentEvals).map((rp) => {
-                  const cfg = LEVEL_CONFIG[rp.level];
-                  return (
-                    <div key={rp.area} style={{
-                      padding: 20, borderRadius: 'var(--radius-md)',
-                      background: cfg.bg, border: `1px solid ${cfg.border}30`,
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 17, fontWeight: 700 }}>{rp.area}</span>
-                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: cfg.border, color: '#fff', fontSize: 12, fontWeight: 600 }}>
-                          {cfg.label}
-                        </span>
+          {/* ② 주차별 성장 기록 (타임라인 + 성장 요약) */}
+          <Section title="주차별 성장 기록" subtitle="6주간 관리자 피드백을 따라 어떻게 성장했는지 볼 수 있어요">
+            {studentEvals.length > 0 && (() => {
+              const completedCount = studentEvals.filter((e) => e.status === 'completed').length;
+              let totalResolved = 0;
+              const strengthSet = new Set<string>();
+              const sorted = [...studentEvals].sort((a, b) => a.week_number - b.week_number);
+              for (let i = 0; i < sorted.length; i++) {
+                const ev = sorted[i];
+                const prev = i > 0 ? sorted[i - 1] : null;
+                if (prev && ev.status !== 'not_started') {
+                  totalResolved += prev.improvement_tags.filter((t) => !ev.improvement_tags.includes(t)).length;
+                }
+                ev.strength_tags.forEach((t) => strengthSet.add(t));
+              }
+              return (
+                <div style={{
+                  display: 'flex', gap: 16,
+                  padding: '16px 20px', marginBottom: 24,
+                  background: 'var(--bg-main)', borderRadius: 'var(--radius-md)',
+                }}>
+                  {[
+                    { value: completedCount, unit: '주', label: '평가 완료', color: 'var(--blue)' },
+                    { value: totalResolved, unit: '개', label: '해결한 개선점', color: 'var(--green)' },
+                    { value: strengthSet.size, unit: '개', label: '쌓은 강점', color: 'var(--purple)' },
+                  ].map((s) => (
+                    <div key={s.label} style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: 24, fontWeight: 700, color: s.color, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                        {s.value}
+                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginLeft: 3 }}>{s.unit}</span>
                       </div>
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 10px' }}>
-                        {rp.weeks.map((w) => `${w}주차`).join(', ')}에서 진행
-                      </p>
-                      {rp.topStrengths.length > 0 && (
-                        <div style={{ marginBottom: 6 }}>
-                          <p style={{ fontSize: 12, color: 'var(--green)', margin: '0 0 4px', fontWeight: 600 }}>잘하는 점</p>
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                            {rp.topStrengths.map((t) => <TagPill key={t} type="strength">{t}</TagPill>)}
-                          </div>
-                        </div>
-                      )}
-                      {rp.topImprovements.length > 0 && (
-                        <div>
-                          <p style={{ fontSize: 12, color: 'var(--orange)', margin: '0 0 4px', fontWeight: 600 }}>보완할 점</p>
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                            {rp.topImprovements.map((t) => <TagPill key={t} type="improvement">{t}</TagPill>)}
-                          </div>
-                        </div>
-                      )}
+                      <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 6 }}>{s.label}</div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </Section>
-
-          {/* ③ 주차별 평가 기록 (타임라인 + 해결됨 표시 포함) */}
-          <Section title="주차별 평가 기록" subtitle="관리자가 매주 작성한 R&P 피드백이에요. 이전 주차의 개선점이 해결되면 표시됩니다">
+                  ))}
+                </div>
+              );
+            })()}
             <div style={{ position: 'relative', paddingLeft: 28 }}>
               {/* 타임라인 세로선 */}
               <div style={{ position: 'absolute', left: 10, top: 8, bottom: 8, width: 2, background: 'var(--border)' }} />
@@ -378,7 +414,9 @@ export default function OverviewPage() {
               {[1, 2, 3, 4, 5, 6].map((w) => {
                 const ev = studentEvals.find((e) => e.week_number === w);
                 const prev = studentEvals.find((e) => e.week_number === w - 1);
-                const resolved = prev && ev ? prev.improvement_tags.filter((t) => !ev.improvement_tags.includes(t)) : [];
+                const resolved = prev && ev && ev.status !== 'not_started'
+                  ? prev.improvement_tags.filter((t) => !ev.improvement_tags.includes(t))
+                  : [];
 
                 return (
                   <div key={w} style={{ position: 'relative', marginBottom: 16 }}>
@@ -390,15 +428,15 @@ export default function OverviewPage() {
 
                     <div style={{
                       padding: 20, borderRadius: 'var(--radius-md)',
-                      background: ev ? 'var(--bg-surface)' : 'transparent',
-                      border: ev ? '1px solid var(--border)' : '1px dashed var(--border)',
+                      background: ev ? 'var(--bg-main)' : 'transparent',
+                      border: ev ? 'none' : '1px dashed var(--border)',
                       opacity: ev ? 1 : 0.4,
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: ev ? 12 : 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{ fontSize: 16, fontWeight: 800, color: ev ? 'var(--text-primary)' : 'var(--text-muted)' }}>{w}주차</span>
+                          <span style={{ fontSize: 16, fontWeight: 600, color: ev ? 'var(--text-primary)' : 'var(--text-muted)', letterSpacing: '-0.01em' }}>{w}주차</span>
                           {ev?.rp_area && (
-                            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 13, fontWeight: 600 }}>
+                            <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)', fontSize: 12, fontWeight: 600 }}>
                               {ev.rp_area}
                             </span>
                           )}
@@ -436,7 +474,7 @@ export default function OverviewPage() {
                           {/* 코멘트 */}
                           {ev.comment && (
                             <div style={{
-                              padding: '14px 18px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)',
+                              padding: '14px 18px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)',
                             }}>
                               <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.75, margin: 0 }}>
                                 {ev.comment}
@@ -492,25 +530,43 @@ export default function OverviewPage() {
             </Section>
           </div>
 
-          {/* ⑤ 벤치마킹 */}
+          {/* ⑤ 벤치마킹 — 주차별 성장 기록과 동일한 타임라인 구조 */}
           <Section title="벤치마킹 기록" subtitle="교육생이 직접 작성한 우수 직원 벤치마킹 기록이에요">
             {studentBMs.length === 0 ? (
               <p style={{ color: 'var(--text-muted)' }}>아직 교육생이 작성한 벤치마킹 기록이 없어요</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {studentBMs.map((bm) => (
-                  <div key={bm.week_number} style={{ padding: 20, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <span style={{ fontWeight: 700, fontSize: 15 }}>{bm.week_number}주차</span>
-                      <span style={{ fontSize: 14, color: 'var(--blue-light)', fontWeight: 600 }}>{bm.target_name}</span>
-                    </div>
-                    <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: 0 }}>{bm.learnings}</p>
-                    {bm.action_plan && (
-                      <div style={{ marginTop: 10, padding: '10px 14px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
-                        <p style={{ fontSize: 13, color: 'var(--purple)', margin: 0, fontWeight: 600 }}>실천 계획</p>
-                        <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: '4px 0 0' }}>{bm.action_plan}</p>
+              <div style={{ position: 'relative', paddingLeft: 28 }}>
+                {/* 타임라인 세로선 */}
+                <div style={{ position: 'absolute', left: 10, top: 8, bottom: 8, width: 2, background: 'var(--border)' }} />
+
+                {[...studentBMs].sort((a, b) => a.week_number - b.week_number).map((bm) => (
+                  <div key={bm.week_number} style={{ position: 'relative', marginBottom: 16 }}>
+                    {/* 타임라인 점 — purple */}
+                    <div style={{
+                      position: 'absolute', left: -23, top: 18, width: 14, height: 14, borderRadius: '50%',
+                      background: 'var(--purple)', border: '2px solid var(--bg-main)',
+                    }} />
+
+                    <div style={{
+                      padding: 20, borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-main)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{bm.week_number}주차</span>
+                        <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 12, fontWeight: 600 }}>
+                          {bm.target_name}
+                        </span>
                       </div>
-                    )}
+
+                      <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: 0 }}>{bm.learnings}</p>
+
+                      {bm.action_plan && (
+                        <div style={{ padding: '14px 18px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', marginTop: 12 }}>
+                          <p style={{ fontSize: 13, color: 'var(--purple)', margin: 0, fontWeight: 600 }}>실천 계획</p>
+                          <p style={{ fontSize: 14, color: 'var(--text-second)', margin: '4px 0 0', lineHeight: 1.6 }}>{bm.action_plan}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -520,60 +576,74 @@ export default function OverviewPage() {
           {/* ⑥ 교육 총평 — 가장 크고 눈에 띄게 */}
           {studentFinals.length > 0 ? (
             <div style={{
-              background: 'linear-gradient(135deg, rgba(0,122,255,0.08), rgba(191,90,242,0.08))',
-              border: '2px solid var(--blue)', borderRadius: 'var(--radius-lg)', padding: 32,
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-sm)',
+              padding: '20px 24px',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <span style={{ fontSize: 16, color: 'var(--text-muted)' }}></span>
-                <div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>교육 총평</h2>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>6주간의 심화교육을 마친 종합 평가예요</p>
-                </div>
-              </div>
-
               {studentFinals.map((fe, idx) => (
                 <div key={idx}>
-                  <div style={{ display: 'flex', gap: 2, marginBottom: 20, alignItems: 'center' }}>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span key={i} style={{ fontSize: 28, opacity: i < fe.overall_rating ? 1 : 0.2 }}>⭐</span>
-                    ))}
-                    <span style={{ fontSize: 16, color: 'var(--text-muted)', marginLeft: 12 }}>
-                      {['', '많이 부족', '부족', '보통', '우수', '매우 우수'][fe.overall_rating]}
-                    </span>
+                  {/* 헤더: 제목 + 별점 한 줄 */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 6 }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, letterSpacing: '-0.015em', lineHeight: 1.3 }}>교육 총평</h3>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 20, color: 'var(--orange)', letterSpacing: 3, lineHeight: 1 }}>
+                        {'★'.repeat(fe.overall_rating)}
+                        <span style={{ color: 'var(--bg-hover)' }}>{'★'.repeat(5 - fe.overall_rating)}</span>
+                      </span>
+                      <span style={{ fontSize: 13, color: 'var(--text-tertiary)', fontWeight: 600 }}>
+                        {['', '많이 부족', '부족', '보통', '우수', '매우 우수'][fe.overall_rating]}
+                      </span>
+                    </div>
                   </div>
+                  <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '0 0 20px' }}>6주간의 심화교육을 마친 종합 평가예요</p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+                  {/* 4개 점수 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
                     <ScoreCard label="매장 적응" score={fe.store_fit_score} color="var(--blue)" />
                     <ScoreCard label="독립 업무" score={fe.independence_score} color="var(--green)" />
                     <ScoreCard label="고객 응대" score={fe.customer_score} color="var(--purple)" />
                     <ScoreCard label="제품 지식" score={fe.product_score} color="var(--orange)" />
                   </div>
 
-                  <div style={{ padding: 20, background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', marginBottom: 20 }}>
-                    <p style={{ fontSize: 17, lineHeight: 1.8, color: 'var(--text-primary)', margin: 0, fontWeight: 500 }}>
+                  {/* 요약문 */}
+                  <div style={{ padding: '16px 20px', background: 'var(--bg-main)', borderRadius: 'var(--radius-md)', marginBottom: 16 }}>
+                    <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--text-primary)', margin: 0 }}>
                       {fe.summary}
                     </p>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  {/* 강점 / 발전 방향 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     {fe.strengths && (
-                      <div style={{ padding: 20, background: 'var(--green-dim)', borderRadius: 'var(--radius-md)' }}>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)', margin: '0 0 8px' }}>💪 핵심 강점</p>
-                        <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.strengths}</p>
+                      <div style={{ padding: '16px 20px', background: 'var(--green-dim)', borderRadius: 'var(--radius-md)' }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)', margin: '0 0 6px' }}>핵심 강점</p>
+                        <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.strengths}</p>
                       </div>
                     )}
                     {fe.areas_to_develop && (
-                      <div style={{ padding: 20, background: 'var(--orange-dim)', borderRadius: 'var(--radius-md)' }}>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--orange)', margin: '0 0 8px' }}>발전 방향</p>
-                        <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.areas_to_develop}</p>
+                      <div style={{ padding: '16px 20px', background: 'var(--orange-dim)', borderRadius: 'var(--radius-md)' }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--orange)', margin: '0 0 6px' }}>발전 방향</p>
+                        <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, margin: 0 }}>{fe.areas_to_develop}</p>
                       </div>
                     )}
                   </div>
 
-                  {fe.recommended_position && (
-                    <p style={{ fontSize: 15, color: 'var(--blue-light)', fontWeight: 700 }}>📍 추천 배치: {fe.recommended_position}</p>
-                  )}
-                  {fe.managers && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>작성: {fe.managers.name} ({fe.managers.store_name})</p>}
+                  {/* 추천 배치 + 작성자 한 줄 */}
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    {fe.recommended_position ? (
+                      <p style={{ fontSize: 14, margin: 0 }}>
+                        <span style={{ color: 'var(--text-tertiary)', marginRight: 6 }}>추천 배치</span>
+                        <span style={{ color: 'var(--blue)', fontWeight: 600 }}>{fe.recommended_position}</span>
+                      </p>
+                    ) : <span />}
+                    {fe.managers && (
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+                        작성: {fe.managers.name} ({fe.managers.store_name})
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -598,14 +668,14 @@ function Section({ title, subtitle, badge, badgeColor, children, ...rest }: {
   return (
     <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: subtitle ? 6 : 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{title}</h2>
+        <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, letterSpacing: '-0.015em', lineHeight: 1.3 }}>{title}</h3>
         {badge && (
           <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--bg-elevated)', color: badgeColor || 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>
             {badge}
           </span>
         )}
       </div>
-      {subtitle && <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px' }}>{subtitle}</p>}
+      {subtitle && <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: '0 0 16px' }}>{subtitle}</p>}
       {children}
     </div>
   );
@@ -620,20 +690,11 @@ function SumCard({ label, value, unit, color }: { label: string; value: number; 
   );
 }
 
-function MiniStat({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <p style={{ fontSize: 15, fontWeight: 700, color, margin: 0 }}>{value}</p>
-      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{label}</p>
-    </div>
-  );
-}
-
 function ScoreCard({ label, score, color }: { label: string; score: number; color: string }) {
   return (
     <div style={{ textAlign: 'center', padding: 14, background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)' }}>
-      <p style={{ fontSize: 26, fontWeight: 800, color, margin: '0 0 4px' }}>{score}<span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>/5</span></p>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>{label}</p>
+      <p style={{ fontSize: 26, fontWeight: 700, color, margin: '0 0 4px', letterSpacing: '-0.02em' }}>{score}<span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>/5</span></p>
+      <p style={{ fontSize: 13, color: 'var(--text-tertiary)', margin: 0 }}>{label}</p>
       <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 6 }}>
         {[1, 2, 3, 4, 5].map((n) => <div key={n} style={{ width: 18, height: 5, borderRadius: 'var(--radius-xs)', background: n <= score ? color : 'var(--bg-hover)' }} />)}
       </div>
@@ -641,22 +702,9 @@ function ScoreCard({ label, score, color }: { label: string; score: number; colo
   );
 }
 
-function Th({ children, align }: { children: React.ReactNode; align?: string }) {
-  return <th style={{ textAlign: (align as 'left' | 'center') || 'left', background: 'var(--bg-elevated)' }}>{children}</th>;
-}
-function Td({ children, align }: { children: React.ReactNode; align?: string }) {
-  return <td style={{ color: 'var(--text-primary)', textAlign: (align as 'left' | 'center') || 'left' }}>{children}</td>;
-}
-function StoreBadge({ children }: { children: React.ReactNode }) {
-  return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)', fontSize: 12, fontWeight: 600 }}>{children}</span>;
-}
 function TagPill({ children, type }: { children: React.ReactNode; type: 'strength' | 'improvement' }) {
   const c = type === 'strength' ? { bg: 'var(--green-dim)', color: 'var(--green)' } : { bg: 'var(--orange-dim)', color: 'var(--orange)' };
   return <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: c.bg, color: c.color, fontSize: 12, fontWeight: 600 }}>{children}</span>;
 }
-function FilterBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return <button onClick={onClick} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', border: active ? 'none' : '1px solid var(--border)', background: active ? 'var(--blue)' : 'transparent', color: active ? '#fff' : 'var(--text-tertiary)', fontSize: 14, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s ease' }}>{children}</button>;
-}
-
 const miniLabel: React.CSSProperties = { fontSize: 13, color: 'var(--text-muted)', display: 'block', marginBottom: 6 };
 const selectStyle: React.CSSProperties = { width: '100%', padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' };
