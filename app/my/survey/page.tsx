@@ -121,6 +121,7 @@ export default function SurveyHubPage() {
         subtitle: '사후 설문',
         desc: '사전 설문을 먼저 작성하면 열려요.',
         duration: '약 7분',
+        period: '4/15 ~ 4/15 자정',
         status: 'locked',
         statusText: '사전 설문 후 가능',
         disabled: true,

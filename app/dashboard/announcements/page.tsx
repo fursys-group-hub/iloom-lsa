@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { SummaryRow } from '@/components/SummaryRow';
+import type { Tone } from '@/components/SummaryCard';
 
 interface Batch {
   id: string;
@@ -22,11 +24,16 @@ const PRIORITY_OPTIONS = [
   { value: 'urgent', label: '긴급', color: 'var(--red)', bg: 'var(--red-dim)' },
 ];
 
+const PRIORITY_TONE: Record<string, Tone> = {
+  normal: 'blue', important: 'orange', urgent: 'red',
+};
+
 export default function AnnouncementsPage() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState('');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // 작성 폼
   const [showForm, setShowForm] = useState(false);
@@ -252,73 +259,42 @@ export default function AnnouncementsPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {announcements.map(a => {
-            const p = PRIORITY_OPTIONS.find(o => o.value === a.priority) || PRIORITY_OPTIONS[0];
+            const tone = PRIORITY_TONE[a.priority] || 'blue';
+            const pLabel = PRIORITY_OPTIONS.find(o => o.value === a.priority)?.label || '일반';
             const dateStr = new Date(a.created_at).toLocaleString('ko-KR', {
               month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
             });
+            const isExpanded = expandedId === a.id;
             return (
-              <div
+              <SummaryRow
                 key={a.id}
-                style={{
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)', padding: '20px 24px',
-                }}
-              >
-                <div className="announce-item" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <span style={{
-                        padding: '3px 10px', borderRadius: 'var(--radius-pill)',
-                        background: p.bg, color: p.color,
-                        fontSize: 12, fontWeight: 600,
-                      }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, display: 'inline-block', marginRight: 4 }} />{p.label}
-                      </span>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dateStr}</span>
-                    </div>
-                    <h4 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>
-                      {a.title}
-                    </h4>
-                    <p style={{ fontSize: 14, color: 'var(--text-second)', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>
-                      {a.content}
-                    </p>
-                  </div>
-                  <div className="announce-actions" style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                badge={{ text: pLabel, tone, dot: true }}
+                title={a.title}
+                rightSlot={
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dateStr}</span>
                     <button
-                      onClick={() => startEdit(a)}
-                      style={{
-                        padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                        border: 'none', background: 'transparent',
-                        color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer',
-                      }}
+                      onClick={(e) => { e.stopPropagation(); startEdit(a); }}
+                      style={{ padding: '4px 10px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer' }}
                     >수정</button>
                     <button
-                      onClick={() => handleDelete(a.id)}
-                      style={{
-                        padding: '4px 10px', borderRadius: 'var(--radius-sm)',
-                        border: 'none', background: 'transparent',
-                        color: 'var(--red)', fontSize: 12, cursor: 'pointer',
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleDelete(a.id); }}
+                      style={{ padding: '4px 10px', border: 'none', background: 'transparent', color: 'var(--red)', fontSize: 12, cursor: 'pointer' }}
                     >삭제</button>
                   </div>
-                </div>
-              </div>
+                }
+                expandable
+                expanded={isExpanded}
+                onToggle={() => setExpandedId(isExpanded ? null : a.id)}
+              >
+                <p style={{ fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {a.content}
+                </p>
+              </SummaryRow>
             );
           })}
         </div>
       )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          .announce-item {
-            flex-direction: column !important;
-          }
-          .announce-actions {
-            align-self: flex-end;
-            margin-top: 8px;
-          }
-        }
-      `}</style>
     </div>
   );
 }
