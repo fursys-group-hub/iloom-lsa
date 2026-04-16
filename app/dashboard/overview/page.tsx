@@ -169,6 +169,7 @@ export default function OverviewPage() {
                   <Th>교육생</Th><Th>매장</Th>
                   {[1, 2, 3, 4, 5, 6].map((w) => <Th key={w} align="center">{w}주차</Th>)}
                   <Th align="center">총평</Th>
+                  <Th align="center">벤치마킹</Th>
                 </tr>
               </thead>
               <tbody>
@@ -208,6 +209,18 @@ export default function OverviewPage() {
                         {stFinal ? (
                           <span style={{ fontSize: 13 }}>{Array.from({ length: stFinal.overall_rating }, () => '★').join('')}</span>
                         ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>미작성</span>}
+                      </Td>
+                      <Td align="center">
+                        {(() => {
+                          const bmCount = benchmarks.filter((b) => b.student_id === st.id).length;
+                          return bmCount > 0 ? (
+                            <span style={{
+                              padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
+                              background: bmCount >= 4 ? 'var(--green-dim)' : 'var(--orange-dim)',
+                              color: bmCount >= 4 ? 'var(--green)' : 'var(--orange)',
+                            }}>{bmCount}건</span>
+                          ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>미작성</span>;
+                        })()}
                       </Td>
                     </tr>
                   );

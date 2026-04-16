@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 
-// GET: 학생의 할 일 조회 (?student_id=X&date=2026-04-15)
+// GET: 학생의 할 일 조회
+// ?student_id=X&date=2026-04-15  → 특정 학생
+// ?student_ids=id1,id2&date=...  → 여러 학생 (관리자용)
 export async function GET(req: NextRequest) {
   const supabase = getSupabase();
   const studentId = req.nextUrl.searchParams.get('student_id');
+  const studentIds = req.nextUrl.searchParams.get('student_ids');
   const date = req.nextUrl.searchParams.get('date');
 
-  if (!studentId) return NextResponse.json({ error: 'student_id 필수' }, { status: 400 });
+  if (!studentId && !studentIds) return NextResponse.json({ error: 'student_id 또는 student_ids 필수' }, { status: 400 });
 
-  let query = supabase.from('student_todos').select('*').eq('student_id', studentId).order('sort_order').order('created_at');
+  let query = supabase.from('student_todos').select('*').order('sort_order').order('created_at');
+
+  if (studentIds) {
+    const ids = studentIds.split(',').filter(Boolean);
+    query = query.in('student_id', ids);
+  } else if (studentId) {
+    query = query.eq('student_id', studentId);
+  }
+
   if (date) query = query.eq('date', date);
 
   const { data, error } = await query;

@@ -7,6 +7,7 @@ import { getDayType } from '@/lib/schedule';
 import type { ScheduleMap } from '@/lib/schedule';
 import { LESSONS } from './lessons-data';
 import LessonCalendar from './LessonCalendar';
+import { Banner } from '@/components/Banner';
 
 interface TestScore { id: string; test_date: string; subject: string; score: number; }
 interface TestResponse { id: string; session: string; question_id: string; is_correct: boolean; earned_score: number; max_score: number; user_answer: string; }
@@ -15,6 +16,15 @@ interface Announcement { id: string; title: string; content: string; priority: '
 interface AttendanceRow { id: string; date: string; status: string; note?: string | null; }
 interface NoteRow { id: string; title: string; content: string; created_at: string; participation_score?: number; participation_max?: number; tags?: string[]; confidence?: string; }
 interface TodoRow { id: string; student_id: string; date: string; text: string; done: boolean; }
+interface SurveyReminder {
+  id: string;
+  student_id: string;
+  survey_type: 'efficacy' | 'ansan-tour';
+  phase: string;
+  survey_name: string;
+  phase_label: string;
+  created_at: string;
+}
 
 // 카테고리 매핑 (대시보드 mapCategory 단순화 버전)
 function mapCategory(c: string): string {
@@ -69,6 +79,7 @@ export default function MyPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [showAttendanceAlert, setShowAttendanceAlert] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
+  const [surveyReminders, setSurveyReminders] = useState<SurveyReminder[]>([]);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -167,6 +178,20 @@ export default function MyPage() {
   }, [studentId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // 설문 재촉 알림 조회
+  const fetchReminders = useCallback(async () => {
+    if (!studentId) return;
+    try {
+      const res = await fetch(`/api/survey-reminders?student_id=${studentId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSurveyReminders(Array.isArray(data) ? data : []);
+      }
+    } catch { /* */ }
+  }, [studentId]);
+  useEffect(() => { fetchReminders(); }, [fetchReminders]);
+
 
   // 차시별 점수 + 반 평균
   const sessionScores = useMemo(() => {
@@ -454,49 +479,23 @@ export default function MyPage() {
         const todayStr = kst.toISOString().slice(0, 10);
         const dayType = getDayType(schedule, todayStr);
         if (dayType === 'practice') return (
-          <div style={{
-            ...card, padding: '16px 20px',
-            background: 'var(--orange-dim)', border: '1px solid var(--orange)',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--orange)' }}></span>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--orange)' }}>오늘은 매장실습일이에요!</div>
-                <div style={{ fontSize: 13, color: 'var(--text-second)', marginTop: 2 }}>실습일지 작성이 필요해요</div>
-              </div>
-            </div>
-            <Link href="/my/practice" style={{
-              padding: '8px 16px', borderRadius: 'var(--radius-md)',
-              background: 'var(--orange)', color: '#fff', fontSize: 14, fontWeight: 600,
-              textDecoration: 'none',
-            }}>
-              실습일지 쓰러가기 →
-            </Link>
-          </div>
+          <Banner
+            tone="orange"
+            title="오늘은 매장실습일이에요!"
+            description="실습일지 작성이 필요해요"
+            actionText="실습일지 쓰러가기 →"
+            actionHref="/my/practice"
+          />
         );
         if (dayType === 'off') return (
-          <div style={{
-            ...card, padding: '16px 20px',
-            background: 'var(--bg-hover)', border: '1px solid var(--border)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-            textAlign: 'center',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 24 }}>🌙</span>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-tertiary)' }}>오늘은 휴무일이에요!</div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요!</div>
-              </div>
-            </div>
-            <Link href="/my/notes" style={{
-              padding: '10px 24px', borderRadius: 'var(--radius-md)',
-              background: 'var(--purple)', color: '#fff', fontSize: 14, fontWeight: 600,
-              textDecoration: 'none',
-            }}>
-              자율학습 쓰기
-            </Link>
-          </div>
+          <Banner
+            icon="🌙"
+            tone="purple"
+            title="오늘은 휴무일이에요!"
+            description="교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요"
+            actionText="자율학습 쓰러가기 →"
+            actionHref="/my/notes"
+          />
         );
         return null;
       })()}
@@ -647,6 +646,35 @@ export default function MyPage() {
                 <span style={{ fontSize: 11, color: 'var(--red)', fontWeight: 600 }}>지금 쓰기 →</span>
               </Link>
             )}
+
+            {/* 설문 재촉 알림 — 강조 스타일 */}
+            {surveyReminders.map(r => {
+              const href = r.survey_type === 'efficacy' ? '/my/survey/efficacy' : '/my/survey/ansan-tour';
+              const shortName = r.survey_name.replace(/\s*설문$/, '');
+              return (
+                <Link key={r.id} href={href} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                  borderRadius: 'var(--radius-md)', textDecoration: 'none',
+                  background: 'var(--red-dim)',
+                  border: '1.5px solid var(--red)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}>
+                  <span style={{
+                    fontSize: 13, color: 'var(--text-primary)', fontWeight: 700, flex: 1,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {shortName} {r.phase_label} 설문을 제출해주세요
+                  </span>
+                  <span style={{
+                    padding: '5px 10px', borderRadius: 'var(--radius-sm)',
+                    background: 'var(--red)', color: '#fff',
+                    fontSize: 12, fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap',
+                  }}>
+                    지금 쓰기 →
+                  </span>
+                </Link>
+              );
+            })}
 
             {/* 교육일지 */}
             {todayDayType !== 'off' && (

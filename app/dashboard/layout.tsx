@@ -12,21 +12,23 @@ const navGroups = [
     ],
   },
   {
-    label: '일일 운영',
+    label: '일일운영',
     items: [
+      { href: '/dashboard/announcements', label: '공지사항' },
       { href: '/dashboard/attendance', label: '출결' },
       { href: '/dashboard/tests', label: '테스트' },
       { href: '/dashboard/education-logs', label: '교육일지' },
       { href: '/dashboard/practice', label: '실습일지' },
       { href: '/dashboard/questions', label: '질문관리' },
+      { href: '/dashboard/reports', label: 'AI 리포트' },
     ],
   },
   {
-    label: '성과 분석',
+    label: '성과분석',
     items: [
-      { href: '/dashboard/students', label: '교육생 분석' },
-      { href: '/dashboard/reports', label: 'AI 리포트' },
-      { href: '/dashboard/analytics', label: '교육 인사이트' },
+      { href: '/dashboard/students', label: '교육생분석' },
+      { href: '/dashboard/surveys', label: '교육설문' },
+      { href: '/dashboard/analytics', label: '교육인사이트' },
     ],
   },
   {
@@ -38,7 +40,6 @@ const navGroups = [
   {
     label: '설정',
     items: [
-      { href: '/dashboard/announcements', label: '공지사항' },
       { href: '/dashboard/settings', label: '기수 관리' },
     ],
   },
