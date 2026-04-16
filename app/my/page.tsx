@@ -90,12 +90,17 @@ export default function MyPage() {
     }
   }, []);
 
-  // 출결 알림 체크 (미출근이면 알림 표시, 30분마다 재확인)
+  // 출결 알림 체크 (미출근이면 알림 표시, 30분마다 재확인) — 휴무일 제외
   useEffect(() => {
-    if (!studentId) return;
+    if (!studentId || !schedule) return;
 
     const checkAttendance = () => {
       const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+      // 휴무일이면 알림 안 띄움
+      if (getDayType(schedule, today) === 'off') {
+        setShowAttendanceAlert(false);
+        return;
+      }
       fetch(`/api/attendance?studentId=${studentId}`)
         .then(r => r.json())
         .then((data) => {
@@ -113,7 +118,7 @@ export default function MyPage() {
     checkAttendance();
     const interval = setInterval(checkAttendance, 30 * 60 * 1000); // 30분마다 재확인
     return () => clearInterval(interval);
-  }, [studentId]);
+  }, [studentId, schedule]);
 
   // 로그인 시 새 공지 팝업
   useEffect(() => {
@@ -262,6 +267,18 @@ export default function MyPage() {
 
   // 오늘 타입 (education / practice / off)
   const todayDayType = useMemo(() => schedule ? getDayType(schedule, kstToday) : null, [schedule, kstToday]);
+
+  // 어제 날짜 (KST) 및 어제 타입/일지 작성 여부
+  const kstYesterday = useMemo(() => {
+    const d = new Date(kstToday + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }, [kstToday]);
+  const yesterdayDayType = useMemo(() => schedule ? getDayType(schedule, kstYesterday) : null, [schedule, kstYesterday]);
+  const hasYesterdayEduNote = useMemo(() => educationNotes.some(n => new Date(n.created_at).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }) === kstYesterday), [educationNotes, kstYesterday]);
+  const hasYesterdayPracticeNote = useMemo(() => practiceNotes.some(n => new Date(n.created_at).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }) === kstYesterday), [practiceNotes, kstYesterday]);
+  const yesterdayMissingEdu = yesterdayDayType && yesterdayDayType !== 'off' && !hasYesterdayEduNote;
+  const yesterdayMissingPractice = yesterdayDayType === 'practice' && !hasYesterdayPracticeNote;
 
   // 제출률 (교육일지 기준)
   const submissionRate = useMemo(() => {
@@ -575,8 +592,8 @@ export default function MyPage() {
 
           {/* 체크리스트 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            {/* 출근 체크 */}
-            {(() => {
+            {/* 출근 체크 (휴무일 제외) */}
+            {todayDayType !== 'off' && (() => {
               const done = !!todayAttendance && todayAttendance.status !== 'absent';
               return (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 'var(--radius-sm)', background: done ? 'transparent' : 'var(--orange-dim)' }}>
@@ -593,6 +610,42 @@ export default function MyPage() {
                 </div>
               );
             })()}
+
+            {/* 어제 교육일지 미작성 알림 */}
+            {yesterdayMissingEdu && (
+              <Link href="/my/notes" style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                borderRadius: 'var(--radius-sm)', textDecoration: 'none',
+                background: 'var(--red-dim)',
+              }}>
+                <span style={{
+                  width: 18, height: 18, borderRadius: 'var(--radius-sm)', flexShrink: 0,
+                  border: '1.5px solid var(--red)',
+                }} />
+                <span style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, flex: 1 }}>
+                  어제 교육일지가 비어 있어요
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--red)', fontWeight: 600 }}>지금 쓰기 →</span>
+              </Link>
+            )}
+
+            {/* 어제 실습일지 미작성 알림 */}
+            {yesterdayMissingPractice && (
+              <Link href="/my/practice" style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                borderRadius: 'var(--radius-sm)', textDecoration: 'none',
+                background: 'var(--red-dim)',
+              }}>
+                <span style={{
+                  width: 18, height: 18, borderRadius: 'var(--radius-sm)', flexShrink: 0,
+                  border: '1.5px solid var(--red)',
+                }} />
+                <span style={{ fontSize: 14, color: 'var(--text-primary)', fontWeight: 600, flex: 1 }}>
+                  어제 실습일지가 비어 있어요
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--red)', fontWeight: 600 }}>지금 쓰기 →</span>
+              </Link>
+            )}
 
             {/* 교육일지 */}
             {todayDayType !== 'off' && (

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { SummaryRow } from '@/components/SummaryRow';
+import type { Tone } from '@/components/SummaryCard';
 
 interface Announcement {
   id: string;
@@ -10,10 +12,10 @@ interface Announcement {
   created_at: string;
 }
 
-const PRIORITY_STYLE: Record<string, { color: string; bg: string; label: string }> = {
-  normal: { color: 'var(--blue-light)', bg: 'var(--blue-dim)', label: '공지' },
-  important: { color: 'var(--orange)', bg: 'var(--orange-dim)', label: '중요' },
-  urgent: { color: 'var(--red)', bg: 'var(--red-dim)', label: '긴급' },
+const PRIORITY_TONE: Record<string, { tone: Tone; label: string }> = {
+  normal: { tone: 'blue', label: '공지' },
+  important: { tone: 'orange', label: '중요' },
+  urgent: { tone: 'red', label: '긴급' },
 };
 
 export default function MyAnnouncementsPage() {
@@ -60,77 +62,41 @@ export default function MyAnnouncementsPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {announcements.map(a => {
-            const ps = PRIORITY_STYLE[a.priority] || PRIORITY_STYLE.normal;
+            const pt = PRIORITY_TONE[a.priority] || PRIORITY_TONE.normal;
             const isExpanded = expandedId === a.id;
             const dateStr = new Date(a.created_at).toLocaleString('ko-KR', {
               month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
             });
-            // 최근 24시간 이내면 NEW 뱃지
             const isNew = Date.now() - new Date(a.created_at).getTime() < 24 * 60 * 60 * 1000;
 
             return (
-              <div
+              <SummaryRow
                 key={a.id}
-                style={{
-                  background: 'var(--bg-surface)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                <div
-                  onClick={() => setExpandedId(isExpanded ? null : a.id)}
-                  style={{
-                    padding: '16px 20px', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    transition: 'background 0.15s ease',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-                    <span style={{
-                      padding: '2px 8px', borderRadius: 'var(--radius-pill)',
-                      background: ps.bg, color: ps.color,
-                      fontSize: 12, fontWeight: 600, flexShrink: 0,
-                    }}>
-                      {ps.label}
-                    </span>
-                    <span style={{
-                      fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {a.title}
-                    </span>
+                badge={{ text: pt.label, tone: pt.tone }}
+                title={a.title}
+                rightSlot={
+                  <>
                     {isNew && (
                       <span style={{
-                        padding: '1px 6px', borderRadius: 'var(--radius-pill)',
+                        padding: '2px 8px', borderRadius: 'var(--radius-pill)',
                         background: 'var(--red)', color: '#fff',
-                        fontSize: 12, fontWeight: 600, flexShrink: 0,
+                        fontSize: 11, fontWeight: 700,
                       }}>NEW</span>
                     )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dateStr}</span>
-                    <span style={{
-                      fontSize: 14, color: 'var(--text-muted)',
-                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s ease', display: 'inline-block',
-                    }}>▾</span>
-                  </div>
-                </div>
-
-                {isExpanded && (
-                  <div style={{
-                    padding: '16px 20px 20px', borderTop: '1px solid var(--border)',
-                  }}>
-                    <p style={{
-                      fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7,
-                      margin: 0, whiteSpace: 'pre-wrap',
-                    }}>
-                      {a.content}
-                    </p>
-                  </div>
-                )}
-              </div>
+                  </>
+                }
+                expandable
+                expanded={isExpanded}
+                onToggle={() => setExpandedId(isExpanded ? null : a.id)}
+              >
+                <p style={{
+                  fontSize: 15, color: 'var(--text-second)', lineHeight: 1.7,
+                  margin: 0, whiteSpace: 'pre-wrap',
+                }}>
+                  {a.content}
+                </p>
+              </SummaryRow>
             );
           })}
         </div>

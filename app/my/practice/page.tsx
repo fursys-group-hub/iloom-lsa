@@ -1,4 +1,5 @@
 'use client';
+import { SummaryCard, type FooterItem } from '@/components/SummaryCard';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
@@ -588,7 +589,7 @@ export default function MyPracticePage() {
       {/* ── 노트 카드 목록 ── */}
       {notes.length > 0 && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 16, maxWidth: 1280 }}>
             {notes.map(note => {
               const isSelected = expandedNoteId === note.id;
               const dateObj = new Date(note.created_at);
@@ -611,68 +612,41 @@ export default function MyPracticePage() {
                 noteOrderDetail = steps.order_detail || '';
               } catch { /* */ }
 
-              return (
-                <button key={note.id}
-                  onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
-                  style={{
-                    padding: 20, borderRadius: 'var(--radius-md)', textAlign: 'left',
-                    border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
-                    background: isSelected ? 'var(--blue-dim)' : 'var(--bg-surface)',
-                    cursor: 'pointer', transition: 'all 0.15s ease',
-                    display: 'flex', flexDirection: 'column', gap: 10,
-                  }}>
-                  {/* 날짜 + 뱃지 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{month}/{day} ({dayName})</span>
-                    <span style={{
-                      padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600,
-                      background: 'var(--blue-dim)', color: 'var(--blue)',
-                    }}>실습일지</span>
-                  </div>
-                  {/* 실적 요약 */}
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {statsData.stats_consult > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue)' }}>상담 {statsData.stats_consult}</span>}
-                    {statsData.stats_estimate > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--blue-dim)', color: 'var(--blue-light)' }}>견적 {statsData.stats_estimate}</span>}
-                    {statsData.stats_order > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--orange-dim)', color: 'var(--orange)' }}>수주 {statsData.stats_order}</span>}
-                    {statsData.stats_amount > 0 && <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--purple-dim)', color: 'var(--purple)' }}>{statsData.stats_amount.toLocaleString()}원</span>}
-                  </div>
-                  {/* 수주 내역 미리보기 */}
-                  {noteOrderDetail && (
-                    <div style={{ fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-                      {noteOrderDetail.split('\n')[0]}
-                    </div>
-                  )}
-                  {/* 섹션 완료 현황 */}
-                  {note.content_type === 'steps' && (() => {
+              return (() => {
+                  // STEP 미완성 체크
+                  let stepIncomplete = false;
+                  let stepDone = 4;
+                  if (note.content_type === 'steps') {
                     try {
                       const steps = JSON.parse(note.content);
                       const filled = [!!steps.step1?.trim(), !!steps.step2?.trim(), !!steps.step3?.trim(), !!steps.step4?.trim()];
-                      const done = filled.filter(Boolean).length;
-                      return (
-                        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          {['1', '2', '3', '4'].map((num, i) => (
-                            <span key={i} style={{
-                              fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-pill)',
-                              background: filled[i] ? 'var(--blue-dim)' : 'var(--bg-hover)',
-                              color: filled[i] ? 'var(--blue)' : 'var(--text-muted)',
-                              opacity: filled[i] ? 1 : 0.3, fontWeight: 600,
-                            }}>{num}</span>
-                          ))}
-                          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{done}/4</span>
-                        </div>
-                      );
-                    } catch { return null; }
-                  })()}
-                  {/* 코멘트 뱃지 */}
-                  {(commentCounts[note.id] || 0) > 0 && (
-                    <span style={{
-                      padding: '3px 10px', borderRadius: 'var(--radius-pill)',
-                      background: 'var(--blue-dim)', color: 'var(--blue-light)',
-                      fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3,
-                    }}>{commentCounts[note.id]}개 코멘트</span>
-                  )}
-                </button>
-              );
+                      stepDone = filled.filter(Boolean).length;
+                      stepIncomplete = stepDone < 4;
+                    } catch { /* */ }
+                  }
+                  const footerSignals: FooterItem[] = [];
+                  if (stepIncomplete) footerSignals.push({ type: 'pill', text: `섹션 ${stepDone}/4`, tone: 'gray' });
+                  const commentCount = commentCounts[note.id] || 0;
+                  // 본문: 수주 금액 강조 + 실적 한줄 + 미리보기 (커스텀 ReactNode를 sub에 못 넣으니 카드 위에 wrapper로 표시)
+                  const sub = [
+                    `상담 ${statsData.stats_consult || 0} · 견적 ${statsData.stats_estimate || 0} · 수주 ${statsData.stats_order || 0}`,
+                    statsData.stats_amount > 0 ? `${statsData.stats_amount.toLocaleString()}원` : '',
+                    noteOrderDetail ? noteOrderDetail.split('\n')[0] : '',
+                  ].filter(Boolean).join(' · ');
+                  return (
+                    <SummaryCard
+                      key={note.id}
+                      date={`${month}/${day} (${dayName})`}
+                      typeBadge={{ text: '실습일지', tone: 'orange' }}
+                      title={statsData.stats_amount > 0 ? `${statsData.stats_amount.toLocaleString()}원` : (noteOrderDetail.split('\n')[0] || '실습일지')}
+                      sub={sub}
+                      selected={isSelected}
+                      onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
+                      footerSignals={footerSignals}
+                      footerRight={commentCount > 0 ? { type: 'commentCount', count: commentCount } : undefined}
+                    />
+                  );
+                })();
             })}
           </div>
 

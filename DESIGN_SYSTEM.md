@@ -1,6 +1,6 @@
 # 일룸 LSA 입문교육 — 디자인 시스템 가이드
 
-> **2026-04-13 확정.** 새 페이지나 컴포넌트를 만들 때 반드시 이 문서를 따를 것.
+> **2026-04-13 확정 / 2026-04-16 업데이트.** 새 페이지나 컴포넌트를 만들 때 반드시 이 문서를 따를 것.
 > 이 문서에 없는 스타일을 임의로 추가하지 말 것 — 추가가 필요하면 이 문서부터 업데이트.
 
 ---
@@ -424,6 +424,161 @@ letterSpacing: '0.06em', textTransform: 'uppercase',
 
 ---
 
+## 17-A. 공통 카드 컴포넌트 — `<SummaryCard>` (2026-04-16 추가)
+
+그리드 카드 리스트 (교육일지/실습일지/교육설문)에서 공통으로 사용. 모든 카드 페이지는 이 컴포넌트로 통일한다.
+
+**위치**: `components/SummaryCard.tsx`
+
+### API
+```tsx
+<SummaryCard
+  date="4/14 (화)"                              // 좌상단 라벨 (날짜/기간)
+  typeBadge={{ text: '교육일지', tone: 'blue' }} // 우상단 유형 뱃지
+  title="..."                                    // 굵은 메인 제목
+  titleSize="default" | "lg" | "xl"              // default(18) | lg(22) | xl(28)
+  sub="..."                                      // 보조 텍스트 (3줄 클램프)
+  thumbnail={imageUrl}                           // 옵션 — 첫 이미지 (72×72 좌측)
+  selected={isSelected}                          // 파란 테두리 강조
+  variant="default" | "self-study"               // self-study = 보라 테두리
+  onClick={...}                                  // 또는
+  href="..."                                     // Link 모드
+  disabled={false}
+  footerSignals={[                               // 신호 칩 배열 (있을 때만 푸터 노출)
+    { type: 'emoji', value: '😊' },
+    { type: 'pill', text: '⭐ 우수', tone: 'orange' },
+    { type: 'tag', text: '리빙(침실)' },
+  ]}
+  footerRight={                                  // 우측 — FooterItem 또는 ReactNode
+    { type: 'commentCount', count: 3 }
+  }
+/>
+```
+
+### 규격 (고정)
+| 속성 | 값 |
+|------|---|
+| padding | `24px` |
+| borderRadius | `var(--radius-lg)` (16px) |
+| boxShadow | `var(--shadow-sm)` |
+| 내부 gap | `16` |
+| 본문 minHeight | `88px` (썸네일 있을 때 본문 정렬 보장) |
+| 푸터 구분선 | `1px solid var(--border-light)` + `paddingTop: 12` |
+
+### 정보 위계 원칙 — "신호만 표시"
+- **3/3, 100% 같은 "다 채움" 표시는 노이즈** → 푸터에서 숨김
+- **미완성/주의 신호만 표시**: `참여 1/3`, `STEP 2/3`, `⭐ 우수`, `💬 N`
+- 카테고리 태그는 `#태그` 형태로 작게 (배경 없음)
+
+---
+
+## 17-B. 공통 행 컴포넌트 — `<SummaryRow>` (2026-04-16 추가)
+
+행 리스트 (공지사항/출결)에서 공통으로 사용. 펼치기 가능.
+
+**위치**: `components/SummaryRow.tsx`
+
+### API
+```tsx
+<SummaryRow
+  leftLabel={{ primary: '4/15', secondary: '수요일', secondaryTone: 'red' }}
+  badge={{ text: '출근', tone: 'green', dot: true }}     // dot = 컬러 닷 prefix
+  title="공지사항 제목..."
+  rightSlot={ReactNode}                                   // 우측 자유 (시간/출퇴근 등)
+  expandable                                              // 펼치기 토글 가능
+  expanded={isOpen}
+  onToggle={...}
+>
+  {/* 펼침 본문 */}
+</SummaryRow>
+```
+
+### 규격 (고정)
+| 속성 | 값 |
+|------|---|
+| padding | `20px 24px` |
+| display | CSS Grid (날짜 88px / 뱃지 auto / 제목 1fr / 우측 auto / 화살표) |
+| gap | `20` |
+| 날짜 라벨 | `18px / 700 / letter-spacing -0.015em` |
+| 날짜 우측 구분선 | `1px solid var(--border-light)` |
+| 펼침 본문 배경 | `var(--bg-main)` |
+
+### 2열 그리드 적용 예시 (출결)
+```tsx
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(440px, 1fr))', gap: 10 }}>
+  {items.map(item => <SummaryRow ... />)}
+</div>
+```
+
+---
+
+## 17-C. 공통 톤 시스템 — `Tone`
+
+`SummaryCard` / `SummaryRow` 모두 같은 톤 enum 사용:
+
+| Tone | 배경 | 텍스트 | 용도 |
+|------|------|--------|------|
+| `blue` | `--blue-dim` | `--blue` | 일반/공지/사전설문 |
+| `orange` | `--orange-dim` | `--orange` | 실습일지/지각/주의 |
+| `purple` | `--purple-dim` | `--purple` | 자율학습 |
+| `green` | `--green-dim` | `--green` | 완료/출근 |
+| `red` | `--red-dim` | `--red` | 긴급/위험 |
+| `gray` | `--bg-hover` | `--text-tertiary` | 부가/마감 |
+
+---
+
+## 17-D. 모달/팝업 패턴 (2026-04-16 추가)
+
+카드 클릭 → 상세보기는 **인라인 펼침이 아닌 모달 팝업**으로 통일.
+
+```tsx
+<div onClick={() => setOpen(false)} style={{
+  position: 'fixed', inset: 0, zIndex: 1000,
+  background: 'rgba(0,0,0,0.55)',
+  display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+  padding: '40px 20px', overflowY: 'auto',
+}}>
+  <div onClick={e => e.stopPropagation()} style={{
+    position: 'relative', width: '100%', maxWidth: 880,
+    background: 'var(--bg-surface)',     // ← 반드시 솔리드 배경 (반투명 X)
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '28px 32px',
+    boxShadow: 'var(--shadow-md)',
+  }}>
+    <button onClick={...} aria-label="닫기" style={{
+      position: 'absolute', top: 16, right: 16, zIndex: 2,
+      width: 36, height: 36, minWidth: 36, minHeight: 36, maxWidth: 36, maxHeight: 36,
+      boxSizing: 'border-box', padding: 0, margin: 0, flex: 'none',
+      borderRadius: '50%', border: 'none',
+      background: 'var(--bg-hover)', color: 'var(--text-tertiary)',
+      fontSize: 20, lineHeight: '36px', fontWeight: 400, textAlign: 'center', cursor: 'pointer',
+    }}>×</button>
+    {/* 내용 — 헤더는 paddingRight: 44 로 닫기 버튼 자리 확보 */}
+  </div>
+</div>
+```
+
+**원칙:**
+- 모달 배경: 반드시 `--bg-surface` 솔리드 (자율학습 등에 `--purple-dim` 같은 반투명 사용 X)
+- 자율학습 모달: 솔리드 배경 + `border: 2px solid var(--purple)`
+- 닫기 버튼: 36×36 고정 (min/max width/height 모두 36, lineHeight: '36px') — 글로벌 CSS가 늘리지 못하도록 강제
+- 헤더 우측 액션 버튼: `paddingRight: 44` 로 닫기 버튼과 겹치지 않게
+
+---
+
+## 17-E. 카드 그리드 표준 너비 (2026-04-16 추가)
+
+| 페이지 | minmax | 최대 너비 | 사유 |
+|--------|--------|-----------|------|
+| 교육일지 (많음) | `minmax(360px, 1fr)` | `1280` | 양 많아도 3~4열 |
+| 실습일지 (2~4개) | `minmax(380px, 1fr)` | `1280` | 큰 카드 2~3열 |
+| 교육설문 (4개 max) | `minmax(360px, 1fr)` | `1280` | 통일감 우선 |
+
+> **원칙**: maxWidth 1280으로 통일. 화면 너무 넓으면 카드 너무 늘어나지 않게.
+
+---
+
 ## 18. 하지 말 것 (Anti-patterns)
 
 | 금지 | 대신 |
@@ -441,3 +596,7 @@ letterSpacing: '0.06em', textTransform: 'uppercase',
 | 드롭다운 borderRadius `radius-md` | 반드시 `var(--radius-sm)` |
 | 라벨에 색상 적용 | 라벨은 항상 **회색** |
 | "수정" 버튼에 테두리 | **테두리 없음**, 텍스트만 |
+| 카드 직접 인라인 작성 | `<SummaryCard>` / `<SummaryRow>` 사용 |
+| 카드 푸터에 "3/3" 등 완료 표시 | 미완성/주의 신호만 (3/3은 노이즈) |
+| 모달 배경 반투명 (`--purple-dim` 등) | 솔리드 `--bg-surface` + 컬러 테두리로 구분 |
+| 주차/탭 선택에 둥근 알약 버튼 | 밑줄 탭 (DESIGN_SYSTEM §8) |

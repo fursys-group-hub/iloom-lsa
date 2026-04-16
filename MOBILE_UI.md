@@ -1,6 +1,6 @@
 # 모바일 UI 가이드 — 일룸 LSA 입문교육
 
-> **2026-04-13 작성.** 모바일/태블릿에서 숨기거나 변환한 요소, 그 이유를 정리한 문서.
+> **2026-04-13 작성 / 2026-04-16 업데이트.** 모바일/태블릿에서 숨기거나 변환한 요소, 그 이유를 정리한 문서.
 > 추후 모바일 수정 작업 시 이 문서를 기준으로 판단할 것.
 
 ---
@@ -104,6 +104,38 @@ html, body { overflow-x: hidden; }
 - [ ] 심화교육(overview) — 6열/4열 그리드 → 모바일 적응
 - [ ] manager 총평(final) — 점수 스케일 2열 → 모바일 1열
 - [ ] 학생 마이페이지(my/page) — 시험 상세 2열 → 모바일 1열
+
+---
+
+## 7-A. 주차/단계 선택 — 데스크톱 탭 / 모바일 드롭다운 (2026-04-16 추가)
+
+여러 주차/단계 중 하나 선택할 때 패턴:
+
+```tsx
+<style>{`
+  @media (max-width: 768px) {
+    .week-tabs { display: none !important; }
+    .week-select { display: block !important; }
+  }
+`}</style>
+{/* 데스크톱: 밑줄 탭 */}
+<div className="week-tabs" style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--border)' }}>
+  {weeks.map(w => (
+    <button style={{
+      padding: '10px 20px 12px',
+      borderBottom: active ? '2px solid var(--blue)' : '2px solid transparent',
+      ...
+    }}>{w}주차</button>
+  ))}
+</div>
+{/* 모바일: select */}
+<select className="week-select" style={{ display: 'none', ... }}>
+  ...
+</select>
+```
+
+**적용 페이지:**
+- 심화교육 (`/my/training`) — 1~6주차 선택
 
 ---
 

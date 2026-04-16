@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { SummaryCard, type Tone, type FooterItem } from '@/components/SummaryCard';
 
 interface AuthData {
   role: string;
@@ -17,6 +17,7 @@ interface SurveyCard {
   subtitle: string;
   desc: string;
   duration: string;
+  period: string;     // 응답 기간 (예: "4/10 ~ 4/15")
   status: 'available' | 'locked' | 'done';
   statusText: string;
   disabled?: boolean;
@@ -66,22 +67,24 @@ export default function SurveyHubPage() {
   // 사전 설문 카드
   const preCard: SurveyCard = ansanDone.pre
     ? {
-        href: '/my/survey/ansan-tour',
+        href: '/my/survey/ansan-tour?phase=pre',
         emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사전 설문',
         desc: '투어 가기 전 지금 알고 있는 정도와 궁금한 점을 적었어요.',
         duration: '약 5분',
+        period: '4/15 ~ 4/15 자정',
         status: 'done',
         statusText: '완료',
       }
     : {
-        href: '/my/survey/ansan-tour',
+        href: '/my/survey/ansan-tour?phase=pre',
         emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사전 설문',
         desc: '투어 가기 전 지금 알고 있는 정도와 가장 궁금한 점을 알려주세요.',
         duration: '약 5분',
+        period: '4/15 ~ 4/15 자정',
         status: 'available',
         statusText: '참여 가능',
       };
@@ -89,28 +92,30 @@ export default function SurveyHubPage() {
   // 사후 설문 카드 (사전 완료 후 활성화)
   const postCard: SurveyCard = ansanDone.post
     ? {
-        href: '/my/survey/ansan-tour',
+        href: '/my/survey/ansan-tour?phase=post',
         emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
         desc: '투어 후 가장 인상 깊었던 점과 새로 알게 된 점을 적었어요.',
         duration: '약 7분',
+        period: '4/15 ~ 4/15 자정',
         status: 'done',
         statusText: '완료',
       }
     : ansanDone.pre
     ? {
-        href: '/my/survey/ansan-tour',
+        href: '/my/survey/ansan-tour?phase=post',
         emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
         desc: '투어를 마치고 가장 인상 깊었던 점과 새로 알게 된 점을 알려주세요.',
         duration: '약 7분',
+        period: '4/15 ~ 4/15 자정',
         status: 'available',
         statusText: '참여 가능',
       }
     : {
-        href: '/my/survey/ansan-tour',
+        href: '/my/survey/ansan-tour?phase=post',
         emoji: '',
         title: '안성공장 인프라 투어',
         subtitle: '사후 설문',
@@ -124,21 +129,17 @@ export default function SurveyHubPage() {
   const cards = [preCard, postCard];
 
   return (
-    <div style={{ padding: '24px 16px 64px', maxWidth: 960, margin: '0 auto' }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{
-          fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)',
-          fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)',
-          margin: 0, letterSpacing: '-0.025em',
-        }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>
           교육 설문
-        </h1>
+        </h2>
       </div>
 
       {loading ? (
         <p style={{ color: 'var(--text-tertiary)', fontSize: 15 }}>불러오는 중...</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16, maxWidth: 1280 }}>
           {cards.map((c, i) => <SurveyCardItem key={i} card={c} />)}
         </div>
       )}
@@ -147,80 +148,29 @@ export default function SurveyHubPage() {
 }
 
 function SurveyCardItem({ card }: { card: SurveyCard }) {
-  const statusColor = card.status === 'done'
-    ? { bg: 'var(--green-dim)', text: 'var(--green)' }
-    : card.status === 'locked'
-    ? { bg: 'var(--bg-elevated)', text: 'var(--text-muted)' }
-    : { bg: 'var(--blue-dim)', text: 'var(--blue)' };
+  const statusTone: Tone = card.status === 'done' ? 'green' : card.status === 'locked' ? 'gray' : 'blue';
+  const actionLabel = card.status === 'done' ? '내 답변 보기 →' : card.status === 'locked' ? '잠김' : '참여하기 →';
 
-  const cardInner = (
-    <div
-      style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '24px',
-        boxShadow: 'var(--shadow-sm)',
-        transition: 'all 0.15s ease',
-        cursor: card.disabled ? 'not-allowed' : 'pointer',
-        opacity: card.disabled ? 0.55 : 1,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 16,
-      }}
-      onMouseEnter={(e) => { if (!card.disabled) { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.transform = 'translateY(-2px)'; } }}
-      onMouseLeave={(e) => { if (!card.disabled) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; } }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: 12 }}>
-        <span style={{
-          padding: '4px 12px',
-          borderRadius: 'var(--radius-pill)',
-          background: statusColor.bg,
-          color: statusColor.text,
-          fontSize: 12,
-          fontWeight: 600,
-          whiteSpace: 'nowrap',
-        }}>
-          {card.statusText}
-        </span>
-      </div>
-
-      <div>
-        <h3 style={{
-          fontSize: 18,
-          fontWeight: 600,
-          lineHeight: 1.3,
-          color: 'var(--text-primary)',
-          margin: '0 0 4px',
-          letterSpacing: '-0.015em',
-        }}>
-          {card.title}
-        </h3>
-        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--blue-light)', margin: 0 }}>
-          {card.subtitle}
-        </p>
-      </div>
-
-      <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0, lineHeight: 1.6, flex: 1 }}>
-        {card.desc}
-      </p>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--border-light)' }}>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>⏱ {card.duration}</span>
-        <span style={{ fontSize: 14, fontWeight: 600, color: card.disabled ? 'var(--text-muted)' : 'var(--blue)' }}>
-          {card.status === 'done' ? '내 답변 보기 →' : card.status === 'locked' ? '잠김' : '참여하기 →'}
-        </span>
-      </div>
-    </div>
+  const footerSignals: FooterItem[] = [
+    { type: 'pill', text: card.statusText, tone: statusTone },
+    { type: 'pill', text: card.duration, tone: 'gray' },
+  ];
+  const footerRight = (
+    <span style={{ fontSize: 13, fontWeight: 600, color: card.disabled ? 'var(--text-muted)' : 'var(--blue)' }}>
+      {actionLabel}
+    </span>
   );
 
-  if (card.disabled) {
-    return cardInner;
-  }
   return (
-    <Link href={card.href} style={{ textDecoration: 'none' }}>
-      {cardInner}
-    </Link>
+    <SummaryCard
+      date={card.period}
+      typeBadge={{ text: card.subtitle, tone: 'blue' }}
+      title={card.title}
+      sub={card.desc}
+      disabled={card.disabled}
+      href={card.disabled ? undefined : card.href}
+      footerSignals={footerSignals}
+      footerRight={footerRight}
+    />
   );
 }

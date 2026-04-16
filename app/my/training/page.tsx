@@ -110,54 +110,70 @@ export default function TrainingPage() {
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.025em', margin: '0 0 8px' }}>심화교육</h1>
-        <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>
-          매장에서 우수 직원을 벤치마킹하고 배운 점을 기록하세요
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: 0 }}>심화교육</h2>
 
-      {/* 주차 선택 탭 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+      {/* 주차 선택 — 데스크톱: 플랫 버튼, 모바일: 드롭다운 */}
+      <style>{`
+        @media (max-width: 768px) {
+          .week-tabs { display: none !important; }
+          .week-select { display: block !important; }
+        }
+      `}</style>
+      <div className="week-tabs" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', borderBottom: '1px solid var(--border)' }}>
         {Array.from({ length: 6 }, (_, i) => i + 1).map((w) => {
           const hasBM = benchmarks.some((b) => b.week_number === w);
+          const active = selectedWeek === w;
           return (
             <button key={w}
               onClick={() => setSelectedWeek(w)}
               style={{
-                padding: '10px 20px', borderRadius: 'var(--radius-pill)',
-                border: selectedWeek === w ? '2px solid var(--blue)' : '1px solid var(--border)',
-                background: selectedWeek === w ? 'var(--blue-dim)' : hasBM ? 'var(--bg-surface)' : 'transparent',
-                color: selectedWeek === w ? 'var(--blue-light)' : hasBM ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
-                position: 'relative',
+                padding: '10px 20px 12px', background: 'transparent', border: 'none',
+                borderBottom: active ? '2px solid var(--blue)' : '2px solid transparent',
+                color: active ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontSize: 15, fontWeight: active ? 600 : 400,
+                cursor: 'pointer', transition: 'all 0.15s ease',
+                marginBottom: -1, display: 'inline-flex', alignItems: 'center', gap: 6,
               }}
             >
               {w}주차
               {hasBM && (
                 <span style={{
-                  position: 'absolute', top: -2, right: -2, width: 8, height: 8,
-                  borderRadius: '50%', background: 'var(--green)',
+                  width: 6, height: 6, borderRadius: '50%', background: 'var(--green)',
                 }} />
               )}
             </button>
           );
         })}
       </div>
+      <select
+        className="week-select"
+        value={selectedWeek}
+        onChange={(e) => setSelectedWeek(Number(e.target.value))}
+        style={{
+          display: 'none',
+          width: '100%', padding: '12px 14px',
+          borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+          background: 'var(--bg-surface)', color: 'var(--text-primary)',
+          fontSize: 16, fontWeight: 600, cursor: 'pointer', outline: 'none',
+        }}
+      >
+        {Array.from({ length: 6 }, (_, i) => i + 1).map((w) => {
+          const hasBM = benchmarks.some((b) => b.week_number === w);
+          return <option key={w} value={w}>{w}주차{hasBM ? ' (작성됨)' : ''}</option>;
+        })}
+      </select>
 
       {/* 벤치마킹 작성 폼 */}
       <div style={{
         background: 'var(--bg-surface)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)', padding: 32,
+        borderRadius: 'var(--radius-lg)', padding: '20px 24px', boxShadow: 'var(--shadow-sm)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 }}>{selectedWeek}주차 벤치마킹</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
-              {existing ? '작성된 내용을 수정할 수 있어요' : '매장에서 관찰한 우수 직원의 노하우를 기록하세요'}
-            </p>
-          </div>
+        <div style={{ marginBottom: 4 }}>
+          <h3 style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.3, letterSpacing: '-0.015em', color: 'var(--text-primary)', margin: '0 0 4px' }}>{selectedWeek}주차 벤치마킹</h3>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>
+            {existing ? '작성된 내용을 수정할 수 있어요' : '매장에서 우수 직원을 벤치마킹하고 배운 점을 기록하세요'}
+          </p>
         </div>
 
         {/* 벤치마킹 대상 */}

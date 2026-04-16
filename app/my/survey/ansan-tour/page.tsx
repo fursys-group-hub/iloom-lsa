@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface AuthData {
   role: string;
@@ -81,6 +82,12 @@ const SAT_QUESTIONS: { key: keyof AnsanSurvey; label: string }[] = [
 
 const BEST_LINE_OPTIONS = ['소파', '매트리스', '철제 가구', '품질 검사', '기타'] as const;
 
+// 설문 마감일 (KST 기준, YYYY-MM-DD). 마감일까지 수정 가능.
+const SURVEY_DEADLINES: Record<'pre' | 'post', string> = {
+  pre: '2026-04-15',
+  post: '2026-04-15',
+};
+
 const POST_OPEN_QUESTIONS: { key: keyof AnsanSurvey; label: string; placeholder: string }[] = [
   { key: 'learned_sofa',     label: '소파 라인을 보고 새로 알게 된 점은?',                      placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
   { key: 'learned_mattress', label: '매트리스 라인을 보고 새로 알게 된 점은?',                  placeholder: '인상 깊은 부분을 자유롭게 적어주세요' },
@@ -99,12 +106,20 @@ const card: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: 18, fontWeight: 600, lineHeight: 1.3, color: 'var(--text-primary)',
-  margin: '0 0 16px', letterSpacing: '-0.015em',
+  fontSize: 18, fontWeight: 700, lineHeight: 1.3, color: 'var(--text-primary)',
+  margin: '0 0 4px', letterSpacing: '-0.015em',
 };
 
 const questionText: React.CSSProperties = {
-  fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 12px',
+  fontSize: 16, fontWeight: 600, color: 'var(--text-primary)',
+  margin: '0 0 14px', lineHeight: 1.45, letterSpacing: '-0.005em',
+};
+
+const qNumStyle: React.CSSProperties = {
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  width: 24, height: 24, borderRadius: '50%', background: 'var(--blue-dim)',
+  color: 'var(--blue)', fontSize: 12, fontWeight: 700,
+  marginRight: 10, flexShrink: 0,
 };
 
 const pillBase: React.CSSProperties = {
@@ -140,6 +155,8 @@ function emptyForm(phase: 'pre' | 'post', auth: AuthData): AnsanSurvey {
 }
 
 export default function AnsanTourSurveyPage() {
+  const searchParams = useSearchParams();
+  const phaseParam = searchParams.get('phase') as 'pre' | 'post' | null;
   const [auth, setAuth] = useState<AuthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -174,7 +191,14 @@ export default function AnsanTourSurveyPage() {
       setExistingPre(preData);
       setExistingPost(postData);
 
-      if (!preData) {
+      // URL에 phase가 지정되면 그 단계만 사용
+      if (phaseParam === 'pre') {
+        if (preData) { setCurrentPhase('pre'); setForm({ ...preData }); setEditing(false); }
+        else { setCurrentPhase('pre'); setForm(emptyForm('pre', auth)); setEditing(false); }
+      } else if (phaseParam === 'post') {
+        if (postData) { setCurrentPhase('post'); setForm({ ...postData }); setEditing(false); }
+        else { setCurrentPhase('post'); setForm(emptyForm('post', auth)); setEditing(false); }
+      } else if (!preData) {
         setCurrentPhase('pre'); setForm(emptyForm('pre', auth)); setEditing(false);
       } else if (!postData) {
         setCurrentPhase('post'); setForm(emptyForm('post', auth)); setEditing(false);
@@ -185,7 +209,7 @@ export default function AnsanTourSurveyPage() {
       setError('설문 데이터를 불러오지 못했어요');
     }
     setLoading(false);
-  }, [auth]);
+  }, [auth, phaseParam]);
 
   useEffect(() => { fetchSurveys(); }, [fetchSurveys]);
 
@@ -255,24 +279,30 @@ export default function AnsanTourSurveyPage() {
 
   /* ── render helpers ── */
   const renderScale = (key: keyof AnsanSurvey, value: number | null, readOnly: boolean, labels: readonly string[]) => (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      {labels.map((label, i) => {
-        const val = i + 1;
-        const selected = value === val;
-        return (
-          <button key={val} type="button" disabled={readOnly}
-            onClick={() => !readOnly && setField(key, val as AnsanSurvey[typeof key])}
-            style={{
-              ...(selected ? pillSelected : pillBase),
-              opacity: readOnly && !selected ? 0.4 : 1,
-              cursor: readOnly ? 'default' : 'pointer',
-              flex: '1 1 auto', minWidth: 0, textAlign: 'center',
-            }}>
-            <span style={{ display: 'block', fontSize: 16, fontWeight: 600 }}>{val}</span>
-            <span style={{ display: 'block', fontSize: 12, fontWeight: 400, marginTop: 2 }}>{label}</span>
-          </button>
-        );
-      })}
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+        {labels.map((_, i) => {
+          const val = i + 1;
+          const selected = value === val;
+          return (
+            <button key={val} type="button" disabled={readOnly}
+              onClick={() => !readOnly && setField(key, val as AnsanSurvey[typeof key])}
+              style={{
+                ...(selected ? pillSelected : pillBase),
+                opacity: readOnly && !selected ? 0.35 : 1,
+                cursor: readOnly ? 'default' : 'pointer',
+                padding: '12px 0', textAlign: 'center',
+                fontSize: 16, fontWeight: 700,
+              }}>
+              {val}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+        <span>{labels[0]}</span>
+        <span>{labels[labels.length - 1]}</span>
+      </div>
     </div>
   );
 
@@ -314,78 +344,137 @@ export default function AnsanTourSurveyPage() {
   const renderForm = (data: AnsanSurvey, readOnly: boolean) => {
     const isPre = data.phase === 'pre';
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 16, alignItems: 'start' }}>
+        {/* ── 왼쪽: 객관식 (점수) ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* A. 자가진단 9문항 (사전/사후 공통) */}
         <div style={card}>
           <h3 style={sectionTitle}>지금 내가 알고 있는 정도</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {KNOW_QUESTIONS.map(q => (
-              <div key={q.key}>
-                <p style={questionText}>{q.label}</p>
-                {renderScale(q.key, data[q.key] as number | null, readOnly, SCALE_LABELS)}
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>총 {KNOW_QUESTIONS.length}문항 · 1점(전혀 모름) ~ 5점(매우 잘 앎)</p>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {KNOW_QUESTIONS.map((q, i) => (
+              <div key={q.key} style={{
+                padding: '20px 0',
+                borderTop: i === 0 ? 'none' : '1px solid var(--border-light)',
+              }}>
+                <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                  <span style={qNumStyle}>{i + 1}</span>
+                  <span>{q.label}</span>
+                </p>
+                <div style={{ paddingLeft: 34 }}>
+                  {renderScale(q.key, data[q.key] as number | null, readOnly, SCALE_LABELS)}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* C. 사후: 만족도 + NPS (객관식 — 왼쪽) */}
+        {!isPre && (
+          <div style={card}>
+            <h3 style={sectionTitle}>투어는 어땠나요?</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>총 {SAT_QUESTIONS.length + 1}문항 · 1점(전혀 그렇지 않다) ~ 5점(매우 그렇다)</p>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {SAT_QUESTIONS.map((q, i) => (
+                <div key={q.key} style={{
+                  padding: '20px 0',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--border-light)',
+                }}>
+                  <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                    <span style={qNumStyle}>{i + 1}</span>
+                    <span>{q.label}</span>
+                  </p>
+                  <div style={{ paddingLeft: 34 }}>
+                    {renderScale(q.key, data[q.key] as number | null, readOnly, SAT_LABELS)}
+                  </div>
+                </div>
+              ))}
+              <div style={{ padding: '20px 0', borderTop: '1px solid var(--border-light)' }}>
+                <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                  <span style={qNumStyle}>{SAT_QUESTIONS.length + 1}</span>
+                  <span>다음 기수에게 이 투어를 추천하시겠어요? (0~10)</span>
+                </p>
+                <div style={{ paddingLeft: 34 }}>
+                  {renderNps(data.nps, readOnly)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        </div>
+
+        {/* ── 오른쪽: 주관식 ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
         {/* B. 사전: 호기심 */}
         {isPre && (
           <div style={card}>
             <h3 style={sectionTitle}>가장 알고 싶은 것</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {CURIOSITY_QUESTIONS.map(q => (
-                <div key={q.key}>
-                  <p style={questionText}>{q.label}</p>
-                  {renderTextarea(q.key, (data[q.key] as string) || '', q.placeholder, readOnly)}
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>총 {CURIOSITY_QUESTIONS.length}문항 · 자유롭게 적어주세요</p>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {CURIOSITY_QUESTIONS.map((q, i) => (
+                <div key={q.key} style={{
+                  padding: '20px 0',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--border-light)',
+                }}>
+                  <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                    <span style={qNumStyle}>{i + 1}</span>
+                    <span>{q.label}</span>
+                  </p>
+                  <div style={{ paddingLeft: 34 }}>
+                    {renderTextarea(q.key, (data[q.key] as string) || '', q.placeholder, readOnly)}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* C. 사후: 만족도 + NPS */}
         {!isPre && (
           <>
-            <div style={card}>
-              <h3 style={sectionTitle}>투어는 어땠나요?</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {SAT_QUESTIONS.map(q => (
-                  <div key={q.key}>
-                    <p style={questionText}>{q.label}</p>
-                    {renderScale(q.key, data[q.key] as number | null, readOnly, SAT_LABELS)}
-                  </div>
-                ))}
-                <div>
-                  <p style={questionText}>다음 기수에게 이 투어를 추천하시겠어요? (0~10)</p>
-                  {renderNps(data.nps, readOnly)}
-                </div>
-              </div>
-            </div>
-
             {/* D. 사후: 가장 인상 깊은 라인 */}
             <div style={card}>
               <h3 style={sectionTitle}>가장 인상 깊었던 라인</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                <div>
-                  <p style={questionText}>가장 인상 깊었던 라인을 선택해주세요</p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {BEST_LINE_OPTIONS.map(opt => {
-                      const selected = data.best_line === opt;
-                      return (
-                        <button key={opt} type="button" disabled={readOnly}
-                          onClick={() => !readOnly && setField('best_line', opt)}
-                          style={{
-                            ...(selected ? pillSelected : pillBase),
-                            opacity: readOnly && !selected ? 0.4 : 1,
-                            cursor: readOnly ? 'default' : 'pointer',
-                          }}>{opt}</button>
-                      );
-                    })}
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>총 2문항</p>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '20px 0' }}>
+                  <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                    <span style={qNumStyle}>1</span>
+                    <span>가장 인상 깊었던 라인을 선택해주세요</span>
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', paddingLeft: 34 }}>
+                    {readOnly ? (
+                      data.best_line ? (
+                        <span style={{
+                          ...pillSelected,
+                          cursor: 'default',
+                        }}>{data.best_line}</span>
+                      ) : (
+                        <span style={{ fontSize: 14, color: 'var(--text-muted)', fontStyle: 'italic' }}>선택 안 함</span>
+                      )
+                    ) : (
+                      BEST_LINE_OPTIONS.map(opt => {
+                        const selected = data.best_line === opt;
+                        return (
+                          <button key={opt} type="button"
+                            onClick={() => setField('best_line', opt)}
+                            style={{
+                              ...(selected ? pillSelected : pillBase),
+                              cursor: 'pointer',
+                            }}>{opt}</button>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
-                <div>
-                  <p style={questionText}>그 라인이 인상 깊었던 이유는?</p>
-                  {renderTextarea('best_reason', data.best_reason, '한 줄로 적어주세요', readOnly)}
+                <div style={{ padding: '20px 0', borderTop: '1px solid var(--border-light)' }}>
+                  <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                    <span style={qNumStyle}>2</span>
+                    <span>그 라인이 인상 깊었던 이유는?</span>
+                  </p>
+                  <div style={{ paddingLeft: 34 }}>
+                    {renderTextarea('best_reason', data.best_reason, '한 줄로 적어주세요', readOnly)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -393,36 +482,59 @@ export default function AnsanTourSurveyPage() {
             {/* E. 사후: 라인별 알게 된 점 + 자신감 + 아쉬운 점 */}
             <div style={card}>
               <h3 style={sectionTitle}>새로 알게 된 점</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {POST_OPEN_QUESTIONS.map(q => (
-                  <div key={q.key}>
-                    <p style={questionText}>{q.label}</p>
-                    {renderTextarea(q.key, (data[q.key] as string) || '', q.placeholder, readOnly)}
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>총 {POST_OPEN_QUESTIONS.length}문항 · 자유롭게 적어주세요</p>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {POST_OPEN_QUESTIONS.map((q, i) => (
+                  <div key={q.key} style={{
+                    padding: '20px 0',
+                    borderTop: i === 0 ? 'none' : '1px solid var(--border-light)',
+                  }}>
+                    <p style={{ ...questionText, display: 'flex', alignItems: 'center' }}>
+                      <span style={qNumStyle}>{i + 1}</span>
+                      <span>{q.label}</span>
+                    </p>
+                    <div style={{ paddingLeft: 34 }}>
+                      {renderTextarea(q.key, (data[q.key] as string) || '', q.placeholder, readOnly)}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </>
         )}
+        </div>
       </div>
     );
   };
 
   const renderCompletedView = (data: AnsanSurvey, phase: 'pre' | 'post') => {
-    const title = phase === 'pre' ? '안성공장 투어 — 사전 설문' : '안성공장 투어 — 사후 설문';
+    const title = phase === 'pre' ? '안성공장 인프라 투어 — 사전 설문' : '안성공장 인프라 투어 — 사후 설문';
+    const todayKst = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+    const deadline = SURVEY_DEADLINES[phase];
+    const isExpired = todayKst > deadline;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ fontSize: 'clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem)', fontWeight: 700, lineHeight: 1.2, color: 'var(--text-primary)', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: '0 0 6px' }}>
               {title}
             </h2>
-            <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>제출 완료</p>
+            <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>
+              제출 완료 · {isExpired ? `마감되었어요 (${deadline}까지)` : `${deadline}까지 수정 가능`}
+            </p>
           </div>
-          <button type="button" onClick={() => startEdit(phase)}
-            style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-            수정하기
-          </button>
+          {isExpired ? (
+            <span style={{
+              padding: '6px 14px', borderRadius: 'var(--radius-pill)',
+              background: 'var(--bg-hover)', color: 'var(--text-muted)',
+              fontSize: 13, fontWeight: 600,
+            }}>마감</span>
+          ) : (
+            <button type="button" onClick={() => startEdit(phase)}
+              style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-primary)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+              수정하기
+            </button>
+          )}
         </div>
         {renderForm(data, true)}
       </div>
@@ -430,10 +542,10 @@ export default function AnsanTourSurveyPage() {
   };
 
   if (loading) {
-    return <div style={{ padding: 32, maxWidth: 720, margin: '0 auto' }}><p style={{ color: 'var(--text-tertiary)', fontSize: 15 }}>불러오는 중...</p></div>;
+    return <p style={{ color: 'var(--text-tertiary)', fontSize: 15 }}>불러오는 중...</p>;
   }
   if (!auth) {
-    return <div style={{ padding: 32, maxWidth: 720, margin: '0 auto' }}><p style={{ color: 'var(--text-tertiary)', fontSize: 15 }}>로그인이 필요해요</p></div>;
+    return <p style={{ color: 'var(--text-tertiary)', fontSize: 15 }}>로그인이 필요해요</p>;
   }
 
   const showForm = currentPhase && form && (
@@ -447,9 +559,9 @@ export default function AnsanTourSurveyPage() {
     : '투어를 마치고 무엇이 가장 인상 깊었는지 알려주세요.';
 
   return (
-    <div style={{ padding: '24px 16px 64px', maxWidth: 720, margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 상단 뒤로가기 */}
-      <Link href="/my/survey" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block', marginBottom: 16 }}>
+      <Link href="/my/survey" style={{ fontSize: 14, color: 'var(--text-tertiary)', textDecoration: 'none', display: 'inline-block' }}>
         ← 설문 목록으로
       </Link>
 
@@ -467,10 +579,10 @@ export default function AnsanTourSurveyPage() {
       {showForm && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>
-            <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.025em' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--text-primary)', margin: '0 0 6px' }}>
               {phaseTitle}
-            </h1>
-            <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>{phaseSub}</p>
+            </h2>
+            <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>{phaseSub}</p>
           </div>
 
           {renderForm(form!, false)}
@@ -491,16 +603,9 @@ export default function AnsanTourSurveyPage() {
       )}
 
       {!showForm && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-          <div>
-            <h1 style={{ fontSize: 'clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem)', fontWeight: 700, lineHeight: 1.1, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.025em' }}>
-              안성공장 인프라 투어 설문
-            </h1>
-            <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>제출한 설문을 확인할 수 있어요</p>
-          </div>
-
-          {existingPre && renderCompletedView(existingPre, 'pre')}
-          {existingPost && renderCompletedView(existingPost, 'post')}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {existingPre && phaseParam !== 'post' && renderCompletedView(existingPre, 'pre')}
+          {existingPost && phaseParam !== 'pre' && renderCompletedView(existingPost, 'post')}
         </div>
       )}
     </div>
