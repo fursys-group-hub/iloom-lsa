@@ -22,12 +22,12 @@ export default async function TestsPage() {
     supabase.from('student_notes').select('id, student_id, title, content, created_at').order('created_at', { ascending: false }),
     // test_responses: 전체 페이지네이션
     (async () => {
-      const all: { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string }[] = [];
+      const all: { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string; user_answer: string | null }[] = [];
       let from = 0;
       const pageSize = 1000;
       while (true) {
         const { data } = await supabase.from('test_responses')
-          .select('student_id, batch_id, session, question_id, is_correct, test_date')
+          .select('student_id, batch_id, session, question_id, is_correct, test_date, user_answer')
           .range(from, from + pageSize - 1);
         if (!data || data.length === 0) break;
         all.push(...data);
@@ -36,7 +36,7 @@ export default async function TestsPage() {
       }
       return { data: all };
     })(),
-    supabase.from('questions').select('id, batch_id, session, question_id, category, series, detail, question_text'),
+    supabase.from('questions').select('id, batch_id, session, question_id, category, series, detail, question_text, correct_answer, options, scoring_mode'),
   ]);
 
   return (
