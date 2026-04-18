@@ -993,7 +993,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
           )}
 
           {/* Row 2 — 차시별 추이 (1/3) + 교육생별 성장 곡선 (2/3) */}
-          <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
+          <div className="row2-grid" style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
           <div style={analysisCardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
               <h3 style={sectionTitleStyle}>차시별 전체 평균 추이</h3>
@@ -1189,7 +1189,7 @@ export default function TestsClient({ batches, students, scores, attendance, not
               </div>
 
               {/* 차시별 비교 (전체) + 제품군별 비교 (전체) 2열 배치 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div className="cmp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 {batchComparison.sessionRows.length > 0 && (
                   <div>
                     <div style={{ ...subLabelStyle, marginBottom: 10 }}>차시별 평균 비교</div>
