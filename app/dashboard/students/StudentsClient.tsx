@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Batch, Student, TestScore, Attendance, TagTracking, HRAdvice } from '@/lib/types';
 import { calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
+import { useBatch } from '@/lib/batch-context';
 
 interface NoteRow { id: string; student_id: string; title: string; content: string; created_at: string; }
 interface AnalysisResponse { student_id: string; batch_id: string; session: string; question_id: string; is_correct: boolean; test_date: string; }
@@ -63,9 +64,10 @@ const cardStyle: React.CSSProperties = { background: 'var(--bg-surface)', border
 export default function StudentsClient({ batches, students: initialStudents, scores, attendance, notes, testResponses, questions, memos, coachingReports }: Props) {
   const [students] = useState(initialStudents);
 
-  // 활성 기수
-  const activeBatch = batches.find(b => !b.is_archived);
-  const batchId = activeBatch?.id || batches[0]?.id || '';
+  // 사이드바에서 선택한 기수 사용 (없으면 활성 기수 → 첫 기수)
+  const { selectedBatchId } = useBatch();
+  const fallbackBatchId = batches.find(b => !b.is_archived)?.id || batches[0]?.id || '';
+  const batchId = selectedBatchId || fallbackBatchId;
 
   // 기수별 활성 학생
   const batchStudents = useMemo(() => students.filter(s => s.batch_id === batchId && !s.is_dropped), [students, batchId]);

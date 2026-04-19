@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import type { Batch, Student, TestScore, Attendance } from '@/lib/types';
+import { useBatch } from '@/lib/batch-context';
 import { calculateAdaptationIndex, calculateAvgScore, calculateDailyAverages } from '@/lib/analysis';
 import ScoreTrendChart from '@/components/charts/ScoreTrendChart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ScatterChart, Scatter, ZAxis, LineChart, Line, Legend } from 'recharts';
@@ -140,9 +141,7 @@ function WhyPopover({ title, children, width = 460 }: { title: string; children:
 
 // ── 메인 ──
 export default function AnalyticsClient({ batches, students, scores, attendance, notes, testResponses, questions, memos, surveys, weeklySales, evaluations }: Props) {
-  const activeBatches = batches.filter(b => !b.is_archived);
-  const archivedBatches = batches.filter(b => b.is_archived);
-  const [selectedBatchId, setSelectedBatchId] = useState(activeBatches[0]?.id || batches[0]?.id || '');
+  const { selectedBatchId } = useBatch();
   const [uploadMsg, setUploadMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -326,13 +325,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* 헤더 */}
       <div className="insight-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="insight-title-row" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 인사이트</h2>
-          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
-            {activeBatches.length > 0 && <optgroup label="진행 중">{activeBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
-            {archivedBatches.length > 0 && <optgroup label="보관됨">{archivedBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}</optgroup>}
-          </select>
-        </div>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>교육 인사이트</h2>
       </div>
 
       {/* KPI — 한 카드에 4칸 */}

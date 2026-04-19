@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { buildComprehensivePrompt, buildSubjectPrompt, REPORT_CATEGORIES, REPORT_TYPE_LABELS } from '@/lib/report-prompts';
 import { ReportStyles } from './ReportStyles';
+import { useOptionalBatch } from '@/lib/batch-context';
 
 interface BatchItem { id: string; name: string; start_date: string; end_date: string; }
 interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
@@ -365,7 +366,11 @@ export function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: bo
 }
 
 export default function ReportsClient({ batches, readOnly, storeFilter }: { batches: BatchItem[]; readOnly?: boolean; storeFilter?: string }) {
-  const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
+  // 대시보드에서는 사이드바 전역 기수 컨텍스트 사용, 매니저에서는 로컬 상태 폴백
+  const batchCtx = useOptionalBatch();
+  const [localBatchId, setLocalBatchId] = useState(batches[0]?.id || '');
+  const selectedBatchId = batchCtx?.selectedBatchId ?? localBatchId;
+  const setSelectedBatchId = batchCtx?.setSelectedBatchId ?? setLocalBatchId;
   const [students, setStudents] = useState<StudentItem[]>([]);
   const [reportGroups, setReportGroups] = useState<ReportGroup[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -581,10 +586,13 @@ export default function ReportsClient({ batches, readOnly, storeFilter }: { batc
         <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>AI 분석 리포트</h2>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
-              style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
-              {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
+            {/* 대시보드는 사이드바 전역 기수 드롭다운 사용 — 페이지 내 드롭다운은 매니저 모드에서만 */}
+            {!batchCtx && (
+              <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
+                style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
+                {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            )}
             <button onClick={refreshReports}
               style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>
               새로고침

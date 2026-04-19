@@ -5,15 +5,9 @@ import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
 } from 'recharts';
+import { useBatch } from '@/lib/batch-context';
 
 /* ── types ── */
-interface Batch {
-  id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  is_archived?: boolean;
-}
 interface Student {
   id: string;
   name: string;
@@ -174,9 +168,8 @@ function fmtDate(iso: string): string {
 
 /* ── component ── */
 export default function SurveysPage() {
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const { selectedBatchId } = useBatch();
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   const [tab, setTab] = useState<'efficacy' | 'ansan'>('ansan');
@@ -189,22 +182,13 @@ export default function SurveysPage() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [modalTab, setModalTab] = useState<string>('intro_end');
 
-  // fetch batches & students
+  // fetch students
   useEffect(() => {
     (async () => {
       try {
-        const [bRes, sRes] = await Promise.all([
-          fetch('/api/batches').then(r => r.json()),
-          fetch('/api/students').then(r => r.json()),
-        ]);
-        const bList = (bRes.batches || bRes || []) as Batch[];
+        const sRes = await fetch('/api/students').then(r => r.json());
         const sList = (sRes.students || sRes || []) as Student[];
-        setBatches(bList);
         setStudents(sList);
-        if (bList.length > 0) {
-          const active = bList.find(b => !b.is_archived) || bList[0];
-          setSelectedBatchId(active.id);
-        }
       } catch { /* */ }
       setLoading(false);
     })();
@@ -314,15 +298,6 @@ export default function SurveysPage() {
         <h2 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
           교육설문
         </h2>
-        <select
-          value={selectedBatchId}
-          onChange={e => setSelectedBatchId(e.target.value)}
-          style={selectStyle}
-        >
-          {batches.map(b => (
-            <option key={b.id} value={b.id}>{b.name}{b.is_archived ? ' (보관)' : ''}</option>
-          ))}
-        </select>
       </div>
 
       {/* Tabs */}

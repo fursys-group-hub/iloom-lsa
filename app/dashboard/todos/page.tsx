@@ -1,15 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useBatch } from '@/lib/batch-context';
 
 /* ── types ── */
-interface Batch {
-  id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  is_archived?: boolean;
-}
 interface Student {
   id: string;
   name: string;
@@ -79,31 +73,21 @@ function recentDates(n: number): string[] {
 
 /* ── component ── */
 export default function TodosPage() {
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const { selectedBatchId } = useBatch();
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedBatchId, setSelectedBatchId] = useState<string>('');
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(todayKST());
 
   const dates = useMemo(() => recentDates(14), []);
 
-  // fetch batches & students
+  // fetch students
   useEffect(() => {
     (async () => {
       try {
-        const [bRes, sRes] = await Promise.all([
-          fetch('/api/batches').then(r => r.json()),
-          fetch('/api/students').then(r => r.json()),
-        ]);
-        const bList = (bRes.batches || bRes || []) as Batch[];
+        const sRes = await fetch('/api/students').then(r => r.json());
         const sList = (sRes.students || sRes || []) as Student[];
-        setBatches(bList);
         setStudents(sList);
-        if (bList.length > 0) {
-          const active = bList.find(b => !b.is_archived) || bList[0];
-          setSelectedBatchId(active.id);
-        }
       } catch { /* */ }
       setLoading(false);
     })();
@@ -156,11 +140,6 @@ export default function TodosPage() {
           <select value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={selectStyle}>
             {dates.map(d => (
               <option key={d} value={d}>{formatDateLabel(d)}{d === todayKST() ? ' (오늘)' : ''}</option>
-            ))}
-          </select>
-          <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)} style={selectStyle}>
-            {batches.map(b => (
-              <option key={b.id} value={b.id}>{b.name}{b.is_archived ? ' (보관)' : ''}</option>
             ))}
           </select>
         </div>

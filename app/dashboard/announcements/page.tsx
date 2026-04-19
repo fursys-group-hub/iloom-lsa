@@ -3,11 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SummaryRow } from '@/components/SummaryRow';
 import type { Tone } from '@/components/SummaryCard';
-
-interface Batch {
-  id: string;
-  name: string;
-}
+import { useBatch } from '@/lib/batch-context';
 
 interface Announcement {
   id: string;
@@ -29,8 +25,7 @@ const PRIORITY_TONE: Record<string, Tone> = {
 };
 
 export default function AnnouncementsPage() {
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [selectedBatchId, setSelectedBatchId] = useState('');
+  const { selectedBatchId, selectedBatch } = useBatch();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -43,22 +38,6 @@ export default function AnnouncementsPage() {
   const [priority, setPriority] = useState<string>('normal');
   const [saving, setSaving] = useState(false);
 
-  const fetchBatches = useCallback(async () => {
-    try {
-      const res = await fetch('/api/batches');
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setBatches(data);
-        // 진행중인 기수 자동 선택
-        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
-        const active = data.find((b: Batch & { start_date: string; end_date: string; advanced_end?: string }) =>
-          today >= b.start_date && (b.advanced_end ? today <= b.advanced_end : today <= b.end_date)
-        );
-        setSelectedBatchId(active?.id || data[0].id);
-      }
-    } catch { /* */ }
-  }, []);
-
   const fetchAnnouncements = useCallback(async (batchId: string) => {
     setLoading(true);
     try {
@@ -69,7 +48,6 @@ export default function AnnouncementsPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchBatches(); }, [fetchBatches]);
   useEffect(() => {
     if (selectedBatchId) fetchAnnouncements(selectedBatchId);
   }, [selectedBatchId, fetchAnnouncements]);
@@ -116,8 +94,6 @@ export default function AnnouncementsPage() {
     setShowForm(true);
   };
 
-  const selectedBatch = batches.find(b => b.id === selectedBatchId);
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -136,24 +112,6 @@ export default function AnnouncementsPage() {
         >
           + 공지 작성
         </button>
-      </div>
-
-      {/* 기수 선택 */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <select
-          value={selectedBatchId}
-          onChange={e => setSelectedBatchId(e.target.value)}
-          style={{
-            padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)', background: 'var(--bg-surface)',
-            color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
-            cursor: 'pointer', outline: 'none',
-          }}
-        >
-          {batches.map(b => (
-            <option key={b.id} value={b.id}>{b.name}</option>
-          ))}
-        </select>
       </div>
 
       {/* 작성/수정 폼 */}

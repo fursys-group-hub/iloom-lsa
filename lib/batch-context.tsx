@@ -91,3 +91,8 @@ export function useBatch(): BatchContextValue {
   if (!ctx) throw new Error('useBatch must be used inside <BatchProvider>');
   return ctx;
 }
+
+/** <BatchProvider> 밖에서도 호출 가능 (매니저 페이지 등). 없으면 null 반환. */
+export function useOptionalBatch(): BatchContextValue | null {
+  return useContext(BatchContext);
+}
