@@ -59,7 +59,7 @@ const PRACTICE_SECTIONS = [
 ] as const;
 
 // 실습일지 작성 가능 날짜 (2026년 4월)
-const PRACTICE_DATES = ['2026-04-11', '2026-04-12', '2026-04-17', '2026-04-18'];
+const PRACTICE_DATES = ['2026-04-11', '2026-04-12', '2026-04-18', '2026-04-19'];
 
 const STATS_FIELDS = [
   { key: 'stats_consult', label: '상담(건)' },
