@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useBatch } from '@/lib/batch-context';
 import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -86,6 +87,7 @@ const LEVEL_CONFIG = {
 
 /* ── 메인 ── */
 export default function OverviewPage() {
+  const { selectedBatchId } = useBatch();
   const [students, setStudents] = useState<StudentItem[]>([]);
   const [evaluations, setEvaluations] = useState<EvalData[]>([]);
   const [finals, setFinals] = useState<FinalEvalData[]>([]);
@@ -96,19 +98,23 @@ export default function OverviewPage() {
   const [filterStore, setFilterStore] = useState('');
 
   useEffect(() => {
+    if (!selectedBatchId) return;
+    setLoading(true);
     Promise.all([
-      fetch('/api/students').then((r) => r.json()),
+      fetch(`/api/students?batch_id=${selectedBatchId}`).then((r) => r.json()),
       fetch('/api/evaluations').then((r) => r.json()),
       fetch('/api/final-evaluations').then((r) => r.json()),
       fetch('/api/benchmarks').then((r) => r.json()),
       fetch('/api/scores').then((r) => r.json()).then((d) => d.scores || d || []),
     ]).then(([s, e, f, b, sc]) => {
       // [임시 목업] 곽현서 샘플 데이터 — 디자인 미리보기용. 실제 데이터 생기면 자동 비활성화됨.
-      const studentList = s as StudentItem[];
-      const evalList = e as EvalData[];
-      const finalList = f as FinalEvalData[];
-      const bmList = b as BenchmarkData[];
-      const scoreList = sc as { student_id: string; subject: string; score: number; max_score: number }[];
+      const studentList = (s as StudentItem[]) || [];
+      const batchIds = new Set(studentList.map(st => st.id));
+      // 모든 평가/총평/벤치마킹/점수를 선택된 기수 학생으로 필터
+      const evalList = ((e as EvalData[]) || []).filter(x => batchIds.has(x.student_id));
+      const finalList = ((f as FinalEvalData[]) || []).filter(x => batchIds.has(x.student_id));
+      const bmList = ((b as BenchmarkData[]) || []).filter(x => batchIds.has(x.student_id));
+      const scoreList = ((sc as { student_id: string; subject: string; score: number; max_score: number }[]) || []).filter(x => batchIds.has(x.student_id));
       const gwak = studentList.find((x) => x.name === '곽현서');
       const hasRealData = gwak && evalList.some((ev) => ev.student_id === gwak.id);
       if (gwak && !hasRealData) {
@@ -166,7 +172,7 @@ export default function OverviewPage() {
         setBenchmarks(bmList); setScores(scoreList);
       }
     }).catch(console.error).finally(() => setLoading(false));
-  }, []);
+  }, [selectedBatchId]);
 
   // 퇴사자 제외
   const activeStudents = students.filter(s => !s.is_dropped);

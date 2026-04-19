@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useBatch } from '@/lib/batch-context';
 import type { StudentQuestion, QuestionReply } from '@/lib/types';
 
 const card: React.CSSProperties = {
@@ -20,6 +21,7 @@ type QuestionWithMeta = StudentQuestion & { reply_count: number; student_name?: 
 type StudentStats = { testAvg: number | null; attendanceRate: number | null; adaptationTotal: number | null; adaptationGroup: string | null };
 
 export default function AdminQuestionsPage() {
+  const { selectedBatchId } = useBatch();
   const [questions, setQuestions] = useState<QuestionWithMeta[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [replies, setReplies] = useState<QuestionReply[]>([]);
@@ -43,16 +45,32 @@ export default function AdminQuestionsPage() {
   }, []);
 
   const fetchQuestions = useCallback(async () => {
+    if (!selectedBatchId) return;
+    setLoading(true);
     try {
-      const res = await fetch('/api/student-questions?all=true');
-      const data = await res.json();
-      setQuestions(data);
+      const [qRes, sRes] = await Promise.all([
+        fetch('/api/student-questions?all=true'),
+        fetch(`/api/students?batch_id=${selectedBatchId}`),
+      ]);
+      const data = await qRes.json();
+      const studentsData = await sRes.json();
+      const ids = new Set<string>(Array.isArray(studentsData) ? studentsData.map((s: { id: string }) => s.id) : []);
+      // 선택된 기수 학생의 질문만
+      const filtered = Array.isArray(data) ? data.filter((q: QuestionWithMeta) => ids.has(q.student_id)) : [];
+      setQuestions(filtered);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedBatchId]);
 
   useEffect(() => { fetchQuestions(); }, [fetchQuestions]);
+
+  // 기수 전환으로 목록이 바뀌어 선택된 질문이 더 이상 없으면 해제
+  useEffect(() => {
+    if (selectedId && questions.length > 0 && !questions.some(q => q.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [questions, selectedId]);
 
   const fetchReplies = useCallback(async (qId: string) => {
     const res = await fetch(`/api/student-questions?question_id=${qId}`);

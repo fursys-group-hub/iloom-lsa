@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as XLSX from 'xlsx';
+import { useBatch } from '@/lib/batch-context';
 import {
   type AttendanceRow, type StatusType,
   parseStatus, excelSerialToDate, excelSerialToTime,
@@ -25,6 +26,7 @@ const statusOptions: { value: StatusType; label: string }[] = [
 ];
 
 export default function AttendancePage() {
+  const { selectedBatchId } = useBatch();
   // ── DB 데이터 ──
   const [savedData, setSavedData] = useState<SavedAttendance[]>([]);
   const [droppedIds, setDroppedIds] = useState<Set<string>>(new Set());
@@ -46,22 +48,28 @@ export default function AttendancePage() {
 
   // DB 데이터 불러오기
   const fetchAttendance = useCallback(async () => {
+    if (!selectedBatchId) return;
+    setLoading(true);
     try {
       const [res, studentsRes] = await Promise.all([
         fetch('/api/attendance'),
-        fetch('/api/students'),
+        fetch(`/api/students?batch_id=${selectedBatchId}`),
       ]);
       const data = await res.json();
       const studentsData = await studentsRes.json();
+      const ids = new Set<string>(Array.isArray(studentsData) ? studentsData.map((s: { id: string }) => s.id) : []);
       if (Array.isArray(studentsData)) {
         setDroppedIds(new Set(studentsData.filter((s: { is_dropped: boolean }) => s.is_dropped).map((s: { id: string }) => s.id)));
       }
       if (Array.isArray(data)) {
-        setSavedData(data);
-        // 첫 로드 시 가장 최근 날짜 선택
-        if (data.length > 0 && !selectedDate) {
-          const dates = [...new Set(data.map((d: SavedAttendance) => d.date))].sort().reverse();
+        // 선택된 기수 학생의 출결만
+        const filtered = data.filter((d: SavedAttendance) => ids.has(d.student_id));
+        setSavedData(filtered);
+        if (filtered.length > 0) {
+          const dates = [...new Set(filtered.map((d: SavedAttendance) => d.date))].sort().reverse();
           setSelectedDate(dates[0] as string);
+        } else {
+          setSelectedDate('');
         }
       }
     } catch {
@@ -69,7 +77,7 @@ export default function AttendancePage() {
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedBatchId]);
 
   useEffect(() => { fetchAttendance(); }, [fetchAttendance]);
 

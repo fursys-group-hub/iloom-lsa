@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useBatch } from '@/lib/batch-context';
 import type { Batch, Student, TestScore, Attendance } from '@/lib/types';
 import { calculateDailyAverages } from '@/lib/analysis';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
@@ -133,7 +134,8 @@ function renderAiMarkdown(text: string): React.ReactNode {
   return nodes;
 }
 
-export default function TestsClient({ batches, students, scores, attendance, notes, allTestResponses, allQuestions }: Props) {
+export default function TestsClient({ batches, students, scores: allScores, attendance: allAttendance, notes: allNotes, allTestResponses, allQuestions }: Props) {
+  const { selectedBatchId } = useBatch();
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
@@ -159,11 +161,18 @@ export default function TestsClient({ batches, students, scores, attendance, not
   const [gradingChanges, setGradingChanges] = useState<Map<string, boolean>>(new Map());
   const [savingGrade, setSavingGrade] = useState(false);
 
-  const sheetId = batches[0]?.sheet_id || '';
-  const batchId = batches[0]?.id || '';
+  const selectedBatchObj = useMemo(() => batches.find(b => b.id === selectedBatchId), [batches, selectedBatchId]);
+  const sheetId = selectedBatchObj?.sheet_id || '';
+  const batchId = selectedBatchId;
 
-  // 퇴사자 제외
-  const activeStudents = useMemo(() => students.filter(s => !s.is_dropped), [students]);
+  // 선택된 기수의 학생/점수/출결/노트만 사용
+  const batchStudentIdSet = useMemo(() => new Set(students.filter(s => s.batch_id === batchId).map(s => s.id)), [students, batchId]);
+  const scores = useMemo(() => allScores.filter(s => batchStudentIdSet.has(s.student_id)), [allScores, batchStudentIdSet]);
+  const attendance = useMemo(() => allAttendance.filter(a => batchStudentIdSet.has(a.student_id)), [allAttendance, batchStudentIdSet]);
+  const notes = useMemo(() => allNotes.filter(n => batchStudentIdSet.has(n.student_id)), [allNotes, batchStudentIdSet]);
+
+  // 퇴사자 제외 (해당 기수 한정)
+  const activeStudents = useMemo(() => students.filter(s => s.batch_id === batchId && !s.is_dropped), [students, batchId]);
 
   // 차시 목록
   const sessions = useMemo(() => {

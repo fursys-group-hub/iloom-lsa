@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useBatch } from '@/lib/batch-context';
 import type { Student, TestScore, Attendance, TagTracking } from '@/lib/types';
 import { calculateAdaptationIndex, calculateRiskChecklist, generateHRAdvice } from '@/lib/analysis';
 import { getDayType, DAY_TYPE_CONFIG } from '@/lib/schedule';
@@ -139,7 +140,7 @@ function parseNoteMeta(content: string) {
 
 export default function DashboardClient({ batches, students: allStudents, scores: allScores, attendance: allAttendance, notes: allNotes, announcements, noteComments, questions, memos, testResponses, examQuestions, coachingReports }: Props) {
   const today = getKSTToday();
-  const [selectedBatchId, setSelectedBatchId] = useState(batches[0]?.id || '');
+  const { selectedBatchId } = useBatch();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const toggle = (key: string) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
@@ -353,27 +354,6 @@ export default function DashboardClient({ batches, students: allStudents, scores
               {dDayInfo.label} <span style={{ fontWeight: 800 }}>{dDayInfo.dday}</span>
             </span>
           )}
-          <select
-            value={selectedBatchId}
-            onChange={e => setSelectedBatchId(e.target.value)}
-            style={{
-              padding: '8px 14px', borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border)', background: 'var(--bg-surface)',
-              color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            {batches.filter(b => !b.is_archived).map(b => (
-              <option key={b.id} value={b.id}>{b.name} 기수</option>
-            ))}
-            {batches.some(b => b.is_archived) && (
-              <optgroup label="보관된 기수">
-                {batches.filter(b => b.is_archived).map(b => (
-                  <option key={b.id} value={b.id}>{b.name} 기수 (보관)</option>
-                ))}
-              </optgroup>
-            )}
-          </select>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useBatch } from '@/lib/batch-context';
 
 interface StudentItem {
   id: string;
@@ -24,6 +25,7 @@ interface EvalData {
 }
 
 export default function AdminEvaluationsPage() {
+  const { selectedBatchId } = useBatch();
   const [students, setStudents] = useState<StudentItem[]>([]);
   const [evaluations, setEvaluations] = useState<EvalData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,24 +33,28 @@ export default function AdminEvaluationsPage() {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [filterStore, setFilterStore] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
+    if (!selectedBatchId) return;
+    setLoading(true);
     try {
       const [studentsRes, evalsRes] = await Promise.all([
-        fetch('/api/students'),
+        fetch(`/api/students?batch_id=${selectedBatchId}`),
         fetch('/api/evaluations'),
       ]);
-      setStudents(await studentsRes.json());
-      setEvaluations(await evalsRes.json());
+      const studentsData: StudentItem[] = await studentsRes.json();
+      const evalsData: EvalData[] = await evalsRes.json();
+      const ids = new Set(Array.isArray(studentsData) ? studentsData.map(s => s.id) : []);
+      setStudents(Array.isArray(studentsData) ? studentsData : []);
+      // 선택된 기수 학생의 평가만
+      setEvaluations(Array.isArray(evalsData) ? evalsData.filter(e => ids.has(e.student_id)) : []);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedBatchId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const stores = [...new Set(students.map((s) => s.store_location).filter(Boolean))] as string[];
   const filteredStudents = filterStore

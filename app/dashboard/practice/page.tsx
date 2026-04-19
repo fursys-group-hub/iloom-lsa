@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useBatch } from '@/lib/batch-context';
 
 // ── 타입 ──
 interface NoteComment {
@@ -101,6 +102,7 @@ function StepImagesGrid({ images }: { images: string[] }) {
 
 // ── 메인 ──
 export default function DashboardPracticePage() {
+  const { selectedBatchId } = useBatch();
   const [notes, setNotes] = useState<StudentNote[]>([]);
   const [students, setStudents] = useState<StudentBasic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -270,25 +272,35 @@ ${studentSections}
   }, [expandedNoteId, fetchComments]);
 
   const fetchData = useCallback(async () => {
+    if (!selectedBatchId) return;
+    setLoading(true);
     try {
       const [notesRes, studentsRes] = await Promise.all([
         fetch('/api/notes?all=true'),
-        fetch('/api/students'),
+        fetch(`/api/students?batch_id=${selectedBatchId}`),
       ]);
       const [notesData, studentsData] = await Promise.all([notesRes.json(), studentsRes.json()]);
+      const batchStudentIds = new Set(Array.isArray(studentsData) ? studentsData.map((s: StudentBasic) => s.id) : []);
       if (notesData?.notes) {
-        // 실습일지만 필터
-        const practiceNotes = notesData.notes.filter((n: StudentNote) => n.tags?.includes('실습일지'));
+        // 실습일지만 필터 + 선택된 기수 학생의 노트만
+        const practiceNotes = notesData.notes.filter((n: StudentNote) =>
+          n.tags?.includes('실습일지') && batchStudentIds.has(n.student_id)
+        );
         setNotes(practiceNotes);
-        if (practiceNotes.length > 0 && !selectedDate) {
+        if (practiceNotes.length > 0) {
           const dates = [...new Set(practiceNotes.map((n: StudentNote) => toKSTDate(n.created_at)))].sort().reverse();
           setSelectedDate(dates[0] as string);
+        } else {
+          setSelectedDate('');
         }
+      } else {
+        setNotes([]);
+        setSelectedDate('');
       }
       if (Array.isArray(studentsData)) setStudents(studentsData);
     } catch { /* */ }
     setLoading(false);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedBatchId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

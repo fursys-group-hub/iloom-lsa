@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { BatchProvider } from '@/lib/batch-context';
+import { BatchSelector } from '@/components/BatchSelector';
 
 const navGroups = [
   {
@@ -81,6 +83,7 @@ export default function DashboardLayout({
   }
 
   return (
+    <BatchProvider>
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-primary)' }}>
 
       {/* 모바일 오버레이 */}
@@ -124,6 +127,14 @@ export default function DashboardLayout({
             </span>
           </div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>교육 관리 시스템</p>
+        </div>
+
+        {/* 전역 기수 선택 */}
+        <div style={{ padding: '12px 14px 8px', borderBottom: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 6px 4px' }}>
+            보고 있는 기수
+          </p>
+          <BatchSelector compact />
         </div>
 
         {/* 네비게이션 */}
@@ -346,5 +357,6 @@ export default function DashboardLayout({
         }
       `}</style>
     </div>
+    </BatchProvider>
   );
 }
