@@ -7,3 +7,14 @@ node_modules
 프로젝트_기록/ExportBlock-*/
 ExportBlock-*/
 프로젝트_기록/*.xlsx
+
+# 개인정보 보관 (학생 사진, 이력서 등 — 절대 커밋 금지)
+_private/
+
+# 안전망 — 혹시 모를 민감 파일 실수 방지
+app/*.jpg
+app/*.jpeg
+app/*.png
+app/*.pdf
+**/이력서*.pdf
+**/합격자*.pdf
