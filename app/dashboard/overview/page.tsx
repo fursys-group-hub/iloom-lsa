@@ -107,70 +107,14 @@ export default function OverviewPage() {
       fetch('/api/benchmarks').then((r) => r.json()),
       fetch('/api/scores').then((r) => r.json()).then((d) => d.scores || d || []),
     ]).then(([s, e, f, b, sc]) => {
-      // [임시 목업] 곽현서 샘플 데이터 — 디자인 미리보기용. 실제 데이터 생기면 자동 비활성화됨.
       const studentList = (s as StudentItem[]) || [];
       const batchIds = new Set(studentList.map(st => st.id));
-      // 모든 평가/총평/벤치마킹/점수를 선택된 기수 학생으로 필터
       const evalList = ((e as EvalData[]) || []).filter(x => batchIds.has(x.student_id));
       const finalList = ((f as FinalEvalData[]) || []).filter(x => batchIds.has(x.student_id));
       const bmList = ((b as BenchmarkData[]) || []).filter(x => batchIds.has(x.student_id));
       const scoreList = ((sc as { student_id: string; subject: string; score: number; max_score: number }[]) || []).filter(x => batchIds.has(x.student_id));
-      const gwak = studentList.find((x) => x.name === '곽현서');
-      const hasRealData = gwak && evalList.some((ev) => ev.student_id === gwak.id);
-      if (gwak && !hasRealData) {
-        const rpAreas = ['학생방', '침실', '옷장', '거실', '주방', '서재'];
-        const strengthByWeek: Record<number, string[]> = {
-          1: ['제품 지식 풍부', '고객 라포형성 우수'],
-          2: ['자신감 있는 상담', '고객 니즈 파악 우수'],
-          3: ['주문서 작성 정확', '빠르고 정확한 상담'],
-          4: ['SCT 활용 능숙', '차분하고 친절한 응대'],
-          5: ['업셀링 적극적'],
-          6: [],
-        };
-        const improvementByWeek: Record<number, string[]> = {
-          1: ['자신감 부족'], 2: ['상담 흐름 개선 필요'], 3: [], 4: ['업셀링 보완 필요'], 5: ['SCT 활용 미숙'], 6: [],
-        };
-        const mockEvals: EvalData[] = [1, 2, 3, 4, 5, 6].map((w) => ({
-          student_id: gwak.id,
-          week_number: w,
-          rp_area: rpAreas[w - 1],
-          status: w <= 4 ? 'completed' : w === 5 ? 'partial' : 'not_started',
-          strength_tags: strengthByWeek[w],
-          improvement_tags: improvementByWeek[w],
-          comment: w <= 5 ? `${w}주차 ${rpAreas[w - 1]} 롤플레잉 피드백: 고객 응대가 자연스러워졌고, 다음 주에는 업셀링과 SCT 활용을 훈련해봐요.` : null,
-          managers: { name: '이관리', store_name: '용산' },
-          updated_at: new Date().toISOString(),
-        }));
-        const mockBMs: BenchmarkData[] = [1, 2, 3, 4].map((w) => ({
-          student_id: gwak.id,
-          week_number: w,
-          target_name: `선배사원 ${w}번`,
-          learnings: `${w}주차 벤치마킹: 선배의 첫인사 톤과 제품 제안 순서가 인상적이었어요. 고객 니즈를 먼저 듣고 맞춤 제안하는 흐름이 안정적입니다.`,
-          action_plan: `${w}주차 실천계획: 첫인사 톤을 다음 상담에 적용하고, 니즈 파악 질문 3개를 미리 준비하기.`,
-        }));
-        const mockFinal: FinalEvalData = {
-          student_id: gwak.id,
-          overall_rating: 4,
-          summary: '곽현서 교육생은 6주간 성실하게 심화교육을 이수했고, 특히 고객 응대와 제품 지식이 빠르게 향상됐어요. 매장에 배치되면 독립 상담을 안정적으로 수행할 수 있는 수준에 도달했습니다.',
-          strengths: '고객 라포 형성이 빠르고, 제품 디테일을 스스로 학습하는 의지가 강합니다. 상담 흐름도 차분하고 논리적이에요.',
-          areas_to_develop: '업셀링 상황에서 추가 제안이 다소 약한 편이에요. SCT 활용 패턴을 더 숙지하면 주문 확정율이 올라갈 거예요.',
-          recommended_position: '용산 거실/침실 상담 담당',
-          store_fit_score: 4, independence_score: 4,
-          customer_score: 5, product_score: 4,
-          managers: { name: '이관리', store_name: '용산' },
-        };
-        const mockScores = [1, 2, 3, 4, 5, 6].map((w) => ({
-          student_id: gwak.id, subject: `${w}주차`, score: 70 + w * 3, max_score: 100,
-        }));
-        setStudents(studentList);
-        setEvaluations([...evalList, ...mockEvals]);
-        setFinals([...finalList, mockFinal]);
-        setBenchmarks([...bmList, ...mockBMs]);
-        setScores([...scoreList, ...mockScores]);
-      } else {
-        setStudents(studentList); setEvaluations(evalList); setFinals(finalList);
-        setBenchmarks(bmList); setScores(scoreList);
-      }
+      setStudents(studentList); setEvaluations(evalList); setFinals(finalList);
+      setBenchmarks(bmList); setScores(scoreList);
     }).catch(console.error).finally(() => setLoading(false));
   }, [selectedBatchId]);
 

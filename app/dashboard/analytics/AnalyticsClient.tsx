@@ -236,7 +236,7 @@ export default function AnalyticsClient({ batches, students, scores, attendance,
       if (!ids.has(n.student_id)) return false;
       const m = parseNoteMeta(n.content);
       return !m.tags.includes('실습일지') && !m.tags.includes('자율학습');
-    }).map(n => ({ date: n.created_at.slice(0, 10), ...parseNoteMeta(n.content) }));
+    }).map(n => ({ date: new Date(n.created_at).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }), ...parseNoteMeta(n.content) }));
 
     const byDate = new Map<string, { high: number; mid: number; low: number; pScores: number[] }>();
     for (const n of eduNotes) {
