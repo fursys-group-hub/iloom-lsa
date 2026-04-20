@@ -627,10 +627,9 @@ export default function MyPracticePage() {
                   const footerSignals: FooterItem[] = [];
                   if (stepIncomplete) footerSignals.push({ type: 'pill', text: `섹션 ${stepDone}/4`, tone: 'gray' });
                   const commentCount = commentCounts[note.id] || 0;
-                  // 본문: 수주 금액 강조 + 실적 한줄 + 미리보기 (커스텀 ReactNode를 sub에 못 넣으니 카드 위에 wrapper로 표시)
+                  // 본문: 실적 한줄 + 주문 상세 미리보기 (수주금액은 상세 펼침에서만 표시)
                   const sub = [
                     `상담 ${statsData.stats_consult || 0} · 견적 ${statsData.stats_estimate || 0} · 수주 ${statsData.stats_order || 0}`,
-                    statsData.stats_amount > 0 ? `${statsData.stats_amount.toLocaleString()}원` : '',
                     noteOrderDetail ? noteOrderDetail.split('\n')[0] : '',
                   ].filter(Boolean).join(' · ');
                   return (
@@ -638,7 +637,7 @@ export default function MyPracticePage() {
                       key={note.id}
                       date={`${month}/${day} (${dayName})`}
                       typeBadge={{ text: '실습일지', tone: 'orange' }}
-                      title={statsData.stats_amount > 0 ? `${statsData.stats_amount.toLocaleString()}원` : (noteOrderDetail.split('\n')[0] || '실습일지')}
+                      title={note.title}
                       sub={sub}
                       selected={isSelected}
                       onClick={() => setExpandedNoteId(isSelected ? null : note.id)}
