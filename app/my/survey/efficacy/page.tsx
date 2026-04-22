@@ -200,16 +200,13 @@ export default function SurveyPage() {
       setExistingAdvanced(advData);
 
       // determine current phase
+      // 입문 미제출 → 입문 폼 표시
+      // 입문 제출됨 → 읽기 전용 뷰 (심화는 별도 오픈 시 URL 파라미터로 분기 예정)
       if (!introData) {
         setCurrentPhase('intro_end');
         setForm(emptyForm('intro_end', auth));
         setEditing(false);
-      } else if (!advData) {
-        setCurrentPhase('advanced_end');
-        setForm(emptyForm('advanced_end', auth));
-        setEditing(false);
       } else {
-        // both done — read-only by default
         setCurrentPhase(null);
         setForm(null);
         setEditing(false);
