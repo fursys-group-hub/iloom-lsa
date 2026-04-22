@@ -161,6 +161,9 @@ export default function TestsClient({ batches, students, scores: allScores, atte
   const [gradingChanges, setGradingChanges] = useState<Map<string, boolean>>(new Map());
   const [savingGrade, setSavingGrade] = useState(false);
 
+  // 응시 기록 삭제
+  const [deletingStudentId, setDeletingStudentId] = useState<string | null>(null);
+
   const selectedBatchObj = useMemo(() => batches.find(b => b.id === selectedBatchId), [batches, selectedBatchId]);
   const sheetId = selectedBatchObj?.sheet_id || '';
   const batchId = selectedBatchId;
@@ -277,6 +280,32 @@ export default function TestsClient({ batches, students, scores: allScores, atte
       setSyncResult('채점 저장 실패');
     } finally {
       setSavingGrade(false);
+    }
+  };
+
+  // 응시 기록 삭제
+  const handleDeleteResponse = async (studentId: string, studentName: string) => {
+    if (!selectedSession) return;
+    const ok = window.confirm(
+      `${studentName}님의 ${selectedSession} 응시 기록을 삭제할까요?\n\n시험 점수와 문항별 답안이 모두 지워지며 되돌릴 수 없어요.`
+    );
+    if (!ok) return;
+
+    setDeletingStudentId(studentId);
+    try {
+      const params = new URLSearchParams({ studentId, session: selectedSession });
+      if (batchId) params.set('batchId', batchId);
+      const res = await fetch(`/api/test-responses?${params.toString()}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || '삭제 실패');
+      setSyncResult(data.message);
+      setSelectedStudent(null);
+      if (selectedSession) fetchSessionData(selectedSession);
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (err) {
+      setSyncResult(err instanceof Error ? err.message : '삭제 실패');
+    } finally {
+      setDeletingStudentId(null);
     }
   };
 
@@ -1614,8 +1643,39 @@ export default function TestsClient({ batches, students, scores: allScores, atte
 
                     {isSelected && rowResp.length > 0 && (
                       <div style={{ padding: '16px 20px 20px', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-second)', marginBottom: 12 }}>
-                          {row.student.name}의 문항별 답안 ({rowResp.length}문항)
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-second)' }}>
+                            {row.student.name}의 문항별 답안 ({rowResp.length}문항)
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteResponse(row.student.id, row.student.name);
+                            }}
+                            disabled={deletingStudentId === row.student.id}
+                            style={{
+                              padding: '6px 14px',
+                              borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--red-dim)',
+                              background: 'transparent',
+                              color: 'var(--red)',
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: deletingStudentId === row.student.id ? 'not-allowed' : 'pointer',
+                              opacity: deletingStudentId === row.student.id ? 0.5 : 1,
+                              transition: 'all 0.15s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (deletingStudentId !== row.student.id) {
+                                e.currentTarget.style.background = 'var(--red-dim)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                            }}
+                          >
+                            {deletingStudentId === row.student.id ? '삭제 중...' : '응시 기록 삭제'}
+                          </button>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {rowResp.map((r) => {
@@ -1993,20 +2053,36 @@ export default function TestsClient({ batches, students, scores: allScores, atte
                                           background: 'var(--bg-surface)', border: '1px solid var(--border)',
                                           display: 'flex', alignItems: 'flex-start', gap: 10,
                                         }}>
-                                          {/* O/X 토글 */}
-                                          <div style={{ display: 'flex', gap: 4, flexShrink: 0, marginTop: 2 }}>
+                                          {/* O/X 토글 — 선택된 쪽만 색이 꽉 차게 */}
+                                          <div style={{ display: 'flex', gap: 6, flexShrink: 0, marginTop: 2 }}>
                                             <button
                                               onClick={() => {
                                                 const m = new Map(gradingChanges);
                                                 if (r.is_correct === true) m.delete(r.id); else m.set(r.id, true);
                                                 setGradingChanges(m);
                                               }}
+                                              title="정답"
                                               style={{
-                                                width: 32, height: 32, borderRadius: '50%', border: 'none',
-                                                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                                                background: currentCorrect ? 'var(--green)' : 'var(--green-dim)',
-                                                color: currentCorrect ? '#fff' : 'var(--green)',
+                                                width: 34, height: 34, borderRadius: '50%',
+                                                fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: currentCorrect ? 'var(--green)' : 'transparent',
+                                                color: currentCorrect ? '#fff' : 'var(--text-muted)',
+                                                border: currentCorrect ? 'none' : '1.5px solid var(--border)',
+                                                boxShadow: currentCorrect ? '0 2px 6px rgba(34,197,94,0.35)' : 'none',
                                                 transition: 'all 0.15s ease',
+                                              }}
+                                              onMouseEnter={(e) => {
+                                                if (!currentCorrect) {
+                                                  e.currentTarget.style.borderColor = 'var(--green)';
+                                                  e.currentTarget.style.color = 'var(--green)';
+                                                }
+                                              }}
+                                              onMouseLeave={(e) => {
+                                                if (!currentCorrect) {
+                                                  e.currentTarget.style.borderColor = 'var(--border)';
+                                                  e.currentTarget.style.color = 'var(--text-muted)';
+                                                }
                                               }}
                                             >O</button>
                                             <button
@@ -2015,12 +2091,28 @@ export default function TestsClient({ batches, students, scores: allScores, atte
                                                 if (r.is_correct === false) m.delete(r.id); else m.set(r.id, false);
                                                 setGradingChanges(m);
                                               }}
+                                              title="오답"
                                               style={{
-                                                width: 32, height: 32, borderRadius: '50%', border: 'none',
-                                                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                                                background: !currentCorrect ? 'var(--red)' : 'var(--red-dim)',
-                                                color: !currentCorrect ? '#fff' : 'var(--red)',
+                                                width: 34, height: 34, borderRadius: '50%',
+                                                fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: !currentCorrect ? 'var(--red)' : 'transparent',
+                                                color: !currentCorrect ? '#fff' : 'var(--text-muted)',
+                                                border: !currentCorrect ? 'none' : '1.5px solid var(--border)',
+                                                boxShadow: !currentCorrect ? '0 2px 6px rgba(239,68,68,0.35)' : 'none',
                                                 transition: 'all 0.15s ease',
+                                              }}
+                                              onMouseEnter={(e) => {
+                                                if (currentCorrect) {
+                                                  e.currentTarget.style.borderColor = 'var(--red)';
+                                                  e.currentTarget.style.color = 'var(--red)';
+                                                }
+                                              }}
+                                              onMouseLeave={(e) => {
+                                                if (currentCorrect) {
+                                                  e.currentTarget.style.borderColor = 'var(--border)';
+                                                  e.currentTarget.style.color = 'var(--text-muted)';
+                                                }
                                               }}
                                             >X</button>
                                           </div>
