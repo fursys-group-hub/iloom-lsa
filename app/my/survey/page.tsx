@@ -27,6 +27,7 @@ export default function SurveyHubPage() {
   const [auth, setAuth] = useState<AuthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [ansanDone, setAnsanDone] = useState({ pre: false, post: false });
+  const [efficacyIntroDone, setEfficacyIntroDone] = useState(false);
 
   useEffect(() => {
     try {
@@ -44,12 +45,14 @@ export default function SurveyHubPage() {
     if (!auth) return;
     setLoading(true);
     try {
-      const [preRes, postRes] = await Promise.all([
+      const [preRes, postRes, introRes] = await Promise.all([
         fetch(`/api/ansan-tour-surveys?studentId=${auth.studentId}&phase=pre`).then(r => r.json()),
         fetch(`/api/ansan-tour-surveys?studentId=${auth.studentId}&phase=post`).then(r => r.json()),
+        fetch(`/api/education-surveys?studentId=${auth.studentId}&phase=intro_end`).then(r => r.json()),
       ]);
       const has = (r: unknown) => Array.isArray(r) ? r.length > 0 : !!r;
       setAnsanDone({ pre: has(preRes), post: has(postRes) });
+      setEfficacyIntroDone(has(introRes));
     } catch { /* */ }
     setLoading(false);
   }, [auth]);
@@ -127,7 +130,32 @@ export default function SurveyHubPage() {
         disabled: true,
       };
 
-  const cards = [preCard, postCard];
+  // 자기효능감 설문 (입문교육)
+  const efficacyIntroCard: SurveyCard = efficacyIntroDone
+    ? {
+        href: '/my/survey/efficacy',
+        emoji: '',
+        title: '자기효능감 설문',
+        subtitle: '입문교육',
+        desc: '입문교육을 마무리하며 자신의 자신감과 만족도를 돌아봤어요.',
+        duration: '약 5분',
+        period: '4/22 ~ 4/22 자정',
+        status: 'done',
+        statusText: '완료',
+      }
+    : {
+        href: '/my/survey/efficacy',
+        emoji: '',
+        title: '자기효능감 설문',
+        subtitle: '입문교육',
+        desc: '입문교육을 마무리하며 지금 자신의 자신감과 교육 만족도를 알려주세요.',
+        duration: '약 5분',
+        period: '4/22 ~ 4/22 자정',
+        status: 'available',
+        statusText: '참여 가능',
+      };
+
+  const cards = [preCard, postCard, efficacyIntroCard];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
