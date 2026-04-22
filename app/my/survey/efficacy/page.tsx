@@ -189,8 +189,12 @@ export default function SurveyPage() {
         fetch(`/api/education-surveys?studentId=${auth.studentId}&phase=advanced_end`).then(r => r.json()),
       ]);
 
-      const introData = introRes?.survey || introRes?.data || null;
-      const advData = advRes?.survey || advRes?.data || null;
+      const introData = Array.isArray(introRes) && introRes.length > 0
+        ? introRes[0]
+        : (introRes?.survey || introRes?.data || null);
+      const advData = Array.isArray(advRes) && advRes.length > 0
+        ? advRes[0]
+        : (advRes?.survey || advRes?.data || null);
 
       setExistingIntro(introData);
       setExistingAdvanced(advData);
