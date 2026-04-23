@@ -9,7 +9,8 @@ import {
 import { SummaryCard, type FooterItem } from '@/components/SummaryCard';
 import AdvancedScoreSection from '@/components/AdvancedScoreSection';
 
-interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
+interface BatchInfo { id: string; name: string; is_archived: boolean; }
+interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; batch_id?: string; }
 interface EvalData {
   student_id: string; week_number: number; rp_area: string | null;
   status: string; strength_tags: string[]; improvement_tags: string[]; comment: string | null;
@@ -79,20 +80,30 @@ export default function ManagerHomePage() {
   const [scores, setScores] = useState<{ student_id: string; subject: string; score: number; max_score: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStudentId, setSelectedStudentId] = useState('');
-
+  const [batches, setBatches] = useState<BatchInfo[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState('');
   useEffect(() => {
+    const raw = localStorage.getItem('iloom-auth');
+    void raw; // auth 체크는 layout에서 처리
     Promise.all([
       fetch('/api/students').then((r) => r.json()),
       fetch('/api/evaluations').then((r) => r.json()),
       fetch('/api/benchmarks').then((r) => r.json()),
       fetch('/api/scores').then((r) => r.json()).then((d) => d.scores || d || []),
-    ]).then(([s, e, b, sc]) => {
+      fetch('/api/batches').then((r) => r.json()),
+    ]).then(([s, e, b, sc, bt]) => {
       setStudents(s); setEvaluations(e); setBenchmarks(b); setScores(sc);
+      const batchList: BatchInfo[] = (bt || []).filter((x: BatchInfo) => !x.is_archived);
+      setBatches(batchList);
+      if (batchList.length > 0) setSelectedBatchId(batchList[batchList.length - 1].id);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  // 퇴사자 제외
-  const activeStudents = students.filter((s) => !s.is_dropped);
+  // 퇴사자 제외 + 기수 필터 (매장 필터 없음 — 전체 교육생 표시)
+  const activeStudents = students.filter((s) =>
+    !s.is_dropped &&
+    (!selectedBatchId || s.batch_id === selectedBatchId)
+  );
   const selectedStudent = students.find((s) => s.id === selectedStudentId);
   const studentEvals = evaluations.filter((e) => e.student_id === selectedStudentId).sort((a, b) => a.week_number - b.week_number);
   const studentBMs = benchmarks.filter((b) => b.student_id === selectedStudentId);
@@ -102,7 +113,15 @@ export default function ManagerHomePage() {
   void router;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>홈</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>홈</h1>
+        {batches.length > 0 && (
+          <select value={selectedBatchId} onChange={(e) => { setSelectedBatchId(e.target.value); setSelectedStudentId(''); }}
+            style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
+            {batches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+        )}
+      </div>
 
       {!selectedStudentId ? (
         /* ===== 전체 목록 — SummaryCard 그리드 ===== */

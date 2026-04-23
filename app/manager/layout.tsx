@@ -6,10 +6,10 @@ import { useState, useEffect } from 'react';
 
 const nav = [
   { href: '/manager', label: '홈' },
-  { href: '/manager/reports', label: '인수인계 리포트' },
-  { href: '/manager/tests', label: '테스트', disabled: true },
-  { href: '/manager/evaluations', label: 'R&P' },
-  { href: '/manager/final', label: '교육 총평' },
+  { href: '/manager/reports', label: '입문교육 AI 리포트' },
+  { href: '/manager/tests', label: '심화테스트' },
+  { href: '/manager/evaluations', label: '주차별 R&P 평가' },
+  { href: '/manager/final', label: '심화교육 총평' },
 ];
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
