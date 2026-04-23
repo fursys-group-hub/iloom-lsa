@@ -54,6 +54,7 @@ interface Props {
   notes?: NoteForAnalysis[];
   surveys?: { id: string; phase: string; eff_product: number | null; eff_customer: number | null; eff_sales: number | null; eff_teamwork: number | null; eff_overall: number | null; open_strength: string | null; open_worry: string | null; open_goal: string | null }[];
   ansanSurveys?: AnsanSurveyData[];
+  hideMemos?: boolean;
 }
 
 interface AnsanSurveyData {
@@ -92,7 +93,7 @@ function parseNoteMeta(content: string) {
 }
 
 export default function StudentDetailClient({
-  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [], surveys = [], ansanSurveys = [],
+  student, batch, scores, allScores, attendance, allAttendance = [], allNotes: allRawNotes = [], memos, coachingReports, responses, questions, notes: rawNotes = [], surveys = [], ansanSurveys = [], hideMemos = false,
 }: Props) {
   const avgScore = useMemo(() => calculateAvgScore(scores), [scores]);
   const dailyAverages = useMemo(() => calculateDailyAverages(scores), [scores]);
@@ -196,6 +197,7 @@ export default function StudentDetailClient({
 
   const hrAdvice = useMemo(() => generateHRAdvice(riskCheck, adaptationIdx), [riskCheck, adaptationIdx]);
   const [surveyModalId, setSurveyModalId] = useState<string | null>(null);
+  const [barModalDate, setBarModalDate] = useState<string | null>(null);
 
   // 카테고리별 그룹 (영역별 정답률용)
   const categoryGroups = useMemo(() => {
@@ -254,9 +256,19 @@ export default function StudentDetailClient({
     });
   }, [responses, questions]);
 
+  const barModalData = useMemo(() => {
+    if (!barModalDate) return null;
+    const dayResponses = responses.filter(r => r.test_date === barModalDate);
+    const wrongs = dayResponses.filter(r => !r.is_correct).map(r => {
+      const q = questions.find(qq => qq.question_id === r.question_id && qq.session === r.session);
+      return { ...r, question: q };
+    });
+    return { wrongs, session: barModalDate };
+  }, [barModalDate, responses, questions]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <Link href="/dashboard/students" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none' }}>← 교육생 목록</Link>
+      {!hideMemos && <Link href="/dashboard/students" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none' }}>← 교육생 목록</Link>}
 
       {/* 프로필 + HR 조언 통합 카드 */}
       <div style={card}>
@@ -275,7 +287,7 @@ export default function StudentDetailClient({
                   {student.is_dropped && (
                     <span style={{ padding: '3px 10px', borderRadius: 'var(--radius-pill)', fontSize: 12, fontWeight: 600, background: 'var(--red-dim)', color: 'var(--red)' }}>퇴사</span>
                   )}
-                  {(() => {
+                  {!hideMemos && (() => {
                     const gc = { high: { bg: 'var(--green-dim)', text: 'var(--green)', label: '상' }, mid: { bg: 'var(--orange-dim)', text: 'var(--orange)', label: '중' }, low: { bg: 'var(--red-dim)', text: 'var(--red)', label: '하' } }[adaptationIdx.group];
                     return <span style={{ background: gc.bg, color: gc.text, borderRadius: 'var(--radius-pill)', padding: '3px 12px', fontSize: 13, fontWeight: 700 }}>{gc.label} {adaptationIdx.total}점</span>;
                   })()}
@@ -289,7 +301,7 @@ export default function StudentDetailClient({
               </div>
             </div>
             {/* 학력/경력 — 2열 */}
-            {(student.education || student.experience) && (
+            {!hideMemos && (student.education || student.experience) && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, paddingTop: 12, borderTop: '1px solid var(--border-light)' }}>
                 {student.education && (
                   <div>
@@ -343,7 +355,7 @@ export default function StudentDetailClient({
         <div className="detail-col-left" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* HR 조언 (있을 때만) */}
-          {hrAdvice && (() => {
+          {!hideMemos && hrAdvice && (() => {
             const dimMap: Record<string, string> = { red: 'var(--red-dim)', orange: 'var(--orange-dim)', blue: 'var(--blue-dim)', purple: 'var(--purple-dim)', green: 'var(--green-dim)' };
             const colorMap: Record<string, string> = { red: 'var(--red)', orange: 'var(--orange)', blue: 'var(--blue)', purple: 'var(--purple)', green: 'var(--green)' };
             const c = colorMap[hrAdvice.typeColor] || 'var(--blue)';
@@ -367,7 +379,7 @@ export default function StudentDetailClient({
           })()}
 
           {/* 적응지수 산정 근거 */}
-          <div className="section-adaptation" style={card}>
+          {!hideMemos && <div className="section-adaptation" style={card}>
             <h3 style={sectionTitle}>적응지수 산정 근거</h3>
             {(() => {
               const items = [
@@ -421,7 +433,7 @@ export default function StudentDetailClient({
                 </>
               );
             })()}
-          </div>
+          </div>}
 
           {/* 성장 여정 (IDP) */}
           <div className="section-growth" style={card}>
@@ -776,7 +788,7 @@ export default function StudentDetailClient({
 
           {/* 교육 캘린더 + 메모 */}
           <div className="section-calendar">
-            <CalendarWithMemo batch={batch} scores={scores} attendance={attendance} notes={rawNotes} studentId={student.id} initialMemos={memos} />
+            <CalendarWithMemo batch={batch} scores={scores} attendance={attendance} notes={rawNotes} studentId={student.id} initialMemos={memos} hideMemos={hideMemos} />
           </div>
 
           {/* 차시별 점수 추이 */}
@@ -786,7 +798,7 @@ export default function StudentDetailClient({
               const chartData = dailyAverages.map((d) => {
                 const classAvg = classAverages.find((c) => c.date === d.date);
                 const dt = new Date(d.date + 'T00:00:00');
-                return { date: `${dt.getMonth() + 1}/${dt.getDate()}`, score: d.avg, classAvg: classAvg?.avg ?? 0 };
+                return { date: `${dt.getMonth() + 1}/${dt.getDate()}`, rawDate: d.date, score: d.avg, classAvg: classAvg?.avg ?? 0 };
               });
               return (
                 <div>
@@ -795,13 +807,13 @@ export default function StudentDetailClient({
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--blue)', display: 'inline-block' }} />{student.name}</span>
                   </div>
                   <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                    <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }} style={{ cursor: 'pointer' }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                       <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
                       <Tooltip contentStyle={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13 }} formatter={(value) => [`${value}점`]} />
-                      <Bar dataKey="classAvg" name="반 평균" fill="#d1d5db" radius={[4, 4, 0, 0]} maxBarSize={20} />
-                      <Bar dataKey="score" name={student.name} radius={[4, 4, 0, 0]} maxBarSize={20}>
+                      <Bar dataKey="classAvg" name="반 평균" fill="#d1d5db" radius={[4, 4, 0, 0]} maxBarSize={20} onClick={(data) => setBarModalDate((data as unknown as { rawDate: string }).rawDate)} />
+                      <Bar dataKey="score" name={student.name} radius={[4, 4, 0, 0]} maxBarSize={20} onClick={(data) => setBarModalDate((data as unknown as { rawDate: string }).rawDate)}>
                         {chartData.map((d, i) => (
                           <Cell key={i} fill={d.score >= d.classAvg ? 'var(--blue)' : 'var(--red)'} />
                         ))}
@@ -812,6 +824,51 @@ export default function StudentDetailClient({
               );
             })() : <p style={emptyStyle}>데이터 없음</p>}
           </div>
+
+          {/* 바 클릭 오답 모달 */}
+          {barModalDate && barModalData && (
+            <div onClick={() => setBarModalDate(null)} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 20px', overflowY: 'auto' }}>
+              <div onClick={e => e.stopPropagation()} style={{ position: 'relative', width: '100%', maxWidth: 560, background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '28px 32px', boxShadow: 'var(--shadow-md)' }}>
+                <button onClick={() => setBarModalDate(null)} aria-label="닫기" style={{ position: 'absolute', top: 16, right: 16, zIndex: 2, width: 36, height: 36, minWidth: 36, minHeight: 36, maxWidth: 36, maxHeight: 36, boxSizing: 'border-box', padding: 0, margin: 0, flex: 'none', borderRadius: '50%', border: 'none', background: 'var(--bg-hover)', color: 'var(--text-tertiary)', fontSize: 20, lineHeight: '36px', fontWeight: 400, textAlign: 'center', cursor: 'pointer' }}>×</button>
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 4px', paddingRight: 44, letterSpacing: '-0.015em' }}>
+                  {(() => { const dt = new Date(barModalDate + 'T00:00:00'); return `${dt.getMonth()+1}/${dt.getDate()}`; })()} 오답 문항
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 20px' }}>{student.name} · {barModalData.wrongs.length}개 오답</p>
+                {barModalData.wrongs.length === 0 ? (
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0', fontSize: 14 }}>오답 없음 (모두 정답)</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {barModalData.wrongs.map((w, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                        {/* 헤더 */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'var(--bg-main)', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--red-dim)', color: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>✕</span>
+                          <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>
+                            {w.question_id} · {w.question?.detail || '기타'} · {w.earned_score}/{w.max_score}점
+                          </span>
+                        </div>
+                        {/* 문제 */}
+                        <div style={{ padding: '12px 16px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 500, borderBottom: '1px solid var(--border)' }}>
+                          {w.question?.question_text || `Q${w.question_id}`}
+                        </div>
+                        {/* 답안 비교 */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                          <div style={{ padding: '10px 16px', borderRight: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>학생 답안</div>
+                            <div style={{ fontSize: 13, color: 'var(--red)', fontWeight: 500 }}>{w.user_answer || '(미응답)'}</div>
+                          </div>
+                          <div style={{ padding: '10px 16px' }}>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>정답</div>
+                            <div style={{ fontSize: 13, color: 'var(--text-second)', fontWeight: 500 }}>{w.question?.correct_answer || '-'}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* 카테고리별 학습 현황 */}
           <div className="section-category" style={card}>
@@ -1486,13 +1543,14 @@ function QuestionsTab({ studentId }: { studentId: string }) {
 }
 
 /* ── 교육 캘린더 + 메모 통합 (홈 달력 스타일) ── */
-function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initialMemos }: {
+function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initialMemos, hideMemos = false }: {
   batch?: Batch | null;
   scores: TestScore[];
   attendance: Attendance[];
   notes: NoteForAnalysis[];
   studentId: string;
   initialMemos: StudentMemo[];
+  hideMemos?: boolean;
 }) {
   // 메모 state
   const [memoList, setMemoList] = useState<StudentMemo[]>(initialMemos);
@@ -1613,7 +1671,7 @@ function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initial
     if (att) dots.push(attColors[att] || '#22C55E');
     if (dataMap.noteSet.has(dateStr)) dots.push('#A855F7');
     if (dataMap.scoreMap.has(dateStr)) dots.push('#3B82F6');
-    if (dataMap.memoMap.has(dateStr)) {
+    if (!hideMemos && dataMap.memoMap.has(dateStr)) {
       const cats = dataMap.memoMap.get(dateStr)!;
       dots.push(cats.includes('caution') ? '#EF4444' : cats.includes('praise') ? '#22C55E' : '#6B7280');
     }
@@ -1700,7 +1758,7 @@ function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initial
                   <span>교육일지 미제출</span>
                 </div>
               ) : null}
-              {selectedInfo.dayMemos.map(m => {
+              {!hideMemos && selectedInfo.dayMemos.map(m => {
                 const catLabels: Record<string, string> = { praise: '칭찬', caution: '주의', behavior: '수업태도', counsel: '상담', general: '일반' };
                 return (
                   <div key={m.id} style={{ fontSize: 13, lineHeight: 1.5, opacity: 0.9 }}>
@@ -1720,7 +1778,7 @@ function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initial
         )}
 
         {/* 메모 입력 — 하단 */}
-        <div style={{ marginTop: 'auto', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {!hideMemos && <div style={{ marginTop: 'auto', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <select
             value={memoCategory}
             onChange={e => setMemoCategory(e.target.value as StudentMemo['category'])}
@@ -1759,7 +1817,7 @@ function CalendarWithMemo({ batch, scores, attendance, notes, studentId, initial
               }}
             >{saving ? '...' : '저장'}</button>
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* 오른쪽: 달력 그리드 */}
