@@ -8,6 +8,7 @@ import type { ScheduleMap } from '@/lib/schedule';
 import { LESSONS } from './lessons-data';
 import LessonCalendar from './LessonCalendar';
 import { Banner } from '@/components/Banner';
+import type { WeekBlock } from '@/lib/types';
 
 interface TestScore { id: string; test_date: string; subject: string; score: number; }
 interface TestResponse { id: string; session: string; question_id: string; is_correct: boolean; earned_score: number; max_score: number; user_answer: string; }
@@ -80,6 +81,11 @@ export default function MyPage() {
   const [showAttendanceAlert, setShowAttendanceAlert] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
   const [surveyReminders, setSurveyReminders] = useState<SurveyReminder[]>([]);
+  const [advOverview, setAdvOverview] = useState<{
+    pass_score: number;
+    advanced_start: string | null;
+    weeks: Record<number, WeekBlock>;
+  } | null>(null);
 
   useEffect(() => {
     const auth = localStorage.getItem('iloom-auth');
@@ -130,6 +136,15 @@ export default function MyPage() {
     const interval = setInterval(checkAttendance, 30 * 60 * 1000); // 30분마다 재확인
     return () => clearInterval(interval);
   }, [studentId, schedule]);
+
+  // 심화시험 오버뷰 (달력 패널에서 사용)
+  useEffect(() => {
+    if (!studentId) return;
+    fetch(`/api/advanced-student-overview?student_id=${studentId}`)
+      .then((r) => r.json())
+      .then(setAdvOverview)
+      .catch(() => {});
+  }, [studentId]);
 
   // 로그인 시 새 공지 팝업
   useEffect(() => {
@@ -487,16 +502,30 @@ export default function MyPage() {
             actionHref="/my/practice"
           />
         );
-        if (dayType === 'off') return (
-          <Banner
-            icon="🌙"
-            tone="purple"
-            title="오늘은 휴무일이에요!"
-            description="교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요"
-            actionText="자율학습 쓰러가기 →"
-            actionHref="/my/notes"
-          />
-        );
+        if (dayType === 'off') {
+          // 입문교육 종료 후에는 자율학습 버튼 제거 (심화교육 단계)
+          const isIntroEnded = batchInfo && todayStr > batchInfo.end_date;
+          if (isIntroEnded) {
+            return (
+              <Banner
+                icon="🌙"
+                tone="purple"
+                title="오늘은 휴무일이에요!"
+                description="편안히 쉬거나 매장 근무에 집중하세요."
+              />
+            );
+          }
+          return (
+            <Banner
+              icon="🌙"
+              tone="purple"
+              title="오늘은 휴무일이에요!"
+              description="교육일지 제출이 필요 없어요. 자율학습은 자유롭게 작성할 수 있어요"
+              actionText="자율학습 쓰러가기 →"
+              actionHref="/my/notes"
+            />
+          );
+        }
         return null;
       })()}
 
@@ -582,11 +611,27 @@ export default function MyPage() {
         )}
       </div>
 
-      {/* 1행: 캘린더 (2fr) + 오늘 체크리스트/스탯 (1fr) */}
-      <div className="row-cal-plus-today" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, alignItems: 'stretch' }}>
-        <LessonCalendar lessons={LESSONS} kstToday={kstToday} />
+      {/* 1행: 캘린더 (2fr) + 오늘 체크리스트/스탯 (1fr) — 입문 종료 후에는 달력이 전체 폭 */}
+      {(() => { const isIntroEnded = !!batchInfo && kstToday > batchInfo.end_date; return (
+      <div
+        className="row-cal-plus-today"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: isIntroEnded ? '1fr' : '2fr 1fr',
+          gap: 16,
+          alignItems: 'stretch',
+        }}
+      >
+        <LessonCalendar
+          lessons={LESSONS}
+          kstToday={kstToday}
+          advancedStart={advOverview?.advanced_start ?? null}
+          advancedWeeks={advOverview?.weeks}
+          advancedPassScore={advOverview?.pass_score}
+        />
 
-        {/* 오늘 할 일 + 스탯 카드 */}
+        {/* 오늘 할 일 + 스탯 카드 — 입문교육 진행 중일 때만 */}
+        {!isIntroEnded && (
         <div className="today-card" style={{ ...card, display: 'flex', flexDirection: 'column', height: 420, gap: 0 }}>
           <h3 style={{ ...sectionTitle, marginBottom: 12 }}>오늘 할 일</h3>
 
@@ -829,6 +874,7 @@ export default function MyPage() {
             </div>
           </div>
         </div>
+        )}
 
         <style>{`
           @media (max-width: 1023px) {
@@ -837,6 +883,7 @@ export default function MyPage() {
           }
         `}</style>
       </div>
+      ); })()}
 
       {/* 2열: 취약영역 TOP3 + 차시별 점수 추이 */}
       <div className="row-weak-chart" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, alignItems: 'stretch' }}>
@@ -1201,4 +1248,3 @@ export default function MyPage() {
     </div>
   );
 }
-

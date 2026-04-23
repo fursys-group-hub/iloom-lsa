@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import type { Lesson } from './lessons-data';
+import type { WeekBlock } from '@/lib/types';
+import { computeAdvancedWeekSchedule } from '@/lib/advanced-week-schedule';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -21,9 +24,20 @@ const sectionTitle: React.CSSProperties = {
 interface Props {
   lessons: Record<string, Lesson[]>;
   kstToday: string;
+  /** 심화교육 시작일 (있으면 선택 날짜 기반으로 활동 카드 표시) */
+  advancedStart?: string | null;
+  /** 주차별 세션 요약 (시험 응시 상태 표시용) */
+  advancedWeeks?: Record<number, WeekBlock>;
+  advancedPassScore?: number;
 }
 
-export default function LessonCalendar({ lessons, kstToday }: Props) {
+export default function LessonCalendar({
+  lessons,
+  kstToday,
+  advancedStart,
+  advancedWeeks,
+  advancedPassScore = 80,
+}: Props) {
   const [selectedDate, setSelectedDate] = useState(kstToday);
   const [viewMonth, setViewMonth] = useState(() => kstToday.slice(0, 7));
 
@@ -49,6 +63,20 @@ export default function LessonCalendar({ lessons, kstToday }: Props) {
   const selLessons = lessons[selectedDate] || [];
   const selLabel = `${selDay.getUTCMonth() + 1}월 ${selDay.getUTCDate()}일 (${WEEKDAYS[selDay.getUTCDay()]})`;
   const isSelToday = selectedDate === kstToday;
+
+  // 선택 날짜가 속한 심화교육 주차 계산
+  const advancedWeek = useMemo(() => {
+    if (!advancedStart) return null;
+    const schedule = computeAdvancedWeekSchedule(advancedStart);
+    if (!schedule) return null;
+    // 선택 날짜 KST 정오 ms
+    const dayMs = new Date(selectedDate + 'T12:00:00+09:00').getTime();
+    for (let w = 1; w <= 6; w++) {
+      const r = schedule[w];
+      if (dayMs >= r.startMs && dayMs <= r.endMs) return w;
+    }
+    return null;
+  }, [selectedDate, advancedStart]);
 
   return (
     <div className="lesson-cal-wrap" style={{ ...cardShell, display: 'flex', height: 420 }}>
@@ -157,6 +185,13 @@ export default function LessonCalendar({ lessons, kstToday }: Props) {
               </tbody>
             </table>
           </div>
+        ) : advancedWeek ? (
+          <AdvancedDayPanel
+            week={advancedWeek}
+            sessions={advancedWeeks?.[advancedWeek]?.sessions ?? {}}
+            passScore={advancedPassScore}
+            isSelToday={isSelToday}
+          />
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
@@ -172,6 +207,116 @@ export default function LessonCalendar({ lessons, kstToday }: Props) {
           .lesson-cal-left { width: 100% !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------
+// 심화교육 주차 활동 패널 (달력 우측, 수업 없는 날 대체)
+// ------------------------------------------------------------
+function AdvancedDayPanel({
+  week,
+  sessions,
+  passScore,
+}: {
+  week: number;
+  sessions: Record<number, import('@/lib/types').SessionSummary>;
+  passScore: number;
+  isSelToday: boolean;
+}) {
+  interface PanelItem {
+    label: string;
+    badge: string | null; // null이면 뱃지 없음 (단순 링크)
+    badgeBg?: string;
+    badgeColor?: string;
+    href: string;
+  }
+
+  const items: PanelItem[] = [];
+
+  // 1차시 / 2차시 시험 (상태 뱃지)
+  for (const s of [1, 2]) {
+    const summary = sessions[s];
+    const attempted = summary && summary.attempt_count > 0;
+    const passed = summary?.passed ?? false;
+    items.push({
+      label: `${week}주차 ${s}차시 시험 치르기`,
+      badge: !attempted
+        ? '미응시'
+        : passed
+          ? `달성 · ${summary!.pass_attempt}회`
+          : `미달성 · ${summary!.attempt_count}회`,
+      badgeBg: !attempted
+        ? 'var(--bg-hover)'
+        : passed
+          ? 'var(--green-dim)'
+          : 'var(--orange-dim)',
+      badgeColor: !attempted
+        ? 'var(--text-muted)'
+        : passed
+          ? 'var(--green)'
+          : 'var(--orange)',
+      href: '/my/advanced-tests',
+    });
+  }
+
+  // 벤치마킹 (단순 이동 링크 — 작성 상태 정보 없음)
+  items.push({
+    label: `${week}주차 벤치마킹 작성하기`,
+    badge: null,
+    href: '/my/training',
+  });
+
+  return (
+    <div style={{ flex: 1, padding: '4px 0 0', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {items.map((it, i) => (
+          <Link
+            key={i}
+            href={it.href}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-surface)',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--bg-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-surface)';
+            }}
+          >
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+              {it.label}
+            </span>
+            {it.badge !== null && (
+              <span
+                style={{
+                  padding: '3px 10px',
+                  borderRadius: 'var(--radius-pill)',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  background: it.badgeBg,
+                  color: it.badgeColor,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {it.badge}
+              </span>
+            )}
+            <span style={{ fontSize: 16, color: 'var(--text-muted)', flexShrink: 0 }}>›</span>
+          </Link>
+        ))}
+      </div>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '14px 0 0', textAlign: 'right' }}>
+        통과 기준 {passScore}점
+      </p>
     </div>
   );
 }

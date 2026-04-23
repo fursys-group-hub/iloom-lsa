@@ -9,6 +9,8 @@ export interface Batch {
   subject_columns: Record<string, { column: string; maxScore: number }>;
   is_archived: boolean;
   archived_at: string | null;
+  advanced_sheet_id: string | null;
+  advanced_pass_score: number;
 }
 
 export interface Student {
@@ -36,6 +38,55 @@ export interface TestScore {
   subject: string;
   score: number;
   max_score: number;
+}
+
+export interface AdvancedTestScore {
+  id: string;
+  student_id: string;
+  batch_id: string;
+  week_number: number;
+  sheet_attempt: number | null;
+  score: number;
+  max_score: number;
+  wrong_parts: string | null;
+  submitted_answers: string | null;
+  submitted_at: string;
+  created_at: string;
+}
+
+export interface SessionSummary {
+  attempts: AdvancedTestScore[];
+  attempt_count: number;
+  passed: boolean;
+  pass_attempt: number | null;
+  final_score: number | null;
+}
+
+export interface WeekBlock {
+  sessions: Record<number, SessionSummary>;
+}
+
+export interface AdvancedScoresResponse {
+  pass_score: number;
+  weeks: Record<number, WeekBlock>;
+}
+
+export interface AdvancedQuestion {
+  id: string;
+  batch_id: string;
+  week_number: number;
+  session: number;
+  question_id: string;
+  question_text: string;
+  correct_answer: string;
+  scoring_mode: string;
+  max_score: number;
+  category: string;
+  series: string;
+  detail: string;
+  options: string;
+  explanation: string;
+  image_url: string | null;
 }
 
 export interface Attendance {

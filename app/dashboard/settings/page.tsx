@@ -12,6 +12,8 @@ interface Batch {
   advanced_start: string | null;
   advanced_end: string | null;
   sheet_id: string | null;
+  advanced_sheet_id: string | null;
+  advanced_pass_score: number | null;
   is_archived: boolean;
   archived_at: string | null;
   schedule?: ScheduleMap;
@@ -38,7 +40,7 @@ export default function SettingsPage() {
   // ── 기수 ──
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
-  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
+  const [batchForm, setBatchForm] = useState({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '', advanced_sheet_id: '', advanced_pass_score: 80 });
   const [showBatchForm, setShowBatchForm] = useState(false);
   const [editingBatchId, setEditingBatchId] = useState<string | null>(null);
   const [savingBatch, setSavingBatch] = useState(false);
@@ -112,6 +114,8 @@ export default function SettingsPage() {
           end_date: batchForm.end_date,
           advanced_start: batchForm.advanced_start || null,
           advanced_end: batchForm.advanced_end || null,
+          advanced_sheet_id: batchForm.advanced_sheet_id || null,
+          advanced_pass_score: Number(batchForm.advanced_pass_score) || 80,
         }),
       });
       if (res.ok) {
@@ -132,7 +136,7 @@ export default function SettingsPage() {
         setEditingBatchId(null);
         setScheduleEdit({});
         setWizardStep(1);
-        setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
+        setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '', advanced_sheet_id: '', advanced_pass_score: 80 });
       }
     } catch { /* silent */ }
     finally { setSavingBatch(false); }
@@ -266,7 +270,7 @@ export default function SettingsPage() {
             onClick={() => {
               setShowBatchForm(true);
               setEditingBatchId(null);
-              setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '' });
+              setBatchForm({ name: '', start_date: '', end_date: '', advanced_start: '', advanced_end: '', advanced_sheet_id: '', advanced_pass_score: 80 });
               setScheduleEdit({});
               setWizardStep(1);
             }}
@@ -482,6 +486,80 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label style={labelStyle}>
+                    심화교육 구글 시트 ID <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(재시험 점수 동기화용)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={batchForm.advanced_sheet_id}
+                    onChange={(e) => setBatchForm({ ...batchForm, advanced_sheet_id: e.target.value })}
+                    style={inputStyle}
+                    placeholder="예: 1XsKAgClhL5AFvpigYArCJEjjmD9HCVtHKjftOVGdmCY"
+                  />
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '6px 0 0' }}>
+                    시트 URL <code>docs.google.com/spreadsheets/d/<strong>[이 부분]</strong>/edit</code>에서 복사해서 붙여넣어요.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 16, alignItems: 'end' }}>
+                  <div>
+                    <label style={labelStyle}>통과 기준 점수</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={batchForm.advanced_pass_score}
+                      onChange={(e) => setBatchForm({ ...batchForm, advanced_pass_score: Number(e.target.value) || 0 })}
+                      style={inputStyle}
+                    />
+                  </div>
+                  {editingBatchId && batchForm.advanced_sheet_id && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/sync-advanced', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ batch_id: editingBatchId }),
+                          });
+                          const json = await res.json();
+                          if (!res.ok) {
+                            alert(`동기화 실패: ${json.message || '알 수 없는 오류'}`);
+                            return;
+                          }
+                          const unmatched = (json.unmatched_names || []).length;
+                          alert(
+                            `심화교육 동기화 완료\n\n` +
+                            `- 총 행: ${json.total_rows}\n` +
+                            `- 점수 저장: ${json.synced}\n` +
+                            (typeof json.synced_questions === 'number'
+                              ? `- 문제은행 저장: ${json.synced_questions}\n`
+                              : '') +
+                            (json.questions_note ? `- ${json.questions_note}\n` : '') +
+                            (unmatched > 0 ? `- 매칭 실패 이름: ${json.unmatched_names.join(', ')}\n` : '')
+                          );
+                        } catch (err) {
+                          alert(`오류: ${err instanceof Error ? err.message : String(err)}`);
+                        }
+                      }}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--purple)',
+                        background: 'var(--purple-dim)',
+                        color: 'var(--purple)',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      심화교육 시험 동기화
+                    </button>
+                  )}
+                </div>
+
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                   <button onClick={() => setWizardStep(2)} style={smallBtnStyle}>← 이전</button>
                   <button onClick={handleBatchSave} disabled={savingBatch}
@@ -567,6 +645,8 @@ export default function SettingsPage() {
                             end_date: batch.end_date,
                             advanced_start: batch.advanced_start || '',
                             advanced_end: batch.advanced_end || '',
+                            advanced_sheet_id: batch.advanced_sheet_id || '',
+                            advanced_pass_score: batch.advanced_pass_score ?? 80,
                           });
                           setScheduleEdit(batch.schedule || {});
                           setWizardStep(1);

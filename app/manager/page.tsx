@@ -7,6 +7,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
 import { SummaryCard, type FooterItem } from '@/components/SummaryCard';
+import AdvancedScoreSection from '@/components/AdvancedScoreSection';
 
 interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
 interface EvalData {
@@ -185,29 +186,13 @@ export default function ManagerHomePage() {
             </div>
           </div>
 
-          {/* 시험 점수 */}
-          {(() => {
-            const studentScores = scores.filter((s) => s.student_id === selectedStudentId);
-            const hasScores = studentScores.length > 0;
-            return (
-              <SectionBox title="심화교육 시험 점수" badge={hasScores ? undefined : '연동 예정'}>
-                <div style={{ display: 'flex', gap: 16 }}>
-                  {[1, 2, 3, 4, 5, 6].map((w) => {
-                    const sc = studentScores.find((s) => s.subject === `${w}주차`);
-                    const color = sc
-                      ? (sc.score >= 80 ? 'var(--green)' : sc.score >= 60 ? 'var(--orange)' : 'var(--red)')
-                      : 'var(--text-muted)';
-                    return (
-                      <div key={w} style={{ flex: 1, textAlign: 'center', padding: '4px 0', opacity: sc ? 1 : 0.5 }}>
-                        <div style={{ fontSize: 28, fontWeight: 700, color, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{sc ? sc.score : '—'}</div>
-                        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', marginTop: 6 }}>{w}주차</div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </SectionBox>
-            );
-          })()}
+          {/* 심화교육 시험 점수 (재시험 횟수 추적) */}
+          <SectionBox title="심화교육 시험 점수">
+            <AdvancedScoreSection
+              studentId={selectedStudentId}
+              studentName={selectedStudent?.name ?? ''}
+            />
+          </SectionBox>
 
           {/* 주차별 성장 기록 */}
           <SectionBox title="주차별 성장 기록" subtitle="6주간 관리자 피드백을 따라 어떻게 성장했는지 볼 수 있어요">

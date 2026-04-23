@@ -10,7 +10,9 @@ CREATE TABLE batches (
   sheet_id TEXT,
   subject_columns JSONB NOT NULL DEFAULT '{}',
   advanced_start DATE,
-  advanced_end DATE
+  advanced_end DATE,
+  advanced_sheet_id TEXT,
+  advanced_pass_score INTEGER DEFAULT 80
 );
 
 -- 교육생
@@ -34,7 +36,7 @@ CREATE TABLE students (
   UNIQUE(batch_id, name)
 );
 
--- 시험 점수
+-- 시험 점수 (입문교육)
 CREATE TABLE test_scores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id UUID REFERENCES students(id),
@@ -44,6 +46,49 @@ CREATE TABLE test_scores (
   max_score NUMERIC(5,2) DEFAULT 100,
   UNIQUE(student_id, test_date, subject)
 );
+
+-- 심화교육 시험 점수 (재시험 여러 회차 지원)
+CREATE TABLE advanced_test_scores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id) ON DELETE CASCADE,
+  batch_id UUID REFERENCES batches(id),
+  week_number INTEGER NOT NULL CHECK (week_number BETWEEN 1 AND 12),
+  sheet_attempt INTEGER,                -- 시트상 '회차' 원본 값 (참고용)
+  score NUMERIC(5,2) NOT NULL,
+  max_score NUMERIC(5,2) DEFAULT 100,
+  wrong_parts TEXT,                     -- '틀린파트' 컬럼
+  submitted_answers TEXT,               -- '제출한답' 컬럼 (보존용)
+  submitted_at TIMESTAMPTZ NOT NULL,    -- '제출일시' (한글 포맷 → ISO)
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(student_id, week_number, submitted_at)
+);
+
+CREATE INDEX idx_advanced_scores_lookup
+  ON advanced_test_scores(student_id, week_number, submitted_at);
+
+-- 심화교육 문제은행
+CREATE TABLE advanced_questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id UUID REFERENCES batches(id) ON DELETE CASCADE,
+  week_number INTEGER NOT NULL CHECK (week_number BETWEEN 1 AND 12),
+  session INTEGER NOT NULL DEFAULT 1,
+  question_id TEXT NOT NULL,
+  question_text TEXT NOT NULL DEFAULT '',
+  correct_answer TEXT DEFAULT '',
+  scoring_mode TEXT DEFAULT '',
+  max_score NUMERIC(5,2) DEFAULT 1,
+  category TEXT DEFAULT '',
+  series TEXT DEFAULT '',
+  detail TEXT DEFAULT '',
+  options TEXT DEFAULT '',
+  explanation TEXT DEFAULT '',
+  image_url TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(batch_id, week_number, session, question_id)
+);
+
+CREATE INDEX idx_advanced_questions_lookup
+  ON advanced_questions(batch_id, week_number, session);
 
 -- 출결
 CREATE TABLE attendance (

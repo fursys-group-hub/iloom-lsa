@@ -32,6 +32,9 @@ export async function POST(req: NextRequest) {
         advanced_end: body.advanced_end || null,
         sheet_id: body.sheet_id || null,
         subject_columns: body.subject_columns || {},
+        advanced_sheet_id: body.advanced_sheet_id || null,
+        advanced_pass_score:
+          typeof body.advanced_pass_score === 'number' ? body.advanced_pass_score : 80,
       })
       .select()
       .single();
@@ -72,16 +75,24 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    const updatePayload: Record<string, unknown> = {
+      name: body.name,
+      start_date: body.start_date,
+      end_date: body.end_date,
+      advanced_start: body.advanced_start || null,
+      advanced_end: body.advanced_end || null,
+      sheet_id: body.sheet_id || null,
+    };
+    if (body.advanced_sheet_id !== undefined) {
+      updatePayload.advanced_sheet_id = body.advanced_sheet_id || null;
+    }
+    if (typeof body.advanced_pass_score === 'number') {
+      updatePayload.advanced_pass_score = body.advanced_pass_score;
+    }
+
     const { error } = await supabase
       .from('batches')
-      .update({
-        name: body.name,
-        start_date: body.start_date,
-        end_date: body.end_date,
-        advanced_start: body.advanced_start || null,
-        advanced_end: body.advanced_end || null,
-        sheet_id: body.sheet_id || null,
-      })
+      .update(updatePayload)
       .eq('id', body.id);
 
     if (error) throw error;

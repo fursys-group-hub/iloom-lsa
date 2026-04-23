@@ -11,7 +11,12 @@ export async function fetchSheetData(
   const url = `${SHEETS_BASE}/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}`;
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Sheets API error: ${res.status} ${res.statusText}`);
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body?.error?.message ? ` — ${body.error.message}` : '';
+    } catch { /* ignore */ }
+    throw new Error(`Sheets API error: ${res.status} ${res.statusText}${detail}`);
   }
   const data = await res.json();
   return data.values || [];
