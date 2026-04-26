@@ -111,6 +111,11 @@ export default function FinalEvalPage() {
 
   return (
     <div>
+      <style>{`
+        @media (max-width: 768px) {
+          .final-strengths-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>교육 총평</h1>
         <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>6주 교육이 끝난 후 교육생에 대한 종합 평가를 남겨주세요</p>
@@ -185,7 +190,7 @@ export default function FinalEvalPage() {
               rows={5} style={textareaStyle} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+          <div className="final-strengths-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
             <div>
               <label style={labelStyle}>핵심 강점</label>
               <textarea value={strengths} onChange={(e) => setStrengths(e.target.value)}

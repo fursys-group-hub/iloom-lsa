@@ -132,6 +132,11 @@ export default function OverviewPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .overview-strengths-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>심화교육</h2>
 
       {!selectedStudentId && (
@@ -543,7 +548,7 @@ export default function OverviewPage() {
                   </div>
 
                   {/* 강점 / 발전 방향 */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                  <div className="overview-strengths-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                     {fe.strengths && (
                       <div style={{ padding: '16px 20px', background: 'var(--green-dim)', borderRadius: 'var(--radius-md)' }}>
                         <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)', margin: '0 0 6px' }}>핵심 강점</p>

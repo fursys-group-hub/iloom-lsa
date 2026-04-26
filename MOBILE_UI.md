@@ -111,12 +111,7 @@
 
 ### 4-D. 반응형 미적용 (남은 과제)
 
-고정 2컬럼이지만 미디어 쿼리 오버라이드가 없는 영역:
-
-| 페이지 | 현재 레이아웃 | 필요한 처리 |
-|--------|-------------|-----------|
-| **심화교육 종합** 점수 스케일 | `1fr 1fr` 고정 | → 모바일 1컬럼 |
-| **매장관리자 총평** 점수 스케일 | `1fr 1fr` 고정 | → 모바일 1컬럼 |
+모든 고정 2컬럼 그리드가 반응형 처리 완료됨. 현재 남은 과제 없음.
 
 ---
 
@@ -156,8 +151,8 @@ html, body { overflow-x: hidden; }
 
 - [x] 테스트 "시험 분석" 탭 — `.analysis-grid`, `.row2-grid`, `.cmp-2col` 모두 1024px 이하 1컬럼 처리 완료
 - [x] 교육효과(analytics) — `.insight-*-grid` 8개 그리드 모두 1024px/768px 반응형 처리 완료
-- [ ] 심화교육(overview) — 점수 스케일 `1fr 1fr` 고정, 미디어 쿼리 없음
-- [ ] manager 총평(final) — 점수 스케일 `1fr 1fr` 고정, 미디어 쿼리 없음
+- [x] 심화교육(overview) — `.overview-strengths-grid` 768px 이하 1컬럼 처리 완료
+- [x] manager 총평(final) — `.final-strengths-grid` 768px 이하 1컬럼 처리 완료
 - [x] 학생 마이페이지(my/page) — `.row-cal-plus-today`, `.row-weak-chart`, `.row-2cols` 모두 1024px 이하 1컬럼 처리 완료
 
 ---
