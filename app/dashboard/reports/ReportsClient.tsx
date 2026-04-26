@@ -365,7 +365,7 @@ export function PrintCard({ r, isPrint = true }: { r: ReportDetail; isPrint?: bo
   );
 }
 
-export default function ReportsClient({ batches, readOnly, storeFilter }: { batches: BatchItem[]; readOnly?: boolean; storeFilter?: string }) {
+export default function ReportsClient({ batches, readOnly, storeFilter, actionRef }: { batches: BatchItem[]; readOnly?: boolean; storeFilter?: string; actionRef?: React.MutableRefObject<(() => void) | null> }) {
   // 대시보드에서는 사이드바 전역 기수 컨텍스트 사용, 매니저에서는 로컬 상태 폴백
   const batchCtx = useOptionalBatch();
   const [localBatchId, setLocalBatchId] = useState(batches[0]?.id || '');
@@ -577,27 +577,19 @@ export default function ReportsClient({ batches, readOnly, storeFilter }: { batc
     showToast('새로고침 완료');
   };
 
+  if (actionRef) actionRef.current = refreshReports;
+
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
   return (
     <div style={{ maxWidth: 1200 }}>
-      {/* 헤더 (읽기 전용 모드에서는 숨김) */}
-      {!readOnly && (
-        <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>AI 분석 리포트</h2>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {/* 대시보드는 사이드바 전역 기수 드롭다운 사용 — 페이지 내 드롭다운은 매니저 모드에서만 */}
-            {!batchCtx && (
-              <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
-                style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
-                {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
-            )}
-            <button onClick={refreshReports}
-              style={{ padding: '8px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}>
-              새로고침
-            </button>
-          </div>
+      {/* 기수 드롭다운 (매니저 모드 전용) */}
+      {!readOnly && !batchCtx && (
+        <div className="no-print" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <select value={selectedBatchId} onChange={e => setSelectedBatchId(e.target.value)}
+              style={{ padding: '8px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer', outline: 'none' }}>
+              {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
         </div>
       )}
 
