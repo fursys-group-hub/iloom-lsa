@@ -1,3 +1,4 @@
+// TypeScript 컴파일러 설정. 코드를 브라우저가 이해하는 형태로 변환할 때 규칙을 정의한다.
 {
   "compilerOptions": {
     "target": "ES2017",

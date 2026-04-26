@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-interface StudentItem { id: string; name: string; store_location: string | null; }
+interface StudentItem { id: string; name: string; store_location: string | null; is_dropped?: boolean; }
 interface FinalEval {
   id?: string; student_id: string; manager_id: string;
   overall_rating: number; summary: string; strengths: string | null;
@@ -14,7 +14,7 @@ interface FinalEval {
 const SCORE_LABELS = ['', '많이 부족', '부족', '보통', '우수', '매우 우수'];
 
 export default function FinalEvalPage() {
-  const [auth, setAuth] = useState<{ managerId: string; name: string } | null>(null);
+  const [auth, setAuth] = useState<{ managerId: string; name: string; storeName: string } | null>(null);
   const [students, setStudents] = useState<StudentItem[]>([]);
   const [finals, setFinals] = useState<FinalEval[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ export default function FinalEvalPage() {
     const raw = localStorage.getItem('iloom-auth');
     if (!raw) return;
     const parsed = JSON.parse(raw);
-    setAuth({ managerId: parsed.managerId, name: parsed.name });
+    setAuth({ managerId: parsed.managerId, name: parsed.name, storeName: parsed.storeName || '' });
   }, []);
 
   useEffect(() => {
@@ -96,6 +96,14 @@ export default function FinalEvalPage() {
     finally { setSaving(false); }
   }
 
+  const myStudents = students.filter((s) => !s.is_dropped && auth?.storeName && s.store_location === auth.storeName);
+
+  useEffect(() => {
+    if (!selectedStudentId && myStudents.length > 0) {
+      setSelectedStudentId(myStudents[0].id);
+    }
+  }, [myStudents.length, selectedStudentId]);
+
   const selectedStudent = students.find((s) => s.id === selectedStudentId);
   const existingFinal = auth ? finals.find((f) => f.student_id === selectedStudentId && f.manager_id === auth.managerId) : null;
 
@@ -108,17 +116,23 @@ export default function FinalEvalPage() {
         <p style={{ fontSize: 15, color: 'var(--text-tertiary)', margin: 0 }}>6주 교육이 끝난 후 교육생에 대한 종합 평가를 남겨주세요</p>
       </div>
 
-      <div style={{ marginBottom: 24 }}>
-        <select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)}
-          style={{ padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 15, outline: 'none', minWidth: 280 }}>
-          <option value="">교육생을 선택하세요</option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} ({s.store_location || '미배정'})
-              {finals.some((f) => f.student_id === s.id) ? ' ✓' : ''}
-            </option>
-          ))}
-        </select>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
+        {myStudents.map((s, i) => (
+          <button key={s.id} onClick={() => setSelectedStudentId(s.id)} style={{
+            padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+            background: 'transparent',
+            color: selectedStudentId === s.id ? 'var(--text-primary)' : 'var(--text-muted)',
+            border: 'none',
+            borderBottom: selectedStudentId === s.id ? '2px solid var(--blue)' : '2px solid transparent',
+            fontSize: 15,
+            fontWeight: selectedStudentId === s.id ? 600 : 400,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            marginBottom: -1,
+          }}>
+            {s.name}{finals.some((f) => f.student_id === s.id) ? ' ✓' : ''}
+          </button>
+        ))}
       </div>
 
       {!selectedStudentId ? (

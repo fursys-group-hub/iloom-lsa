@@ -1,0 +1,18 @@
+// VS Code 탐색기에서 안 건드리는 설정 파일들을 숨긴다. 파일이 삭제되는 게 아니라 보이지 않을 뿐.
+// 다시 보고 싶으면 이 파일에서 해당 항목을 false로 바꾸면 된다.
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    ".next": true,
+    ".omc": true,
+    "node_modules": true,
+    "next-env.d.ts": true,
+    "tsconfig.tsbuildinfo": true,
+    "tsconfig.json": true,
+    "postcss.config.mjs": true,
+    "eslint.config.mjs": true,
+    "next.config.ts": true,
+    "package-lock.json": true
+  }
+}

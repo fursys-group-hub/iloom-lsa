@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   const batchId = searchParams.get('batchId');
   const reportType = searchParams.get('reportType');
   const groupId = searchParams.get('groupId');
+  const studentId = searchParams.get('studentId');
   const publishedOnly = searchParams.get('publishedOnly') === 'true';
 
   const supabase = getSupabase();
@@ -24,6 +25,17 @@ export async function GET(req: NextRequest) {
     if (reportType) q = q.eq('report_type', reportType);
 
     const { data, error } = await q;
+    if (error) return Response.json({ message: error.message }, { status: 500 });
+    return Response.json({ reports: data || [] });
+  }
+
+  // 특정 학생의 리포트 조회
+  if (studentId) {
+    const { data, error } = await supabase
+      .from('coaching_reports')
+      .select('id, report_type, subject, created_at, manager_report, student_id')
+      .eq('student_id', studentId)
+      .order('created_at', { ascending: false });
     if (error) return Response.json({ message: error.message }, { status: 500 });
     return Response.json({ reports: data || [] });
   }

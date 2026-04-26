@@ -1,6 +1,6 @@
 # 일룸 LSA 입문교육 — 디자인 시스템 가이드
 
-> **2026-04-13 확정 / 2026-04-16 업데이트.** 새 페이지나 컴포넌트를 만들 때 반드시 이 문서를 따를 것.
+> **2026-04-13 확정 / 2026-04-26 업데이트.** 새 페이지나 컴포넌트를 만들 때 반드시 이 문서를 따를 것.
 > 이 문서에 없는 스타일을 임의로 추가하지 말 것 — 추가가 필요하면 이 문서부터 업데이트.
 
 ---
@@ -48,7 +48,18 @@
   rgba(0, 0, 0, 0.027) 0px 2px 8px,
   rgba(0, 0, 0, 0.02) 0px 0.8px 3px,
   rgba(0, 0, 0, 0.01) 0px 0.2px 1px;
+
+--shadow-lg:
+  rgba(0, 0, 0, 0.08) 0px 8px 30px,
+  rgba(0, 0, 0, 0.04) 0px 4px 12px,
+  rgba(0, 0, 0, 0.02) 0px 1px 4px;
 ```
+
+| 변수 | 용도 |
+|------|------|
+| `--shadow-sm` | 카드 기본 |
+| `--shadow-md` | 모달 |
+| `--shadow-lg` | 토스트, 플로팅 요소 |
 
 > **원칙**: 단층 그림자 사용 금지. 항상 다층으로.
 
@@ -65,13 +76,26 @@
 - body: `16px`, `line-height: 1.5`
 - **12px 이하 사용 절대 금지** (iOS 줌 방지)
 
-### 제목 — 마이너스 자간 (글씨 클수록 좁게)
-| 태그 | 크기 | 굵기 | line-height | letter-spacing |
-|------|------|------|-------------|----------------|
-| h1 | clamp(1.75rem, ..., 2.5rem) = 28~40px | 700 | 1.1 | **-0.025em** |
-| h2 | clamp(1.375rem, ..., 1.75rem) = 22~28px | 700 | 1.2 | **-0.02em** |
-| h3 | clamp(1.125rem, ..., 1.375rem) = 18~22px | 600 | 1.3 | **-0.015em** |
-| h4 | clamp(1rem, ..., 1.125rem) = 16~18px | 600 | 1.35 | **-0.01em** |
+### 페이지 제목 (h2) — 모든 페이지 통일
+
+```tsx
+<h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>페이지 제목</h2>
+```
+
+| 속성 | 값 | 비고 |
+|------|---|------|
+| fontSize | **28** | 고정값 (clamp 사용 안 함) |
+| fontWeight | **700** | |
+| margin | **0** | 부모의 gap이 간격을 처리 |
+
+> **주의**: globals.css에 clamp() 규칙이 있지만, 실제 페이지에서는 `fontSize: 28` 고정 사용.
+> h1은 사용하지 않음. 페이지 최상위 제목은 항상 h2.
+
+### 기타 제목 크기
+| 용도 | 크기 | 굵기 | letter-spacing |
+|------|------|------|----------------|
+| 카드/섹션 제목 (h3) | 17 | 700 | -0.01em |
+| 서브 제목 (h4) | 16~18 | 600 | -0.01em |
 
 ### 폰트 굵기 4단계
 | 변수 | 값 | 용도 |
@@ -148,6 +172,41 @@ const badgeBase: React.CSSProperties = {
 | fontWeight | `600` | 통일 (700 사용 금지) |
 
 > **색상은 dim 배경 + 원색 텍스트** 조합: `background: var(--red-dim), color: var(--red)`
+
+---
+
+## 7-A. 페이지 레이아웃 패턴
+
+모든 페이지의 최상위 구조. **제목과 탭 사이 간격은 부모의 `gap: 24`가 처리한다.**
+
+```tsx
+// 기본 (탭 없는 페이지)
+<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+  <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>페이지 제목</h2>
+  {/* 내용 */}
+</div>
+
+// 액션 버튼이 있는 경우 (우측 정렬)
+<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <h2 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>페이지 제목</h2>
+    <div style={{ display: 'flex', gap: 8 }}>
+      <button>액션</button>
+    </div>
+  </div>
+  {/* 탭 */}
+  {/* 내용 */}
+</div>
+```
+
+| 규칙 | 값 |
+|------|---|
+| 최상위 컨테이너 | `display: flex, flexDirection: column, gap: 24` |
+| 제목-탭 간격 | **24px** (부모 gap이 처리, marginBottom 사용 금지) |
+| 제목-내용 간격 | **24px** (동일) |
+| 액션 버튼 위치 | h2와 같은 행, 우측 정렬 (`justifyContent: space-between`) |
+
+> **금지**: h2에 `marginBottom`을 직접 주거나, 탭에 `marginTop`을 주지 말 것. 부모 `gap: 24`로 통일.
 
 ---
 

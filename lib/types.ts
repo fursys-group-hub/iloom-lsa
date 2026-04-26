@@ -186,43 +186,43 @@ export interface WeeklyEvaluation {
 }
 
 // 평가 태그 상수
-export const STRENGTH_TAG_OPTIONS = [
-  '고객 라포형성 우수',
-  '제품 지식 풍부',
-  '자신감 있는 상담',
-  '주문서 작성 정확',
-  'SCT 활용 능숙',
-  '업셀링 적극적',
-  '차분하고 친절한 응대',
-  '자가 학습 의지 높음',
-  '고객 니즈 파악 우수',
-  '빠르고 정확한 상담',
-] as const;
+export const STRENGTH_TAG_GROUPS = [
+  { label: '고객 응대', tags: ['고객 라포형성 우수', '차분하고 친절한 응대', '고객 니즈 파악 우수'] },
+  { label: '상담 스킬', tags: ['자신감 있는 상담', '빠르고 정확한 상담', '클로징 능숙', '업셀링 적극적', '대안 제품 제안 우수'] },
+  { label: '제품 지식', tags: ['제품 지식 풍부', '공간 스타일링 제안 우수', '소재/컬러 코디 능숙'] },
+  { label: '업무 처리', tags: ['주문서 작성 정확', 'SCT 활용 능숙', '배송·설치 안내 정확'] },
+  { label: '태도', tags: ['자가 학습 의지 높음'] },
+];
 
-export const IMPROVEMENT_TAG_OPTIONS = [
-  '제품 디테일 미흡',
-  '자신감 부족',
-  '주문서 작성 누락',
-  '소재/컬러 미숙지',
-  'SCT 활용 미숙',
-  '프로모션 등록 누락',
-  '사이즈 숙지 필요',
-  '업셀링 보완 필요',
-  '옵션/액세서리 미숙지',
-  '상담 흐름 개선 필요',
-] as const;
+export const IMPROVEMENT_TAG_GROUPS = [
+  { label: '제품 지식', tags: ['제품 특장점 설명 미흡', '소재 미숙지', '컬러 미숙지', '사이즈 미숙지', '옵션/액세서리 미숙지'] },
+  { label: '상담 스킬', tags: ['자신감 부족', '상담 흐름 개선 필요', '클로징 소극적', '업셀링 보완 필요', '공간 제안 미흡', '경쟁사 질문 대응 필요', '고객 정보 파악 미흡'] },
+  { label: '업무 처리', tags: ['주문서 작성 누락', 'SCT 활용 미숙지', '프로모션 등록 누락', '배송·AS 안내 누락'] },
+];
+
+// 하위 호환용 flat 배열
+export const STRENGTH_TAG_OPTIONS = STRENGTH_TAG_GROUPS.flatMap(g => g.tags);
+export const IMPROVEMENT_TAG_OPTIONS = IMPROVEMENT_TAG_GROUPS.flatMap(g => g.tags);
 
 export const RP_AREA_OPTIONS = [
+  '키즈',
   '학생방',
-  '다이닝',
-  '소파',
-  '침실',
-  '옷장',
-  '거실',
-  '헤이븐',
   '홈라이브러리',
-  '서재',
-  '학생방 업셀링',
+  '침실',
+  '매트리스',
+  '옷장',
+  '소파',
+  '다이닝',
+  '조명',
+  '반려동물',
+  '복합공간제안',
+] as const;
+
+export const RP_TYPE_OPTIONS = [
+  '신혼',
+  '입주',
+  '개비',
+  '키즈',
 ] as const;
 
 export interface Benchmark {

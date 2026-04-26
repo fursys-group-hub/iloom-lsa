@@ -1,7 +1,9 @@
+# Git에 올리면 안 되는 파일/폴더 목록. 비밀번호, 임시 빌드 파일, 개인정보 등을 보호한다.
 node_modules
 .next
 .env.local
 .env
+.omc
 
 # 노션 raw export (CSV/HTML 덤프) - 파싱해서 lessons-data.ts로 생성
 프로젝트_기록/ExportBlock-*/
@@ -10,6 +12,9 @@ ExportBlock-*/
 
 # 개인정보 보관 (학생 사진, 이력서 등 — 절대 커밋 금지)
 _private/
+
+# 교육생 개인 평가 데이터 (실명 포함)
+scripts/memo-rewrites.json
 
 # 안전망 — 혹시 모를 민감 파일 실수 방지
 app/*.jpg

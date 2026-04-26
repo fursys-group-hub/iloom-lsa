@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SummaryCard } from '@/components/SummaryCard';
 import { PrintCard, type ReportDetail } from '@/app/dashboard/reports/ReportsClient';
 import { ReportStyles } from '@/app/dashboard/reports/ReportStyles';
 
@@ -60,28 +59,18 @@ export default function ManagerReportsClient({ batches }: { batches: BatchItem[]
     }
   }
   const deduped = Array.from(uniqueByStudent.values());
-  const selected = deduped.find((r) => r.student_id === selectedStudentId);
 
-  if (selected) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <button
-          onClick={() => setSelectedStudentId('')}
-          style={{ alignSelf: 'flex-start', padding: 0, border: 'none', background: 'transparent', color: 'var(--text-tertiary)', fontSize: 14, cursor: 'pointer' }}
-        >
-          ← 리포트 목록
-        </button>
-        <PrintCard r={selected} isPrint={false} />
-        <ReportStyles />
-      </div>
-    );
-  }
+  // 첫 학생 자동 선택
+  const activeId = selectedStudentId || deduped[0]?.student_id || '';
+  const selected = deduped.find((r) => r.student_id === activeId);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>
-        입문교육 AI 리포트
-      </h1>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 0 0', letterSpacing: '-0.025em', lineHeight: 1.1 }}>
+          입문교육 AI 리포트
+        </h1>
+      </div>
 
       {deduped.length === 0 ? (
         <div style={{
@@ -93,29 +82,39 @@ export default function ManagerReportsClient({ batches }: { batches: BatchItem[]
           </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-          {deduped.map((r) => {
-            const headerLeft = (
-              <span style={{
-                padding: '3px 10px', borderRadius: 'var(--radius-pill)',
-                background: r.students?.store_location ? 'var(--blue-dim)' : 'var(--bg-hover)',
-                color: r.students?.store_location ? 'var(--blue)' : 'var(--text-tertiary)',
-                fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
-              }}>{r.students?.store_location || '매장 미배정'}</span>
-            );
-            const created = new Date(r.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Seoul' });
-            return (
-              <SummaryCard
-                key={r.id}
-                date={headerLeft}
-                title={r.students?.name || '—'}
-                sub={`${created} 발송`}
-                typeBadge={{ text: '공식 리포트', tone: 'green' }}
+        <>
+          {/* 학생 탭 */}
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 28 }}>
+            {deduped.map((r, i) => (
+              <button
+                key={r.student_id}
                 onClick={() => setSelectedStudentId(r.student_id)}
-              />
-            );
-          })}
-        </div>
+                style={{
+                  padding: `8px 20px 12px ${i === 0 ? '0px' : '20px'}`,
+                  background: 'transparent',
+                  color: activeId === r.student_id ? 'var(--text-primary)' : 'var(--text-muted)',
+                  border: 'none',
+                  borderBottom: activeId === r.student_id ? '2px solid var(--blue)' : '2px solid transparent',
+                  fontSize: 15,
+                  fontWeight: activeId === r.student_id ? 600 : 400,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  marginBottom: -1,
+                }}
+              >
+                {r.students?.name || '—'}
+              </button>
+            ))}
+          </div>
+
+          {/* 선택된 학생 리포트 */}
+          {selected && (
+            <>
+              <PrintCard r={selected} isPrint={false} />
+              <ReportStyles />
+            </>
+          )}
+        </>
       )}
     </div>
   );

@@ -9,8 +9,10 @@ export async function POST(req: NextRequest) {
   }
 
   // 슈퍼관리자 체크
-  if (name.trim() === '김수지' && password === '4851') {
-    return Response.json({ role: 'admin', name: '김수지' });
+  const adminName = process.env.ADMIN_NAME;
+  const adminPw = process.env.ADMIN_PASSWORD;
+  if (adminName && adminPw && name.trim() === adminName && password === adminPw) {
+    return Response.json({ role: 'admin', name: adminName });
   }
 
   const supabase = getSupabase();

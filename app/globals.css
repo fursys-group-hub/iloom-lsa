@@ -57,6 +57,10 @@
     rgba(0, 0, 0, 0.027) 0px 2px 8px,
     rgba(0, 0, 0, 0.02) 0px 0.8px 3px,
     rgba(0, 0, 0, 0.01) 0px 0.2px 1px;
+  --shadow-lg:
+    rgba(0, 0, 0, 0.08) 0px 8px 30px,
+    rgba(0, 0, 0, 0.04) 0px 4px 12px,
+    rgba(0, 0, 0, 0.02) 0px 1px 4px;
 
   /* 경고 강조 (라이트: filled 스타일) */
   --red-solid-bg: #EF4444;
@@ -147,6 +151,10 @@ body.dark {
     0 4px 18px rgba(0, 0, 0, 0.5),
     0 2px 8px rgba(0, 0, 0, 0.35),
     0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-lg:
+    0 8px 30px rgba(0, 0, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.3);
 
   --red-solid-bg: rgba(255, 69, 58, 0.15);
   --red-solid-text: #FF453A;
