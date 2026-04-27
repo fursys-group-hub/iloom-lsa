@@ -15,6 +15,13 @@ _private/
 
 # 교육생 개인 평가 데이터 (실명 포함)
 scripts/memo-rewrites.json
+scripts/practice-rewrites.json
+
+# 교육 원본 자료 (대용량 PPTX/xlsx — 100MB 초과)
+기존자료/
+
+# textbook 파서 임시 출력
+scripts/textbook/output/
 
 # 안전망 — 혹시 모를 민감 파일 실수 방지
 app/*.jpg

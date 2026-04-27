@@ -30,6 +30,7 @@ const navGroups = [
     items: [
       { href: '/dashboard/students', label: '교육생분석' },
       { href: '/dashboard/surveys', label: '교육설문' },
+      { href: '/dashboard/textbook', label: '교육내용정리' },
       { href: '/dashboard/analytics', label: '교육인사이트' },
     ],
   },
