@@ -59,6 +59,27 @@ export default function TextbookSeriesPage() {
     reload();
   }, [reload]);
 
+  // 챕터 미리보기 안 이미지 클릭 시 lightbox (크게 보기)
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const el = e.target as HTMLElement;
+      if (el?.tagName === 'IMG' && el.closest('.tb-chapter')) {
+        const src = (el as HTMLImageElement).src;
+        if (!src) return;
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:40px;';
+        const big = document.createElement('img');
+        big.src = src;
+        big.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.5);';
+        overlay.appendChild(big);
+        overlay.addEventListener('click', () => overlay.remove());
+        document.body.appendChild(overlay);
+      }
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [editing]);
+
   async function saveContent() {
     if (!chapter || busy) return;
     setBusy('저장 중...');
