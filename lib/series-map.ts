@@ -135,20 +135,29 @@ export function getCategoryBySeriesName(seriesName: string): Category {
  * 텍스트에서 등장하는 시리즈명 직접 추출 (정규식 매칭)
  * - 긴 시리즈명부터 매칭 (예: "로이모노"가 "로이"보다 우선)
  * - 매칭된 부분은 다른 매칭에서 제외해서 중복 방지
- *
- * 한국어는 단어 경계(\b)가 없어 그냥 includes 매칭. 한 글자 시리즈는 거의 없어 안전.
+ * - 1글자 시리즈명(닛/로)은 단어 경계(공백·구두점·시작·끝)로 둘러싸인 것만 매칭 (오탐 방지)
  */
 export function findSeriesInText(text: string): string[] {
   if (!text) return [];
   const found = new Set<string>();
-  // 긴 시리즈명부터 매칭 → 매칭되면 그 부분 제거 (짧은 이름이 부분매칭 안 되도록)
   const sorted = [...SERIES_LIST].sort((a, b) => b.length - a.length);
   let remaining = text;
+  // 단어 경계로 인정되는 문자 (한글/영문/숫자가 아닌 것 + 시작/끝)
+  const BOUNDARY = `(?:^|[^A-Za-z0-9가-힣])`;
+  const BOUNDARY_AFTER = `(?=[^A-Za-z0-9가-힣]|$)`;
+
   for (const s of sorted) {
-    if (s.length < 2) continue; // 한 글자는 스킵 (오탐 방지)
+    if (s.length === 1) {
+      // 1글자: 단어 경계로만 매칭
+      const re = new RegExp(`${BOUNDARY}${s}${BOUNDARY_AFTER}`, 'g');
+      if (re.test(remaining)) {
+        found.add(s);
+        remaining = remaining.replace(new RegExp(`${BOUNDARY}${s}${BOUNDARY_AFTER}`, 'g'), (match) => match.replace(s, ' '));
+      }
+      continue;
+    }
     if (remaining.includes(s)) {
       found.add(s);
-      // 매칭된 부분을 공백으로 치환 → 짧은 이름 부분매칭 차단
       remaining = remaining.split(s).join(' '.repeat(s.length));
     }
   }
