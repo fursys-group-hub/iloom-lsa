@@ -439,8 +439,10 @@ export default function TextbookPage() {
                   //   1) 같은 시리즈명의 모든 카드 sub를 합쳐서 출처로 사용 (레마처럼 사이트가 한 페이지에 묶어둔 경우 대응)
                   //   2) sub.title의 owner = 가장 긴 매칭 시리즈명 (헤이즐R 우드헤드 침대 → owner '헤이즐R', 헤이즐 카드엔 안 보임)
                   //   3) 같은 시리즈명 카드 다중 + 같은 pumok이면 pumok 키워드 + 온라인 여부로 추가 필터
+                  //   4) 단종 sub 제외 — sub.title에 '단종' 키워드 들어있으면 필터링 (예: '테일러 멀티장(단종)')
                   const allSubsForName = subsBySeriesName[s.series_name] || [];
                   let subs = allSubsForName.filter((sp) => findSubOwner(sp.title) === s.series_name);
+                  subs = subs.filter((sp) => !/단종/.test(sp.title));
                   if ((subsByNameCount[s.series_name] || 0) > 1) {
                     const kws = PUMOK_KEYWORDS[s.pumok];
                     if (kws) subs = subs.filter((sp) => kws.some((k) => sp.title.includes(k)));

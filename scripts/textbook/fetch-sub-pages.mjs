@@ -119,6 +119,8 @@ for (let i = 0; i < queue.length; i++) {
         const title = (a.textContent || '').trim();
         if (!title) continue;
         if (/^(업데이트|매뉴얼|GPT|가이드|업데이트 요청)/.test(title)) continue;
+        // 단종 표기된 sub 제외 (예: '테일러 멀티장(단종)', '에디키즈 책상 단종')
+        if (/단종/.test(title)) continue;
 
         subs.push({ page_id: pid, title, url: a.href });
         seen.add(pid);
