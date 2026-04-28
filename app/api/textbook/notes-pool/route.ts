@@ -84,18 +84,24 @@ export async function GET() {
   const { data: batches } = await supabase.from('batches').select('id, name');
   const batchMap = new Map<string, string>((batches || []).map((b) => [b.id, b.name]));
 
-  // 3) 분류 결과 조회 (이미 분류된 노트들)
-  const { data: classifs } = await supabase
-    .from('textbook_classifications')
-    .select('note_id, series_name, confidence');
+  // 3) 분류 결과 조회 (이미 분류된 노트들) — PostgREST max-rows(1000) 우회 페이지네이션
   const classifyMap = new Map<string, { series: string[]; confidence: number }>();
-  for (const c of classifs || []) {
-    if (!classifyMap.has(c.note_id)) {
-      classifyMap.set(c.note_id, { series: [], confidence: 0 });
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data: classifs } = await supabase
+      .from('textbook_classifications')
+      .select('note_id, series_name, confidence')
+      .range(from, from + PAGE - 1);
+    if (!classifs || classifs.length === 0) break;
+    for (const c of classifs) {
+      if (!classifyMap.has(c.note_id)) {
+        classifyMap.set(c.note_id, { series: [], confidence: 0 });
+      }
+      const entry = classifyMap.get(c.note_id)!;
+      entry.series.push(c.series_name);
+      entry.confidence = Math.max(entry.confidence, Number(c.confidence) || 0);
     }
-    const entry = classifyMap.get(c.note_id)!;
-    entry.series.push(c.series_name);
-    entry.confidence = Math.max(entry.confidence, Number(c.confidence) || 0);
+    if (classifs.length < PAGE) break;
   }
 
   // 4) 언팩 + 필터

@@ -31,14 +31,20 @@ export async function GET(req: NextRequest) {
     .order('updated_at', { ascending: false });
   if (error) return Response.json({ message: error.message }, { status: 500 });
 
-  // 통계 함께 (limit 명시 — Supabase 기본 1000건 제한 우회)
-  const { data: classifs } = await supabase
-    .from('textbook_classifications')
-    .select('series_name')
-    .limit(50000);
+  // 통계 — Supabase PostgREST의 max-rows 제한(기본 1000)을 .range() 페이지네이션으로 우회
+  const PAGE = 1000;
   const noteCount: Record<string, number> = {};
-  for (const c of classifs || []) {
-    noteCount[c.series_name] = (noteCount[c.series_name] || 0) + 1;
+  for (let from = 0; ; from += PAGE) {
+    const { data: classifs, error: cErr } = await supabase
+      .from('textbook_classifications')
+      .select('series_name')
+      .range(from, from + PAGE - 1);
+    if (cErr) return Response.json({ message: cErr.message }, { status: 500 });
+    if (!classifs || classifs.length === 0) break;
+    for (const c of classifs) {
+      noteCount[c.series_name] = (noteCount[c.series_name] || 0) + 1;
+    }
+    if (classifs.length < PAGE) break;
   }
 
   return Response.json({
