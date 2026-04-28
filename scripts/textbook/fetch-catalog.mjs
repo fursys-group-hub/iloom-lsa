@@ -72,6 +72,9 @@ const SERIES_OVERRIDES = {
   18318: { split_names: ['쿠시노', '쿠시노코지'] }, // 쿠시노/쿠시노코지 → 두 카드로 분리
   39171: { extra_label: '모션 포함' },              // 바젤 — 시리즈명 옆 작은 라벨
   60181: { force_target: true },                    // 멘디R — 사이트엔 단종/구버전 표기 있지만 실제 활성
+  // 레마 거실수납장(50071) 카드를 다이닝룸/주방수납장에도 추가 카드로 노출
+  // (사이트는 거실수납장만 등록했지만 sub-품목에 주방식기장·카페장이 있음 → 영업 분류 일치시킴)
+  50071: { add_locations: [{ category: '다이닝룸', pumok: '주방수납장', gubun: '' }] },
 };
 
 // gubun(비고/sub-헤더) 정규화 — 같은 의미인데 일룸 사이트가 인라인 정보까지 적은 경우 단순화
@@ -490,6 +493,24 @@ await browser.close();
 
 // (R 리뉴얼 자동 감지는 케이스 다양해서 제거 — 볼케R/볼케S 같이 등급 구분도 있음.
 //  사용자가 챕터 생성 단계에서 명시적으로 어떤 시리즈 처리할지 결정.)
+
+// SERIES_OVERRIDES.add_locations 처리 — 한 시리즈를 다른 카테고리에도 카드로 추가
+// (예: 레마 거실수납장(50071) → 다이닝룸/주방수납장에도 카드 추가)
+const additionalCards = [];
+for (const s of allSeries) {
+  const ov = SERIES_OVERRIDES[s.page_id];
+  if (!ov?.add_locations) continue;
+  for (const loc of ov.add_locations) {
+    additionalCards.push({
+      ...s,
+      category: loc.category,
+      pumok: loc.pumok !== undefined ? loc.pumok : s.pumok,
+      gubun: loc.gubun !== undefined ? loc.gubun : s.gubun,
+    });
+  }
+}
+allSeries.push(...additionalCards);
+console.log(`\nadd_locations 추가 카드: ${additionalCards.length}건`);
 
 // 3) 결과 저장
 await fs.writeFile(path.join(OUT_DIR, 'catalog.json'), JSON.stringify(allSeries, null, 2), 'utf-8');

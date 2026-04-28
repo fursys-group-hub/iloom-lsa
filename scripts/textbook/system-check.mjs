@@ -90,11 +90,25 @@ top10.forEach(([k, v]) => console.log(`     ${k}: ${v}`));
 
 // 5) 카탈로그-분류 정합성 (분류 결과 시리즈명이 카탈로그에 있는지)
 console.log('\n🔗 5. 카탈로그 ↔ 분류 정합성');
+// SERIES_ALIASES (lib/series-aliases.ts와 동일하게 유지)
+const SERIES_ALIASES_LOCAL = {
+  '글렌 라이브러리': ['글렌'],
+  '케플러클래식': ['케플러 클래식'],
+  '엘바 패밀리': ['엘바패밀리'],
+  '업 모션': ['업모션'],
+  '캐빈R': ['캐빈'],
+  '멘디R': ['멘디'],
+  '뉴트': ['뉴트 홈오피스'],
+  '버튼': ['버튼스위블'],
+};
 const catalogNames = new Set(targets.map((s) => s.series_name));
-// 슬래시 묶음 별칭도 추가
+// 슬래시 묶음 + 별칭 매핑도 추가
 for (const s of targets) {
   for (const alias of s.series_name.split('/').map((x) => x.trim())) {
     if (alias) catalogNames.add(alias);
+  }
+  for (const alias of SERIES_ALIASES_LOCAL[s.series_name] || []) {
+    catalogNames.add(alias);
   }
 }
 const orphanClassif = Object.keys(classifByName).filter((name) => !catalogNames.has(name));

@@ -3599,5 +3599,21 @@
     "is_old_version": false,
     "is_new_version": false,
     "is_target": false
+  },
+  {
+    "category": "다이닝룸",
+    "series_name": "레마",
+    "url": "https://iloomproduct.fursys.com/?p=50071",
+    "page_id": 50071,
+    "pumok": "주방수납장",
+    "gubun": "",
+    "label": "",
+    "is_discontinued": false,
+    "is_online_only": false,
+    "is_new_2025": false,
+    "is_new_2026": false,
+    "is_old_version": false,
+    "is_new_version": false,
+    "is_target": true
   }
 ]
