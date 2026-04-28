@@ -121,25 +121,16 @@ ${sets.length > 50 ? `        <tr><td colspan="5"><em>... 외 ${sets.length - 50
 
 function renderProductGuide() {
   if (data.product_guides.length === 0) return '';
+  // 일룸 가이드 사이트 링크만 (raw text dump 제거 — 내부 이력/색상 코드만 등 학생 학습에 무의미)
   let html = `
 <section>
-  <h2>📖 일룸 가이드 발췌 (자동 수집)</h2>`;
+  <h2>📖 일룸 가이드 사이트</h2>
+  <p>제품 사양·색상·사이즈 등 공식 정보는 아래 링크에서 확인:</p>
+  <ul>`;
   for (const g of data.product_guides) {
-    html += `
-  <h3>${escape(g.series_name)} (page_id=${g.page_id})</h3>
-  <p><a href="${escape(g.url)}" target="_blank">일룸 가이드 사이트 열기 ↗</a></p>`;
-    for (const tabKey of ['tab1', 'tab2', 'tab3', 'tab4', 'tab5']) {
-      const tab = g[tabKey];
-      if (!tab?.text || tab.text.length < 50) continue;
-      const tabLabel = { tab1: '타겟·기획의도·품목', tab2: '규격·소재', tab3: '특징·주의사항·옵션', tab4: '추천연관제품', tab5: '히스토리' }[tabKey];
-      html += `
-  <details>
-    <summary><strong>${tabLabel}</strong> (${tab.text.length}자, 표 ${tab.tables?.length || 0}개, 이미지 ${tab.images?.length || 0}개)</summary>
-    <pre style="white-space:pre-wrap;font-size:13px;background:#f8f8f8;padding:12px;border-radius:6px;">${escape(tab.text.slice(0, 3000))}${tab.text.length > 3000 ? '\n... (생략, 원본 더 김)' : ''}</pre>
-  </details>`;
-    }
+    html += `\n    <li><a href="${escape(g.url)}" target="_blank">${escape(g.series_name)} 페이지 ↗</a> <small>(p=${g.page_id})</small></li>`;
   }
-  return html + '\n</section>';
+  return html + '\n  </ul>\n</section>';
 }
 
 function renderNotesPool() {

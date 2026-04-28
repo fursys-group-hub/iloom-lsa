@@ -80,6 +80,8 @@ const SERIES_OVERRIDES = {
   46309: { hidden_in: [{ category: '리빙룸' }] },
   // 토스티(49462) 리빙룸/거실 테이블: 사이트는 '디자인 소파테이블'로 분류했지만 실제는 사이드테이블
   49462: { gubun: '사이드테이블' },
+  // 데일리라이트(44375): 사이트는 '데일리라이트(온) 2022'로 표기했지만 (온) 라벨 추출 누락 — 강제 적용
+  44375: { force_online: true },
 };
 
 // gubun(비고/sub-헤더) 정규화 — 같은 의미인데 일룸 사이트가 인라인 정보까지 적은 경우 단순화
@@ -481,6 +483,10 @@ for (const cat of categories) {
         newS.is_target = true;
         newS.is_discontinued = false;
         newS.is_old_version = false;
+      }
+      // 온라인 전용 강제 (사이트의 (온) 라벨 추출 누락 보정)
+      if (ov.force_online === true) {
+        newS.is_online_only = true;
       }
       finalSeries.push(newS);
     }
