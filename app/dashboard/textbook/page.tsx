@@ -527,7 +527,11 @@ export default function TextbookPage() {
                           <>
                             {' · '}
                             <strong
-                              style={{ color: 'var(--text-primary)' }}
+                              style={{
+                                color: 'var(--text-primary)',
+                                borderBottom: '1px dotted var(--text-tertiary)',
+                                cursor: 'help',
+                              }}
                               title={subs.map((sp) => sp.title).join('\n')}
                             >
                               {subs.length}품목
