@@ -94,38 +94,91 @@ for (const cat of categories) {
     // 표 구조에서 품목/구분 추적용 (위치 기반 매핑)
     const positionContext = new Map(); // key=link element, value={pumok, gubun}
     const tables = Array.from(document.querySelectorAll('table'));
+
+    function isSeriesLink(a) {
+      return /[?&]p=\d+/.test(a.href) || /[?&]page_id=\d+/.test(a.href);
+    }
+
     for (const table of tables) {
-      const rows = Array.from(table.querySelectorAll('tr'));
-      let currentPumok = '';
-      let currentGubun = '';
+      // 1) rowspan/colspan을 처리한 가상 매트릭스 생성
+      const trs = Array.from(table.querySelectorAll('tr'));
+      const matrix = [];
+      for (let r = 0; r < trs.length; r++) {
+        if (!matrix[r]) matrix[r] = [];
+        const cells = Array.from(trs[r].children).filter((el) => el.tagName === 'TD' || el.tagName === 'TH');
+        let c = 0;
+        for (const cell of cells) {
+          while (matrix[r][c]) c++;
+          const rs = parseInt(cell.getAttribute('rowspan') || '1', 10);
+          const cs = parseInt(cell.getAttribute('colspan') || '1', 10);
+          for (let dr = 0; dr < rs; dr++) {
+            for (let dc = 0; dc < cs; dc++) {
+              if (!matrix[r + dr]) matrix[r + dr] = [];
+              matrix[r + dr][c + dc] = cell;
+            }
+          }
+          c += cs;
+        }
+      }
 
-      for (const row of rows) {
-        const cells = Array.from(row.querySelectorAll('td, th'));
-        if (cells.length === 0) continue;
-        let pumokCell = null, gubunCell = null, seriesCell = null;
+      // 2) 각 행에서 시리즈 셀 위치 동적 감지 + 라벨 추출
+      for (const row of matrix) {
+        if (!row || row.length === 0) continue;
 
-        if (cells.length >= 3) {
-          [pumokCell, gubunCell, seriesCell] = cells;
-        } else if (cells.length === 2) {
-          [gubunCell, seriesCell] = cells;
-        } else if (cells.length === 1) {
-          seriesCell = cells[0];
+        // 시리즈 링크가 가장 많은 셀 = 시리즈 셀 (cell 인덱스)
+        let seriesIdx = -1;
+        let maxLinks = 0;
+        const seenCellIds = new Set();
+        for (let i = 0; i < row.length; i++) {
+          const cell = row[i];
+          if (!cell) continue;
+          // 같은 cell이 colspan으로 여러 인덱스에 있을 수 있음 → 한 번만 평가
+          if (seenCellIds.has(cell)) continue;
+          seenCellIds.add(cell);
+          const links = Array.from(cell.querySelectorAll('a')).filter(isSeriesLink);
+          if (links.length > maxLinks) {
+            maxLinks = links.length;
+            seriesIdx = i;
+          }
+        }
+        if (seriesIdx === -1) continue;
+
+        // 라벨 셀 텍스트 (시리즈 셀 제외, 빈 텍스트 제거)
+        const seriesCellEl = row[seriesIdx];
+        const labelCells = [];
+        const seenLabelIds = new Set();
+        for (let i = 0; i < row.length; i++) {
+          const cell = row[i];
+          if (!cell || cell === seriesCellEl) continue;
+          if (seenLabelIds.has(cell)) continue;
+          seenLabelIds.add(cell);
+          const txt = (cell.textContent || '').trim();
+          if (txt) labelCells.push({ idx: i, text: txt });
         }
 
-        if (pumokCell) {
-          const txt = (pumokCell.textContent || '').trim();
-          if (txt) currentPumok = txt;
+        // 시리즈 셀 위치로 표 패턴 분기
+        // 패턴 A (리빙룸/다이닝룸): [pumok, gubun, series]  → seriesIdx === row.length - 1
+        // 패턴 B (키즈룸·틴즈룸):   [구분, series, 비고]    → 비고를 pumok로 (더 세부 분류)
+        let currentPumok = '';
+        let currentGubun = '';
+        if (seriesIdx === row.length - 1) {
+          // 패턴 A: 시리즈가 마지막 → 앞쪽이 [pumok, gubun]
+          if (labelCells[0]) currentPumok = labelCells[0].text;
+          if (labelCells[1]) currentGubun = labelCells[1].text;
+        } else {
+          // 패턴 B: 시리즈가 중간 → 시리즈 뒤(비고) 우선 pumok, 시리즈 앞(구분)을 gubun
+          const after = labelCells.find((l) => l.idx > seriesIdx);
+          const before = labelCells.find((l) => l.idx < seriesIdx);
+          if (after) currentPumok = after.text;
+          else if (before) currentPumok = before.text; // 비고 빈 행 — 구분을 pumok으로
+          if (before && after) currentGubun = before.text;
         }
-        if (gubunCell) {
-          const txt = (gubunCell.textContent || '').trim();
-          if (txt) currentGubun = txt;
-        }
-        if (!seriesCell) continue;
 
-        // 시리즈 셀 안의 링크들
-        const links = Array.from(seriesCell.querySelectorAll('a'));
+        // 시리즈 셀 안의 링크들에 매핑
+        const links = Array.from(seriesCellEl.querySelectorAll('a')).filter(isSeriesLink);
         for (const a of links) {
-          if (/[?&]p=\d+/.test(a.href) || /[?&]page_id=\d+/.test(a.href)) {
+          // 동일 링크가 여러 행에서 잡힐 일은 거의 없지만, 처음 매칭만 유지
+          if (!positionContext.has(a)) {
             positionContext.set(a, { pumok: currentPumok, gubun: currentGubun });
           }
         }
@@ -166,6 +219,11 @@ for (const cat of categories) {
       let isNewVersion = false;  // (뉴) 접두사
       let labelExtra = '';
 
+      // 잡문자 정제 — 일룸 사이트 표기에 가끔 붙는 |, ㅣ, 공백 (예: "스톤 |", "| 셀렉트")
+      const cleanEdges = (s) =>
+        s.replace(/^[|ㅣ\s]+/, '').replace(/[|ㅣ\s]+$/, '').trim();
+      seriesName = cleanEdges(seriesName);
+
       // (구)/(뉴) 접두사 감지
       if (/^\s*\(구\)\s*/.test(seriesName)) {
         seriesName = seriesName.replace(/^\s*\(구\)\s*/, '').trim();
@@ -184,10 +242,10 @@ for (const cat of categories) {
         isOnlineOnly = true;
       }
 
-      // 시리즈명에 직접 "단종" 붙은 경우
-      const dcMatch = seriesName.match(/^(.+?)단종$/);
+      // 시리즈명에 직접 "단종" 붙은 경우 (끝에 잡문자 더 있어도 처리)
+      const dcMatch = seriesName.match(/^(.+?)단종\b/);
       if (dcMatch) {
-        seriesName = dcMatch[1].trim();
+        seriesName = cleanEdges(dcMatch[1]);
         isDiscontinued = true;
       }
 
@@ -234,29 +292,51 @@ for (const cat of categories) {
       // 날짜 형식 (26.04, 2026.04 등) 제외
       if (/^\d+\.\d+$/.test(seriesName) || /^\d{4}\.\d{1,2}\.\d{1,2}$/.test(seriesName)) continue;
 
-      // 같은 page_id + 시리즈명 중복 제외
-      const key = `${pageId}|${seriesName}`;
-      if (seenIds.has(key)) continue;
-      seenIds.add(key);
-
       const ctx = positionContext.get(a) || { pumok: '', gubun: '' };
 
-      result.push({
-        series_name: seriesName,
-        url,
-        page_id: pageId,
-        pumok: ctx.pumok,
-        gubun: ctx.gubun,
-        label: labelExtra,
-        is_discontinued: isDiscontinued,
-        is_online_only: isOnlineOnly,
-        is_new_2025: isNew2025,
-        is_new_2026: isNew2026,
-        is_old_version: isOldVersion,
-        is_new_version: isNewVersion,
-        // 챕터 자동 생성 대상 여부
-        is_target: !isDiscontinued && !isOldVersion,
-      });
+      // 쉼표 묶음 분리 — 괄호 밖의 쉼표만 (예: "오브, 오브플레인" → 두 시리즈)
+      // 괄호 안 쉼표는 보호 (예: "키큰옷장(컬렉트,리디,스톤W)")
+      function splitOutsideParens(s) {
+        const parts = [];
+        let depth = 0;
+        let cur = '';
+        for (const ch of s) {
+          if (ch === '(' || ch === '[') { depth++; cur += ch; }
+          else if (ch === ')' || ch === ']') { depth--; cur += ch; }
+          else if (ch === ',' && depth === 0) {
+            if (cur.trim()) parts.push(cur.trim());
+            cur = '';
+          } else cur += ch;
+        }
+        if (cur.trim()) parts.push(cur.trim());
+        return parts;
+      }
+      const splitNames = splitOutsideParens(seriesName);
+      const namesToAdd = splitNames.length > 1 ? splitNames : [seriesName];
+
+      for (const finalName of namesToAdd) {
+        // 같은 page_id + 시리즈명 중복 제외
+        const key = `${pageId}|${finalName}`;
+        if (seenIds.has(key)) continue;
+        seenIds.add(key);
+
+        result.push({
+          series_name: finalName,
+          url,
+          page_id: pageId,
+          pumok: ctx.pumok,
+          gubun: ctx.gubun,
+          label: labelExtra,
+          is_discontinued: isDiscontinued,
+          is_online_only: isOnlineOnly,
+          is_new_2025: isNew2025,
+          is_new_2026: isNew2026,
+          is_old_version: isOldVersion,
+          is_new_version: isNewVersion,
+          // 챕터 자동 생성 대상 여부
+          is_target: !isDiscontinued && !isOldVersion,
+        });
+      }
     }
     return result;
   }, Array.from(ALL_CATEGORY_IDS));
