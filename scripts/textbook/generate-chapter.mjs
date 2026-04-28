@@ -1,17 +1,18 @@
-// 단일 시리즈 챕터 자동 생성 (사양 자동 채움 + 영업 노하우 placeholder)
+// 단일 시리즈 챕터 자동 생성 — 코펜하겐 8섹션 구조 sceleton
 // 사용법: node scripts/textbook/generate-chapter.mjs <시리즈명> [--dry-run]
 // 예: node scripts/textbook/generate-chapter.mjs 로이
 //
-// 흐름:
-// 1. collect-series-data 결과 활용 (없으면 자동 호출)
-// 2. 코펜하겐 챕터 구조 따라 HTML 자동 채우기
-//    - 자동: 헤더/sub-품목/단품 표/색상/사이즈/단종 알림
-//    - placeholder: 영업 노하우 영역 (Claude 추가 작성용)
-// 3. textbook_chapters upsert (status='draft')
+// 코펜하겐 챕터(기준 모델) 8섹션:
+// 1. 📋 기본 정보 — 자동
+// 2. ⭐ 제품 특장점 — Claude 작성 (placeholder + 자료 풀)
+// 3. 💡 매장 실전 팁 — Claude 작성 (placeholder + 일지 발췌)
+// 4. 🎓 학생 깨달음 사례 — Claude 작성 (placeholder + 일지 발췌)
+// 5. 🪑 운영 라인업 (단품 코드 + 사이즈) — 자동 (세트마스터)
+// 6. 🎨 마감재 / 색상 옵션 — 자동 (세트마스터 색상 코드)
+// 7. 🔧 소재 / 내장재 — Claude 작성 (placeholder + PPTX 발췌)
+// 8. 📐 사이즈 도면 — placeholder (이미지는 별도 처리)
 //
-// 후속:
-// - 이미지 다운로드 + Storage 업로드은 별도 download-images.mjs로
-// - 영업 노하우는 Claude가 일지 보고 직접 추가 작성
+// 흐름: collect-series-data.mjs → all-data.json → 이 스크립트 → DB upsert
 
 import { createClient } from '@supabase/supabase-js';
 import { config } from 'dotenv';
@@ -37,7 +38,6 @@ const supabase = createClient(
 const OUT_DIR = path.resolve('scripts/textbook/output', `series-${seriesName}`);
 const DATA_FILE = path.join(OUT_DIR, 'all-data.json');
 
-// 1) 데이터 수집 (없으면 collect-series-data 호출)
 let data;
 try {
   data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
@@ -48,44 +48,95 @@ try {
   data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
 }
 
-// 2) HTML 생성
 function escape(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function renderHeader() {
+// ═══ 섹션 1: 📋 기본 정보 (자동) ═══
+function section1_basicInfo() {
   const cards = data.catalog_cards;
   const cats = [...new Set(cards.map((c) => c.category))];
-  const pumoks = [...new Set(cards.map((c) => `${c.category}/${c.pumok}${c.gubun ? '·' + c.gubun : ''}`))];
+  const pumoks = [...new Set(cards.map((c) => c.pumok).filter(Boolean))];
+  const onlineFlag = cards.some((c) => c.is_online_only);
   return `
-<section>
+<section class="basic-info">
   <h2>📋 기본 정보</h2>
   <table>
-    <tr><th>시리즈명</th><td><strong>${escape(data.series_name)}</strong>${data.aliases.length > 1 ? ` <em>(별칭: ${escape(data.aliases.slice(1).join(', '))})</em>` : ''}</td></tr>
-    <tr><th>카테고리</th><td>${escape(cats.join(', '))}</td></tr>
-    <tr><th>품목 분류</th><td>${pumoks.map(escape).join('<br>')}</td></tr>
-    <tr><th>관련 단품 수</th><td><strong>${data.set_master.length}</strong>개 (세트마스터 기준)</td></tr>
-    <tr><th>학생 일지</th><td><strong>${data.notes_count}</strong>건 누적</td></tr>
+    <tr><th>모델명</th><td><strong>${escape(data.series_name)}</strong>${onlineFlag ? ' <span style="color:#A855F7;font-size:13px;">(온라인 전용)</span>' : ''}</td></tr>
+    <tr><th>카테고리</th><td>${escape(cats.join(' / '))}</td></tr>
+    <tr><th>품목 분류</th><td>${escape(pumoks.join(' / '))}</td></tr>
+    <tr><th>관련 단품</th><td><strong>${data.set_master.length}</strong>개 (세트마스터 기준)</td></tr>
+    <tr><th>학생 일지</th><td><strong>${data.notes_count}</strong>건 누적 학습 기록</td></tr>
+    <tr><th>가이드 사이트</th><td>${data.product_guides.map((g) => `<a href="${escape(g.url)}" target="_blank">${escape(g.series_name)} 페이지 ↗</a>`).join(' / ')}</td></tr>
   </table>
 </section>`;
 }
 
-function renderSubPages() {
-  const allSubs = data.product_guides.flatMap((g) => g.sub_pages || []).filter((sp) => !/단종/.test(sp.title));
-  if (allSubs.length === 0) return '';
+// ═══ 섹션 2: ⭐ 제품 특장점 (Claude placeholder) ═══
+function section2_features() {
   return `
-<section>
-  <h2>🛋️ 시리즈 라인업 (sub-품목)</h2>
-  <p>이 시리즈는 다음 ${allSubs.length}개 품목으로 구성됩니다:</p>
-  <ul>
-${allSubs.map((sp) => `    <li><a href="${escape(sp.url)}" target="_blank">${escape(sp.title)}</a></li>`).join('\n')}
-  </ul>
+<section class="features">
+  <h2>⭐ 제품 특장점</h2>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — 일지·PPTX·가이드 분석해서 다음 항목 작성:
+    <ul>
+      <li>📌 <strong>한 문장으로 ${escape(data.series_name)}</strong> (제품 정체성 압축)</li>
+      <li>🎨 <strong>디자인 분석</strong> — 구조 → 효과 표 (왜 이 디자인이 ㅇㅇ한 효과를 주는지)</li>
+      <li>🛋️ <strong>착좌감 / 사용감</strong></li>
+      <li>🌟 <strong>다른 시리즈와의 결정적 차이</strong></li>
+      <li>💡 <strong>영업 멘트 예시</strong> (노란 박스)</li>
+      <li>👥 <strong>추천 고객 페르소나</strong> (표)</li>
+    </ul>
+  </div>
 </section>`;
 }
 
-function renderSetMaster() {
+// ═══ 섹션 3: 💡 매장 실전 팁 (Claude placeholder + 일지 발췌) ═══
+function section3_storeTips() {
+  const sortedNotes = [...data.notes].sort((a, b) => (b.excerpts?.length || 0) - (a.excerpts?.length || 0));
+  const top10 = sortedNotes.slice(0, 10);
+  return `
+<section class="store-tips">
+  <h2>💡 매장 실전 팁</h2>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — 아래 일지에서 매장 응대·고객 사례·실수 회피 노하우 추출
+  </div>
+
+  <details>
+    <summary><strong>📝 학생 일지 발췌 ${data.notes_count}건 펼치기</strong> (긴 발췌 순)</summary>
+${top10.map((n) => `
+    <blockquote>
+      <cite>${escape(n.student)}, ${escape(n.batch)}·${escape(n.date || '')}</cite>
+${(n.excerpts || []).slice(0, 2).map((e) => `      <p>${escape(e.slice(0, 250))}</p>`).join('\n')}
+    </blockquote>`).join('')}
+${data.notes.length > 10 ? `<p><em>외 ${data.notes.length - 10}건은 all-data.json 파일 참고</em></p>` : ''}
+  </details>
+</section>`;
+}
+
+// ═══ 섹션 4: 🎓 학생 깨달음 사례 (Claude placeholder) ═══
+function section4_studentInsights() {
+  return `
+<section class="student-insights">
+  <h2>🎓 학생 깨달음 사례</h2>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — 일지에서 인상 깊은 학생 회고 / 깨달음 추출
+    <p style="margin:8px 0;font-size:13px;color:#6B7280;">예: "처음엔 ㅇㅇ인 줄 알았는데 알고 보니 △△ 였다", "고객 반응이 □□일 줄 몰랐다"</p>
+  </div>
+</section>`;
+}
+
+// ═══ 섹션 구분선 ═══
+function divider() {
+  return `\n<div class="section-divider">─── 사양 정보 (Reference) ───</div>\n`;
+}
+
+// ═══ 섹션 5: 🪑 운영 라인업 (자동 — 세트마스터) ═══
+function section5_lineup() {
   if (data.set_master.length === 0) return '';
-  // 품목군별 그룹핑
   const byPumok = {};
   for (const s of data.set_master) {
     const p = s.pumok_name || '(미분류)';
@@ -93,25 +144,19 @@ function renderSetMaster() {
     byPumok[p].push(s);
   }
   let html = `
-<section>
-  <h2>📦 세트마스터 (단품 정보)</h2>`;
+<section class="lineup">
+  <h2>🪑 운영 라인업 (단품 코드 + 사이즈)</h2>`;
   for (const pumok of Object.keys(byPumok)) {
     const sets = byPumok[pumok];
-    // 색상 unique
-    const colors = [...new Set(sets.map((s) => s.set_color).filter(Boolean))];
-    // 채널
-    const channels = [...new Set(sets.map((s) => s.channel_name).filter(Boolean))];
     html += `
-  <h3>${escape(pumok)} <small>(${sets.length}개 단품)</small></h3>
-  <p><strong>색상:</strong> ${colors.length > 0 ? colors.map(escape).join(' / ') : '-'} <br>
-     <strong>판매채널:</strong> ${channels.map(escape).join(' / ')}</p>
+  <h3>${escape(pumok)} <small style="color:#6B7280;font-weight:400;">(${sets.length}개 단품)</small></h3>
   <details>
     <summary>단품 ${sets.length}개 펼치기</summary>
     <table>
-      <thead><tr><th>세트코드</th><th>색상</th><th>명칭</th><th>규격</th><th>채널</th></tr></thead>
+      <thead><tr><th>세트코드</th><th>색상</th><th>명칭</th><th>규격(W×D×H)</th><th>채널</th></tr></thead>
       <tbody>
-${sets.slice(0, 50).map((s) => `        <tr><td><code>${escape(s.set_code)}</code></td><td>${escape(s.set_color)}</td><td>${escape(s.set_name)}</td><td>${escape(s.size_detail || '-')}</td><td>${escape(s.channel_name || '-')}</td></tr>`).join('\n')}
-${sets.length > 50 ? `        <tr><td colspan="5"><em>... 외 ${sets.length - 50}개 (펼쳐서 일부만 표시)</em></td></tr>` : ''}
+${sets.slice(0, 60).map((s) => `        <tr><td><code>${escape(s.set_code)}</code></td><td>${escape(s.set_color)}</td><td>${escape(s.set_name)}</td><td>${escape(s.size_detail || '-')}</td><td>${escape(s.channel_name || '-')}</td></tr>`).join('\n')}
+${sets.length > 60 ? `        <tr><td colspan="5"><em>... 외 ${sets.length - 60}개</em></td></tr>` : ''}
       </tbody>
     </table>
   </details>`;
@@ -119,93 +164,105 @@ ${sets.length > 50 ? `        <tr><td colspan="5"><em>... 외 ${sets.length - 50
   return html + '\n</section>';
 }
 
-function renderProductGuide() {
-  if (data.product_guides.length === 0) return '';
-  // 일룸 가이드 사이트 링크만 (raw text dump 제거 — 내부 이력/색상 코드만 등 학생 학습에 무의미)
-  let html = `
-<section>
-  <h2>📖 일룸 가이드 사이트</h2>
-  <p>제품 사양·색상·사이즈 등 공식 정보는 아래 링크에서 확인:</p>
-  <ul>`;
-  for (const g of data.product_guides) {
-    html += `\n    <li><a href="${escape(g.url)}" target="_blank">${escape(g.series_name)} 페이지 ↗</a> <small>(p=${g.page_id})</small></li>`;
-  }
-  return html + '\n  </ul>\n</section>';
-}
-
-function renderNotesPool() {
-  if (data.notes.length === 0) return '';
-  // 일지 본문에서 시리즈 등장 부분만 발췌
-  const sortedNotes = [...data.notes].sort((a, b) => (b.excerpts?.length || 0) - (a.excerpts?.length || 0));
-  let html = `
-<section>
-  <h2>📝 학생 일지 풀 (영업 노하우 작성 자료)</h2>
-  <p>아래 ${data.notes.length}건의 일지에서 매장 실전 팁·깨달음·고객 페르소나를 추출하세요.</p>
-  <details>
-    <summary><strong>${data.notes.length}건 일지 발췌 펼치기</strong> (긴 발췌 순)</summary>`;
-  for (const n of sortedNotes.slice(0, 30)) {
-    html += `
-    <blockquote style="border-left:3px solid #3B82F6;padding:8px 12px;margin:8px 0;background:#F8FAFF;">
-      <cite style="font-size:12px;color:#6B7280;">${escape(n.student)}, ${escape(n.batch)}·${escape(n.date || '')}</cite>
-${(n.excerpts || []).map((e) => `      <p style="margin:6px 0;font-size:14px;">${escape(e.slice(0, 300))}</p>`).join('\n')}
-    </blockquote>`;
-  }
-  return html + `
-${data.notes.length > 30 ? `<p><em>... 외 ${data.notes.length - 30}건 (전체는 collect-series-data JSON 파일에 있음)</em></p>` : ''}
-  </details>
-</section>`;
-}
-
-function renderPlaceholder() {
+// ═══ 섹션 6: 🎨 색상 옵션 (자동 — 세트마스터 색상 코드) ═══
+function section6_colors() {
+  const colors = [...new Set(data.set_master.map((s) => s.set_color).filter(Boolean))];
+  if (colors.length === 0) return '';
   return `
-<section style="background:#FEF9C3;border:2px dashed #EAB308;padding:20px;border-radius:8px;margin:24px 0;">
-  <h2 style="margin-top:0;">✏️ 영업 노하우 — Claude 추가 작성 영역</h2>
-  <p>아래 섹션은 Claude가 학생 일지를 분석해서 직접 작성합니다 (현재는 placeholder).</p>
-  <ul>
-    <li><strong>⭐ 제품 특장점</strong> — 한 문장 정의 / 영업 멘트 예시 / 페르소나</li>
-    <li><strong>💡 매장 실전 팁</strong> — 일지 인용 + 매장 응대 노하우</li>
-    <li><strong>🎓 학생 깨달음 사례</strong> — 인상 깊은 학생 회고</li>
-    <li><strong>🚨 매장 영업 필수 안내</strong> — 클레임 예방용 (있을 경우)</li>
-  </ul>
-  <p><em>일지 풀(아래 섹션)에서 매장 응대·고객 사례·학생 깨달음을 추출해 작성하세요.</em></p>
+<section class="colors">
+  <h2>🎨 마감재 / 색상 옵션</h2>
+  <p>세트마스터 기준 ${colors.length}개 색상 코드:</p>
+  <p style="background:#FAFBFC;padding:12px;border-radius:6px;font-family:monospace;font-size:13px;">
+    ${colors.map((c) => `<span style="display:inline-block;background:#fff;border:1px solid #D1D5DB;padding:3px 8px;border-radius:4px;margin:2px;">${escape(c)}</span>`).join(' ')}
+  </p>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — 색상 칩 이미지 + 한국어 색상명 매칭 (가이드 이미지 활용)
+    <p style="margin:8px 0;font-size:13px;color:#6B7280;">예: L840 = 블랑(BLANC), 4L0 = 샤모아(CHAMOIS) — 색상 칩 + 한·영 색상명 표</p>
+  </div>
 </section>`;
 }
 
-const html = `<style>
-.tb-chapter { font-family: 'Pretendard', sans-serif; line-height: 1.6; }
+// ═══ 섹션 7: 🔧 소재 / 내장재 (Claude placeholder + PPTX 발췌) ═══
+function section7_materials() {
+  const slides = data.pptx_slides || [];
+  return `
+<section class="materials">
+  <h2>🔧 소재 / 내장재</h2>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — PPTX 자료 분석해 소재·내장재 정리
+  </div>
+
+  ${slides.length > 0 ? `
+  <details>
+    <summary><strong>📚 일룸 PPTX 자료에서 ${slides.length}장 매칭됨</strong> (시리즈명 등장 슬라이드)</summary>
+${slides.slice(0, 8).map((s) => `
+    <div style="background:#FAFBFC;border:1px solid #E5E7EB;padding:10px 14px;border-radius:6px;margin:8px 0;">
+      <p style="font-size:12px;color:#6B7280;margin:0 0 6px;">${escape(s.file)} <strong>슬라이드 ${s.slide_no}</strong>: ${escape(s.title)}</p>
+      <pre style="white-space:pre-wrap;font-size:13px;margin:0;">${escape(s.text.slice(0, 800))}</pre>
+    </div>`).join('')}
+${slides.length > 8 ? `<p><em>외 ${slides.length - 8}장은 all-data.json 참고</em></p>` : ''}
+  </details>` : ''}
+</section>`;
+}
+
+// ═══ 섹션 8: 📐 사이즈 도면 (placeholder) ═══
+function section8_dimensions() {
+  return `
+<section class="dimensions">
+  <h2>📐 사이즈 도면</h2>
+
+  <div class="claude-todo">
+    <strong>✏️ Claude 작성 영역</strong> — 가이드 사이트 도면 이미지 + 사이즈 표
+    <p style="margin:8px 0;font-size:13px;color:#6B7280;">download-images.mjs로 도면 이미지 다운로드 + Storage 업로드 후 삽입</p>
+  </div>
+</section>`;
+}
+
+// ═══ 전체 HTML ═══
+const styles = `<style>
+.tb-chapter { font-family: 'Pretendard', -apple-system, sans-serif; line-height: 1.6; }
 .tb-chapter table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 14px; }
-.tb-chapter th, .tb-chapter td { border: 1px solid #D1D5DB; padding: 10px 14px; text-align: left; vertical-align: top; }
-.tb-chapter th { background: #F3F4F6; font-weight: 600; }
-.tb-chapter h2 { font-size: 20px; font-weight: 700; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #1C1C1E; }
-.tb-chapter h3 { font-size: 16px; font-weight: 700; margin: 16px 0 6px; }
+.tb-chapter th, .tb-chapter td { border: 1px solid #D1D5DB; padding: 10px 14px; text-align: left; vertical-align: top; line-height: 1.5; }
+.tb-chapter th { background: #F3F4F6; font-weight: 600; color: #1F2937; white-space: nowrap; width: 140px; }
+.tb-chapter thead th { white-space: normal; width: auto; background: #E5E7EB; }
 .tb-chapter section { margin-bottom: 32px; }
-.tb-chapter ul { padding-left: 24px; }
-.tb-chapter li { margin: 4px 0; }
-.tb-chapter blockquote { margin: 12px 0; padding: 14px 18px; background: #F7F8FA; border-left: 3px solid #3B82F6; border-radius: 4px; }
-.tb-chapter cite { color: #6B7280; font-size: 13px; font-style: normal; }
+.tb-chapter h2 { font-size: 20px; font-weight: 700; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #1C1C1E; }
+.tb-chapter h3 { font-size: 15px; font-weight: 700; margin: 16px 0 6px; color: #1F2937; }
+.tb-chapter ul { padding-left: 24px; margin: 8px 0; }
+.tb-chapter li { margin: 6px 0; line-height: 1.6; }
+.tb-chapter blockquote { margin: 12px 0; padding: 14px 18px; background: #F7F8FA; border-left: 3px solid #3B82F6; border-radius: 4px; font-style: italic; }
+.tb-chapter cite { color: #6B7280; font-size: 13px; font-style: normal; margin-left: 6px; font-weight: 400; display: inline-block; }
 .tb-chapter details { margin: 12px 0; }
 .tb-chapter summary { cursor: pointer; padding: 6px 0; font-weight: 500; }
 .tb-chapter code { background: #F3F4F6; padding: 1px 4px; border-radius: 3px; font-family: 'D2Coding', monospace; font-size: 12px; }
-</style>
+.tb-chapter .claude-todo { background: #FEF9C3; border: 2px dashed #EAB308; padding: 14px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; }
+.tb-chapter .claude-todo strong { color: #92400E; }
+.tb-chapter .section-divider { margin: 48px 0 24px; padding: 12px 16px; background: #F3F4F6; border-radius: 6px; text-align: center; font-size: 13px; font-weight: 700; color: #6B7280; letter-spacing: 0.08em; }
+</style>`;
+
+const html = `${styles}
 <div class="tb-chapter">
-${renderHeader()}
-${renderPlaceholder()}
-${renderSubPages()}
-${renderSetMaster()}
-${renderProductGuide()}
-${renderNotesPool()}
+${section1_basicInfo()}
+${section2_features()}
+${section3_storeTips()}
+${section4_studentInsights()}
+${divider()}
+${section5_lineup()}
+${section6_colors()}
+${section7_materials()}
+${section8_dimensions()}
 </div>`;
 
-// 결과 저장 (디버그용 로컬)
+// 결과 저장
 const htmlFile = path.join(OUT_DIR, 'chapter-auto.html');
 await fs.writeFile(htmlFile, html, 'utf-8');
 const sizeKB = (Buffer.byteLength(html) / 1024).toFixed(1);
 console.log(`\n✅ HTML 생성: ${htmlFile} (${sizeKB}KB)`);
 
-// 카탈로그에서 카테고리 가져오기
 const category = data.catalog_cards[0]?.category || null;
 
-// DB upsert
 if (DRY) {
   console.log('\n[DRY-RUN] DB 저장 안 함');
 } else {
@@ -232,5 +289,6 @@ if (DRY) {
 }
 
 console.log(`\n다음 단계:`);
-console.log(`  1. /dashboard/textbook/${encodeURIComponent(seriesName)} 에서 검수`);
-console.log(`  2. Claude가 영업 노하우 영역(노란 박스) 추가 작성 — 일지 풀 활용`);
+console.log(`  1. /dashboard/textbook/${encodeURIComponent(seriesName)} 검수`);
+console.log(`  2. Claude가 8섹션의 ✏️ 노란 박스 영역 채워나감 (일지·PPTX 분석)`);
+console.log(`  3. download-images.mjs로 색상 칩·도면 이미지 추가`);

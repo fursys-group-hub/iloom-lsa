@@ -141,6 +141,33 @@ function unpackNote(row) {
 }
 const notesData = notes.map(unpackNote).filter(Boolean);
 
+// ─── 5) PPTX 슬라이드 발췌 ───
+console.log('\n5) PPTX 슬라이드 발췌 (textbook_sources)...');
+const { data: sources } = await supabase
+  .from('textbook_sources')
+  .select('file_name, slides');
+const pptxSlides = [];
+for (const src of sources || []) {
+  const slides = Array.isArray(src.slides) ? src.slides : [];
+  for (const slide of slides) {
+    const text = String(slide.text || '');
+    // 시리즈명 또는 별칭이 슬라이드 텍스트에 등장하면 포함
+    const hit = aliasNames.some((alias) => text.includes(alias));
+    if (hit) {
+      pptxSlides.push({
+        file: src.file_name,
+        slide_no: slide.slide_no,
+        title: slide.title,
+        text: text.slice(0, 1500), // 슬라이드당 최대 1500자
+      });
+    }
+  }
+}
+console.log(`   ${pptxSlides.length}개 슬라이드 매칭 (전체 PPTX에서 시리즈명 등장 슬라이드)`);
+const byFile = {};
+for (const s of pptxSlides) byFile[s.file] = (byFile[s.file] || 0) + 1;
+Object.entries(byFile).forEach(([k, v]) => console.log(`     ${k}: ${v}장`));
+
 // ─── 결과 저장 ───
 const result = {
   series_name: seriesName,
@@ -151,6 +178,7 @@ const result = {
   set_master_by_pumok: setsByPumok,
   notes_count: notesData.length,
   notes: notesData,
+  pptx_slides: pptxSlides,
   collected_at: new Date().toISOString(),
 };
 
@@ -166,4 +194,5 @@ console.log(`  카탈로그 카드: ${cards.length}개 (${[...new Set(cards.map(
 console.log(`  제품가이드 페이지: ${guides.length}개 / sub-품목 ${totalSubs}개`);
 console.log(`  세트마스터 단품: ${allSets.length}개`);
 console.log(`  분류된 일지: ${notesData.length}건 (전체 ${notes.length}건 중)`);
+console.log(`  PPTX 매칭 슬라이드: ${pptxSlides.length}장`);
 console.log(`\n다음 단계: 이 JSON으로 챕터 HTML 자동 생성 (코펜하겐 템플릿 따라)`);
