@@ -153,20 +153,19 @@ export function findSeriesInText(text: string): string[] {
   const BOUNDARY = `(?:^|[^A-Za-z0-9가-힣])`;
   const BOUNDARY_AFTER = `(?=[^A-Za-z0-9가-힣]|$)`;
 
+  // 모든 시리즈를 단어 경계 매칭 — '로이'가 '클로이' 안에 부분매칭되는 문제 방지
+  // 정규식 메타 문자 이스케이프
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   for (const s of sorted) {
     const normalizedS = stripSpaces(s);
-    if (normalizedS.length === 1) {
-      // 1글자: 단어 경계로만 매칭
-      const re = new RegExp(`${BOUNDARY}${normalizedS}${BOUNDARY_AFTER}`, 'g');
-      if (re.test(remaining)) {
-        found.add(s); // 원본 시리즈명 (정규화 전) 저장 — 분류 결과 키 일관성
-        remaining = remaining.replace(new RegExp(`${BOUNDARY}${normalizedS}${BOUNDARY_AFTER}`, 'g'), (match) => match.replace(normalizedS, ' '));
-      }
-      continue;
-    }
-    if (remaining.includes(normalizedS)) {
-      found.add(s);
-      remaining = remaining.split(normalizedS).join(' '.repeat(normalizedS.length));
+    if (!normalizedS) continue;
+    const pattern = `${BOUNDARY}${escapeRegex(normalizedS)}${BOUNDARY_AFTER}`;
+    const re = new RegExp(pattern, 'g');
+    if (re.test(remaining)) {
+      found.add(s); // 원본 시리즈명 (정규화 전) 저장 — 분류 결과 키 일관성
+      // 매칭된 부분 공백으로 치환 → 짧은 이름 부분매칭 차단
+      remaining = remaining.replace(new RegExp(pattern, 'g'), (match) => match.replace(normalizedS, ' '.repeat(normalizedS.length)));
     }
   }
   return Array.from(found);
