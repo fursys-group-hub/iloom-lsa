@@ -76,6 +76,10 @@ const SERIES_OVERRIDES = {
   // 레마 거실수납장(50071) 카드를 다이닝룸/주방수납장에도 추가 카드로 노출
   // (사이트는 거실수납장만 등록했지만 sub-품목에 주방식기장·카페장이 있음 → 영업 분류 일치시킴)
   50071: { add_locations: [{ category: '다이닝룸', pumok: '주방수납장', gubun: '' }] },
+  // 업 모션(46309): 사이트엔 리빙룸/거실 테이블 + 다이닝룸/식탁 양쪽 등록되었으나 영업적으로 다이닝룸 단일
+  46309: { hidden_in: [{ category: '리빙룸' }] },
+  // 토스티(49462) 리빙룸/거실 테이블: 사이트는 '디자인 소파테이블'로 분류했지만 실제는 사이드테이블
+  49462: { gubun: '사이드테이블' },
 };
 
 // gubun(비고/sub-헤더) 정규화 — 같은 의미인데 일룸 사이트가 인라인 정보까지 적은 경우 단순화
@@ -486,6 +490,15 @@ for (const cat of categories) {
 
   console.log(`   시리즈 ${seriesItems.length}개 발견 (단종 ${seriesItems.filter(s => s.is_discontinued).length}개 포함)`);
   for (const s of seriesItems) {
+    // SERIES_OVERRIDES.hidden_in 처리 — 특정 카테고리/품목에선 카드 제외
+    const ov = SERIES_OVERRIDES[s.page_id];
+    if (ov?.hidden_in?.some((h) => {
+      if (h.category && h.category !== cat.name) return false;
+      if (h.pumok && h.pumok !== s.pumok) return false;
+      return true;
+    })) {
+      continue; // 이 카테고리에서는 제외
+    }
     allSeries.push({ category: cat.name, ...s });
   }
 }
