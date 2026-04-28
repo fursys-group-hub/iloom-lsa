@@ -81,6 +81,34 @@ export default function TextbookPage() {
     } catch {}
   }, []);
 
+  // 첫 방문 시 — 카테고리별 1위 외 모든 품목 그룹은 기본 접힘
+  // (사용자가 한 번이라도 토글하면 -init 마커가 'done'으로 바뀌어 재계산 안 함)
+  useEffect(() => {
+    if (catalog.length === 0) return;
+    if (localStorage.getItem('iloom-textbook-collapsed-pumok-init') === 'done') return;
+
+    const grouped: Record<string, Record<string, number>> = {};
+    for (const s of catalog) {
+      if (!s.is_target) continue;
+      const cat = s.category;
+      const pumok = s.pumok || '기타';
+      if (!grouped[cat]) grouped[cat] = {};
+      grouped[cat][pumok] = (grouped[cat][pumok] || 0) + 1;
+    }
+
+    const defaultCollapsed = new Set<string>();
+    for (const cat of Object.keys(grouped)) {
+      const sorted = Object.entries(grouped[cat]).sort((a, b) => b[1] - a[1]);
+      for (let i = 1; i < sorted.length; i++) {
+        defaultCollapsed.add(`${cat}::${sorted[i][0]}`);
+      }
+    }
+
+    setCollapsedPumok(defaultCollapsed);
+    localStorage.setItem('iloom-textbook-collapsed-pumok', JSON.stringify([...defaultCollapsed]));
+    localStorage.setItem('iloom-textbook-collapsed-pumok-init', 'done');
+  }, [catalog]);
+
   function togglePumok(category: string, pumok: string) {
     const key = `${category}::${pumok}`;
     const next = new Set(collapsedPumok);
