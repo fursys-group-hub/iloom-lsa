@@ -67,10 +67,30 @@ const PUMOK_KEYWORDS: Record<string, string[]> = {
   '홈 라이브러리': ['책상', '책장', '선반', '액세서리'],
 };
 
+// 검수중/완료만 우상단 뱃지 표시 (초안은 버튼 색상으로 구분되므로 뱃지 생략)
 const STATUS_LABEL: Record<string, { text: string; tone: string }> = {
-  draft: { text: '초안', tone: 'blue' },
-  reviewing: { text: '검수중', tone: 'orange' },
+  reviewing: { text: '검수중', tone: 'blue' },
   final: { text: '완료', tone: 'green' },
+};
+
+// 카드 액션 버튼 — 상태별 텍스트 + 색상
+const STATUS_BUTTON: Record<string, { text: string; bg: string; fg: string; border?: string }> = {
+  draft: {
+    text: '초안 작성 중',
+    bg: 'var(--bg-hover)',
+    fg: 'var(--text-tertiary)',
+    border: '1px solid var(--border)',
+  },
+  reviewing: {
+    text: '검수중 →',
+    bg: 'var(--blue)',
+    fg: '#fff',
+  },
+  final: {
+    text: '완료 (편집)',
+    bg: 'var(--green)',
+    fg: '#fff',
+  },
 };
 
 const TONE_BG: Record<string, string> = {
@@ -578,16 +598,35 @@ export default function TextbookPage() {
                         )}
                       </div>
 
-                      {/* 액션 — 두 버튼 정확히 동일 사이즈 (wrapper로 감쌈) */}
+                      {/* 액션 — 상태별 색상 (draft=회색 / reviewing=파랑 / final=초록) */}
                       <div style={{ marginTop: 'auto', width: '100%' }}>
-                        {ch ? (
-                          <Link
-                            href={`/dashboard/textbook/${encodeURIComponent(s.series_name)}`}
-                            style={{ ...btnPrimarySm, width: '100%', textDecoration: 'none' }}
-                          >
-                            검수 / 편집 →
-                          </Link>
-                        ) : (
+                        {ch ? (() => {
+                          const btnCfg = STATUS_BUTTON[ch.status] || STATUS_BUTTON.draft;
+                          return (
+                            <Link
+                              href={`/dashboard/textbook/${encodeURIComponent(s.series_name)}`}
+                              style={{
+                                height: 36,
+                                padding: '0 12px',
+                                borderRadius: 'var(--radius-sm)',
+                                border: btnCfg.border || '1px solid transparent',
+                                background: btnCfg.bg,
+                                color: btnCfg.fg,
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxSizing: 'border-box',
+                                width: '100%',
+                                textDecoration: 'none',
+                              }}
+                            >
+                              {btnCfg.text}
+                            </Link>
+                          );
+                        })() : (
                           <div style={{ ...btnGhostSm, width: '100%', color: 'var(--text-muted)' }}>
                             초안 없음
                           </div>
