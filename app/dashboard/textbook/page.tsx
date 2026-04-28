@@ -57,6 +57,7 @@ export default function TextbookPage() {
   const [catalog, setCatalog] = useState<CatalogSeries[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
+  const [subPagesByPid, setSubPagesByPid] = useState<Record<number, Array<{ page_id: number; title: string; url: string }>>>({});
   const [activeCat, setActiveCat] = useState<string>('리빙룸');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hidden, setHidden] = useState<Set<number>>(new Set());
@@ -143,6 +144,7 @@ export default function TextbookPage() {
     ]);
     setChapters(chRes.chapters || []);
     setNoteCounts(chRes.note_counts || {});
+    setSubPagesByPid(chRes.sub_pages_by_pid || {});
     setCatalog(catRes.list || []);
   }
 
@@ -467,6 +469,33 @@ export default function TextbookPage() {
                           <> · 수정 {formatRelativeTime(ch.updated_at)}</>
                         )}
                       </div>
+
+                      {/* sub-품목 (있을 때만) */}
+                      {(() => {
+                        const subs = subPagesByPid[s.page_id] || [];
+                        if (subs.length === 0) return null;
+                        const preview = subs.slice(0, 3).map((sp) =>
+                          sp.title.replace(s.series_name, '').replace(/^\s+/, '').replace(/\s*\(.*?\)\s*$/, '') || sp.title
+                        );
+                        return (
+                          <div
+                            title={subs.map((sp) => sp.title).join('\n')}
+                            style={{
+                              fontSize: 12,
+                              color: 'var(--text-tertiary)',
+                              padding: '6px 8px',
+                              background: 'var(--bg-main)',
+                              borderRadius: 'var(--radius-sm)',
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            <strong style={{ color: 'var(--text-second)', fontWeight: 600 }}>📦 {subs.length}품목</strong>
+                            <span style={{ color: 'var(--text-muted)', marginLeft: 6 }}>
+                              {preview.join(' · ')}{subs.length > 3 ? ' …' : ''}
+                            </span>
+                          </div>
+                        );
+                      })()}
 
                       {/* 액션 — 두 버튼 정확히 동일 사이즈 (wrapper로 감쌈) */}
                       <div style={{ marginTop: 'auto', width: '100%' }}>

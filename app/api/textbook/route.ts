@@ -47,9 +47,22 @@ export async function GET(req: NextRequest) {
     if (classifs.length < PAGE) break;
   }
 
+  // sub-품목 메타 — page_id 별 sub_pages
+  const { data: guides } = await supabase
+    .from('textbook_product_guide')
+    .select('page_id, sub_pages')
+    .not('sub_pages', 'is', null);
+  const subPagesByPid: Record<number, Array<{ page_id: number; title: string; url: string }>> = {};
+  for (const g of guides || []) {
+    if (Array.isArray(g.sub_pages) && g.sub_pages.length > 0) {
+      subPagesByPid[g.page_id] = g.sub_pages;
+    }
+  }
+
   return Response.json({
     chapters: data || [],
     note_counts: noteCount,
+    sub_pages_by_pid: subPagesByPid,
   });
 }
 
