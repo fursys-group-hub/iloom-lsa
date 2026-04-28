@@ -470,29 +470,24 @@ export default function TextbookPage() {
                         )}
                       </div>
 
-                      {/* sub-품목 (있을 때만) */}
+                      {/* sub-품목 (있을 때만, hover로 전체 리스트) */}
                       {(() => {
                         const subs = subPagesByPid[s.page_id] || [];
                         if (subs.length === 0) return null;
-                        const preview = subs.slice(0, 3).map((sp) =>
-                          sp.title.replace(s.series_name, '').replace(/^\s+/, '').replace(/\s*\(.*?\)\s*$/, '') || sp.title
-                        );
                         return (
                           <div
                             title={subs.map((sp) => sp.title).join('\n')}
                             style={{
                               fontSize: 12,
-                              color: 'var(--text-tertiary)',
-                              padding: '6px 8px',
+                              fontWeight: 600,
+                              color: 'var(--text-second)',
+                              padding: '4px 8px',
                               background: 'var(--bg-main)',
                               borderRadius: 'var(--radius-sm)',
-                              lineHeight: 1.4,
+                              alignSelf: 'flex-start',
                             }}
                           >
-                            <strong style={{ color: 'var(--text-second)', fontWeight: 600 }}>📦 {subs.length}품목</strong>
-                            <span style={{ color: 'var(--text-muted)', marginLeft: 6 }}>
-                              {preview.join(' · ')}{subs.length > 3 ? ' …' : ''}
-                            </span>
+                            {subs.length}품목
                           </div>
                         );
                       })()}
