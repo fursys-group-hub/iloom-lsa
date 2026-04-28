@@ -122,6 +122,22 @@ export default function TextbookSeriesPage() {
     }
   }
 
+  async function deleteChapter() {
+    if (!chapter || busy) return;
+    if (!confirm(`'${seriesName}' 챕터를 완전히 삭제할까요?\n\n초안 + 편집 내용 모두 사라지며 되돌릴 수 없어요.\n메인 페이지에서 다시 '초안 생성'으로 새로 만들 수 있어요.`)) return;
+    setBusy('챕터 삭제 중...');
+    try {
+      const res = await fetch(`/api/textbook?series=${encodeURIComponent(seriesName)}`, { method: 'DELETE' });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || '삭제 실패');
+      setToast('챕터 삭제 완료. 메인으로 돌아갑니다.');
+      setTimeout(() => { window.location.href = '/dashboard/textbook'; }, 800);
+    } catch (e) {
+      setToast((e as Error).message);
+      setBusy(null);
+    }
+  }
+
   function openPrint() {
     window.open(`/dashboard/textbook/print?series=${encodeURIComponent(seriesName)}`, '_blank', 'noopener');
   }
@@ -174,6 +190,14 @@ export default function TextbookSeriesPage() {
               </select>
               <button onClick={regenerateDraft} disabled={!!busy} style={btnGhost}>AI 초안 다시 생성</button>
               <button onClick={openPrint} disabled={!!busy} style={btnGhost}>인쇄 미리보기</button>
+              <button
+                onClick={deleteChapter}
+                disabled={!!busy}
+                style={{ ...btnGhost, color: 'var(--red)' }}
+                title="챕터 완전 삭제 (되돌릴 수 없음)"
+              >
+                챕터 삭제
+              </button>
               <button onClick={saveContent} disabled={!!busy || !dirty} style={btnPrimary}>
                 {dirty ? '저장' : '저장됨'}
               </button>

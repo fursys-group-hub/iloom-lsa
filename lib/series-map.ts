@@ -136,29 +136,37 @@ export function getCategoryBySeriesName(seriesName: string): Category {
  * - 긴 시리즈명부터 매칭 (예: "로이모노"가 "로이"보다 우선)
  * - 매칭된 부분은 다른 매칭에서 제외해서 중복 방지
  * - 1글자 시리즈명(닛/로)은 단어 경계(공백·구두점·시작·끝)로 둘러싸인 것만 매칭 (오탐 방지)
+ * - 한글 사이 공백 차이를 무시 ('스노즈 컴팩트' / '스노즈컴팩트' 동일하게 매칭)
  */
+function stripSpaces(s: string): string {
+  // 한글 사이 공백을 제거 (영문/숫자 사이는 유지)
+  return s.replace(/(?<=[가-힣])\s+(?=[가-힣])/g, '');
+}
+
 export function findSeriesInText(text: string): string[] {
   if (!text) return [];
   const found = new Set<string>();
   const sorted = [...SERIES_LIST].sort((a, b) => b.length - a.length);
-  let remaining = text;
+  // 텍스트 정규화 (한글 사이 공백 제거)
+  let remaining = stripSpaces(text);
   // 단어 경계로 인정되는 문자 (한글/영문/숫자가 아닌 것 + 시작/끝)
   const BOUNDARY = `(?:^|[^A-Za-z0-9가-힣])`;
   const BOUNDARY_AFTER = `(?=[^A-Za-z0-9가-힣]|$)`;
 
   for (const s of sorted) {
-    if (s.length === 1) {
+    const normalizedS = stripSpaces(s);
+    if (normalizedS.length === 1) {
       // 1글자: 단어 경계로만 매칭
-      const re = new RegExp(`${BOUNDARY}${s}${BOUNDARY_AFTER}`, 'g');
+      const re = new RegExp(`${BOUNDARY}${normalizedS}${BOUNDARY_AFTER}`, 'g');
       if (re.test(remaining)) {
-        found.add(s);
-        remaining = remaining.replace(new RegExp(`${BOUNDARY}${s}${BOUNDARY_AFTER}`, 'g'), (match) => match.replace(s, ' '));
+        found.add(s); // 원본 시리즈명 (정규화 전) 저장 — 분류 결과 키 일관성
+        remaining = remaining.replace(new RegExp(`${BOUNDARY}${normalizedS}${BOUNDARY_AFTER}`, 'g'), (match) => match.replace(normalizedS, ' '));
       }
       continue;
     }
-    if (remaining.includes(s)) {
+    if (remaining.includes(normalizedS)) {
       found.add(s);
-      remaining = remaining.split(s).join(' '.repeat(s.length));
+      remaining = remaining.split(normalizedS).join(' '.repeat(normalizedS.length));
     }
   }
   return Array.from(found);
