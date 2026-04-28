@@ -365,7 +365,9 @@ export default function TextbookPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
                 {items.map((s) => {
                   const ch = chapterMap.get(s.series_name);
-                  const noteCount = noteCounts[s.series_name] || 0;
+                  // '쿠시노/쿠시노코지', '미엘/미엘갤러리'처럼 슬래시 묶음은 별칭별로 합산
+                  const aliases = s.series_name.split('/').map((x) => x.trim()).filter(Boolean);
+                  const noteCount = aliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
                   const isSelected = selected.has(s.series_name);
                   const status = ch?.status;
                   const statusBadge = status ? STATUS_LABEL[status] : null;
