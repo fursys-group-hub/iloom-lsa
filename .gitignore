@@ -23,6 +23,9 @@ scripts/practice-rewrites.json
 # textbook 파서 임시 출력
 scripts/textbook/output/
 
+# textbook 제품 이미지 (16MB, 현재 미사용 — 나중에 쓰면 별도 호스팅 검토)
+public/textbook-images/
+
 # 안전망 — 혹시 모를 민감 파일 실수 방지
 app/*.jpg
 app/*.jpeg
