@@ -231,6 +231,22 @@ export default function TextbookPage() {
     return m;
   }, [catalog]);
 
+  // sub-품목 owner 시리즈 결정용 — 카탈로그의 모든 시리즈명을 길이 내림차순 정렬
+  // 'sub.title' 안에 가장 긴 시리즈명이 매칭되는 시리즈가 owner.
+  // (헤이즐R 우드헤드 침대 → '헤이즐R'이 owner. '헤이즐'이 아님)
+  const allSeriesNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const s of catalog) names.add(s.series_name);
+    return Array.from(names).sort((a, b) => b.length - a.length);
+  }, [catalog]);
+
+  function findSubOwner(subTitle: string): string | null {
+    for (const name of allSeriesNames) {
+      if (subTitle.includes(name)) return name;
+    }
+    return null;
+  }
+
   async function runClassify() {
     if (busy) return;
     if (!confirm('전체 일지를 시리즈별로 자동 분류합니다 (정규식 매칭, 5초 안에 끝남). 진행할까요?')) return;
@@ -421,13 +437,15 @@ export default function TextbookPage() {
                   const noteCount = aliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
                   // sub-품목 필터링 정책:
                   //   1) 같은 시리즈명의 모든 카드 sub를 합쳐서 출처로 사용 (레마처럼 사이트가 한 페이지에 묶어둔 경우 대응)
-                  //   2) 카드의 시리즈명을 sub.title이 포함하는지 (쿠시노/쿠시노코지 split 분리)
-                  //   3) 같은 시리즈명 카드가 여러 개면 카드 pumok 키워드로 추가 필터 (레마 식탁 vs 거실수납장)
+                  //   2) sub.title의 owner = 가장 긴 매칭 시리즈명 (헤이즐R 우드헤드 침대 → owner '헤이즐R', 헤이즐 카드엔 안 보임)
+                  //   3) 같은 시리즈명 카드 다중 + 같은 pumok이면 pumok 키워드 + 온라인 여부로 추가 필터
                   const allSubsForName = subsBySeriesName[s.series_name] || [];
-                  let subs = allSubsForName.filter((sp) => sp.title.includes(s.series_name));
+                  let subs = allSubsForName.filter((sp) => findSubOwner(sp.title) === s.series_name);
                   if ((subsByNameCount[s.series_name] || 0) > 1) {
                     const kws = PUMOK_KEYWORDS[s.pumok];
                     if (kws) subs = subs.filter((sp) => kws.some((k) => sp.title.includes(k)));
+                    const cardOnline = s.is_online_only || (s.gubun || '').includes('온라인');
+                    subs = subs.filter((sp) => sp.title.includes('온라인') === cardOnline);
                   }
                   const isSelected = selected.has(s.series_name);
                   const status = ch?.status;
