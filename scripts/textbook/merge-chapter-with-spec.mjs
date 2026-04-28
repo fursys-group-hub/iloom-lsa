@@ -135,7 +135,9 @@ function specDimensions() {
 }
 
 // 합치기 — claude HTML의 </div> 직전에 사양 섹션 삽입
-const specSection = `${specLineup()}${specColors()}${specPptx()}${specDimensions()}`;
+// 색상 옵션 섹션은 제거 — 기본 정보 표의 색상 (6종)으로 충분
+// (SPGY/OSPW 같은 조합 코드는 단일 색상이 아니라 베이스+포인트 조합이라 별도 표시 무의미)
+const specSection = `${specLineup()}${specPptx()}${specDimensions()}`;
 const merged = claudeHtml.replace(/<\/div>\s*$/, `${specSection}\n</div>`);
 
 const outFile = path.join(OUT_DIR, 'chapter-final.html');
