@@ -256,10 +256,27 @@ npm run attendance:headed       # 브라우저 표시 (디버깅)
 - 학생 쓰기 차단: notes, student-questions, note-comments, benchmarks POST → 403
 - UI: 설정(📦보관/복구), 대시보드(드롭다운 분리), 학생(읽기전용 배너+버튼 숨김)
 
+### Textbook Chapter Automation (교육내용정리)
+
+시리즈별 챕터 자동 생성 + Claude 1:1 작성 파이프라인. **새 시리즈 작업 전 반드시 `docs/교육내용정리-자동화-가이드.md` 읽을 것.**
+
+워크플로우 5단계 (`scripts/textbook/`):
+1. `collect-series-data.mjs` — 카탈로그/제품가이드/세트마스터/일지 통합 수집
+2. `generate-chapter.mjs` — 8섹션 sceleton 자동 생성
+3. `download-images.mjs` — **(자주 빼먹음 — 절대 잊지 말 것)** 일룸 가이드 이미지 다운로드 → Storage 업로드
+4. Claude가 `chapter-claude.html` 1:1 작성 (가이드 §2)
+5. `merge-chapter-with-spec.mjs` — 자동 사양 머지 + DB upsert (status: reviewing)
+
+상태별 카드 색상 (`app/dashboard/textbook/page.tsx`): draft 회색 / reviewing 파랑 / final 초록.
+공유 라이브러리: `lib/color-chips.ts` (6색), `lib/material-images.ts` (60개 소파 소재).
+
+골든 스탠다드: `scripts/textbook/output/series-로이/chapter-claude.html` (32KB, 8섹션).
+
 ## Known Issues / In Progress
 
 - **심화교육 시험**: 구글 시트 연동 예정. 시험 점수 섹션은 빈칸으로 마련됨
 - **노션 export 불완전**: 일부 교육생의 마크다운 파일이 노션 export 시 내용 잘림 (파서 문제 아님). 수동 입력 필요
+- **교육내용정리 우선순위**: 뉴트 → 링키플러스 → 에디 → 에디키즈 → 팅클팝 (5개) — 1:1 작성 대기. 수지님이 "우선순위 시리즈 자동으로 진행해"라고 하면 가이드 §3 따라 한 번에 처리
 
 ## Conventions
 
