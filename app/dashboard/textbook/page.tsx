@@ -523,7 +523,7 @@ export default function TextbookPage() {
                       {/* 메타 정보 — 일지 N건 · M품목 · 수정 X */}
                       <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
                         일지 <strong style={{ color: 'var(--text-primary)' }}>{noteCount}</strong>건
-                        {subs.length > 0 && (
+                        {subs.length >= 2 && (
                           <>
                             {' · '}
                             <strong
