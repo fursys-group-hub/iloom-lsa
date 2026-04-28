@@ -371,6 +371,10 @@ export default function TextbookPage() {
                   // '쿠시노/쿠시노코지', '미엘/미엘갤러리'처럼 슬래시 묶음은 별칭별로 합산
                   const aliases = s.series_name.split('/').map((x) => x.trim()).filter(Boolean);
                   const noteCount = aliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
+                  // sub-품목 필터링: 같은 page_id를 공유하는 시리즈끼리 sub 분리
+                  // (예: 쿠시노/쿠시노코지가 split된 경우, sub.title에 시리즈명 포함된 것만)
+                  const allSubs = subPagesByPid[s.page_id] || [];
+                  const subs = allSubs.filter((sp) => sp.title.includes(s.series_name));
                   const isSelected = selected.has(s.series_name);
                   const status = ch?.status;
                   const statusBadge = status ? STATUS_LABEL[status] : null;
@@ -462,35 +466,24 @@ export default function TextbookPage() {
                         )}
                       </div>
 
-                      {/* 메타 정보 */}
+                      {/* 메타 정보 — 일지 N건 · M품목 · 수정 X */}
                       <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
                         일지 <strong style={{ color: 'var(--text-primary)' }}>{noteCount}</strong>건
+                        {subs.length > 0 && (
+                          <>
+                            {' · '}
+                            <strong
+                              style={{ color: 'var(--text-primary)' }}
+                              title={subs.map((sp) => sp.title).join('\n')}
+                            >
+                              {subs.length}품목
+                            </strong>
+                          </>
+                        )}
                         {ch?.updated_at && (
                           <> · 수정 {formatRelativeTime(ch.updated_at)}</>
                         )}
                       </div>
-
-                      {/* sub-품목 (있을 때만, hover로 전체 리스트) */}
-                      {(() => {
-                        const subs = subPagesByPid[s.page_id] || [];
-                        if (subs.length === 0) return null;
-                        return (
-                          <div
-                            title={subs.map((sp) => sp.title).join('\n')}
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 600,
-                              color: 'var(--text-second)',
-                              padding: '4px 8px',
-                              background: 'var(--bg-main)',
-                              borderRadius: 'var(--radius-sm)',
-                              alignSelf: 'flex-start',
-                            }}
-                          >
-                            {subs.length}품목
-                          </div>
-                        );
-                      })()}
 
                       {/* 액션 — 두 버튼 정확히 동일 사이즈 (wrapper로 감쌈) */}
                       <div style={{ marginTop: 'auto', width: '100%' }}>
