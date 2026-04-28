@@ -18,6 +18,7 @@ interface CatalogSeries {
   is_old_version: boolean;
   is_new_version: boolean;
   is_target: boolean;
+  extra_label?: string;
 }
 
 interface Chapter {
@@ -425,6 +426,9 @@ export default function TextbookPage() {
                           <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {s.series_name}
                           </span>
+                          {s.extra_label && (
+                            <span style={pillStyle('gray')}>{s.extra_label}</span>
+                          )}
                           {s.is_online_only && (
                             <span style={pillStyle('purple')}>온라인</span>
                           )}

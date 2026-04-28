@@ -63,6 +63,22 @@ const PUMOK_NORMALIZE = {
   },
 };
 
+// 사용자 정의 카탈로그 보정 — 일룸 사이트 자체로는 표현 못 하는 수지님 결정사항
+// page_id 기준으로 적용, 카탈로그 재수집해도 보존
+const SERIES_OVERRIDES = {
+  37110: { gubun: '키즈 시리즈' },                  // 코코 — '★ 일룸 내작 매트리스/토퍼' 대신
+  53742: { gubun: '키즈 시리즈' },                  // 쿠시노 투인원 — 동일
+  62011: { series_name: '키큰옷장' },               // '키큰옷장(컬렉트,리디,스톤W)' → 단순화
+  18318: { split_names: ['쿠시노', '쿠시노코지'] }, // 쿠시노/쿠시노코지 → 두 카드로 분리
+  39171: { extra_label: '모션 포함' },              // 바젤 — 시리즈명 옆 작은 라벨
+};
+
+// gubun(비고/sub-헤더) 정규화 — 같은 의미인데 일룸 사이트가 인라인 정보까지 적은 경우 단순화
+const GUBUN_NORMALIZE = {
+  '호텔 침실 (바젤 : 모션 포함)': '호텔 침실', // 바젤 모션 포함은 SERIES_OVERRIDES 39171로 처리
+  '헤이븐 HAVEN 시리즈': '헤이븐 시리즈',       // 영문 HAVEN 제거
+};
+
 if (argPageIds.length > 0) {
   // 인자로 받은 page_id만 처리
   categories = argPageIds.map((id) => ({
@@ -404,6 +420,37 @@ for (const cat of categories) {
       }
     }
   }
+
+  // gubun 정규화 (인라인 부가 정보가 들어간 라벨 단순화)
+  for (const s of seriesItems) {
+    if (s.gubun && GUBUN_NORMALIZE[s.gubun]) {
+      s.gubun = GUBUN_NORMALIZE[s.gubun];
+    }
+  }
+
+  // SERIES_OVERRIDES 적용 — gubun/series_name 변경 + split_names로 카드 분리
+  const finalSeries = [];
+  for (const s of seriesItems) {
+    const ov = SERIES_OVERRIDES[s.page_id];
+    if (!ov) {
+      finalSeries.push(s);
+      continue;
+    }
+    if (Array.isArray(ov.split_names)) {
+      // 한 페이지를 여러 카드로 분리 (예: '쿠시노/쿠시노코지' → 쿠시노 + 쿠시노코지)
+      for (const name of ov.split_names) {
+        finalSeries.push({ ...s, series_name: name });
+      }
+    } else {
+      const newS = { ...s };
+      if (ov.gubun !== undefined) newS.gubun = ov.gubun;
+      if (ov.series_name !== undefined) newS.series_name = ov.series_name;
+      if (ov.extra_label !== undefined) newS.extra_label = ov.extra_label;
+      finalSeries.push(newS);
+    }
+  }
+  seriesItems.length = 0;
+  seriesItems.push(...finalSeries);
 
   console.log(`   시리즈 ${seriesItems.length}개 발견 (단종 ${seriesItems.filter(s => s.is_discontinued).length}개 포함)`);
   for (const s of seriesItems) {
