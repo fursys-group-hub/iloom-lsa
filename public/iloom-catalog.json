@@ -2856,13 +2856,13 @@
     "pumok": "틴즈룸",
     "gubun": "",
     "label": "2025·온 ㅣ( 구)멘디2020·온·단종",
-    "is_discontinued": true,
+    "is_discontinued": false,
     "is_online_only": true,
     "is_new_2025": true,
     "is_new_2026": false,
     "is_old_version": false,
     "is_new_version": false,
-    "is_target": false
+    "is_target": true
   },
   {
     "category": "키즈룸·틴즈룸",

@@ -32,6 +32,19 @@ interface Chapter {
 
 const CATEGORY_ORDER = ['리빙룸', '다이닝룸', '침실·옷장', '키즈룸·틴즈룸', '워크룸·멀티룸'];
 
+// 시리즈명 별칭 매핑 — 카탈로그 시리즈명 → 분류 DB의 별칭 키 (일지 카운트 합산용)
+// series-map.ts(분류 정규식)와 카탈로그 표기가 다를 때 발생하는 갭을 메움
+const SERIES_ALIASES: Record<string, string[]> = {
+  '글렌 라이브러리': ['글렌'],
+  '케플러클래식': ['케플러 클래식'],
+  '엘바 패밀리': ['엘바패밀리'],
+  '업 모션': ['업모션'],
+  '캐빈R': ['캐빈'],
+  '멘디R': ['멘디'],
+  '뉴트': ['뉴트 홈오피스'], // 뉴트 메인 페이지(p=54132) 안에 '뉴트 홈오피스 책상' sub
+  '버튼': ['버튼스위블'], // HCH0020W는 단종이지만 캐스터/글라이드 모델(HCH0020WN/HCH0020G) 활성
+};
+
 // 카드 pumok에 맞는 sub-품목만 필터링하기 위한 키워드
 // (같은 시리즈명 다중 카드 케이스에서 카드별로 sub 분리)
 // 키워드 매칭이 안 맞는 케이스가 발견되면 여기 추가
@@ -432,9 +445,11 @@ export default function TextbookPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
                 {items.map((s) => {
                   const ch = chapterMap.get(s.series_name);
-                  // '쿠시노/쿠시노코지', '미엘/미엘갤러리'처럼 슬래시 묶음은 별칭별로 합산
-                  const aliases = s.series_name.split('/').map((x) => x.trim()).filter(Boolean);
-                  const noteCount = aliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
+                  // 일지 카운트 합산 — 슬래시 묶음(쿠시노/쿠시노코지) + SERIES_ALIASES(글렌 라이브러리 ← 글렌 등)
+                  const slashAliases = s.series_name.split('/').map((x) => x.trim()).filter(Boolean);
+                  const explicitAliases = SERIES_ALIASES[s.series_name] || [];
+                  const allAliases = [...new Set([...slashAliases, ...explicitAliases])];
+                  const noteCount = allAliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
                   // sub-품목 필터링 정책:
                   //   1) 같은 시리즈명의 모든 카드 sub를 합쳐서 출처로 사용 (레마처럼 사이트가 한 페이지에 묶어둔 경우 대응)
                   //   2) sub.title의 owner = 가장 긴 매칭 시리즈명 (헤이즐R 우드헤드 침대 → owner '헤이즐R', 헤이즐 카드엔 안 보임)

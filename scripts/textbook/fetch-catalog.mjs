@@ -71,6 +71,7 @@ const SERIES_OVERRIDES = {
   62011: { series_name: '키큰옷장' },               // '키큰옷장(컬렉트,리디,스톤W)' → 단순화
   18318: { split_names: ['쿠시노', '쿠시노코지'] }, // 쿠시노/쿠시노코지 → 두 카드로 분리
   39171: { extra_label: '모션 포함' },              // 바젤 — 시리즈명 옆 작은 라벨
+  60181: { force_target: true },                    // 멘디R — 사이트엔 단종/구버전 표기 있지만 실제 활성
 };
 
 // gubun(비고/sub-헤더) 정규화 — 같은 의미인데 일룸 사이트가 인라인 정보까지 적은 경우 단순화
@@ -467,6 +468,12 @@ for (const cat of categories) {
       if (ov.gubun !== undefined) newS.gubun = ov.gubun;
       if (ov.series_name !== undefined) newS.series_name = ov.series_name;
       if (ov.extra_label !== undefined) newS.extra_label = ov.extra_label;
+      // 단종/구버전 강제 활성화 (사이트엔 잘못 표기됐지만 실제 활성)
+      if (ov.force_target === true) {
+        newS.is_target = true;
+        newS.is_discontinued = false;
+        newS.is_old_version = false;
+      }
       finalSeries.push(newS);
     }
   }
