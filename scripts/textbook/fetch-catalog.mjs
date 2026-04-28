@@ -77,6 +77,11 @@ const SERIES_OVERRIDES = {
 const GUBUN_NORMALIZE = {
   '호텔 침실 (바젤 : 모션 포함)': '호텔 침실', // 바젤 모션 포함은 SERIES_OVERRIDES 39171로 처리
   '헤이븐 HAVEN 시리즈': '헤이븐 시리즈',       // 영문 HAVEN 제거
+  // 다이닝룸 식탁: 사이트가 상판 종류로 분류('세라믹/원목/리빙다이닝')했지만,
+  // 실제 시리즈는 다양한 상판(세라믹·새틴유리·벤치 등)을 가짐 → sub-헤더 무의미. 식탁 하나로 통칭.
+  '세라믹 식탁': '',
+  '원목 / 목재 식탁': '',
+  '리빙다이닝 식탁': '',
 };
 
 if (argPageIds.length > 0) {
@@ -422,8 +427,9 @@ for (const cat of categories) {
   }
 
   // gubun 정규화 (인라인 부가 정보가 들어간 라벨 단순화)
+  // 빈 문자열로 매핑하면 sub-헤더 자체를 없앰 (식탁의 세라믹/원목/리빙다이닝 같이 무의미한 분류)
   for (const s of seriesItems) {
-    if (s.gubun && GUBUN_NORMALIZE[s.gubun]) {
+    if (s.gubun && Object.prototype.hasOwnProperty.call(GUBUN_NORMALIZE, s.gubun)) {
       s.gubun = GUBUN_NORMALIZE[s.gubun];
     }
   }

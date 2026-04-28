@@ -32,6 +32,28 @@ interface Chapter {
 
 const CATEGORY_ORDER = ['리빙룸', '다이닝룸', '침실·옷장', '키즈룸·틴즈룸', '워크룸·멀티룸'];
 
+// 카드 pumok에 맞는 sub-품목만 필터링하기 위한 키워드
+// (같은 시리즈명 다중 카드 케이스에서 카드별로 sub 분리)
+// 키워드 매칭이 안 맞는 케이스가 발견되면 여기 추가
+const PUMOK_KEYWORDS: Record<string, string[]> = {
+  '식탁': ['식탁', '테이블', '다이닝', '벤치'],
+  '거실 테이블': ['테이블'],
+  '거실 수납장': ['수납장', '식기장', '카페장', '진열장', '장식장', '선반장', '서랍장', '도어', 'AV장', '전시장'],
+  '주방수납장': ['수납장', '식기장', '카페장'],
+  '의자': ['의자', '체어', '스툴', '벤치'],
+  '소파': ['소파', '리클라이너'],
+  '침실': ['침실', '침대', '서랍장', '화장대', '풋보드', '가드', '옷장', '협탁'],
+  '매트리스 / 토퍼': ['매트리스', '토퍼', '프로텍터', '패드'],
+  '옷장': ['옷장', '드레스', '몸통', '도어'],
+  '수납시리즈 / 스마티류': ['수납', '스마티', '서랍', '선반'],
+  '드레스룸': ['드레스', '옷장'],
+  '책상': ['책상', '데스크', '서랍'],
+  '책장': ['책장', '선반', '액세서리'],
+  '책상+책장': ['책상', '책장', '데스크', '선반'],
+  '홈라이브러리': ['책상', '책장', '선반', '액세서리'],
+  '홈 라이브러리': ['책상', '책장', '선반', '액세서리'],
+};
+
 const STATUS_LABEL: Record<string, { text: string; tone: string }> = {
   draft: { text: '초안', tone: 'blue' },
   reviewing: { text: '검수중', tone: 'orange' },
@@ -182,6 +204,32 @@ export default function TextbookPage() {
     for (const c of chapters) m.set(c.series_name, c);
     return m;
   }, [chapters]);
+
+  // 같은 시리즈명을 가진 카드들의 sub 합치기 (예: 레마 식탁 + 레마 거실수납장 → 합쳐진 sub 목록)
+  // 일룸 사이트가 한 페이지에 sub를 몰아놨어도, 시리즈명이 같으면 모든 sub를 공유
+  const subsBySeriesName = useMemo(() => {
+    const map: Record<string, Array<{ page_id: number; title: string; url: string }>> = {};
+    for (const s of catalog) {
+      const subs = subPagesByPid[s.page_id] || [];
+      if (!map[s.series_name]) map[s.series_name] = [];
+      for (const sp of subs) {
+        if (!map[s.series_name].some((e) => e.page_id === sp.page_id)) {
+          map[s.series_name].push(sp);
+        }
+      }
+    }
+    return map;
+  }, [catalog, subPagesByPid]);
+
+  // 같은 시리즈명 카드가 여러 개 있을 때, 카드 pumok에 맞는 sub만 분리해서 보여주는 키워드
+  const subsByNameCount = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const s of catalog) {
+      if (!s.is_target) continue;
+      m[s.series_name] = (m[s.series_name] || 0) + 1;
+    }
+    return m;
+  }, [catalog]);
 
   async function runClassify() {
     if (busy) return;
@@ -371,10 +419,16 @@ export default function TextbookPage() {
                   // '쿠시노/쿠시노코지', '미엘/미엘갤러리'처럼 슬래시 묶음은 별칭별로 합산
                   const aliases = s.series_name.split('/').map((x) => x.trim()).filter(Boolean);
                   const noteCount = aliases.reduce((sum, name) => sum + (noteCounts[name] || 0), 0);
-                  // sub-품목 필터링: 같은 page_id를 공유하는 시리즈끼리 sub 분리
-                  // (예: 쿠시노/쿠시노코지가 split된 경우, sub.title에 시리즈명 포함된 것만)
-                  const allSubs = subPagesByPid[s.page_id] || [];
-                  const subs = allSubs.filter((sp) => sp.title.includes(s.series_name));
+                  // sub-품목 필터링 정책:
+                  //   1) 같은 시리즈명의 모든 카드 sub를 합쳐서 출처로 사용 (레마처럼 사이트가 한 페이지에 묶어둔 경우 대응)
+                  //   2) 카드의 시리즈명을 sub.title이 포함하는지 (쿠시노/쿠시노코지 split 분리)
+                  //   3) 같은 시리즈명 카드가 여러 개면 카드 pumok 키워드로 추가 필터 (레마 식탁 vs 거실수납장)
+                  const allSubsForName = subsBySeriesName[s.series_name] || [];
+                  let subs = allSubsForName.filter((sp) => sp.title.includes(s.series_name));
+                  if ((subsByNameCount[s.series_name] || 0) > 1) {
+                    const kws = PUMOK_KEYWORDS[s.pumok];
+                    if (kws) subs = subs.filter((sp) => kws.some((k) => sp.title.includes(k)));
+                  }
                   const isSelected = selected.has(s.series_name);
                   const status = ch?.status;
                   const statusBadge = status ? STATUS_LABEL[status] : null;
