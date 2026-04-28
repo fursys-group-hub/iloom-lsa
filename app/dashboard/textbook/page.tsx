@@ -59,10 +59,11 @@ export default function TextbookPage() {
   const [activeCat, setActiveCat] = useState<string>('리빙룸');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hidden, setHidden] = useState<Set<number>>(new Set());
+  const [collapsedPumok, setCollapsedPumok] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string>('');
 
-  // localStorage에서 숨긴 시리즈 page_id 불러오기
+  // localStorage에서 숨긴 시리즈 page_id + 접힌 품목 그룹 불러오기
   useEffect(() => {
     try {
       const raw = localStorage.getItem('iloom-textbook-hidden-pages');
@@ -71,7 +72,23 @@ export default function TextbookPage() {
         if (Array.isArray(arr)) setHidden(new Set(arr.filter((x) => typeof x === 'number')));
       }
     } catch {}
+    try {
+      const raw = localStorage.getItem('iloom-textbook-collapsed-pumok');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setCollapsedPumok(new Set(arr.filter((x) => typeof x === 'string')));
+      }
+    } catch {}
   }, []);
+
+  function togglePumok(category: string, pumok: string) {
+    const key = `${category}::${pumok}`;
+    const next = new Set(collapsedPumok);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setCollapsedPumok(next);
+    localStorage.setItem('iloom-textbook-collapsed-pumok', JSON.stringify(Array.from(next)));
+  }
 
   function hideSeries(s: CatalogSeries) {
     if (!confirm(`"${s.series_name}" 카드를 숨기시겠어요? 부속품/프로텍터 등 별도 시리즈가 아닌 항목을 정리할 때 사용하세요. (브라우저에 저장되며 언제든 복구 가능)`)) return;
@@ -281,14 +298,39 @@ export default function TextbookPage() {
         <span style={{ marginLeft: 'auto' }}>{busy ?? `${(seriesByCategory[activeCat] || []).length}개 시리즈`}</span>
       </div>
 
-      {/* 품목 > 구분 > 시리즈 그룹핑 */}
-      {Object.entries(groupedByPumokGubun).map(([pumok, gubunMap]) => (
+      {/* 품목 > 구분 > 시리즈 그룹핑 — 품목 헤더 클릭으로 접기/펼치기 */}
+      {Object.entries(groupedByPumokGubun).map(([pumok, gubunMap]) => {
+        const collapseKey = `${activeCat}::${pumok}`;
+        const isCollapsed = collapsedPumok.has(collapseKey);
+        const totalCount = Object.values(gubunMap).reduce((sum, items) => sum + items.length, 0);
+        return (
         <div key={pumok} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{pumok}</h3>
-          {Object.entries(gubunMap).map(([gubun, items]) => (
+          <button
+            onClick={() => togglePumok(activeCat, pumok)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '4px 0',
+              margin: 0,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              textAlign: 'left',
+            }}
+            title={isCollapsed ? '펼치기' : '접기'}
+          >
+            <span style={{ display: 'inline-block', width: 12, fontSize: 11, color: 'var(--text-tertiary)', transition: 'transform 0.15s ease' }}>
+              {isCollapsed ? '▶' : '▼'}
+            </span>
+            <span style={{ fontSize: 18, fontWeight: 700 }}>{pumok}</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-tertiary)' }}>({totalCount})</span>
+          </button>
+          {!isCollapsed && Object.entries(gubunMap).map(([gubun, items]) => (
             <div key={gubun} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {gubun !== '-' && (
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-tertiary)' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-second)' }}>
                   {gubun} ({items.length})
                 </div>
               )}
@@ -414,7 +456,8 @@ export default function TextbookPage() {
             </div>
           ))}
         </div>
-      ))}
+        );
+      })}
 
       {/* 토스트 */}
       {toast && (
