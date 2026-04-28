@@ -48,6 +48,21 @@ const CATEGORY_NAMES = {
 // 모든 카테고리 page_id (시리즈 목록에서 제외용)
 const ALL_CATEGORY_IDS = new Set([158, 160, 154, 52, 150, 162, 59703, 34578]);
 
+// 일룸 사이트엔 단종 표시가 없지만 수지님이 지정한 단종 시리즈 (수동 보정)
+// page_id 단위로 적용 — 카탈로그 재수집해도 보존됨
+const MANUAL_DISCONTINUED_PIDS = new Set([
+  36220, // 뷰스크
+]);
+
+// 카테고리별 큰 그룹 정규화 (pumok 통합)
+// 일룸 사이트가 별도 행으로 나눠둔 같은 의미 그룹을 한 pumok으로 묶음
+// 원래 pumok은 gubun(sub-헤더)으로 보존 → 메인 페이지에서 sub-헤더로 노출
+const PUMOK_NORMALIZE = {
+  '침실·옷장': {
+    '침실 (온라인)': '침실',
+  },
+};
+
 if (argPageIds.length > 0) {
   // 인자로 받은 page_id만 처리
   categories = argPageIds.map((id) => ({
@@ -88,7 +103,7 @@ for (const cat of categories) {
   await page.goto(cat.url, { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
 
-  const seriesItems = await page.evaluate((CATEGORY_PAGE_IDS) => {
+  const seriesItems = await page.evaluate(({ CATEGORY_PAGE_IDS, MANUAL_DISC_PIDS }) => {
     const result = [];
 
     // 표 구조에서 품목/구분 추적용 (위치 기반 매핑)
@@ -156,9 +171,12 @@ for (const cat of categories) {
           if (txt) labelCells.push({ idx: i, text: txt });
         }
 
-        // 시리즈 셀 위치로 표 패턴 분기
+        // 시리즈 셀 위치로 표 패턴 분기 — 일관성: 왼쪽 = pumok(큰 그룹), 오른쪽 = gubun(sub-헤더)
         // 패턴 A (리빙룸/다이닝룸): [pumok, gubun, series]  → seriesIdx === row.length - 1
-        // 패턴 B (키즈룸·틴즈룸):   [구분, series, 비고]    → 비고를 pumok로 (더 세부 분류)
+        //   예: [소파, 베이직 소파, 시리즈들]
+        // 패턴 B (침실·옷장/키즈룸·틴즈룸): [pumok, series, gubun(비고)]
+        //   예: 침실·옷장 [침실, 시리즈, 호텔 침실(바젤:모션 포함)]
+        //   예: 키즈룸·틴즈룸 [틴즈룸, 시리즈, 책상]
         let currentPumok = '';
         let currentGubun = '';
         if (seriesIdx === row.length - 1) {
@@ -166,21 +184,45 @@ for (const cat of categories) {
           if (labelCells[0]) currentPumok = labelCells[0].text;
           if (labelCells[1]) currentGubun = labelCells[1].text;
         } else {
-          // 패턴 B: 시리즈가 중간 → 시리즈 뒤(비고) 우선 pumok, 시리즈 앞(구분)을 gubun
-          const after = labelCells.find((l) => l.idx > seriesIdx);
+          // 패턴 B: 시리즈가 중간 → 왼쪽(앞쪽) = pumok, 오른쪽(비고) = gubun
           const before = labelCells.find((l) => l.idx < seriesIdx);
-          if (after) currentPumok = after.text;
-          else if (before) currentPumok = before.text; // 비고 빈 행 — 구분을 pumok으로
-          if (before && after) currentGubun = before.text;
+          const after = labelCells.find((l) => l.idx > seriesIdx);
+          if (before) currentPumok = before.text;
+          if (after) currentGubun = after.text;
         }
 
-        // 시리즈 셀 안의 링크들에 매핑
-        const links = Array.from(seriesCellEl.querySelectorAll('a')).filter(isSeriesLink);
-        for (const a of links) {
-          // 동일 링크가 여러 행에서 잡힐 일은 거의 없지만, 처음 매칭만 유지
-          if (!positionContext.has(a)) {
-            positionContext.set(a, { pumok: currentPumok, gubun: currentGubun });
+        // 시리즈 셀 안 인라인 헤더 처리
+        // 예: 매트리스/토퍼 셀 안에 [헤이븐 HAVEN 시리즈]2024 / [데일리 시리즈]2022/2023 등
+        //
+        // 정책: 셀 안에 인라인 헤더가 한 번이라도 등장하면, 그 셀의 시리즈들은
+        //       각자 직전 헤더(없으면 빈값)를 gubun으로 사용 — 셀 단위 currentGubun은 무시.
+        //       이렇게 해야 매트리스/토퍼 안의 [헤이븐]/[데일리]/(헤더 없는 코코·쿠시노)가 깔끔히 분리됨.
+        //       인라인 헤더가 전혀 없으면 currentGubun 그대로 사용.
+        const linkToInlineGubun = new Map();
+        let inlineGubun = '';
+        let hasInlineHeaders = false;
+        const walker = document.createTreeWalker(
+          seriesCellEl,
+          NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+        );
+        let node = walker.nextNode();
+        while (node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const txt = node.textContent || '';
+            const m = txt.match(/\[([^\]]*?시리즈[^\]]*?)\]/);
+            if (m) {
+              inlineGubun = m[1].trim();
+              hasInlineHeaders = true;
+            }
+          } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'A' && isSeriesLink(node)) {
+            linkToInlineGubun.set(node, inlineGubun);
           }
+          node = walker.nextNode();
+        }
+        for (const [a, ig] of linkToInlineGubun) {
+          if (positionContext.has(a)) continue;
+          const finalGubun = hasInlineHeaders ? ig : currentGubun;
+          positionContext.set(a, { pumok: currentPumok, gubun: finalGubun });
         }
       }
     }
@@ -294,6 +336,11 @@ for (const cat of categories) {
 
       const ctx = positionContext.get(a) || { pumok: '', gubun: '' };
 
+      // 수동 단종 보정 (사용자가 지정한 단종 시리즈)
+      if (MANUAL_DISC_PIDS.includes(pageId)) {
+        isDiscontinued = true;
+      }
+
       // 쉼표 묶음 분리 — 괄호 밖의 쉼표만 (예: "오브, 오브플레인" → 두 시리즈)
       // 괄호 안 쉼표는 보호 (예: "키큰옷장(컬렉트,리디,스톤W)")
       function splitOutsideParens(s) {
@@ -339,11 +386,23 @@ for (const cat of categories) {
       }
     }
     return result;
-  }, Array.from(ALL_CATEGORY_IDS));
+  }, { CATEGORY_PAGE_IDS: Array.from(ALL_CATEGORY_IDS), MANUAL_DISC_PIDS: Array.from(MANUAL_DISCONTINUED_PIDS) });
 
   // 라벨 정제 (&nbsp; 등)
   for (const s of seriesItems) {
     s.label = (s.label || '').replace(/&nbsp;/g, ' ').trim();
+  }
+
+  // 카테고리별 pumok 정규화 — 같은 의미 그룹 통합 (원 pumok은 gubun으로 보존)
+  const normalizeMap = PUMOK_NORMALIZE[cat.name];
+  if (normalizeMap) {
+    for (const s of seriesItems) {
+      if (normalizeMap[s.pumok]) {
+        // 원래 pumok이 의미 있으면 gubun에 보존 (gubun 비어있을 때만)
+        if (!s.gubun) s.gubun = s.pumok;
+        s.pumok = normalizeMap[s.pumok];
+      }
+    }
   }
 
   console.log(`   시리즈 ${seriesItems.length}개 발견 (단종 ${seriesItems.filter(s => s.is_discontinued).length}개 포함)`);
