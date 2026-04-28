@@ -23,6 +23,10 @@ scripts/practice-rewrites.json
 # textbook 파서 임시 출력
 scripts/textbook/output/
 
+# textbook 챕터 이미지 — Supabase Storage('textbook-images' bucket)로 호스팅됨
+# 로컬 다운로드는 디버그용일 뿐, git/Railway에 올리지 않음
+public/textbook-images/
+
 # 안전망 — 혹시 모를 민감 파일 실수 방지
 app/*.jpg
 app/*.jpeg

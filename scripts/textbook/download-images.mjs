@@ -1,26 +1,53 @@
-// WordPress 가이드 페이지에서 이미지 다운로드 + 인접 텍스트로 색상/제품 매칭
-// 사용법: node scripts/textbook/download-images.mjs <p_id> <시리즈명>
+// WordPress 가이드 페이지에서 이미지 다운로드 → Supabase Storage 직접 업로드
+// 사용법: node scripts/textbook/download-images.mjs <p_id> <시리즈명> [--local-only]
 // 예: node scripts/textbook/download-images.mjs 21977 코펜하겐
+//
+// 기본: Supabase Storage 'textbook-images' bucket에 'p<pid>/<sanitized-filename>' 키로 업로드
+//        + scripts/textbook/output/series-<시리즈명>/images-meta.json 에 메타 저장
+// --local-only: Storage 업로드 스킵 (디버그용으로 로컬에만 저장)
 
 import { chromium } from 'playwright';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
+import { config } from 'dotenv';
+
+config({ path: '.env.local' });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LOGIN_URL = 'https://iloomproduct.fursys.com/wp-login.php';
 const ID = 'seoyeon_lee';
 const PW = 'iloomguide2020';
+const BUCKET = 'textbook-images';
 
-const pid = process.argv[2] || '21977';
-const seriesName = process.argv[3] || '코펜하겐';
+const args = process.argv.slice(2);
+const LOCAL_ONLY = args.includes('--local-only');
+const positional = args.filter((a) => !a.startsWith('--'));
+const pid = positional[0] || '21977';
+const seriesName = positional[1] || '코펜하겐';
 const TARGET_URL = `https://iloomproduct.fursys.com/?p=${pid}`;
 
-// public/textbook-images/{시리즈명}/ 에 저장 (Next.js 정적 서빙)
-const PUBLIC_DIR = path.resolve('public', 'textbook-images', seriesName);
-const META_PATH = path.resolve('scripts/textbook/output', `series-${seriesName}`, 'images-meta.json');
-await fs.mkdir(PUBLIC_DIR, { recursive: true });
+const META_DIR = path.resolve('scripts/textbook/output', `series-${seriesName}`);
+const META_PATH = path.join(META_DIR, 'images-meta.json');
+await fs.mkdir(META_DIR, { recursive: true });
+
+const supabase = LOCAL_ONLY ? null : createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+// Storage URL 베이스
+const SUPA_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
+const STORAGE_BASE = `${SUPA_URL}/storage/v1/object/public/${BUCKET}`;
+
+function sanitizeFilename(name) {
+  const ext = path.extname(name);
+  const base = path.basename(name, ext);
+  const clean = base.replace(/[^A-Za-z0-9_.\-]/g, '').replace(/_+$/, '').replace(/^_+/, '') || 'unnamed';
+  return clean + ext.toLowerCase();
+}
 
 const browser = await chromium.launch({ headless: true });
 const ctx = await browser.newContext();
@@ -80,38 +107,59 @@ for (const img of allImages) {
 const unique = Array.from(uniq.values());
 console.log(`\n중복 제거 후: ${unique.length}개`);
 
-// 페이지 인증 쿠키로 다운로드 (인증 필요할 수도)
-console.log('\n3) 다운로드...');
+// 페이지 인증 쿠키로 다운로드 → Supabase Storage 업로드
+console.log('\n3) 다운로드 + Storage 업로드...');
+const STORAGE_PREFIX = `p${pid}`;
 const meta = [];
 let i = 0;
+let okCount = 0;
+let errCount = 0;
+
 for (const img of unique) {
   i++;
-  const ext = path.extname(new URL(img.src).pathname) || '.png';
-  const baseName = `${String(i).padStart(2, '0')}_${img.w}x${img.h}_tab${img.tab}${ext}`;
-  const dest = path.join(PUBLIC_DIR, baseName);
+  const ext = (path.extname(new URL(img.src).pathname) || '.png').toLowerCase();
+  const baseName = sanitizeFilename(`${String(i).padStart(2, '0')}_${img.w}x${img.h}_tab${img.tab}${ext}`);
+  const storageKey = `${STORAGE_PREFIX}/${baseName}`;
+  const publicUrl = `${STORAGE_BASE}/${storageKey}`;
 
   try {
     // page.context()의 cookies로 인증된 fetch
     const response = await page.request.get(img.src);
     if (!response.ok()) throw new Error(`HTTP ${response.status()}`);
     const buf = await response.body();
-    await fs.writeFile(dest, buf);
-    const publicPath = `/textbook-images/${seriesName}/${baseName}`;
+
+    if (!LOCAL_ONLY) {
+      // Supabase Storage upsert
+      const ct = ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'application/octet-stream';
+      const { error: upErr } = await supabase.storage.from(BUCKET).upload(storageKey, buf, {
+        contentType: ct,
+        upsert: true,
+      });
+      if (upErr) throw new Error(`Storage upload: ${upErr.message}`);
+    }
+
     meta.push({
       file: baseName,
-      public_path: publicPath,
+      storage_key: storageKey,
+      public_url: publicUrl,
       ...img,
     });
-    console.log(`   ${baseName} (${(buf.length / 1024).toFixed(0)}KB)`);
+    okCount++;
+    console.log(`   ✓ ${storageKey} (${(buf.length / 1024).toFixed(0)}KB)`);
   } catch (e) {
-    console.log(`   ❌ ${img.src} 실패: ${e.message.slice(0, 80)}`);
+    errCount++;
+    console.log(`   ❌ ${img.src} 실패: ${e.message.slice(0, 100)}`);
   }
 }
 
 await fs.writeFile(META_PATH, JSON.stringify(meta, null, 2), 'utf-8');
 await browser.close();
 
-console.log(`\n✅ ${meta.length}개 이미지 다운로드 완료`);
-console.log(`   저장 폴더: ${PUBLIC_DIR}`);
+console.log(`\n✅ ${okCount}건 업로드 / ${errCount}건 실패`);
 console.log(`   메타 정보: ${META_PATH}`);
-console.log(`   웹 접근: http://localhost:3000/textbook-images/${seriesName}/...`);
+if (!LOCAL_ONLY) {
+  console.log(`   Storage 베이스: ${STORAGE_BASE}/${STORAGE_PREFIX}/`);
+  console.log(`   샘플 URL: ${meta[0]?.public_url || '(없음)'}`);
+} else {
+  console.log(`   --local-only 모드: Storage 업로드 스킵됨`);
+}
