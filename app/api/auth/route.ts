@@ -8,11 +8,17 @@ export async function POST(req: NextRequest) {
     return Response.json({ message: '이름과 비밀번호를 입력해주세요.' }, { status: 400 });
   }
 
-  // 슈퍼관리자 체크
-  const adminName = process.env.ADMIN_NAME;
-  const adminPw = process.env.ADMIN_PASSWORD;
-  if (adminName && adminPw && name.trim() === adminName && password === adminPw) {
-    return Response.json({ role: 'admin', name: adminName });
+  // 슈퍼관리자 체크 (복수 계정 지원)
+  const admins = [
+    { name: process.env.ADMIN_NAME, pw: process.env.ADMIN_PASSWORD },
+    { name: process.env.ADMIN_NAME_2, pw: process.env.ADMIN_PASSWORD_2 },
+  ].filter((a): a is { name: string; pw: string } => Boolean(a.name && a.pw));
+
+  const matchedAdmin = admins.find(
+    (a) => name.trim() === a.name && password === a.pw
+  );
+  if (matchedAdmin) {
+    return Response.json({ role: 'admin', name: matchedAdmin.name });
   }
 
   const supabase = getSupabase();
