@@ -142,6 +142,18 @@ export default function DashboardClient({ batches, students: allStudents, scores
   const today = getKSTToday();
   const { selectedBatchId } = useBatch();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  // 로그인한 슈퍼관리자 이름 (성 제외한 이름만 — 김수지→수지, 민재윤→재윤)
+  const [adminGivenName, setAdminGivenName] = useState<string>('');
+  useEffect(() => {
+    try {
+      const auth = localStorage.getItem('iloom-auth');
+      if (!auth) return;
+      const parsed = JSON.parse(auth);
+      const fullName: string = parsed?.name || '';
+      setAdminGivenName(fullName.length >= 2 ? fullName.slice(1) : fullName);
+    } catch {}
+  }, []);
   const toggle = (key: string) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   const selectedBatch = batches.find(b => b.id === selectedBatchId);
 
@@ -337,7 +349,7 @@ export default function DashboardClient({ batches, students: allStudents, scores
       <div className="greeting-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            안녕하세요, 수지님
+            안녕하세요{adminGivenName ? `, ${adminGivenName}님` : ''}
           </h2>
           <p style={{ fontSize: 15, color: 'var(--text-tertiary)', marginTop: 4 }}>
             오늘의 교육 현황이에요
