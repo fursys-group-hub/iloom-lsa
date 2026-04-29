@@ -114,7 +114,6 @@ export default function TextbookPage() {
   const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
   const [subPagesByPid, setSubPagesByPid] = useState<Record<number, Array<{ page_id: number; title: string; url: string }>>>({});
   const [activeCat, setActiveCat] = useState<string>('리빙룸');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [hidden, setHidden] = useState<Set<number>>(new Set());
   const [collapsedPumok, setCollapsedPumok] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
@@ -306,58 +305,6 @@ export default function TextbookPage() {
     }
   }
 
-  async function generateDrafts() {
-    if (busy) return;
-    if (selected.size === 0) {
-      setToast('초안을 생성할 시리즈를 카드 체크박스로 선택하세요.');
-      return;
-    }
-    if (!confirm(`선택한 ${selected.size}개 시리즈의 초안을 생성합니다. 진행할까요?`)) return;
-    setBusy('초안 생성 중...');
-    const list = Array.from(selected);
-    const results: string[] = [];
-    for (let i = 0; i < list.length; i += 5) {
-      const chunk = list.slice(i, i + 5);
-      const settled = await Promise.allSettled(
-        chunk.map((s) =>
-          fetch('/api/textbook/draft', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ series_name: s, force: true }),
-          }).then(async (r) => {
-            const d = await r.json();
-            if (!r.ok) throw new Error(`${s}: ${d.message || r.statusText}`);
-            return `${s}: OK`;
-          }),
-        ),
-      );
-      for (const r of settled) {
-        results.push(r.status === 'fulfilled' ? r.value : `실패: ${(r.reason as Error).message}`);
-      }
-    }
-    setToast(`초안 생성 결과:\n${results.join('\n')}`);
-    setSelected(new Set());
-    await reload();
-    setBusy(null);
-  }
-
-  function toggleSelect(series: string) {
-    const next = new Set(selected);
-    if (next.has(series)) next.delete(series);
-    else next.add(series);
-    setSelected(next);
-  }
-
-  function selectAllInCategory() {
-    const next = new Set(selected);
-    for (const s of seriesByCategory[activeCat] || []) next.add(s.series_name);
-    setSelected(next);
-  }
-
-  function clearSelection() {
-    setSelected(new Set());
-  }
-
   const stats = useMemo(() => {
     return {
       total: catalog.length,
@@ -380,9 +327,6 @@ export default function TextbookPage() {
           )}
           <button onClick={runClassify} disabled={!!busy} style={btnGhost}>
             전체 일지 분류
-          </button>
-          <button onClick={generateDrafts} disabled={!!busy || selected.size === 0} style={btnPrimary}>
-            선택 초안 생성 ({selected.size})
           </button>
         </div>
       </div>
@@ -418,11 +362,8 @@ export default function TextbookPage() {
         ))}
       </div>
 
-      {/* 다중 선택 도구 */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, color: 'var(--text-tertiary)' }}>
-        <button onClick={selectAllInCategory} style={btnText}>이 카테고리 전체 선택</button>
-        <span>·</span>
-        <button onClick={clearSelection} style={btnText}>선택 해제</button>
+      {/* 카테고리 시리즈 카운트 */}
+      <div style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-tertiary)' }}>
         <span style={{ marginLeft: 'auto' }}>{busy ?? `${(seriesByCategory[activeCat] || []).length}개 시리즈`}</span>
       </div>
 
@@ -484,7 +425,6 @@ export default function TextbookPage() {
                     const cardOnline = s.is_online_only || (s.gubun || '').includes('온라인');
                     subs = subs.filter((sp) => sp.title.includes('온라인') === cardOnline);
                   }
-                  const isSelected = selected.has(s.series_name);
                   const status = ch?.status;
                   const statusBadge = status ? STATUS_LABEL[status] : null;
 
@@ -493,7 +433,7 @@ export default function TextbookPage() {
                       key={`${s.category}-${s.page_id}-${s.series_name}`}
                       style={{
                         background: 'var(--bg-surface)',
-                        border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
+                        border: '1px solid var(--border)',
                         borderRadius: 'var(--radius-lg)',
                         padding: 16,
                         boxShadow: 'var(--shadow-sm)',
@@ -531,13 +471,7 @@ export default function TextbookPage() {
                       </button>
                       {/* 시리즈명 + 온라인 뱃지(가이드링크) + 검수 상태 */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', flex: 1, minWidth: 0 }}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(s.series_name)}
-                            style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }}
-                          />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
                           <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {s.series_name}
                           </span>
@@ -569,7 +503,7 @@ export default function TextbookPage() {
                           >
                             ↗
                           </a>
-                        </label>
+                        </div>
                         {statusBadge && (
                           <span style={{ ...pillStyle(statusBadge.tone), flexShrink: 0 }}>{statusBadge.text}</span>
                         )}
