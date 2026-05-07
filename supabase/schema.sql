@@ -150,6 +150,7 @@ CREATE TABLE weekly_evaluations (
   manager_id UUID REFERENCES managers(id),
   week_number INTEGER NOT NULL CHECK (week_number BETWEEN 1 AND 12),
   rp_area TEXT,
+  rp_type TEXT,
   status TEXT CHECK (status IN ('completed','not_completed','partial')) DEFAULT 'completed',
   strength_tags TEXT[] DEFAULT '{}',
   improvement_tags TEXT[] DEFAULT '{}',
