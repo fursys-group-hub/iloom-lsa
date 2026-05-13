@@ -43,16 +43,23 @@ export default function TextbookSeriesPage() {
   const [toast, setToast] = useState('');
 
   const reload = useCallback(async () => {
-    const [chRes, poolRes] = await Promise.all([
-      fetch(`/api/textbook?series=${encodeURIComponent(seriesName)}`).then((r) => r.json()),
-      fetch('/api/textbook/notes-pool').then((r) => r.json()),
-    ]);
-    setChapter(chRes.chapter);
-    setEditing(chRes.chapter?.html_content || '');
-    setDirty(false);
-    // 이 시리즈에 분류된 노트만
-    const all: PoolNote[] = poolRes.notes || [];
-    setNotes(all.filter((n) => n.series.includes(seriesName)));
+    // chapter와 notes-pool 독립 fetch — notes-pool이 느려도 챕터 즉시 표시
+    fetch(`/api/textbook?series=${encodeURIComponent(seriesName)}`)
+      .then((r) => r.json())
+      .then((chRes) => {
+        setChapter(chRes.chapter);
+        setEditing(chRes.chapter?.html_content || '');
+        setDirty(false);
+      })
+      .catch(() => {});
+
+    fetch('/api/textbook/notes-pool')
+      .then((r) => r.json())
+      .then((poolRes) => {
+        const all: PoolNote[] = poolRes.notes || [];
+        setNotes(all.filter((n) => n.series.includes(seriesName)));
+      })
+      .catch(() => {});
   }, [seriesName]);
 
   useEffect(() => {
