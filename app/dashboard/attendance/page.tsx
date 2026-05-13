@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { useBatch } from '@/lib/batch-context';
+import { getKSTToday } from '@/lib/date';
 import {
   type AttendanceRow, type StatusType,
   parseStatus, excelSerialToDate, excelSerialToTime,
@@ -26,11 +27,12 @@ const statusOptions: { value: StatusType; label: string }[] = [
 ];
 
 export default function AttendancePage() {
-  const { selectedBatchId } = useBatch();
+  const { selectedBatchId, selectedBatch } = useBatch();
   // ── DB 데이터 ──
   const [savedData, setSavedData] = useState<SavedAttendance[]>([]);
   const [droppedIds, setDroppedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [isInPeriod, setIsInPeriod] = useState(true);
   const [selectedDate, setSelectedDate] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState<StatusType>('present');
@@ -50,6 +52,20 @@ export default function AttendancePage() {
   const fetchAttendance = useCallback(async () => {
     if (!selectedBatchId) return;
     setLoading(true);
+
+    // 입문교육 기간 외에는 API 호출 없이 종료
+    const today = getKSTToday();
+    const inPeriod = !!selectedBatch &&
+      today >= selectedBatch.start_date &&
+      today <= selectedBatch.end_date;
+    setIsInPeriod(inPeriod);
+    if (!inPeriod) {
+      setSavedData([]);
+      setSelectedDate('');
+      setLoading(false);
+      return;
+    }
+
     try {
       const [res, studentsRes] = await Promise.all([
         fetch('/api/attendance'),
@@ -62,7 +78,6 @@ export default function AttendancePage() {
         setDroppedIds(new Set(studentsData.filter((s: { is_dropped: boolean }) => s.is_dropped).map((s: { id: string }) => s.id)));
       }
       if (Array.isArray(data)) {
-        // 선택된 기수 학생의 출결만
         const filtered = data.filter((d: SavedAttendance) => ids.has(d.student_id));
         setSavedData(filtered);
         if (filtered.length > 0) {
@@ -77,7 +92,7 @@ export default function AttendancePage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedBatchId]);
+  }, [selectedBatchId, selectedBatch?.start_date, selectedBatch?.end_date]);
 
   useEffect(() => { fetchAttendance(); }, [fetchAttendance]);
 
@@ -369,6 +384,15 @@ export default function AttendancePage() {
       {/* ═══ 출결 현황 (메인) ═══ */}
       {loading ? (
         <p style={{ fontSize: 16, color: 'var(--text-muted)', textAlign: 'center', padding: 48 }}>불러오는 중...</p>
+      ) : !isInPeriod ? (
+        <div style={{ ...card, textAlign: 'center', padding: 48 }}>
+          <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px' }}>
+            현재 입문교육 기간이 아닙니다
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
+            {selectedBatch ? `${selectedBatch.start_date} ~ ${selectedBatch.end_date}` : ''}
+          </p>
+        </div>
       ) : savedData.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', padding: 48 }}>
           <p style={{ fontSize: 40, margin: '0 0 12px' }}></p>
