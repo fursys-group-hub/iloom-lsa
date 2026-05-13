@@ -192,14 +192,21 @@ export default function TextbookPage() {
   }
 
   async function reload() {
-    const [chRes, catRes] = await Promise.all([
-      fetch('/api/textbook').then((r) => r.json()),
-      fetch('/api/textbook/catalog').then((r) => r.json()),
-    ]);
-    setChapters(chRes.chapters || []);
-    setNoteCounts(chRes.note_counts || {});
-    setSubPagesByPid(chRes.sub_pages_by_pid || {});
-    setCatalog(catRes.list || []);
+    // catalog(파일 읽기)와 textbook(Supabase 쿼리)를 독립적으로 fetch
+    // — textbook이 느려도 catalog는 즉시 표시되도록 분리
+    fetch('/api/textbook/catalog')
+      .then((r) => r.json())
+      .then((catRes) => setCatalog(catRes.list || []))
+      .catch(() => {});
+
+    fetch('/api/textbook')
+      .then((r) => r.json())
+      .then((chRes) => {
+        setChapters(chRes.chapters || []);
+        setNoteCounts(chRes.note_counts || {});
+        setSubPagesByPid(chRes.sub_pages_by_pid || {});
+      })
+      .catch(() => {});
   }
 
   useEffect(() => {

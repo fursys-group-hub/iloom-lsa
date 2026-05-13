@@ -25,42 +25,38 @@ export async function GET(req: NextRequest) {
     return Response.json({ chapter: data });
   }
 
-  const { data, error } = await supabase
-    .from('textbook_chapters')
-    .select('*')
-    .order('updated_at', { ascending: false });
-  if (error) return Response.json({ message: error.message }, { status: 500 });
-
-  // 통계 — Supabase PostgREST의 max-rows 제한(기본 1000)을 .range() 페이지네이션으로 우회
-  const PAGE = 1000;
-  const noteCount: Record<string, number> = {};
-  for (let from = 0; ; from += PAGE) {
-    const { data: classifs, error: cErr } = await supabase
+  // 3개 쿼리 병렬 실행 — html_content 제외(목록에선 불필요), classifications 한 번에 조회
+  const [chaptersRes, classifRes, guidesRes] = await Promise.all([
+    supabase
+      .from('textbook_chapters')
+      .select('id, series_name, category, status, generated_at, updated_at')
+      .order('updated_at', { ascending: false }),
+    supabase
       .from('textbook_classifications')
       .select('series_name')
-      .range(from, from + PAGE - 1);
-    if (cErr) return Response.json({ message: cErr.message }, { status: 500 });
-    if (!classifs || classifs.length === 0) break;
-    for (const c of classifs) {
-      noteCount[c.series_name] = (noteCount[c.series_name] || 0) + 1;
-    }
-    if (classifs.length < PAGE) break;
+      .limit(50000),
+    supabase
+      .from('textbook_product_guide')
+      .select('page_id, sub_pages')
+      .not('sub_pages', 'is', null),
+  ]);
+
+  if (chaptersRes.error) return Response.json({ message: chaptersRes.error.message }, { status: 500 });
+
+  const noteCount: Record<string, number> = {};
+  for (const c of classifRes.data || []) {
+    noteCount[c.series_name] = (noteCount[c.series_name] || 0) + 1;
   }
 
-  // sub-품목 메타 — page_id 별 sub_pages
-  const { data: guides } = await supabase
-    .from('textbook_product_guide')
-    .select('page_id, sub_pages')
-    .not('sub_pages', 'is', null);
   const subPagesByPid: Record<number, Array<{ page_id: number; title: string; url: string }>> = {};
-  for (const g of guides || []) {
+  for (const g of guidesRes.data || []) {
     if (Array.isArray(g.sub_pages) && g.sub_pages.length > 0) {
       subPagesByPid[g.page_id] = g.sub_pages;
     }
   }
 
   return Response.json({
-    chapters: data || [],
+    chapters: chaptersRes.data || [],
     note_counts: noteCount,
     sub_pages_by_pid: subPagesByPid,
   });
