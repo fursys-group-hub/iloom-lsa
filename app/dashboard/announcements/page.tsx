@@ -25,7 +25,7 @@ const PRIORITY_TONE: Record<string, Tone> = {
 };
 
 export default function AnnouncementsPage() {
-  const { selectedBatchId, selectedBatch } = useBatch();
+  const { selectedBatchId, selectedBatch, loading: batchLoading } = useBatch();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -49,8 +49,12 @@ export default function AnnouncementsPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedBatchId) fetchAnnouncements(selectedBatchId);
-  }, [selectedBatchId, fetchAnnouncements]);
+    if (selectedBatchId) {
+      fetchAnnouncements(selectedBatchId);
+    } else if (!batchLoading) {
+      setLoading(false);
+    }
+  }, [selectedBatchId, batchLoading, fetchAnnouncements]);
 
   const resetForm = () => {
     setShowForm(false); setEditingId(null);

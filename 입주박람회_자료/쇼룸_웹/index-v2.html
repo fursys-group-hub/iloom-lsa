@@ -1,0 +1,2915 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>iloom COLLECT 키큰옷장 — 박람회 쇼룸</title>
+
+<style>
+/* ─────────────────────────────────────────
+   폰트 (인쇄용 자료에서 그대로 가져옴)
+   ───────────────────────────────────────── */
+@font-face {
+  font-family: 'Paybooc';
+  src: url('fonts/paybooc OTF Light.otf') format('opentype');
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Paybooc';
+  src: url('fonts/paybooc OTF Light.otf') format('opentype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Paybooc';
+  src: url('fonts/paybooc OTF Medium.otf') format('opentype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Paybooc';
+  src: url('fonts/paybooc OTF Bold.otf') format('opentype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Paybooc';
+  src: url('fonts/paybooc OTF ExtraBold.otf') format('opentype');
+  font-weight: 800; font-style: normal; font-display: swap;
+}
+
+/* ─────────────────────────────────────────
+   기본 — 1920×1080 풀스크린, TV 가로형
+   ───────────────────────────────────────── */
+:root {
+  --ink: #2A2A2E;
+  --ink-soft: #5A5A5A;
+  --ink-mute: #8A8A8A;
+  --line: #E5E3DD;
+  --line-soft: rgba(0, 0, 0, 0.06);   /* 속삭임 테두리 */
+  --line-strong: #2A2A2E;
+  --bg: #FAFAF8;
+  --iloom: #F7F5F1;       /* 컬렉트 그레이지 */
+  --iloom-strong: #2A2A2E;
+  --hansam-1: #F5F5F5;    /* 타사 가성비 */
+  --hansam-2: #ECECEC;    /* 타사 프리미엄 */
+  --accent: #B89968;       /* 골드 */
+  --accent-deep: #9A7F50;  /* 골드 진한 (hover) */
+  --hot: #C84A3F;          /* 강조 빨강 */
+
+  /* Linear-style 다층 그림자 (자연광) */
+  --shadow-sm:
+    rgba(0, 0, 0, 0.04) 0px 4px 18px,
+    rgba(0, 0, 0, 0.027) 0px 2px 8px,
+    rgba(0, 0, 0, 0.02) 0px 0.8px 3px,
+    rgba(0, 0, 0, 0.01) 0px 0.2px 1px;
+  --shadow-md:
+    rgba(0, 0, 0, 0.08) 0px 8px 30px,
+    rgba(0, 0, 0, 0.04) 0px 4px 12px,
+    rgba(0, 0, 0, 0.02) 0px 1px 4px;
+  --shadow-lg:
+    rgba(0, 0, 0, 0.12) 0px 16px 48px,
+    rgba(0, 0, 0, 0.06) 0px 6px 16px,
+    rgba(0, 0, 0, 0.03) 0px 2px 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Paybooc', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  background: #000;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: default;
+}
+
+/* 스테이지: 1920×1080 기준으로 작업 후 화면 비율에 맞춰 자동 스케일 */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+.stage-inner {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  background: var(--bg);
+  transform-origin: center center;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────
+   슬라이드 컨테이너
+   ───────────────────────────────────────── */
+.slides { position: absolute; inset: 0; }
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 56px 64px 130px;
+  overflow: hidden;
+}
+.slide.active { opacity: 1; pointer-events: auto; }
+
+/* 슬라이드 안의 요소들이 페이드인 */
+.slide.active .fade-up { animation: fadeUp 0.9s 0.2s both cubic-bezier(0.4, 0, 0.2, 1); }
+.slide.active .fade-up-2 { animation: fadeUp 0.9s 0.4s both cubic-bezier(0.4, 0, 0.2, 1); }
+.slide.active .fade-up-3 { animation: fadeUp 0.9s 0.6s both cubic-bezier(0.4, 0, 0.2, 1); }
+.slide.active .fade-up-4 { animation: fadeUp 0.9s 0.8s both cubic-bezier(0.4, 0, 0.2, 1); }
+.slide.active .scale-in { animation: scaleIn 1.1s 0.3s both cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────
+   공용 컴포넌트 (Reusable)
+   ───────────────────────────────────────── */
+
+/* 검은 강조 박스 — 사양 결론, 부품 임팩트, 시뮬레이터 요약, 가격 차이 등 */
+.dark-block {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 14px;
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+}
+.dark-block strong { color: #fff; font-weight: 700; }
+.dark-block em { font-style: normal; color: #F5CC6A; font-weight: 700; }
+.dark-block .accent { color: #F5CC6A; font-weight: 800; letter-spacing: -0.02em; }
+
+/* 흰 카드 박스 — 표면재/부품/도어/가격/두께 카드 등 */
+.surface-card {
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.surface-card.is-clickable { cursor: zoom-in; }
+.surface-card.is-clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.surface-card.is-iloom {
+  background: var(--iloom);
+  border: 2px solid rgba(184, 153, 104, 0.4);
+}
+
+/* ─────────────────────────────────────────
+   상단 헤더 (모든 슬라이드 공통)
+   ───────────────────────────────────────── */
+.slide-eyebrow {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.slide-title {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.slide-intro {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.slide-intro strong { font-weight: 700; color: var(--ink); }
+
+/* ─────────────────────────────────────────
+   슬라이드 1 · 표지 (인트로)
+   ───────────────────────────────────────── */
+.cover {
+  background: linear-gradient(135deg, #F7F5F1 0%, #FAFAF8 50%, #F2EFE9 100%);
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+.cover-rule {
+  width: 96px;
+  height: 4px;
+  background: var(--ink);
+  margin-bottom: 46px;
+}
+.cover-eyebrow {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.cover-title {
+  font-size: 96px;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 60px;
+}
+.cover-title em { font-style: normal; color: var(--accent); font-weight: 800; }
+.cover-sub {
+  font-size: 26px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-bottom: 80px;
+  letter-spacing: -0.005em;
+}
+.cover-cta {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  padding: 22px 48px;
+  border: none;
+  outline: none;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  box-shadow:
+    rgba(184, 153, 104, 0.35) 0px 12px 32px,
+    rgba(184, 153, 104, 0.18) 0px 4px 12px,
+    rgba(0, 0, 0, 0.04) 0px 2px 4px;
+  letter-spacing: -0.005em;
+}
+.cover-cta:hover { transform: translateY(-2px); background: var(--accent-deep); }
+.cover-cta::after { content: '→'; font-size: 26px; }
+.cover-bottom {
+  position: absolute;
+  bottom: 60px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 18px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.touch-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 16px;
+  color: var(--ink-mute);
+  opacity: 0.6;
+  animation: pulse 2.4s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* ─────────────────────────────────────────
+   슬라이드 2 · 한눈에 비교 (큰 표)
+   ───────────────────────────────────────── */
+.cmp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 28px;
+  font-size: 20px;
+  table-layout: fixed;
+}
+.cmp-table th, .cmp-table td {
+  padding: 22px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--line-soft);
+  font-weight: 400;
+  vertical-align: middle;
+}
+.cmp-table thead th {
+  font-size: 22px;
+  font-weight: 700;
+  padding: 22px 24px;
+  border-bottom: 2px solid var(--line-strong);
+  letter-spacing: -0.005em;
+}
+.cmp-table th.col-label { background: transparent; text-align: left; color: var(--ink-mute); }
+.cmp-table th.col-h1 { background: var(--hansam-1); color: var(--ink-soft); }
+.cmp-table th.col-h2 { background: var(--hansam-2); color: var(--ink-soft); }
+.cmp-table th.col-il { background: var(--iloom); color: var(--ink); }
+.cmp-table tbody th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--ink-soft);
+  background: transparent;
+  width: 22%;
+}
+.cmp-table tbody tr:hover td, .cmp-table tbody tr:hover th {
+  background: rgba(0,0,0,0.02);
+}
+.cmp-table tbody td.iloom {
+  background: var(--iloom);
+  font-weight: 500;
+  color: var(--ink);
+}
+.cmp-table tbody td.iloom strong { color: var(--ink); font-weight: 800; font-size: 23px; }
+.cmp-table tbody tr:last-child td, .cmp-table tbody tr:last-child th { border-bottom: none; }
+.cmp-table small { font-size: 14px; color: var(--ink-mute); display: block; margin-top: 3px; font-weight: 400; }
+.cmp-x { color: #B0B0B0; font-style: italic; }
+
+/* 결론 박스 */
+.cmp-conclusion {
+  margin-top: 28px;
+  padding: 28px 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cmp-conclusion-text {
+  font-size: 22px;
+  line-height: 1.55;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+}
+.cmp-conclusion-text strong { color: #fff; font-weight: 700; }
+.cmp-conclusion-text .accent { color: #F5CC6A; font-weight: 700; }
+
+/* ─────────────────────────────────────────
+   슬라이드 3 · 표면재 (LPM vs 코팅페이퍼)
+   ───────────────────────────────────────── */
+.material-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 28px;
+  flex: 1;
+  min-height: 0;
+}
+.material-card {
+  padding: 28px 32px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+.material-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.material-card-name { font-size: 26px; font-weight: 800; letter-spacing: -0.015em; }
+.material-card-tag {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.material-card-tag.bad { background: rgba(200,74,63,0.1); color: var(--hot); }
+.material-card-tag.good { background: var(--ink); color: #fff; }
+
+/* 사진 wrapper */
+.material-card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F0EEE8;
+}
+.material-card-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.material-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.material-card li {
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  position: relative;
+  padding-left: 22px;
+}
+.material-card li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1.4;
+}
+.material-card li strong { color: var(--ink); font-weight: 700; }
+.zoom-hint {
+  position: absolute;
+  bottom: 14px; right: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-soft);
+  border: 1px solid var(--line-soft);
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+/* part-card / door-card는 카드 우상단 (head 영역에 tag 없음) */
+.part-card .zoom-hint {
+  top: 16px; right: 16px;
+  bottom: auto;
+}
+.door-card-big .zoom-hint {
+  top: auto;
+  bottom: 28px;
+  right: 28px;
+}
+
+.pitch-quote {
+  margin-top: 28px;
+  padding: 24px 40px;
+  font-size: 22px;
+  line-height: 1.55;
+  text-align: center;
+  font-style: normal;
+}
+
+/* ─────────────────────────────────────────
+   슬라이드 4 · 두께
+   ───────────────────────────────────────── */
+.thickness-flex {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 28px;
+  flex: 1;
+  min-height: 0;
+}
+.thick-side {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+}
+.thick-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.thick-side.iloom .thick-label { color: var(--ink); }
+
+/* 두께 카드 사진 */
+.thick-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F0EEE8;
+  margin-bottom: 18px;
+}
+.thick-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.thick-img-caption {
+  position: absolute;
+  left: 14px; bottom: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+.thick-img-caption strong { color: var(--ink); font-weight: 700; }
+
+.thick-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.thick-bar-item { display: flex; flex-direction: column; gap: 6px; }
+.thick-bar-item-name {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 600;
+}
+.thick-bar-item-name strong {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.thick-bar-item-name strong em { font-style: normal; font-size: 18px; color: var(--ink-mute); margin-left: 4px; font-weight: 500; }
+.thick-bar { height: 22px; background: #ECEAE3; border-radius: 6px; position: relative; overflow: hidden; }
+.thick-bar-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink-mute);
+  border-radius: 6px;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.6s 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.thick-side.iloom .thick-bar-fill { background: var(--ink); }
+.slide.active .thick-bar-fill { transform: scaleX(var(--w, 0.8)); }
+
+.thick-impact {
+  margin-top: auto;
+  padding: 18px 22px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.thick-side.iloom .thick-impact { background: rgba(255,255,255,0.5); }
+.thick-impact strong { color: var(--ink); font-weight: 700; }
+
+.thick-headline {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.01em;
+  background: var(--ink);
+  border-radius: 14px;
+  padding: 22px 32px;
+}
+.thick-headline em { font-style: normal; color: var(--accent); font-weight: 800; }
+.thick-headline strong { color: #fff; font-weight: 700; }
+
+/* ─────────────────────────────────────────
+   슬라이드 4 v2 — 사진 띠 + 진짜 비교 차트
+   ───────────────────────────────────────── */
+.thick-photos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 28px;
+  flex-shrink: 0;
+}
+.thick-photo {
+  position: relative;
+  height: 220px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #F0EEE8;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-sm);
+}
+.thick-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thick-photo:first-child img { object-position: center bottom; }
+.thick-photo:last-child img { object-position: center 75%; }
+.thick-photo-cap {
+  position: absolute;
+  left: 16px; bottom: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line-soft);
+  color: var(--ink-soft);
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-sm);
+}
+.thick-photo-cap strong { color: var(--ink); font-weight: 700; }
+
+/* 두께 비교 차트 */
+.th-chart {
+  margin-top: 28px;
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+.th-chart-row {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 28px;
+  align-items: center;
+}
+.th-chart-row + .th-chart-row {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line-soft);
+}
+.th-chart-metric {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+}
+.th-chart-track {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.th-chart-bar {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.th-chart-vendor {
+  font-size: 15px;
+  color: var(--ink-mute);
+  font-weight: 600;
+  text-align: right;
+  letter-spacing: -0.005em;
+}
+.th-chart-bar.iloom .th-chart-vendor {
+  color: var(--ink);
+  font-weight: 700;
+}
+.th-chart-fill-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.th-chart-fill {
+  height: 32px;
+  width: var(--w);
+  background: var(--ink-mute);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.4s 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide.active .th-chart-fill { transform: scaleX(1); }
+.th-chart-bar.iloom .th-chart-fill { background: var(--ink); }
+.th-chart-bar.iloom .th-chart-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: var(--extra, 0px);
+  background: var(--accent);
+}
+.th-chart-num {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.th-chart-num small { font-size: 14px; font-weight: 500; color: var(--ink-mute); margin-left: 2px; }
+.th-chart-num .diff {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 700;
+  margin-left: 8px;
+  background: rgba(184, 153, 104, 0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.th-chart-num .diff-thin {
+  font-size: 14px;
+  color: var(--ink-mute);
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+/* ─────────────────────────────────────────
+   슬라이드 5 · 부품 (Hettich, Salice, 옷걸이봉)
+   ───────────────────────────────────────── */
+.parts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 22px;
+  margin-top: 28px;
+  flex: 1;
+  min-height: 0;
+}
+.part-card {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  min-height: 0;
+}
+.part-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.part-num {
+  width: 52px; height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  flex-shrink: 0;
+}
+.part-cat { font-size: 16px; font-weight: 700; color: var(--ink-mute); letter-spacing: 0.06em; text-transform: uppercase; }
+.part-name { font-size: 26px; font-weight: 800; letter-spacing: -0.015em; }
+.part-img {
+  width: 100%;
+  flex: 1;
+  min-height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #F0EEE8;
+}
+.part-stat {
+  background: var(--iloom);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.part-stat-num { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -0.015em; line-height: 1.2; }
+.part-stat-label { font-size: 16px; color: var(--ink-soft); line-height: 1.4; font-weight: 500; }
+.part-pills {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.part-pills li {
+  font-size: 20px;
+  color: var(--ink-soft);
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.55;
+}
+.part-pills li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 800;
+}
+.part-pills li strong { color: var(--ink); font-weight: 700; }
+
+.parts-impact {
+  margin-top: 28px;
+  padding: 22px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.parts-impact-side { font-size: 22px; line-height: 1.4; flex: 1; }
+.parts-impact-side.bad {
+  opacity: 0.4;
+  text-decoration: line-through;
+  text-align: right;
+}
+.parts-impact-side.good {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.parts-impact-arrow { font-size: 30px; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+.parts-impact-side strong { color: #fff; font-weight: 700; }
+.parts-impact-side.good strong { color: var(--accent); font-weight: 800; }
+
+/* ─────────────────────────────────────────
+   슬라이드 6 · 모듈 + 시뮬레이터
+   ───────────────────────────────────────── */
+.sim-layout {
+  display: grid;
+  grid-template-columns: 620px 1fr;
+  gap: 24px;
+  margin-top: 28px;
+  flex: 1;
+  min-height: 0;
+}
+.sim-modules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.sim-modules-title {
+  grid-column: 1 / -1;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.sim-module {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  align-self: start;
+}
+.sim-module:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-md);
+}
+.sim-module-img {
+  width: 100%;
+  height: 260px;
+  flex-shrink: 0;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.sim-module-img img { width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 12px; display: block; }
+.sim-module-info { padding: 16px 18px 12px; min-width: 0; }
+.sim-module-name { font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.015em; line-height: 1.25; }
+.sim-module-desc { font-size: 15px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+.sim-module-code {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  letter-spacing: 0.02em;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  line-height: 1.4;
+}
+.sim-module-add {
+  width: calc(100% - 36px);
+  margin: 0 18px 18px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: background 0.2s, transform 0.15s;
+}
+.sim-module-add:hover { background: #1A1A1A; transform: translateY(-1px); }
+.sim-module-add:active { transform: translateY(0); }
+
+/* 시뮬레이터 영역 */
+.sim-canvas {
+  background: linear-gradient(180deg, #FAFAF8 0%, #F2EFE9 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+.sim-canvas-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.sim-canvas-title { font-size: 22px; font-weight: 800; flex-shrink: 0; }
+
+/* 옷장 / 붙박이장 모드 토글 */
+.sim-mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0,0,0,0.05);
+  padding: 4px;
+  border-radius: 999px;
+}
+.sim-mode-tab {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+.sim-mode-tab.active { background: var(--ink); color: #fff; }
+
+.sim-canvas-clear {
+  font-size: 14px;
+  color: var(--ink-mute);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.sim-canvas-clear:hover { border-color: var(--ink); color: var(--ink); }
+
+.sim-floor {
+  flex: 1;
+  background: rgba(255,255,255,0.6);
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 20px 18px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1px;
+  min-height: 0;
+  overflow-x: auto;
+}
+.sim-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--ink-mute);
+  font-size: 18px;
+  line-height: 1.6;
+}
+.sim-empty-icon { font-size: 56px; margin-bottom: 12px; opacity: 0.3; }
+
+/* 양 끝 서라운딩 — 사진 박스와 같은 구조 (박스 + 빈 라벨 영역) */
+.sim-side {
+  flex-shrink: 0;
+  width: 28px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.sim-side-box {
+  flex: 1;
+  background: var(--iloom);
+  border: 1px solid #D8D5CD;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  padding: 10px 0;
+  min-height: 0;
+}
+/* 사진 박스 옆 라벨 영역만큼 비워서 정렬 맞춤 (sim-placed-name 38 + spec ~20 = ~58) */
+.sim-side::after {
+  content: '';
+  display: block;
+  height: 58px;
+  flex-shrink: 0;
+}
+
+.sim-placed {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.sim-placed:hover { z-index: 2; }
+.sim-placed:hover .sim-placed-img { box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.sim-placed-img {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #D8D5CD;
+  border-radius: 0;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+/* 인접 박스 좌측 보더 제거 (이중 보더 방지) */
+.sim-placed + .sim-placed .sim-placed-img,
+.sim-side + .sim-placed .sim-placed-img,
+.sim-placed + .sim-side .sim-side-box,
+.sim-side + .sim-side .sim-side-box {
+  border-left: none;
+}
+/* 양 끝(첫/마지막 자식)만 둥근 모서리 — sim-side든 sim-placed든 적용 */
+.sim-floor > :first-child .sim-placed-img,
+.sim-floor > :first-child .sim-side-box {
+  border-radius: 4px 0 0 4px;
+}
+.sim-floor > :last-child .sim-placed-img,
+.sim-floor > :last-child .sim-side-box {
+  border-radius: 0 4px 4px 0;
+}
+.sim-floor > :only-child .sim-placed-img,
+.sim-floor > :only-child .sim-side-box {
+  border-radius: 4px;
+}
+
+.sim-placed-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.sim-placed-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  padding: 6px 2px 0;
+  line-height: 1.25;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: keep-all;
+  flex-shrink: 0;
+}
+.sim-placed-spec {
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-align: center;
+  padding: 0 2px 8px;
+  font-weight: 500;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.sim-placed-remove {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 3;
+}
+.sim-placed:hover .sim-placed-remove { opacity: 1; }
+
+.sim-summary {
+  display: flex;
+  gap: 32px;
+  padding: 14px 22px;
+  flex-shrink: 0;
+}
+.sim-summary-item { flex: 1; }
+.sim-summary-label { font-size: 14px; color: rgba(255,255,255,0.55); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
+.sim-summary-value { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.sim-summary-value small { font-size: 14px; color: rgba(255,255,255,0.55); margin-left: 4px; font-weight: 500; }
+
+/* ─────────────────────────────────────────
+   슬라이드 7 · 도어 (리디 vs 스톤W)
+   ───────────────────────────────────────── */
+.doors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 28px;
+  flex: 1;
+  min-height: 0;
+}
+.door-card-big {
+  padding: 28px 32px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  position: relative;
+}
+.door-card-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.door-chip-big {
+  width: 64px; height: 64px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  border: 2px solid var(--ink);
+}
+.door-chip-big.spp { background: url('사용 이미지본/SPP.png') center / cover, linear-gradient(135deg, #FAFAF7, #F2F0EA); }
+.door-chip-big.ngys { background: url('사용 이미지본/NGYS.png') center / cover, linear-gradient(135deg, #E8E3DA, #D8D2C7); }
+.door-card-name-big { font-size: 26px; font-weight: 800; }
+.door-card-sub-big { font-size: 15px; color: var(--ink-mute); margin-top: 4px; }
+.door-card-img-big {
+  width: 100%;
+  flex: 1;
+  border-radius: 16px;
+  background: #F0EEE8;
+  overflow: hidden;
+}
+.door-card-img-big img { width: 100%; height: 100%; object-fit: cover; }
+.door-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.door-features li {
+  font-size: 20px;
+  color: var(--ink-soft);
+  padding-left: 22px;
+  position: relative;
+  line-height: 1.55;
+}
+.door-features li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1.4;
+}
+.door-features li strong { color: var(--ink); font-weight: 700; }
+
+/* ─────────────────────────────────────────
+   슬라이드 8 · 가격 비교 (인터랙티브)
+   ───────────────────────────────────────── */
+.price-shell {
+  margin-top: 28px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+}
+
+.price-tabs {
+  display: flex;
+  gap: 12px;
+  background: rgba(0,0,0,0.04);
+  padding: 6px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+.price-tab {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.price-tab.active { background: var(--ink); color: #fff; }
+
+.price-stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
+  gap: 24px;
+  align-items: center;
+}
+.price-nav {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.price-nav svg { width: 28px; height: 28px; display: block; }
+.price-nav:hover { background: var(--ink); color: #fff; transform: scale(1.05); }
+.price-nav:disabled { opacity: 0.3; cursor: not-allowed; transform: none; background: #fff; color: var(--ink); }
+
+.price-card {
+  padding: 28px 36px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.price-card-head { display: flex; justify-content: space-between; align-items: flex-end; }
+.price-card-config-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.price-card-config { font-size: 30px; font-weight: 800; letter-spacing: -0.015em; }
+.price-card-config small { font-size: 16px; color: var(--ink-mute); font-weight: 500; margin-left: 8px; }
+
+.price-card-pager {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  background: rgba(0,0,0,0.04);
+  padding: 8px 16px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+
+/* 가격 카드 본문 — 좌우 2단 (왼쪽 모듈 시각화 / 오른쪽 사양 + 가격) */
+.price-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 22px;
+  min-height: 0;
+}
+.price-body-left {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+.price-body-right {
+  display: grid;
+  grid-template-columns: 4.5fr 5.5fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* 모듈 시각화 (왼쪽 컬럼 안) */
+.price-visual-modules {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+}
+.price-visual-side {
+  width: 44px;
+  height: 420px;
+  background: #FFFFFF;
+  color: var(--ink-mute);
+  border: 1px solid rgba(0,0,0,0.14);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  flex-shrink: 0;
+}
+.price-visual-module {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  text-align: center;
+}
+.price-visual-module-img-wrap {
+  height: 420px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.price-visual-module-img {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+.price-visual-module-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 12px;
+}
+.price-visual-module-spec {
+  font-size: 15px;
+  color: var(--ink-mute);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* 사양 요약 — display:contents 로 4개 칸을 그리드에 직접 노출 */
+.price-visual-summary {
+  display: contents;
+}
+.price-visual-summary > div {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+}
+.price-visual-summary-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.price-visual-summary-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.price-visual-summary-note {
+  font-size: 14px;
+  color: var(--ink-mute);
+  font-weight: 400;
+  margin-top: 6px;
+}
+
+/* 가격 비교 — 우측 컬럼 안에서 세로 스택 */
+.price-vs {
+  display: contents;
+}
+.price-vs .price-side-final { font-size: 32px; }
+
+/* 컬렉트 카드 내부 리디 / 스톤W 분할 */
+.iloom-door-split {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.iloom-door-half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 4px;
+}
+.iloom-door-half + .iloom-door-half {
+  border-top: 1px dashed rgba(0,0,0,0.13);
+  padding-top: 10px;
+  margin-top: 8px;
+}
+.iloom-door-half .price-side-old { margin-top: auto; }
+
+.price-side {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  flex: 1;
+}
+.price-side.iloom {
+  background: var(--iloom);
+  border: 2px solid var(--ink);
+}
+.price-side-vendor { font-size: 14px; font-weight: 600; color: var(--ink-mute); letter-spacing: 0.06em; }
+.price-side.iloom .price-side-vendor { color: var(--ink); }
+.price-side.iloom .price-side-final { color: var(--hot); }
+.price-side-tag { font-size: 13px; color: var(--ink-mute); }
+.price-side.iloom .price-side-tag { color: var(--ink-soft); }
+.price-side-old {
+  font-size: 14px;
+  color: var(--ink-mute);
+  text-decoration: line-through;
+  font-weight: 500;
+  margin-top: auto;
+}
+.price-side-final {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.price-side-final small { font-size: 16px; font-weight: 600; color: var(--ink-mute); margin-left: 4px; }
+.price-side-alt { font-size: 13px; color: var(--ink-soft); padding-top: 10px; border-top: 1px dashed rgba(0,0,0,0.1); }
+.price-side-alt strong { color: var(--ink); font-weight: 700; }
+.price-side-alt .strike { text-decoration: line-through; color: var(--ink-mute); margin-right: 6px; }
+.price-side-empty {
+  font-size: 24px;
+  color: var(--ink-mute);
+  margin: auto;
+  text-align: center;
+  font-weight: 500;
+}
+
+.price-diff-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 18px 28px;
+}
+.price-diff-num { font-size: 40px; font-weight: 800; color: var(--accent); letter-spacing: -0.02em; line-height: 1; }
+.price-diff-text { font-size: 22px; line-height: 1.4; }
+.price-diff-text strong { color: #fff; font-weight: 700; }
+
+.price-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.price-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.price-dot.active { background: var(--ink); width: 28px; border-radius: 999px; }
+
+/* ─────────────────────────────────────────
+   네비게이션 바 (하단)
+   ───────────────────────────────────────── */
+.navbar {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 86px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -16px 32px -8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 30;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+.nav-dots {
+  display: flex;
+  gap: 14px;
+}
+.nav-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-dot.active { background: var(--ink); width: 36px; border-radius: 999px; }
+.nav-dot:hover:not(.active) { background: rgba(0,0,0,0.4); }
+
+.nav-controls { display: flex; gap: 10px; align-items: center; }
+.nav-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, opacity 0.2s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.nav-btn svg { width: 18px; height: 18px; display: block; }
+.nav-btn:hover { transform: scale(1.08); background: #1A1A1A; }
+.nav-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+.nav-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px;
+  background: var(--accent);
+  width: 0;
+  transition: width 0.2s linear, opacity 0.4s ease;
+}
+.nav-progress.paused { opacity: 0; }
+
+/* 일시정지 인디케이터 */
+.pause-indicator {
+  position: absolute;
+  top: 24px; right: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-soft);
+  border: 1px solid var(--line-soft);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 25;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+.pause-indicator.show { opacity: 1; transform: translateY(0); }
+.pause-indicator::before {
+  content: '';
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #FF6B6B;
+  animation: pulseDot 1.6s infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* ─────────────────────────────────────────
+   확대 모달
+   ───────────────────────────────────────── */
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s;
+  padding: 60px;
+}
+.modal-shell.open { display: flex; opacity: 1; }
+.modal-card {
+  background: #fff;
+  border-radius: 24px;
+  width: 1500px;
+  height: 820px;
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.3s;
+  box-shadow: var(--shadow-lg);
+}
+.modal-shell.open .modal-card { transform: scale(1); }
+.modal-img-wrap {
+  flex: 1;
+  background: var(--iloom);
+  overflow: hidden;
+  position: relative;
+}
+.modal-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.modal-body {
+  width: 520px;
+  flex-shrink: 0;
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.modal-cat {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+.modal-title { font-size: 40px; font-weight: 800; line-height: 1.3; letter-spacing: -0.02em; }
+.modal-stat-row { display: flex; gap: 14px; }
+.modal-stat {
+  flex: 1;
+  background: var(--iloom);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.modal-stat-num { font-size: 30px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; line-height: 1.6; }
+.modal-stat-label { font-size: 13px; color: var(--ink-soft); margin-top: 2px; line-height: 1.6; }
+.modal-desc { font-size: 18px; line-height: 1.8; color: var(--ink-soft); }
+.modal-desc strong { color: var(--ink); font-weight: 700; }
+.modal-pills {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+.modal-pills li {
+  font-size: 15px;
+  padding: 12px 16px 12px 38px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 10px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  position: relative;
+}
+.modal-pills li::before {
+  content: '✓';
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 14px;
+}
+.modal-pills li strong { color: var(--ink); font-weight: 700; }
+.modal-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  color: var(--ink);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 5;
+}
+.modal-close:hover { background: var(--ink); color: #fff; }
+
+/* ─────────────────────────────────────────
+   세이프 가드 — 이미지 깨졌을 때 fallback
+   ───────────────────────────────────────── */
+img { background: #F0EEE8; }
+
+/* ─────────────────────────────────────────
+   Slide 7 · 가격 비교 (토글: 특가 / 상시)
+   ───────────────────────────────────────── */
+.price-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+.ptab {
+  padding: 7px 22px; font-size: 14px; font-weight: 700; font-family: inherit;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink-mute);
+  border-radius: 100px; cursor: pointer; transition: all 0.15s;
+}
+.ptab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pview.hidden { display: none; }
+
+/* 특가 뷰 — 1장 큰 카드 */
+.pf-card {
+  background: var(--iloom); border: 1px solid var(--line); border-radius: 16px;
+  padding: 28px 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.pf-badge {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  color: #fff; background: var(--hot); border-radius: 100px; padding: 4px 14px; margin-bottom: 10px;
+}
+.pf-size { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 4px; }
+.pf-modules { display: flex; gap: 8px; align-items: flex-end; margin: 14px 0 10px; }
+.pf-mod-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pf-mod-img {
+  width: 112px; height: 150px; object-fit: contain;
+  background: #F0EEE8; border-radius: 8px; border: 1px solid var(--line-soft);
+}
+.pf-mod-label { font-size: 12px; color: var(--ink-mute); }
+.pf-surround {
+  width: 26px; height: 150px; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--ink-mute); writing-mode: vertical-rl; letter-spacing: 0.1em;
+  background: #E8E5DF; border-radius: 6px; flex-shrink: 0;
+}
+.pf-config { font-size: 13px; color: var(--ink-soft); }
+.pf-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.pf-vs-block { }
+.pf-vs-label {
+  font-size: 12px; font-weight: 700; color: var(--ink-mute);
+  letter-spacing: 0.03em; margin-bottom: 8px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--line);
+}
+.pf-vs-price-old { font-size: 13px; color: var(--ink-mute); text-decoration: line-through; margin-bottom: 2px; }
+.pf-vs-price { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); line-height: 1.1; }
+.pf-vs-price.iloom { color: var(--hot); }
+.pf-vs-sub { font-size: 14px; font-weight: 600; color: var(--hot); opacity: 0.8; margin-top: 8px; }
+.pf-vs-sub-old { font-size: 12px; color: var(--ink-mute); text-decoration: line-through; }
+
+/* 상시 뷰 — 2열 카드 */
+.pr-two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pr-card { background: var(--iloom); border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px; }
+.pr-badge {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  color: #fff; background: var(--ink); border-radius: 100px; padding: 3px 12px; margin-bottom: 8px;
+}
+.pr-size { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 3px; }
+.pr-modules { display: flex; gap: 8px; align-items: flex-end; margin: 10px 0 8px; }
+.pr-mod-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pr-mod-img {
+  width: 110px; height: 145px; object-fit: contain;
+  background: #F0EEE8; border-radius: 8px; border: 1px solid var(--line-soft);
+}
+.pr-mod-label { font-size: 12px; color: var(--ink-mute); }
+.pr-config { font-size: 13px; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 8px; }
+.pr-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; gap: 6px; }
+.pr-vendor { font-size: 13px; color: var(--ink-soft); flex-shrink: 0; }
+.pr-nums { display: flex; flex-direction: column; align-items: flex-end; }
+.pr-old { font-size: 11px; color: var(--ink-mute); text-decoration: line-through; }
+.pr-final { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.pr-row.iloom .pr-final, .pr-row.iloom-alt .pr-final { color: var(--hot); font-size: 18px; }
+.pr-divider { border: none; border-top: 1px dashed var(--line); margin: 6px 0; }
+
+/* ─────────────────────────────────────────
+   Slide 8 · 모듈·도어 단가 카드
+   ───────────────────────────────────────── */
+.up-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 15px;
+}
+.up-card {
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.up-card-img {
+  height: 420px;
+  flex-shrink: 0;
+  background: #F7F5F1;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.up-card-img img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  padding: 20px;
+}
+.up-card-body {
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.up-card-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+/* 모듈 단가 표 */
+.up-price-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.up-price-table thead th {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  letter-spacing: 0.01em;
+  text-align: right;
+  padding: 10px 14px;
+  background: #EDECE8;
+}
+.up-price-table thead th:first-child { text-align: left; border-radius: 6px 0 0 0; }
+.up-price-table thead th:last-child { border-radius: 0 6px 0 0; }
+.up-price-table tbody tr { border-bottom: 1px solid var(--line-soft); }
+.up-price-table tbody tr:last-child { border-bottom: none; }
+.up-price-table td {
+  padding: 14px 14px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+}
+.up-price-table td:first-child {
+  text-align: left;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink-mute);
+}
+.up-price-table td.iloom { color: var(--hot); font-weight: 700; }
+.up-price-table td.none { color: var(--ink-mute); font-weight: 400; }
+/* 도어 카드: 폭별 행 목록 */
+.up-door-head {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  letter-spacing: 0.05em;
+  padding: 0 4px 6px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.up-door-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+.up-door-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 1fr;
+  gap: 4px;
+  align-items: center;
+  background: var(--bg);
+  border-radius: 7px;
+  padding: 9px 10px;
+}
+.up-door-w {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  letter-spacing: 0.03em;
+}
+.up-door-iloom {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hot);
+  text-align: right;
+}
+.up-door-rival {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.unit-price-footnote {
+  font-size: 16px; color: #C0392B;
+  margin-top: 10px; line-height: 1.8;
+}
+.price-tab-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+.price-tab-footnote {
+  font-size: 13px;
+  color: #C0392B;
+  line-height: 1.7;
+  padding-top: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage-inner" id="stage">
+
+    <div class="slides" id="slides">
+
+      <!-- ===== SLIDE 1 · 표지 ===== -->
+      <section class="slide cover active" data-idx="0">
+        <div class="cover-rule fade-up"></div>
+        <h1 class="cover-title fade-up-2">
+          타사 VS 컬렉트 키큰옷장<br>
+          스펙 및 가격 비교
+        </h1>
+        <button class="cover-cta fade-up-4" onclick="goto(1)">
+          비교 시작
+        </button>
+        <div class="touch-hint">화면을 터치하거나 좌우로 넘기세요</div>
+      </section>
+
+      <!-- ===== SLIDE 2 · 한눈에 비교 ===== -->
+      <section class="slide" data-idx="1">
+        <div class="slide-eyebrow fade-up">한눈에</div>
+        <h2 class="slide-title fade-up">핵심 사양 한눈에 비교</h2>
+        <table class="cmp-table fade-up-3">
+          <colgroup><col style="width:22%"><col style="width:26%"><col style="width:26%"><col style="width:26%"></colgroup>
+          <thead>
+            <tr>
+              <th class="col-label">비교 항목</th>
+              <th class="col-h1">타사 가성비 라인</th>
+              <th class="col-h2">타사 프리미엄 라인</th>
+              <th class="col-il">컬렉트 키큰옷장</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th>주요 마감재</th><td>CPR(코팅페이퍼)<small>(종이+비닐)</small></td><td>PP / LPM</td><td class="iloom"><strong>LPM</strong></td></tr>
+            <tr><th>윗판/바닥판 두께</th><td>18mm PB</td><td>18mm PB</td><td class="iloom"><strong>18.5mm</strong> PB</td></tr>
+            <tr><th>옆판 두께</th><td>18mm PB</td><td>15mm PB</td><td class="iloom"><strong>15.5mm</strong> PB</td></tr>
+            <tr><th>서랍 레일</th><td>중국 타이밍</td><td>Hettich<small>독일 137년</small></td><td class="iloom"><strong>Hettich</strong><small>독일 137년</small></td></tr>
+            <tr><th>여닫이 도어 힌지</th><td class="cmp-x">미명시</td><td>Hettich<small>독일 137년</small></td><td class="iloom"><strong>Salice</strong><small>이탈리아 90년</small></td></tr>
+            <tr><th>옷걸이봉</th><td>스틸봉</td><td>알루미늄 + 아노다이징</td><td class="iloom"><strong>알루미늄</strong> + 아노다이징<small>iloom 각인 소켓</small></td></tr>
+          </tbody>
+        </table>
+
+        <div class="cmp-conclusion dark-block fade-up-4">
+          <div class="cmp-conclusion-text">
+            비슷한 금액에 한 단계 위의 부품과 마감<br>
+            <span class="accent">Hettich 서랍레일 · Salice 도어힌지 · LPM 마감</span>이 컬렉트는 전부 기본 구성입니다.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 3 · 표면재 ===== -->
+      <section class="slide" data-idx="2">
+        <div class="slide-eyebrow fade-up">Part 1 · 몸통의 차이</div>
+        <h2 class="slide-title fade-up">옷장 표면이 오래 써도 처음 모습에 가깝게 유지되는 이유</h2>
+        <p class="slide-intro fade-up-2">
+          옷장은 <strong>매일 옷이 스치고, 옷걸이 후크가 닿고, 손으로 만지는 가구</strong>예요. 표면재가 단단할수록 오래 사용해도 처음과 같은 모습을 잘 유지할 수 있어요.
+        </p>
+
+        <div class="material-grid fade-up-3">
+          <div class="material-card surface-card is-clickable" onclick="openModal('material-paper')">
+            <div class="material-card-head">
+              <div class="material-card-name">코팅페이퍼</div>
+              <div class="material-card-tag bad">⚠️ 장기 사용 시 들뜸</div>
+            </div>
+            <div class="material-card-img-wrap">
+              <img class="material-card-img" src="사용 이미지본/PET.png" alt="코팅페이퍼 단면">
+            </div>
+            <ul>
+              <li>인쇄된 종이/필름을 <strong>본드로 부착</strong></li>
+              <li>시간이 지나면 본드가 약해져 <strong>들뜸 발생 가능</strong></li>
+              <li>옷걸이 후크 스침에 미세 흠집 누적</li>
+              <li>장기 사용 시 <strong>가장자리 들뜸·변색</strong>, 물에 부풀 수 있음</li>
+            </ul>
+            <div class="zoom-hint">🔍 자세히 보기</div>
+          </div>
+
+          <div class="material-card surface-card is-clickable" onclick="openModal('material-lpm')">
+            <div class="material-card-head">
+              <div class="material-card-name">LPM</div>
+              <div class="material-card-tag good">✅ 장기 사용 시에도 색 변화가 적음</div>
+            </div>
+            <div class="material-card-img-wrap">
+              <img class="material-card-img" src="사용 이미지본/LPM.png" alt="LPM 단면">
+            </div>
+            <ul>
+              <li><strong>고온·고압 직접 압착</strong></li>
+              <li>표면이 사실상 <strong>단단한 플라스틱</strong>처럼 일체화</li>
+              <li>손톱 긁힘에 강함, 물걸레 청소 가능</li>
+              <li>장기 사용 시에도 <strong>색 변화가 적음</strong></li>
+            </ul>
+            <div class="zoom-hint">🔍 자세히 보기</div>
+          </div>
+        </div>
+
+        <div class="pitch-quote dark-block fade-up-4">
+          옷장은 매일 옷걸이가 스치는 곳이에요. 일반 코팅페이퍼는 <em>종이를 본드로 붙인 마감</em>이라 시간이 지나면 가장자리가 들뜨고 변색될 수 있지만,<br>컬렉트는 <em>고온·고압으로 직접 압착한 LPM</em>이라 표면이 플라스틱처럼 단단해서 흠집과 색 변화에 강해요.
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 4 · 부품 ===== -->
+      <section class="slide" data-idx="3">
+        <div class="slide-eyebrow fade-up">Part 2 · 프리미엄 부품 구성</div>
+        <h2 class="slide-title fade-up">보이지 않는 부품도 검증된 브랜드로</h2>
+        <p class="slide-intro fade-up-2">
+          가구의 품질은 <strong>눈에 잘 보이지 않는 부품(레일·힌지·금속)</strong>에서 차이가 납니다. 매일 여닫는 도어·서랍의 부드러움이 오래 사용해도 잘 유지되는 이유예요.
+        </p>
+
+        <div class="parts-grid fade-up-3">
+          <div class="part-card surface-card is-clickable" onclick="openModal('part-hettich')">
+            <div class="zoom-hint">🔍 자세히 보기</div>
+            <div class="part-card-head">
+              <div class="part-num" aria-label="서랍 레일">⚙️</div>
+              <div>
+                <div class="part-cat">서랍 레일</div>
+                <div class="part-name">Hettich</div>
+              </div>
+            </div>
+            <img class="part-img" src="사용 이미지본/소랍 레일.jpg" alt="Hettich 서랍 레일">
+            <div class="part-stat">
+              <div class="part-stat-num">50,000</div>
+              <div class="part-stat-label">회 개폐 테스트 (Hettich 자체 검증)</div>
+            </div>
+            <ul class="part-pills">
+              <li><strong>강철 슬라이드 + 볼베어링</strong></li>
+              <li><strong>풀 익스텐션</strong> (서랍 100%)</li>
+              <li><strong>댐핑 클로징</strong> 자동 감속</li>
+            </ul>
+          </div>
+
+          <div class="part-card surface-card is-clickable" onclick="openModal('part-salice')">
+            <div class="zoom-hint">🔍 자세히 보기</div>
+            <div class="part-card-head">
+              <div class="part-num" aria-label="여닫이 도어 힌지">🔩</div>
+              <div>
+                <div class="part-cat">여닫이 도어 힌지</div>
+                <div class="part-name">Salice</div>
+              </div>
+            </div>
+            <img class="part-img" src="사용 이미지본/도어 힌지.jpg" alt="Salice 도어 힌지">
+            <div class="part-stat">
+              <div class="part-stat-num">200,000</div>
+              <div class="part-stat-label">회 개폐 테스트 (Salice 자체 검증)</div>
+            </div>
+            <ul class="part-pills">
+              <li><strong>댐핑(soft-close)</strong> 마지막 5cm 자동 감속</li>
+              <li><strong>3D 정밀 조절</strong> (좌우·상하·앞뒤)</li>
+              <li>시공 후 <strong>처짐 보정</strong> 가능</li>
+            </ul>
+          </div>
+
+          <div class="part-card surface-card is-clickable" onclick="openModal('part-rod')">
+            <div class="zoom-hint">🔍 자세히 보기</div>
+            <div class="part-card-head">
+              <div class="part-num" aria-label="옷걸이봉">📏</div>
+              <div>
+                <div class="part-cat">옷걸이봉</div>
+                <div class="part-name">알루미늄 + 아노다이징</div>
+              </div>
+            </div>
+            <img class="part-img" src="사용 이미지본/옷걸이봉.jpg" alt="알루미늄 옷걸이봉">
+            <div class="part-stat">
+              <div class="part-stat-num">0</div>
+              <div class="part-stat-label">부식에 강함 · 비철금속</div>
+            </div>
+            <ul class="part-pills">
+              <li><strong>비철금속</strong> · 부식에 강함</li>
+              <li>표면 <strong>균일·매끈</strong> · 옷 후크 긁힘에 강함</li>
+              <li>알루미늄에 <strong>iloom 로고 각인</strong></li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== SLIDE 5 · 모듈 + 시뮬레이터 ===== -->
+      <section class="slide" data-idx="4">
+        <div class="slide-eyebrow fade-up">Part 3 · 제품 구성</div>
+        <h2 class="slide-title fade-up">내 옷장 직접 짜보기</h2>
+        <p class="slide-intro fade-up-2">
+          모듈 6종 + 도어 2종을 자유롭게 조합해 <strong>1통반부터 3통반</strong>까지 공간에 맞게 구성할 수 있어요.
+        </p>
+
+        <div class="sim-layout fade-up-3">
+          <div class="sim-modules" id="simModules">
+            <div class="sim-modules-title">모듈 12종 (900/1000폭 · 450/500폭) — 클릭하면 추가</div>
+            <!-- JS가 채움 -->
+          </div>
+
+          <div class="sim-canvas">
+            <div class="sim-canvas-head">
+              <div class="sim-canvas-title">내 옷장 구성</div>
+              <div class="sim-mode-tabs" id="simModeTabs">
+                <button class="sim-mode-tab active" data-mode="closet" onclick="setSimMode('closet')">옷장</button>
+                <button class="sim-mode-tab" data-mode="builtin" onclick="setSimMode('builtin')">붙박이장</button>
+              </div>
+              <button class="sim-canvas-clear" onclick="clearSim()">↺ 처음부터</button>
+            </div>
+            <div class="sim-floor" id="simFloor">
+              <div class="sim-empty">
+                <div class="sim-empty-icon">🛋️</div>
+                왼쪽에서 모듈을 선택하면<br>여기에 차곡차곡 쌓여요
+              </div>
+            </div>
+            <div class="sim-summary dark-block">
+              <div class="sim-summary-item">
+                <div class="sim-summary-label">총 폭</div>
+                <div class="sim-summary-value" id="simWidth">0<small>mm</small></div>
+              </div>
+              <div class="sim-summary-item">
+                <div class="sim-summary-label">모듈 개수</div>
+                <div class="sim-summary-value" id="simCount">0<small>개</small></div>
+              </div>
+              <div class="sim-summary-item">
+                <div class="sim-summary-label">적합 평형</div>
+                <div class="sim-summary-value" id="simSpace">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 6 · 도어 ===== -->
+      <section class="slide" data-idx="5">
+        <div class="slide-eyebrow fade-up">Part 3 · 제품 구성</div>
+        <h2 class="slide-title fade-up">2종 여닫이 도어 옵션</h2>
+        <p class="slide-intro fade-up-2">
+          리디<small>(SPP · 무광 새틴)</small>와 스톤W<small>(NGYS · 스톤 질감)</small>, 두 가지 모두 <strong>18.5t LPM 마감</strong>으로 공간 분위기에 맞게 고르시면 됩니다.
+        </p>
+
+        <div class="doors-grid fade-up-3">
+          <div class="door-card-big surface-card is-clickable" onclick="openModal('door-spp')">
+            <div class="door-card-head">
+              <div>
+                <div class="door-card-name-big">리디 도어 (SPP)</div>
+                <div class="door-card-sub-big">심플리 화이트 · 무광 새틴</div>
+              </div>
+              <div class="door-chip-big spp"></div>
+            </div>
+            <div class="door-card-img-big">
+              <img src="사용 이미지본/리디도어 핸드리스.jpg" alt="리디 도어">
+            </div>
+            <ul class="door-features">
+              <li><strong>디자인</strong> · 핸드리스 + 곡면 커팅 손잡이부 (오래 써도 편안)</li>
+              <li><strong>색상</strong> · 따뜻한 화이트 톤 (옅은 회색빛을 은은하게 머금은)</li>
+              <li><strong>질감 및 마감</strong> · 무광 새틴 (차분하고 부드러운 새틴 감촉)</li>
+              <li><strong>소재</strong> · MDF + PP + LPM 18.5t</li>
+            </ul>
+            <div class="zoom-hint">🔍 자세히 보기</div>
+          </div>
+
+          <div class="door-card-big surface-card is-clickable" onclick="openModal('door-ngys')">
+            <div class="door-card-head">
+              <div>
+                <div class="door-card-name-big">스톤W 도어 (NGYS)</div>
+                <div class="door-card-sub-big">뉴트럴 그레이 · 스톤 질감</div>
+              </div>
+              <div class="door-chip-big ngys"></div>
+            </div>
+            <div class="door-card-img-big">
+              <img src="사용 이미지본/스톤w도어.jpg" alt="스톤W 도어">
+            </div>
+            <ul class="door-features">
+              <li><strong>디자인</strong> · 알루미늄 손잡이 (메탈 포인트로 모던한 느낌)</li>
+              <li><strong>색상</strong> · 뉴트럴 그레이 톤 (화사하면서도 차분한 회색)</li>
+              <li><strong>질감 및 마감</strong> · 스톤 질감 (자연 소재 같은 표면감과 은은한 고급스러움)</li>
+              <li><strong>소재</strong> · PB + LPM 18.5t</li>
+            </ul>
+            <div class="zoom-hint">🔍 자세히 보기</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 7 · 세트 가격 비교 (토글) ===== -->
+      <section class="slide" data-idx="6">
+        <div class="slide-eyebrow fade-up">Part 4 · 가격 비교</div>
+        <h2 class="slide-title fade-up">타사 vs 컬렉트, 가격은 거의 같습니다.</h2>
+        <p class="slide-intro fade-up-2">타사 베이직 가격에 타사 프리미엄 부품·표면재 · 그것이 컬렉트 키큰옷장의 경쟁력입니다.</p>
+
+        <div class="price-shell">
+          <!-- 탭 + 각주 -->
+          <div class="price-tab-row fade-up-3">
+            <div class="price-tabs">
+              <button class="price-tab active" data-cat="builtin" onclick="switchPriceCat('builtin')">입주박람회 특가</button>
+              <button class="price-tab" data-cat="closet" onclick="switchPriceCat('closet')">상시 가격</button>
+            </div>
+            <div class="price-tab-footnote" id="priceTabFootnote">
+              * <strong style="color:#C0392B;">일룸 입주박람회 특가:</strong> 입주 프로모션(200만 원 이상 구매 시 -10만 원) 반영 금액<br>
+              * <strong style="color:#C0392B;">타사 가격:</strong> 입주 프로모션 최대 할인가 추정(100만 원 단위 할인 + 옷장 5% 등) 반영 기준이며, 실제 시점·조건에 따라 다를 수 있습니다.
+            </div>
+          </div>
+
+          <!-- 캐러셀 스테이지 -->
+          <div class="price-stage fade-up-4">
+            <button class="price-nav" id="priceNavPrev" onclick="navPrice(-1)" aria-label="이전">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+
+            <div class="price-card">
+              <div class="price-card-head">
+                <div>
+                  <div class="price-card-config-label">구성 비교</div>
+                  <div class="price-card-config" id="priceConfig">—</div>
+                </div>
+                <div class="price-card-pager" id="pricePager">1 / 1</div>
+              </div>
+
+              <div class="price-body">
+                <div class="price-body-left">
+                  <div class="price-visual-modules" id="priceVisualModules"></div>
+                </div>
+                <div class="price-body-right">
+                  <div class="price-visual-summary" id="priceVisualSummary"></div>
+                  <div class="price-vs">
+                    <div class="price-side">
+                      <div class="price-side-vendor" id="priceHansamTag">타사 프리미엄 라인</div>
+                      <div class="price-side-old" id="priceHansamOld"></div>
+                      <div class="price-side-final" id="priceHansamFinal">—</div>
+                    </div>
+                    <div class="price-side iloom">
+                      <div class="price-side-vendor">컬렉트 키큰옷장</div>
+                      <div class="iloom-door-split">
+                        <div class="iloom-door-half">
+                          <div class="price-side-tag">리디 도어</div>
+                          <div class="price-side-old" id="priceIloomOld"></div>
+                          <div class="price-side-final" id="priceIloomFinal">—</div>
+                        </div>
+                        <div class="iloom-door-half">
+                          <div class="price-side-tag">스톤W 도어</div>
+                          <div class="price-side-old" id="priceStoneOld"></div>
+                          <div class="price-side-final" id="priceStoneWFinal">—</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="price-nav" id="priceNavNext" onclick="navPrice(1)" aria-label="다음">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <div class="price-dots" id="priceDots"></div>
+        </div>
+
+      </section>
+
+      <!-- ===== SLIDE 8 · 모듈·도어 단가 참고 ===== -->
+      <section class="slide" data-idx="7">
+        <div class="slide-eyebrow fade-up">Part 4 · 단가 참고</div>
+        <h2 class="slide-title fade-up">타사 vs 컬렉트, 모듈 단가도 비슷합니다.</h2>
+
+        <div class="up-grid fade-up-3">
+
+          <!-- 기본장 -->
+          <div class="up-card">
+            <div class="up-card-img">
+              <img src="사용 이미지본/기본장.jpg" alt="기본장">
+            </div>
+            <div class="up-card-body">
+              <div class="up-card-name">기본장</div>
+              <table class="up-price-table">
+                <thead><tr><th>폭</th><th>타사</th><th>컬렉트</th></tr></thead>
+                <tbody>
+                  <tr><td>900폭</td><td>252,000원</td><td class="iloom">228,000원</td></tr>
+                  <tr><td>1,000폭</td><td>259,000원</td><td class="iloom">231,000원</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 긴장 -->
+          <div class="up-card">
+            <div class="up-card-img">
+              <img src="사용 이미지본/긴장.jpg" alt="긴장">
+            </div>
+            <div class="up-card-body">
+              <div class="up-card-name">긴장</div>
+              <table class="up-price-table">
+                <thead><tr><th>폭</th><th>타사</th><th>컬렉트</th></tr></thead>
+                <tbody>
+                  <tr><td>900폭</td><td class="none">—</td><td class="iloom">217,000원</td></tr>
+                  <tr><td>1,000폭</td><td>243,000원</td><td class="iloom">219,000원</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2단 속서랍 옷장 -->
+          <div class="up-card">
+            <div class="up-card-img">
+              <img src="사용 이미지본/2단 속서랍 옷장.jpg" alt="2단 속서랍 옷장">
+            </div>
+            <div class="up-card-body">
+              <div class="up-card-name">2단 속서랍 옷장</div>
+              <table class="up-price-table">
+                <thead><tr><th>폭</th><th>타사</th><th>컬렉트</th></tr></thead>
+                <tbody>
+                  <tr><td>900폭</td><td>531,000원</td><td class="iloom">399,000원</td></tr>
+                  <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+        <div class="unit-price-footnote fade-up-4">
+          * <strong style="color:#C0392B;">타사 모듈·도어 가격:</strong> 모두 추정가입니다. 타사는 세트 단위로 가격을 안내하므로, 고객분께서 실제 안내받으신 견적과 다소 차이가 있을 수 있습니다.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ===== 네비게이션 바 ===== -->
+    <div class="navbar">
+      <div class="nav-brand">iloom COLLECT 키큰옷장</div>
+      <div class="nav-dots" id="navDots"></div>
+      <div class="nav-controls">
+        <button class="nav-btn" id="navPrev" onclick="prev()" aria-label="이전">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="nav-btn" id="navNext" onclick="next()" aria-label="다음">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div class="nav-progress" id="navProgress"></div>
+    </div>
+
+    <div class="pause-indicator" id="pauseIndicator">자동재생 일시정지</div>
+
+  </div>
+</div>
+
+<!-- ===== 확대 모달 ===== -->
+<div class="modal-shell" id="modal" onclick="closeModalBg(event)">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal()" aria-label="닫기">×</button>
+    <div class="modal-img-wrap"><img id="modalImg" src="" alt=""></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <div class="modal-cat" id="modalCat">—</div>
+        <div class="modal-title" id="modalTitle">—</div>
+      </div>
+      <div class="modal-stat-row" id="modalStats"></div>
+      <div class="modal-desc" id="modalDesc">—</div>
+      <ul class="modal-pills" id="modalPills"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1. 스테이지 자동 스케일 — 1920×1080 기준 화면 비율에 맞춤
+   ============================================================ */
+function fitStage() {
+  const st = document.getElementById('stage');
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  st.style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
+/* ============================================================
+   2. 슬라이드 컨트롤
+   ============================================================ */
+const SLIDE_COUNT = 8;
+const SLIDE_DURATION = 8500; // 자동재생 시간 (ms)
+const ATTRACT_TIMEOUT = 30000; // 손님 안 만지면 표지 복귀 (ms)
+
+let curSlide = 0;
+let autoTimer = null;
+let attractTimer = null;
+let progressTimer = null;
+let isPaused = false;
+
+const slides = document.querySelectorAll('.slide');
+const navDots = document.getElementById('navDots');
+const navProgress = document.getElementById('navProgress');
+const pauseIndicator = document.getElementById('pauseIndicator');
+
+// 점 인디케이터 만들기
+for (let i = 0; i < SLIDE_COUNT; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goto(i);
+  navDots.appendChild(dot);
+}
+const dots = navDots.querySelectorAll('.nav-dot');
+
+function setActive(idx) {
+  slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  document.getElementById('navPrev').disabled = idx === 0;
+  document.getElementById('navNext').disabled = idx === SLIDE_COUNT - 1;
+  curSlide = idx;
+  resetProgress();
+}
+
+function goto(idx) {
+  if (idx < 0) idx = 0;
+  if (idx >= SLIDE_COUNT) idx = SLIDE_COUNT - 1;
+  setActive(idx);
+  userInteract();
+}
+function next() {
+  goto(curSlide + 1 < SLIDE_COUNT ? curSlide + 1 : curSlide);
+}
+function prev() {
+  goto(curSlide - 1 >= 0 ? curSlide - 1 : 0);
+}
+
+function autoNext() {
+  if (curSlide + 1 < SLIDE_COUNT) {
+    setActive(curSlide + 1);
+  } else {
+    setActive(0); // 끝까지 가면 처음으로
+  }
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+}
+function resetProgress() {
+  stopAuto();
+  if (isPaused) {
+    navProgress.style.width = '0';
+    navProgress.classList.add('paused');
+    return;
+  }
+  navProgress.classList.remove('paused');
+  let elapsed = 0;
+  navProgress.style.width = '0';
+  progressTimer = setInterval(() => {
+    elapsed += 100;
+    navProgress.style.width = (elapsed / SLIDE_DURATION * 100) + '%';
+  }, 100);
+  autoTimer = setTimeout(autoNext, SLIDE_DURATION);
+}
+
+/* 사용자 인터랙션 (터치/클릭/키보드) → 자동재생 멈춤 */
+function userInteract() {
+  isPaused = true;
+  resetProgress();
+  pauseIndicator.classList.add('show');
+  bumpAttract();
+}
+
+/* Attract: 손님이 30초 동안 안 만지면 표지 복귀 + 자동재생 재개 */
+function bumpAttract() {
+  if (attractTimer) clearTimeout(attractTimer);
+  attractTimer = setTimeout(() => {
+    isPaused = false;
+    pauseIndicator.classList.remove('show');
+    if (curSlide !== 0) setActive(0);
+    else resetProgress();
+  }, ATTRACT_TIMEOUT);
+}
+
+/* ============================================================
+   3. 키보드 / 터치 / 스와이프 제어
+   ============================================================ */
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') { next(); }
+  else if (e.key === 'ArrowLeft') { prev(); }
+  else if (e.key === ' ') {
+    isPaused = !isPaused;
+    pauseIndicator.classList.toggle('show', isPaused);
+    resetProgress();
+    bumpAttract();
+    e.preventDefault();
+  }
+  else if (e.key === 'Escape') { closeModal(); }
+});
+
+let touchStartX = 0;
+let touchStartY = 0;
+window.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  userInteract();
+}, { passive: true });
+window.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)) {
+    if (dx < 0) next(); else prev();
+  }
+}, { passive: true });
+
+/* 손님이 화면 만지면(클릭) 자동재생 멈춤. 마우스만 살짝 지나가는 건 30초 타이머만 리셋 */
+window.addEventListener('mousedown', userInteract);
+window.addEventListener('mousemove', bumpAttract);
+
+/* ============================================================
+   4. 확대 모달 데이터
+   ============================================================ */
+const MODAL_DATA = {
+  'material-paper': {
+    img: '사용 이미지본/PET.png',
+    fit: 'contain',
+    cat: '몸통의 차이 · 표면재',
+    title: 'CPR(코팅페이퍼)',
+    stats: [{ num: '장기간', label: '들뜸·변색 가능' }, { num: '본드', label: '냉압 부착' }],
+    desc: '인쇄된 종이나 PET 필름을 본드로 PB(파티클보드) 표면에 부착하는 방식입니다. <strong>본드의 노화로 시간이 지나면 들뜸이 발생할 수 있습니다</strong>. 옷장처럼 옷걸이가 매일 스치는 가구에서는 시간이 지나면 가장자리가 들뜨거나 변색되는 경우가 있습니다.',
+    pills: ['옷걸이 후크 스침에 미세 흠집 누적', '물에 닿으면 종이가 부풀 수 있음', '장기 사용 시 가장자리 들뜸·변색 가능']
+  },
+  'material-lpm': {
+    img: '사용 이미지본/LPM.png',
+    fit: 'contain',
+    cat: '몸통의 차이 · 표면재',
+    title: 'LPM',
+    stats: [{ num: '장기간', label: '색 변화가 적음' }, { num: '고온·고압', label: '직접 압착' }],
+    desc: '<strong>고온·고압으로 직접 압착</strong>하는 방식입니다. 표면이 사실상 단단한 플라스틱처럼 일체화되어 손톱 긁힘에 강하고, 물걸레 청소도 가능합니다. <strong>장기 사용 시에도 색 변화가 적습니다</strong>.',
+    pills: ['표면이 사실상 단단한 플라스틱처럼 일체화', '손톱 긁힘에 강함, 물걸레 청소 가능', '뒷판·서랍재까지 LPM으로 부위별 마감 차이 없음']
+  },
+  'part-hettich': {
+    img: '사용 이미지본/소랍 레일.jpg',
+    cat: '프리미엄 부품 구성 · 서랍 레일',
+    title: 'Hettich<br><small style="font-size: 0.55em; font-weight: 500; color: #6B6B6B;">독일 137년</small>',
+    stats: [{ num: '50,000회', label: 'Hettich 자체 개폐 테스트' }, { num: 'BMW·벤츠', label: '인테리어 표준 부품' }],
+    desc: '1888년부터 이어진 독일의 가구 부품 전문 브랜드입니다. 강철 슬라이드와 볼베어링 구조로 <strong>풀 익스텐션(서랍이 100% 빠지는 구조)</strong>을 지원하며, 댐핑 클로징으로 자동 감속됩니다. <strong>Hettich 자체 50,000회 개폐 테스트</strong>를 통과한 부품을 기본 적용합니다.',
+    pills: ['강철 슬라이드 + 볼베어링', '풀 익스텐션: 서랍이 100% 끝까지 빠짐', '댐핑 클로징: 마지막에 자동 감속하며 부드럽게 닫힘', 'Hettich 자체 검증 50,000회 개폐 테스트 통과 부품']
+  },
+  'part-salice': {
+    img: '사용 이미지본/도어 힌지.jpg',
+    cat: '프리미엄 부품 구성 · 여닫이 도어 힌지',
+    title: 'Salice<br><small style="font-size: 0.55em; font-weight: 500; color: #6B6B6B;">이탈리아 90년</small>',
+    stats: [{ num: '200,000회', label: 'Salice 자체 개폐 테스트' }, { num: '유럽 표준', label: '고가 키친·옷장 부품' }],
+    desc: '1934년부터 이어진 이탈리아의 도어 힌지 전문 브랜드입니다. 유럽의 고가 키친과 옷장에 표준으로 사용됩니다. <strong>Salice 자체 200,000회 개폐 테스트</strong>를 통과한 부품이며, 시공 후에도 좌우·상하·앞뒤 3D 미세 조정이 가능해 도어 처짐을 보정할 수 있습니다.',
+    pills: ['댐핑(soft-close): 마지막 5cm 자동 감속', '3D 정밀 조절: 좌우·상하·앞뒤 미세 보정', '장기 사용해도 도어 라인 처짐에 강함', 'Salice 자체 검증 200,000회 개폐 테스트 통과 부품']
+  },
+  'part-rod': {
+    img: '사용 이미지본/옷걸이봉.jpg',
+    cat: '프리미엄 부품 구성 · 옷걸이봉',
+    title: '알루미늄 + 아노다이징',
+    stats: [{ num: '비철금속', label: '녹이 잘 발생하지 않음' }, { num: '균일·매끈', label: '옷 후크 걸림에 강함' }],
+    desc: '일반 옷걸이봉은 <strong>스틸+페인트 또는 PVC</strong>로 만들어져, 페인트가 벗겨지면 갈색 녹이 발생하고 옷에 자국이 남는 경우가 있습니다. 컬렉트 키큰옷장은 <strong>알루미늄 + 아노다이징</strong>으로 비철금속이라 부식에 강하며, 표면이 매끈해 옷 후크 걸림에 강합니다.',
+    pills: ['알루미늄 + 아노다이징: 부식에 강함', '균일·매끈한 표면: 옷 후크 걸림에 강함', '알루미늄에 iloom 로고 각인: 정품 표시']
+  },
+  'door-spp': {
+    img: '사용 이미지본/SPP.png',
+    fit: 'contain',
+    cat: '도어 옵션',
+    title: '리디 도어<br><small style="font-size: 0.55em; font-weight: 500; color: #6B6B6B;">(SPP)</small>',
+    stats: [{ num: 'MDF+PP', label: '+ LPM 18.5t' }, { num: '핸드리스', label: '손잡이 없음' }],
+    desc: '심플리 화이트 톤의 무광 새틴 마감 도어. <strong>핸드리스 + 곡면 커팅 손잡이부</strong>로 손이 닿는 부분이 곡면으로 마감되어 오래 사용해도 편안합니다. 따뜻한 화이트에 옅은 회색빛을 은은하게 머금은 색감으로, <strong>모던하면서도 차분한 공간</strong>을 연출합니다.',
+    pills: ['디자인: 핸드리스 + 곡면 커팅 손잡이부 (손이 닿는 부분이 곡면으로 마감되어 오래 사용해도 편안)', '색상: 따뜻한 화이트 톤 (옅은 회색빛을 은은하게 머금은 화이트)', '질감 및 마감: 무광 새틴 (차분하고 고급스러운 표면에 부드러운 새틴 감촉)', '소재: MDF + PP + LPM 18.5t']
+  },
+  'door-ngys': {
+    img: '사용 이미지본/NGYS.png',
+    fit: 'contain',
+    cat: '도어 옵션',
+    title: '스톤W 도어<br><small style="font-size: 0.55em; font-weight: 500; color: #6B6B6B;">(NGYS)</small>',
+    stats: [{ num: 'PB+LPM', label: '18.5t' }, { num: '메탈', label: '알루미늄 손잡이' }],
+    desc: '뉴트럴 그레이 톤의 스톤 질감 도어. <strong>알루미늄 손잡이</strong>가 메탈 포인트가 되어 모던한 느낌을 줍니다. 자연 소재 같은 표면감과 은은한 고급스러움이 어우러지는 디자인입니다.',
+    pills: ['디자인: 알루미늄 손잡이 (메탈 포인트로 모던한 느낌)', '색상: 뉴트럴 그레이 톤 (화사하면서도 차분한 회색)', '질감 및 마감: 스톤 질감 (자연 소재 같은 표면감과 은은한 고급스러움)', '소재: PB + LPM 18.5t']
+  }
+};
+
+function openModal(key) {
+  const d = MODAL_DATA[key];
+  if (!d) return;
+  const img = document.getElementById('modalImg');
+  img.src = d.img;
+  img.style.objectFit = d.fit || 'cover';
+  document.getElementById('modalCat').textContent = d.cat;
+  document.getElementById('modalTitle').innerHTML = d.title;
+
+  const statsHtml = d.stats.map(s =>
+    '<div class="modal-stat"><div class="modal-stat-num">' + s.num + '</div><div class="modal-stat-label">' + s.label + '</div></div>'
+  ).join('');
+  document.getElementById('modalStats').innerHTML = statsHtml;
+
+  document.getElementById('modalDesc').innerHTML = d.desc;
+  document.getElementById('modalPills').innerHTML = d.pills.map(p => '<li>' + p + '</li>').join('');
+
+  document.getElementById('modal').classList.add('open');
+  userInteract();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  userInteract();
+}
+function closeModalBg(e) { if (e.target.id === 'modal') closeModal(); }
+
+/* ============================================================
+   5. 모듈 시뮬레이터
+   ============================================================ */
+const MODULES = [
+  { id: 'M1-900',  baseName: '기본장',        desc: '옷걸이 2단 · 긴 옷 + 짧은 옷',   code: 'IFW0040A', img: '사용 이미지본/기본장.jpg',           width: 900 },
+  { id: 'M1-1000', baseName: '기본장',        desc: '옷걸이 2단 · 긴 옷 + 짧은 옷',   code: 'IFW0041A', img: '사용 이미지본/기본장.jpg',           width: 1000 },
+  { id: 'M2-900',  baseName: '긴장',          desc: '옷걸이 1단 · 코트·패딩·원피스 전용', code: 'IFW0042A', img: '사용 이미지본/긴장.jpg',             width: 900 },
+  { id: 'M2-1000', baseName: '긴장',          desc: '옷걸이 1단 · 코트·패딩·원피스 전용', code: 'IFW0043A', img: '사용 이미지본/긴장.jpg',             width: 1000 },
+  { id: 'M3-900',  baseName: '속서랍 옷장',   desc: '옷걸이 1단 + 속서랍 2단',         code: 'IFW0044A', img: '사용 이미지본/2단 속서랍 옷장.jpg',   width: 900 },
+  { id: 'M3-1000', baseName: '속서랍 옷장',   desc: '옷걸이 1단 + 속서랍 2단',         code: 'IFW0045A', img: '사용 이미지본/2단 속서랍 옷장.jpg',   width: 1000 },
+  { id: 'M4-900',  baseName: '서랍 옷장',     desc: '옷걸이 1단 + 외부 서랍 3단',      code: 'IFW0046A', img: '사용 이미지본/3단 서랍 옷장.jpg',     width: 900 },
+  { id: 'M4-1000', baseName: '서랍 옷장',     desc: '옷걸이 1단 + 외부 서랍 3단',      code: 'IFW0047A', img: '사용 이미지본/3단 서랍 옷장.jpg',     width: 1000 },
+  { id: 'M5-450',  baseName: '하부선반 하프장', desc: '옷걸이 1단 + 하부 수납 선반',    code: 'IFW0048A', img: '사용 이미지본/하부선반 하프장.jpg',   width: 450 },
+  { id: 'M5-500',  baseName: '하부선반 하프장', desc: '옷걸이 1단 + 하부 수납 선반',    code: 'IFW0049A', img: '사용 이미지본/하부선반 하프장.jpg',   width: 500 },
+  { id: 'M6-450',  baseName: '멀티선반 하프장', desc: '선반 8단 · 옷걸이 없음 (수납 전용)', code: 'IFW0050A', img: '사용 이미지본/멀티선반 하프장.jpg', width: 450 },
+  { id: 'M6-500',  baseName: '멀티선반 하프장', desc: '선반 8단 · 옷걸이 없음 (수납 전용)', code: 'IFW0051A', img: '사용 이미지본/멀티선반 하프장.jpg', width: 500 },
+];
+MODULES.forEach(m => { m.name = m.baseName; });
+
+let placedModules = [];
+let simMode = 'closet'; // 'closet' (옷장, 서라운딩 없음) | 'builtin' (붙박이장, 양 끝 서라운딩)
+
+function setSimMode(mode) {
+  simMode = mode;
+  document.querySelectorAll('.sim-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  renderSim();
+  userInteract();
+}
+
+function buildModuleList() {
+  const cont = document.getElementById('simModules');
+  MODULES.forEach((m) => {
+    const div = document.createElement('div');
+    div.className = 'sim-module';
+    div.innerHTML =
+      '<div class="sim-module-img"><img src="' + m.img + '" alt="' + m.baseName + '"></div>' +
+      '<div class="sim-module-info">' +
+        '<div class="sim-module-name">' + m.baseName +
+          ' <span style="color:#0A84FF; font-weight:700; font-size:17px; letter-spacing:0;">' + m.width + '폭</span>' +
+        '</div>' +
+        '<div class="sim-module-desc">' + m.desc + '</div>' +
+        '<div class="sim-module-code">' + m.code + '</div>' +
+      '</div>' +
+      '<button class="sim-module-add" type="button">＋ 추가하기</button>';
+    div.querySelector('.sim-module-add').onclick = (e) => { e.stopPropagation(); addModule(m); };
+    cont.appendChild(div);
+  });
+}
+
+function addModule(m) {
+  if (placedModules.length >= 8) return;
+  placedModules.push({ ...m, _id: Date.now() + Math.random() });
+  renderSim();
+}
+function removeModule(idx, e) {
+  if (e) e.stopPropagation();
+  placedModules.splice(idx, 1);
+  renderSim();
+}
+function clearSim() {
+  placedModules = [];
+  renderSim();
+}
+
+function renderSim() {
+  const floor = document.getElementById('simFloor');
+  if (placedModules.length === 0) {
+    floor.innerHTML = '<div class="sim-empty"><div class="sim-empty-icon">🛋️</div>왼쪽에서 모듈을 선택하면<br>여기에 차곡차곡 쌓여요</div>';
+  } else {
+    // 폭에 따라 너비 비율: 900폭 = 140px 기준으로 비례 (1000→156, 450→70, 500→78)
+    const modulesHtml = placedModules.map((m, i) => {
+      const w = Math.round(m.width / 900 * 140) + 'px';
+      const label = m.baseName || m.name;
+      return (
+        '<div class="sim-placed" style="width:' + w + ';" onclick="removeModule(' + i + ', event)">' +
+          '<div class="sim-placed-remove">×</div>' +
+          '<div class="sim-placed-img"><img src="' + m.img + '" alt="' + label + '"></div>' +
+          '<div class="sim-placed-name">' + label + '</div>' +
+          '<div class="sim-placed-spec">' + m.width + '폭</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    // 붙박이장 모드일 때만 양 끝에 서라운딩 (사진 박스 높이만큼만)
+    const sideLabel = (simMode === 'builtin')
+      ? '<div class="sim-side"><div class="sim-side-box">서라운딩</div></div>'
+      : '';
+    floor.innerHTML = sideLabel + modulesHtml + sideLabel;
+  }
+  const totalWidth = placedModules.reduce((s, m) => s + m.width, 0);
+  // 붙박이장만 서라운딩 +250mm 가산
+  const surroundExtra = (simMode === 'builtin' && placedModules.length > 0) ? 250 : 0;
+  const finalWidth = totalWidth + surroundExtra;
+  document.getElementById('simWidth').innerHTML = finalWidth.toLocaleString() + '<small>mm</small>';
+  document.getElementById('simCount').innerHTML = placedModules.length + '<small>개</small>';
+
+  let space = '—';
+  if (simMode === 'builtin') {
+    if (finalWidth >= 3300) space = '30평형+ 안방';
+    else if (finalWidth >= 2500) space = '20평형 안방';
+    else if (finalWidth >= 1800) space = '드레스룸';
+    else if (finalWidth >= 900) space = '학생방';
+  } else {
+    if (finalWidth >= 3000) space = '30평형+ 안방';
+    else if (finalWidth >= 2400) space = '20평형 안방';
+    else if (finalWidth >= 1800) space = '드레스룸';
+    else if (finalWidth >= 900) space = '학생방';
+  }
+  document.getElementById('simSpace').textContent = space;
+}
+
+buildModuleList();
+renderSim();
+
+/* ============================================================
+   6. 가격 슬라이더 (8개 구성)
+   ============================================================ */
+const PRICE_DATA = {
+  builtin: [
+    {
+      config: '기본장 3 + 하프장 1 + 서라운딩', size: '3통반 · 3,600폭',
+      iloomLine: '리디', iloomOld: 2033000, iloomFinal: 1933000,
+      stoneOld: 2064000, stoneFinal: 1964000,
+      hansamLine: '프리미엄', hansamOld: 2082518, hansamFinal: 1933350,
+      visual: {
+        surround: true,
+        modules: [
+          { name: '기본장', spec: '900폭', img: '사용 이미지본/기본장.png' },
+          { name: '기본장', spec: '900폭', img: '사용 이미지본/기본장.png' },
+          { name: '기본장', spec: '900폭', img: '사용 이미지본/기본장.png' },
+          { name: '하프장', spec: '450폭', img: '사용 이미지본/하부선반 하프장.jpg' }
+        ],
+        totalWidth: '약 3,250mm', widthNote: '(900×3 + 450 + 서라운딩)',
+        suitable: '30평형대 안방 옷장', suitableNote: '(벽 길이 3.3m+ 필요)'
+      }
+    },
+  ],
+  closet: [
+    {
+      config: '기본장 + 긴장 + 2단 속서랍', size: '3통 · 3,000폭',
+      iloomLine: '리디', iloomOld: null, iloomFinal: 1600000,
+      stoneOld: null, stoneFinal: 1630000,
+      hansamLine: '베이직', hansamOld: 1646000, hansamFinal: 1481400,
+      visual: {
+        surround: false,
+        modules: [
+          { name: '기본장', spec: '900폭', img: '사용 이미지본/기본장.png' },
+          { name: '긴장', spec: '900폭', img: '사용 이미지본/긴장.jpg' },
+          { name: '2단 속서랍', spec: '900폭', img: '사용 이미지본/2단 속서랍 옷장.jpg' }
+        ],
+        totalWidth: '약 2,700mm', widthNote: '(900 × 3)',
+        suitable: '20~30평형대 안방', suitableNote: '(벽 길이 2.8m+ 필요)'
+      }
+    },
+    {
+      config: '기본장 + 2단 속서랍', size: '2통 · 2,800폭',
+      iloomLine: '리디', iloomOld: null, iloomFinal: 1115000,
+      stoneOld: null, stoneFinal: 1133000,
+      hansamLine: '베이직', hansamOld: 1187000, hansamFinal: 1068300,
+      visual: {
+        surround: false,
+        modules: [
+          { name: '기본장', spec: '900폭', img: '사용 이미지본/기본장.png' },
+          { name: '2단 속서랍', spec: '900폭', img: '사용 이미지본/2단 속서랍 옷장.jpg' }
+        ],
+        totalWidth: '약 1,800mm', widthNote: '(900 × 2)',
+        suitable: '소형 방 / 학생방', suitableNote: '(벽 길이 1.9m+ 필요)'
+      }
+    },
+  ]
+};
+
+let priceCat = 'builtin';
+let priceIdx = 0;
+
+const PRICE_FOOTNOTES = {
+  builtin: `* <strong style="color:#C0392B;">일룸 입주박람회 특가:</strong> 입주 프로모션(200만 원 이상 구매 시 -10만 원) 반영 금액<br>* <strong style="color:#C0392B;">타사 가격:</strong> 입주 프로모션 최대 할인가 추정(100만 원 단위 할인 + 옷장 5% 등) 반영 기준이며, 실제 시점·조건에 따라 다를 수 있습니다.`,
+  closet:  `* <strong style="color:#C0392B;">일룸 상시 가격:</strong> 할인 미적용 정가 기준이며, 프로모션 시행 시 변동될 수 있습니다.<br>* <strong style="color:#C0392B;">타사 가격:</strong> 입주 프로모션 최대 할인가 추정(100만 원 단위 할인 + 옷장 5% 등) 반영 기준이며, 실제 시점·조건에 따라 다를 수 있습니다.`
+};
+
+function switchPriceCat(cat) {
+  priceCat = cat;
+  priceIdx = 0;
+  document.querySelectorAll('.price-tab').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  document.getElementById('priceTabFootnote').innerHTML = PRICE_FOOTNOTES[cat];
+  renderPrice();
+  userInteract();
+}
+
+function navPrice(d) {
+  const len = PRICE_DATA[priceCat].length;
+  priceIdx = Math.max(0, Math.min(len - 1, priceIdx + d));
+  renderPrice();
+  userInteract();
+}
+
+function renderPrice() {
+  const list = PRICE_DATA[priceCat];
+  const item = list[priceIdx];
+
+  document.getElementById('priceConfig').innerHTML = item.config + '<small> · ' + item.size + '</small>';
+  document.getElementById('pricePager').textContent = (priceIdx + 1) + ' / ' + list.length;
+
+  // 구성 시각화 (모듈 + 요약)
+  const v = item.visual;
+  const vModulesEl = document.getElementById('priceVisualModules');
+  const vSummaryEl = document.getElementById('priceVisualSummary');
+  let modulesHtml = '';
+  if (v.surround) modulesHtml += '<div class="price-visual-side">서라운딩</div>';
+  v.modules.forEach(function(m) {
+    modulesHtml +=
+      '<div class="price-visual-module">' +
+        '<div class="price-visual-module-img-wrap">' +
+          '<img class="price-visual-module-img" src="' + m.img + '" alt="' + m.name + '">' +
+        '</div>' +
+        '<div class="price-visual-module-name">' + m.name + '</div>' +
+        '<div class="price-visual-module-spec">' + m.spec + '</div>' +
+      '</div>';
+  });
+  if (v.surround) modulesHtml += '<div class="price-visual-side">서라운딩</div>';
+  vModulesEl.innerHTML = modulesHtml;
+  vSummaryEl.innerHTML =
+    '<div>' +
+      '<div class="price-visual-summary-label">총 폭</div>' +
+      '<div class="price-visual-summary-value">' + v.totalWidth + '</div>' +
+      '<div class="price-visual-summary-note">' + v.widthNote + '</div>' +
+    '</div>' +
+    '<div>' +
+      '<div class="price-visual-summary-label">적합 평형 / 자리</div>' +
+      '<div class="price-visual-summary-value">' + v.suitable + '</div>' +
+      '<div class="price-visual-summary-note">' + v.suitableNote + '</div>' +
+    '</div>';
+
+  // 컬렉트 — 리디 도어
+  document.getElementById('priceIloomOld').textContent = item.iloomOld ? item.iloomOld.toLocaleString() + '원 (정가)' : ' ';
+  document.getElementById('priceIloomFinal').innerHTML = item.iloomFinal.toLocaleString() + '<small>원</small>';
+  // 컬렉트 — 스톤W 도어
+  document.getElementById('priceStoneOld').textContent = item.stoneOld ? item.stoneOld.toLocaleString() + '원 (정가)' : ' ';
+  document.getElementById('priceStoneWFinal').innerHTML = item.stoneFinal.toLocaleString() + '<small>원</small>';
+
+  // 타사
+  document.getElementById('priceHansamTag').textContent = '타사 ' + item.hansamLine + ' 라인';
+  document.getElementById('priceHansamOld').textContent = item.hansamOld ? item.hansamOld.toLocaleString() + '원 (정가)' : '';
+  document.getElementById('priceHansamFinal').innerHTML = item.hansamFinal.toLocaleString() + '<small>원</small>';
+
+  // 차이 메시지는 정적 (priceDiffText는 HTML에 고정 메시지 — 동적 변경 없음)
+
+  // 점 인디케이터
+  const dots = document.getElementById('priceDots');
+  dots.innerHTML = list.map((_, i) =>
+    '<div class="price-dot' + (i === priceIdx ? ' active' : '') + '" onclick="priceIdx=' + i + ';renderPrice();userInteract();"></div>'
+  ).join('');
+
+  // 화살표 활성/비활성
+  document.getElementById('priceNavPrev').disabled = priceIdx === 0;
+  document.getElementById('priceNavNext').disabled = priceIdx === list.length - 1;
+}
+
+renderPrice();
+
+function showPriceView(view, btn) {
+  document.querySelectorAll('.pview').forEach(function(el) { el.classList.add('hidden'); });
+  document.getElementById('pview-' + view).classList.remove('hidden');
+  document.querySelectorAll('.ptab').forEach(function(el) { el.classList.remove('active'); });
+  btn.classList.add('active');
+  userInteract();
+}
+
+/* ============================================================
+   7. 시작 — 처음에는 자동재생 모드
+   ============================================================ */
+isPaused = false;
+setActive(0);
+// 시작 시점에는 attractTimer 안 걸어둠 (자동재생 중이므로)
+</script>
+
+</body>
+</html>

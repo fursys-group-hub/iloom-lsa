@@ -1,0 +1,3307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>컬렉트 키큰옷장 vs 타사 ·입주박람회 비교 가이드 v2</title>
+<style>
+  @font-face {
+    font-family: 'Paybooc';
+    src: url('fonts/paybooc OTF Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Paybooc';
+    src: url('fonts/paybooc OTF Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Paybooc';
+    src: url('fonts/paybooc OTF Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Paybooc';
+    src: url('fonts/paybooc OTF ExtraBold.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+<style>
+  /* ─────────────────────────────────────────
+     A4 인쇄 규격 (210mm × 297mm) · 양면 2장 = 4페이지
+     ───────────────────────────────────────── */
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Paybooc', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    background: #FFFFFF;
+    color: #2A2A2E;
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    word-break: keep-all;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: #FFFFFF;
+    margin: 0 auto;
+    padding: 18mm 16mm 14mm 16mm;
+    page-break-after: always;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .page:last-child { page-break-after: auto; }
+  .page + .page { border-top: 1px solid #EFEFEF; }
+
+  @media print {
+    body { background: #FFFFFF; }
+    .page + .page { border-top: none; }
+  }
+
+  /* ─────────────────────────────────────────
+     타이포 위계 (5단계)
+       L1  22pt / 700  ·Hero 제목 (Page 1)
+       L2  16pt / 700  ·페이지 섹션 제목 (Page 2~4)
+       L3  11pt / 600  ·카드/표/섹션 헤딩
+       L4  9.5pt / 500 ·본문 강조, 표 헤더, 라벨
+       L5  9.5pt / 400 ·본문, 표 셀
+       (caption 8pt / 400 ·작은 주석)
+     ───────────────────────────────────────── */
+  h2, h3, h4 { letter-spacing: -0.01em; line-height: 1.3; }
+  p, td, th, li { font-size: 9.5pt; line-height: 1.65; font-weight: 400; }
+  small { font-size: 8pt; font-weight: 400; color: #8A8A8A; }
+  strong, b { font-weight: 600; color: #2A2A2E; }
+
+  /* ─────────────────────────────────────────
+     공통 헤더 / 푸터
+     ───────────────────────────────────────── */
+  .page-header { display: none; }
+  .brand-logo { display: none; }
+  .brand-tag {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #9A9A9A;
+    letter-spacing: -0.005em;
+  }
+  .page-header-right { text-align: right; }
+  .badge-expo {
+    font-size: 8pt;
+    font-weight: 500;
+    color: #6B6B6B;
+    letter-spacing: 0.02em;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+  .header-date { font-size: 8pt; color: #8A8A8A; margin-top: 3px; }
+
+  .page-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #EFEFEF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7.5pt;
+    color: #9C9C9C;
+  }
+
+  /* ─────────────────────────────────────────
+     PAGE 1 ·표지(cover)
+     ───────────────────────────────────────── */
+  .page.cover .hero {
+    margin: 40px 0 0;
+    padding: 30px 0 40px;
+  }
+  .page.cover .cover-rule {
+    width: 56px;
+    height: 2px;
+    background: #2A2A2E;
+    margin-bottom: 28px;
+  }
+  .page.cover .hero-eyebrow {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #6B6B6B;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .page.cover .hero-title {
+    font-size: 28pt;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+    color: #2A2A2E;
+  }
+
+  /* 표지 목차 (CONTENTS) */
+  .cover-toc {
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 1px solid #2A2A2E;
+  }
+  .cover-toc-label {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #8A8A8A;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .cover-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .cover-toc-item {
+    display: flex;
+    align-items: baseline;
+    padding: 7px 0;
+    font-size: 10pt;
+    color: #2A2A2E;
+  }
+  .cover-toc-num {
+    width: 64px;
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #6B6B6B;
+    letter-spacing: 0.04em;
+    font-size: 9pt;
+  }
+  .cover-toc-title {
+    flex: 1;
+    font-weight: 500;
+  }
+  .cover-toc-title small {
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: #8A8A8A;
+    margin-left: 6px;
+  }
+  .cover-toc-page {
+    color: #8A8A8A;
+    font-weight: 400;
+    margin-left: 12px;
+    font-variant-numeric: tabular-nums;
+    font-size: 9.5pt;
+  }
+  .cover-toc-item.appendix {
+    margin-top: 4px;
+  }
+  .cover-toc-item.appendix .cover-toc-num,
+  .cover-toc-item.appendix .cover-toc-title,
+  .cover-toc-item.appendix .cover-toc-page {
+    color: #A0A0A0;
+  }
+
+  /* ─────────────────────────────────────────
+     Hero / 핵심 메시지 (일반 페이지)
+     ───────────────────────────────────────── */
+  .hero { margin: 4px 0 16px; }
+  .hero-eyebrow {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #6B6B6B;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .hero-title {
+    font-size: 22pt;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    color: #2A2A2E;
+  }
+  .hero-title .accent { color: #2A2A2E; font-weight: 700; }
+  .hero-sub {
+    margin-top: 8px;
+    font-size: 9.5pt;
+    font-weight: 400;
+    color: #6B6B6B;
+    letter-spacing: -0.005em;
+  }
+
+  .keymsg {
+    margin: 14px 0 18px;
+    padding: 16px 20px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    display: block;
+  }
+  .keymsg-icon { display: none; }
+  .keymsg-text {
+    font-size: 11pt;
+    font-weight: 600;
+    line-height: 1.55;
+    letter-spacing: -0.015em;
+    color: #2A2A2E;
+  }
+  .keymsg-text .em {
+    font-weight: 700;
+    color: #2A2A2E;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+  }
+  .keymsg-sub {
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: #6B6B6B;
+    margin-top: 8px;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  /* 비교표 섹션 */
+  .cmp-section { margin-top: 14px; }
+  .cmp-section-title {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #2A2A2E;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #2A2A2E;
+    letter-spacing: -0.005em;
+    display: block;
+  }
+  .cmp-section-title::before { display: none; }
+
+  /* ─────────────────────────────────────────
+     공통 표 스타일 (에디토리얼)
+     ───────────────────────────────────────── */
+  table.cmp,
+  table.diff-spec,
+  table.modules-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  table.diff-spec {
+    margin-bottom: 20px;
+  }
+  /* 표면재 카드 — 표는 헤더 밑줄과 동일 너비, 카드는 중앙 정렬 */
+  .aligned-564 {
+    width: 100%;
+  }
+  .aligned-564 > .diff-spec {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .aligned-564 > .material-flow {
+    grid-template-columns: 1fr 1fr;
+    justify-content: stretch;
+  }
+
+  table.cmp th, table.cmp td,
+  table.diff-spec th, table.diff-spec td,
+  table.modules-table th, table.modules-table td {
+    padding: 6px 10px;
+    border: none;
+    border-bottom: 1px solid #EAEAEA;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  table.cmp thead th,
+  table.diff-spec thead th,
+  table.modules-table thead th {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #2A2A2E;
+    background: transparent;
+    border-bottom: 1.5px solid #2A2A2E;
+    padding: 8px 10px;
+  }
+  table.cmp thead .col-label,
+  table.diff-spec thead th:first-child,
+  table.modules-table thead th:first-child {
+    text-align: left;
+    padding-left: 4px;
+    color: #6B6B6B;
+    font-weight: 500;
+    background: transparent;
+  }
+  /* iloom 컬럼: 옅은 배경 + 굵은 좌측 보더로 강조 */
+  table.cmp thead .col-iloom,
+  table.diff-spec thead th.iloom-col,
+  table.modules-table thead th.iloom-col {
+    background: #F7F5F1;
+    color: #2A2A2E;
+    border-bottom: 2.5px solid #2A2A2E;
+    border-left: 2px solid #2A2A2E;
+    position: static;
+  }
+  table.cmp thead .col-iloom::after { display: none; }
+  table.cmp thead .col-hansem-basic,
+  table.cmp thead .col-hansem-prem {
+    background: transparent;
+    color: #6B6B6B;
+    font-weight: 500;
+  }
+  /* iloom 본문 셀: 옅은 배경 + 좌측 보더 (컬럼 전체 띠 효과) */
+  table.cmp tbody td.iloom,
+  table.diff-spec tbody td.iloom-cell {
+    background: #F7F5F1 !important;
+    border-left: 2px solid #2A2A2E;
+  }
+  /* 미명시 셀은 흐리게 ·약점 시각화 */
+  table.cmp tbody td .x,
+  table.diff-spec tbody td .x-cell,
+  table.cmp tbody td span.x,
+  table.diff-spec tbody td span.x-cell {
+    color: #C8C8C8;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  table.cmp tbody th,
+  table.diff-spec tbody th,
+  table.modules-table tbody th {
+    text-align: left;
+    padding-left: 4px;
+    background: transparent;
+    font-size: 9pt;
+    font-weight: 500;
+    color: #6B6B6B;
+  }
+  table.cmp tbody td,
+  table.diff-spec tbody td,
+  table.modules-table tbody td {
+    font-size: 9.5pt;
+    color: #2A2A2E;
+    font-weight: 400;
+  }
+  /* iloom 셀: 배경 없음, 텍스트만 굵게 */
+  table.cmp tbody td.iloom,
+  table.diff-spec tbody td.iloom-cell,
+  table.modules-table tbody td.tonal {
+    background: transparent;
+    color: #2A2A2E;
+    font-weight: 600;
+  }
+  table.cmp tbody td.iloom strong,
+  table.diff-spec tbody td.iloom-cell strong { color: #2A2A2E; font-weight: 700; }
+
+  table.cmp .check {
+    color: #2A2A2E;
+    font-weight: 600;
+    margin-right: 3px;
+    font-size: 9pt;
+  }
+  table.cmp .x,
+  table.diff-spec td.x-cell {
+    color: #B8B8B8;
+    font-weight: 400;
+  }
+  table.cmp .price-em {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────
+     입주박람회 견적 비교 — 컴팩트 카드 (1~2줄)
+     ───────────────────────────────────────── */
+  .price-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .price-compare-card {
+    padding: 12px 16px;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    background: #FFFFFF;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .price-compare-card.iloom {
+    border: 1px solid #EAEAEA;
+  }
+  .price-compare-vendor-line {
+    font-size: 9pt;
+    color: #6B6B6B;
+    margin-bottom: 10px;
+    letter-spacing: -0.005em;
+    line-height: 1.4;
+  }
+  .price-compare-vendor-line strong {
+    color: #2A2A2E;
+    font-weight: 700;
+  }
+  .price-compare-card.iloom .price-compare-vendor-line strong {
+    color: #2A2A2E;
+  }
+  .price-compare-flow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .price-compare-old {
+    text-decoration: line-through;
+    text-decoration-color: #B8B8B8;
+    color: #8A8A8A;
+    font-size: 9.5pt;
+    font-weight: 500;
+  }
+  .price-compare-arrow {
+    color: #8A8A8A;
+    font-size: 11pt;
+    font-weight: 600;
+  }
+  .price-compare-new {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #2A2A2E;
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  .price-compare-card.iloom .price-compare-new {
+    color: #2A2A2E;
+  }
+  .price-compare-alt {
+    font-size: 8pt;
+    color: #6B6B6B;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .price-compare-alt .strike-alt {
+    text-decoration: line-through;
+    text-decoration-color: #C8C8C8;
+    color: #9A9A9A;
+  }
+
+  /* 3통 반 구성 시각 자료 */
+  .config-visual {
+    margin: 0 0 12px;
+    padding: 14px 18px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+  }
+  .config-visual-title {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #6B6B6B;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .config-modules {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .config-modules-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .config-side {
+    width: 22px;
+    height: 220px;
+    background: #4A4A4D;
+    color: #FFFFFF;
+    border: 1px solid #4A4A4D;
+    border-radius: 0;
+    font-size: 7pt;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    padding: 6px 0;
+    flex-shrink: 0;
+  }
+  .config-module {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    text-align: center;
+  }
+  .config-module-img-wrap {
+    height: 220px;
+    background: transparent;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .config-module-img {
+    height: 100%;
+    width: auto;
+    display: block;
+  }
+  .config-module-label {
+    padding: 8px 4px 0;
+  }
+  .config-module-name {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 2px;
+    letter-spacing: -0.005em;
+  }
+  .config-module-spec {
+    font-size: 7.5pt;
+    color: #6B6B6B;
+    font-weight: 500;
+  }
+  .config-body {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .config-body .config-modules {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+  }
+  .config-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-left: 20px;
+    border-left: 1px solid #D8D8D8;
+    flex-shrink: 0;
+  }
+  .config-summary-value {
+    white-space: nowrap;
+  }
+  .config-summary-value small {
+    white-space: nowrap;
+  }
+  .config-summary-label {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #8A8A8A;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .config-summary-value {
+    font-size: 14pt;
+    font-weight: 800;
+    color: #2A2A2E;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 5px;
+    white-space: nowrap;
+  }
+  .config-summary-note {
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: #6B6B6B;
+    line-height: 1.4;
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+
+  .price-summary {
+    margin-top: 12px;
+    padding: 14px 20px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 18px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .price-summary-headline {
+    font-size: 21pt;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #FFFFFF;
+    white-space: nowrap;
+    padding-right: 18px;
+    border-right: 1px solid #4A4A4A;
+  }
+  .price-summary-headline small {
+    display: block;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #B8B8B8;
+    margin-top: 5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .price-summary-text {
+    font-size: 9.5pt;
+    line-height: 1.55;
+    color: #FFFFFF;
+    font-weight: 400;
+  }
+  .price-summary-text strong {
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  /* ─────────────────────────────────────────
+     PAGE 1 결론
+     ───────────────────────────────────────── */
+  .conclusion {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+  }
+  .conclusion-title {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #6B6B6B;
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .conclusion-body {
+    font-size: 9.5pt;
+    font-weight: 400;
+    color: #2A2A2E;
+    line-height: 1.7;
+  }
+  .conclusion-body strong { color: #2A2A2E; font-weight: 600; }
+
+  /* ─────────────────────────────────────────
+     PAGE 2~3 ·차별 포인트
+     ───────────────────────────────────────── */
+  .page-title-block { margin-bottom: 12px; }
+  .page-title-eyebrow {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #8A8A8A;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .page-intro {
+    margin-top: 8px;
+    font-size: 9pt;
+    font-weight: 400;
+    color: #6B6B6B;
+    line-height: 1.65;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    max-width: 640px;
+  }
+  .page-intro strong { color: #2A2A2E; font-weight: 600; }
+
+  .diff-card {
+    margin-bottom: 18px;
+    padding: 16px 18px;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    background: #FFFFFF;
+  }
+  .diff-card.solo {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  .diff-card:last-child { margin-bottom: 0; }
+
+  .diff-card-head {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #EAEAEA;
+  }
+  .diff-num {
+    width: 28px; height: 28px;
+    background: #F0F0F0;
+    color: #2A2A2E;
+    border: none;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11pt;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .diff-category {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #8A8A8A;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .diff-title {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .diff-tagline {
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: #8A8A8A;
+    margin-top: 4px;
+  }
+
+  /* LPM/PET 카드 비교 (① 표면재 카드 전용) */
+  .material-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .flow-side {
+    background: #FFFFFF;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .flow-img-wrap {
+    background: rgb(249, 250, 246);
+    padding: 0;
+    text-align: center;
+    border-bottom: 1px solid #EAEAEA;
+  }
+  .flow-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  .flow-body {
+    padding: 12px 14px 14px;
+  }
+  .flow-side-name {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #EAEAEA;
+    letter-spacing: -0.005em;
+  }
+  .flow-side-tag {
+    font-size: 7.5pt;
+    font-weight: 500;
+    color: #6B6B6B;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #EAEAEA;
+    letter-spacing: 0;
+  }
+  .flow-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .flow-list li {
+    font-size: 10pt;
+    color: #2A2A2E;
+    padding: 5px 0 5px 14px;
+    line-height: 1.55;
+    position: relative;
+  }
+  .flow-list li::before {
+    content: '·';
+    position: absolute;
+    left: 2px;
+    top: 1px;
+    color: #6B6B6B;
+    font-weight: 700;
+  }
+  .flow-list li strong,
+  .flow-list li b {
+    font-weight: 700;
+    color: #2A2A2E;
+  }
+
+  /* 두께 시각화 (② 두께 카드 전용) - 외곽 보더 없이 흐름 */
+  .thickness-card {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  .thickness-card-photos-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  /* 사진 좌 + 텍스트 우 매칭 행 구조 */
+  .thickness-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .thickness-row {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .thickness-row-photo {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+  }
+  .thickness-row-photo img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+  .thickness-row-text {
+    font-size: 9.5pt;
+    line-height: 1.65;
+    color: #2A2A2E;
+  }
+  .thickness-row-text strong {
+    font-weight: 700;
+  }
+  .thickness-row-text .stat-headline {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .thickness-row-text .stat-num {
+    font-size: 24pt;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #2A2A2E;
+    white-space: nowrap;
+  }
+  .thickness-row-text .stat-num small {
+    font-size: 12pt;
+    font-weight: 600;
+  }
+  .thickness-row-text .stat-arrow {
+    font-size: 16pt;
+    color: #8A8A8A;
+  }
+  .thickness-card-photo {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    display: flex;
+    flex-direction: column;
+  }
+  .thickness-card-photo img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+  .thickness-card-photo-caption {
+    padding: 9px 12px;
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    background: #FFFFFF;
+    border-top: 1px solid #EAEAEA;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+  .thickness-card-photo-caption strong {
+    font-weight: 700;
+    color: #2A2A2E;
+  }
+  .thickness-card-stat-full {
+    display: flex;
+    flex-direction: column;
+    background: #FAFAFA;
+    color: #2A2A2E;
+    padding: 16px 20px;
+    border-radius: 4px;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .thickness-card-stat-full .stat-line {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .thickness-card-stat-full .stat-num {
+    font-size: 24pt;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #2A2A2E;
+    white-space: nowrap;
+  }
+  .thickness-card-stat-full .stat-num small {
+    font-size: 12pt;
+    font-weight: 600;
+    margin-left: 1px;
+  }
+  .thickness-card-stat-full .stat-arrow {
+    font-size: 16pt;
+    color: #8A8A8A;
+    font-weight: 400;
+  }
+  .thickness-card-stat-full .stat-caption {
+    font-size: 9.5pt;
+    color: #2A2A2E;
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -0.005em;
+  }
+  .thickness-card-stat-full .stat-caption strong {
+    color: #2A2A2E;
+    font-weight: 700;
+  }
+  .dim-label {
+    position: absolute;
+    font-size: 9pt;
+    font-weight: 800;
+    color: #2A2A2E;
+    background: rgba(255,255,255,0.96);
+    padding: 4px 9px;
+    border-radius: 3px;
+    border: 1.5px solid #2A2A2E;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .dim-label small {
+    display: block;
+    font-size: 6.5pt;
+    font-weight: 500;
+    color: #6B6B6B;
+    letter-spacing: 0.04em;
+    margin-top: 1px;
+  }
+  .dim-shelf { top: 22%; left: 58%; }
+  .dim-side  { top: 56%; right: 8%; }
+
+  .thickness-card-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #FAFAFA;
+    color: #2A2A2E;
+    padding: 16px 18px;
+    border-radius: 4px;
+    gap: 8px;
+  }
+  .thickness-card-stat .stat-line {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .thickness-card-stat .stat-num {
+    font-size: 22pt;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #2A2A2E;
+    white-space: nowrap;
+  }
+  .thickness-card-stat .stat-num small {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-left: 1px;
+  }
+  .thickness-card-stat .stat-arrow {
+    font-size: 14pt;
+    color: #8A8A8A;
+    font-weight: 400;
+  }
+  .thickness-card-stat .stat-caption {
+    font-size: 9pt;
+    color: #6B6B6B;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+  .thickness-card-stat .stat-caption strong {
+    color: #2A2A2E;
+    font-weight: 700;
+  }
+  .thickness-card-narrative {
+    margin: 0;
+    font-size: 9pt;
+    line-height: 1.7;
+    color: #2A2A2E;
+    padding-top: 12px;
+    border-top: 1px solid #EAEAEA;
+  }
+  .thickness-card-narrative strong {
+    font-weight: 700;
+  }
+
+  /* 사진 위 위치 인디케이터 라벨 (▼ 화살표 포함) */
+  .photo-pointer-label {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2A2A2E;
+    color: #FFFFFF;
+    font-size: 8.5pt;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 3px;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 2;
+  }
+  .photo-pointer-label::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #2A2A2E;
+  }
+
+  /* Row 1 우측 — 짐 종류 이모지 칩 */
+  .load-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 10px;
+  }
+  .load-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    background: #F5F5F5;
+    border: 1px solid #E5E5E5;
+    border-radius: 999px;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #2A2A2E;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+  }
+  .load-chip-emoji {
+    font-size: 11pt;
+    line-height: 1;
+  }
+
+  /* Row 1 우측 — 질문 강조용 */
+  .row-question {
+    margin: 0 0 6px;
+    font-size: 12pt;
+    font-weight: 600;
+    color: #2A2A2E;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+  .row-question strong {
+    font-weight: 800;
+  }
+  .row-question-attr {
+    margin: 0;
+    font-size: 9pt;
+    color: #6B6B6B;
+    font-weight: 500;
+  }
+
+  /* Row 1 ↔ Row 2 사이 연결선 */
+  .thickness-row-bridge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    font-size: 8.5pt;
+    color: #8A8A8A;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    padding: 2px 0;
+  }
+  .thickness-row-bridge::before,
+  .thickness-row-bridge::after {
+    content: '';
+    flex: 0 0 48px;
+    height: 1px;
+    background: #D8D8D8;
+  }
+
+  /* 두께 비교 — material-flow 카드 스타일 재사용 */
+  .thickness-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .thickness-flow .flow-img-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+  .thickness-flow .flow-img-wrap img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    margin: 0;
+  }
+  .thickness-flow .flow-side.is-problem .flow-img-wrap img {
+    filter: grayscale(100%) contrast(0.96) brightness(0.98);
+    object-position: center bottom;
+  }
+  /* 카드 본문 — 제목(flow-side-name)이 구분선 역할, 칩/스탯은 spacing만 */
+  .thickness-flow .load-chips,
+  .thickness-flow .flow-body .stat-headline {
+    margin-bottom: 14px;
+  }
+  .thickness-flow .row-question {
+    margin: 0;
+  }
+  .thickness-flow .flow-body .flow-list {
+    margin-top: 0;
+  }
+
+  /* "왜 차이" + "그래서 일상에서" 2단 박스 (다른 카드용) */
+  .why-real {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .why-box, .real-box {
+    padding: 12px 14px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+  }
+  .why-label, .real-label {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #8A8A8A;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+  .why-body, .real-body {
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+  .why-body strong, .real-body strong { color: #2A2A2E; font-weight: 600; }
+
+  /* 부품 카드용 불릿 리스트 (줄글 대신 짧은 핵심만) */
+  .why-list, .real-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+  .why-list li, .real-list li {
+    position: relative;
+    padding-left: 12px;
+    margin-bottom: 6px;
+  }
+  .why-list li:last-child, .real-list li:last-child { margin-bottom: 0; }
+  .why-list li::before, .real-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #2A2A2E;
+  }
+  .why-list strong, .real-list strong { color: #2A2A2E; font-weight: 600; }
+
+  /* ─────────────────────────────────────────
+     압축형 카드 (3,4,5 한 장에 압축 — v2-3)
+     표 살리고, 핵심 강점은 더 잘 보이게
+     ───────────────────────────────────────── */
+  .diff-card-compact {
+    border: 1px solid #E5E5E5;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background: #FFFFFF;
+  }
+  .diff-card-compact:last-child { margin-bottom: 0; }
+  .compact-head {
+    display: grid;
+    grid-template-columns: 26px 64px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .compact-head.no-logo { grid-template-columns: 26px 1fr; }
+  .compact-head .diff-num { width: 24px; height: 24px; font-size: 9.5pt; }
+  .compact-head .compact-logo {
+    width: 64px; height: 32px;
+    display:flex; align-items:center; justify-content:center;
+    background:#FFFFFF; border:1px solid #EAEAEA; border-radius:3px;
+    padding:3px 5px;
+  }
+  .compact-head .compact-logo img { max-width:100%; max-height:100%; object-fit:contain; }
+  .compact-head .compact-title-block .compact-category {
+    font-size: 7pt; font-weight: 600; color: #8A8A8A;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1px;
+  }
+  .compact-head .compact-title-block .compact-title {
+    font-size: 11pt; font-weight: 700; color: #2A2A2E;
+    letter-spacing: -0.015em; line-height: 1.2;
+  }
+  .compact-head .compact-title-block .compact-title small {
+    font-size: 7.5pt; font-weight: 400; color: #6A6A6A; margin-left: 6px;
+  }
+  .compact-head .compact-tag {
+    font-size: 7.5pt; color: #5A5A5A;
+    background: #F5F5F5;
+    padding: 4px 9px;
+    border-radius: 3px;
+    border: 1px solid #E5E5E5;
+    white-space: nowrap;
+  }
+  .compact-head .compact-tag strong { color: #B85540; font-weight: 700; }
+
+  /* 압축 표 + 사진 2단 그리드 (좌: 표, 우: 사진) */
+  .compact-body {
+    display: block;
+    margin-bottom: 12px;
+  }
+  /* 압축 표 — 기존 diff-spec 더 작게 */
+  .compact-body table.diff-spec {
+    margin: 0;
+    font-size: 7.5pt;
+  }
+  .compact-body table.diff-spec th,
+  .compact-body table.diff-spec td {
+    padding: 5px 8px !important;
+    line-height: 1.35 !important;
+  }
+  .compact-body table.diff-spec thead th {
+    font-size: 7pt !important;
+    padding: 4px 8px !important;
+  }
+  .compact-body table.diff-spec tbody th {
+    font-size: 7pt !important;
+  }
+  .compact-photo {
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid #EAEAEA;
+    background: #FAFAFA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .compact-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 핵심 강점 — 한 줄 pill 태그들 */
+  .compact-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px 0;
+    font-size: 8pt;
+    color: #2A2A2E;
+    align-items: center;
+  }
+  .compact-pills .pills-label {
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #8A8A8A;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-right: 2px;
+  }
+  .compact-pills li {
+    padding: 3px 10px;
+    background: #F2F2F2;
+    border-radius: 9999px;
+    line-height: 1.3;
+  }
+  .compact-pills li strong { color: #2A2A2E; font-weight: 700; }
+
+  /* 영향 라인 (다크) — 가장 강조되어야 할 영역 */
+  .compact-impact {
+    padding: 14px 18px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 4px;
+    font-size: 10pt;
+    line-height: 1.4;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .compact-impact .vs-arrow {
+    color: #888888;
+    font-size: 14pt;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .compact-impact .impact-side {
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+  .compact-impact .impact-side strong {
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+  .compact-impact .impact-good { text-align: right; }
+
+  /* 부품 비교용: 사진(좌) + 불릿(우) 2단 */
+  .parts-detail {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .parts-photo {
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #EAEAEA;
+    background: #FAFAFA;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .parts-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .parts-why {
+    padding: 12px 14px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+  }
+
+  /* 인과 흐름 비교 (알루미늄용 — 일반 vs 컬렉트 메커니즘 나란히) */
+  .why-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 8pt;
+    color: #2A2A2E;
+  }
+  .why-compare-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .why-compare-col-head {
+    font-size: 7.5pt;
+    font-weight: 700;
+    color: #8A8A8A;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+  .why-compare .step {
+    padding: 7px 10px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 3px;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .why-compare .step strong { color: #2A2A2E; font-weight: 600; }
+  .why-compare .arrow {
+    text-align: center;
+    color: #B0B0B0;
+    font-size: 10pt;
+    line-height: 1;
+    margin: 1px 0;
+  }
+
+  /* "그래서 일상에서" 전체 너비 박스 (줄글용) */
+  .real-fullwidth {
+    padding: 12px 14px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  /* 다크 변형 (영업 멘트 자리 대체용) */
+  .real-fullwidth.dark {
+    background: #2A2A2E;
+    border-color: #2A2A2E;
+  }
+  .real-fullwidth.dark .real-label { color: rgba(255,255,255,0.55); }
+  .real-fullwidth.dark .real-body { color: #FFFFFF; font-size: 9pt; line-height: 1.65; }
+  .real-fullwidth.dark .real-body strong { color: #FFFFFF; font-weight: 700; }
+
+  /* 영업 멘트 */
+  .pitch-line {
+    padding: 12px 14px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 4px;
+    font-size: 9pt;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: -0.005em;
+  }
+  .pitch-line::before { display: none; }
+  .pitch-line em {
+    font-style: normal;
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+
+  /* 브랜드 정보 박스 (Hettich, Salice) */
+  .brand-info {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 14px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .brand-logo-circle {
+    width: 110px; height: 56px;
+    border-radius: 4px;
+    background: #FFFFFF;
+    border: 1px solid #EAEAEA;
+    display: flex; align-items: center; justify-content: center;
+    padding: 8px 10px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .brand-logo-circle img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  .brand-info-body {
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+  .brand-info-body strong { color: #2A2A2E; font-weight: 600; }
+  .brand-info-name {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+
+  /* ─────────────────────────────────────────
+     PAGE 5 ·모듈 + 도어 + 시공 + Q&A
+     ───────────────────────────────────────── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .module-card {
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+  }
+  .module-img-wrap {
+    aspect-ratio: 4 / 5;
+    background: #FAFAFA;
+    border-bottom: 1px solid #EAEAEA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .module-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+  .module-info {
+    padding: 12px 14px 14px;
+  }
+  .module-name {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 5px;
+    letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+  .module-desc {
+    font-size: 9pt;
+    font-weight: 400;
+    color: #2A2A2E;
+    line-height: 1.45;
+    margin-bottom: 7px;
+  }
+  .module-desc b { font-weight: 700; color: #2A2A2E; }
+  .module-code {
+    font-size: 7pt;
+    font-weight: 500;
+    color: #8A8A8A;
+    letter-spacing: 0.03em;
+    padding-top: 6px;
+    border-top: 1px dashed #EEEEEE;
+  }
+
+  .doors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .door-card {
+    padding: 12px 14px;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+  }
+  .door-card-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .door-chip {
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    border: 1px solid #D8D8D8;
+    flex-shrink: 0;
+  }
+  .door-chip.spp { background: #F5F1EA; }
+  .door-chip.ngys { background: #C8C5BE; }
+  .door-card-name {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    letter-spacing: -0.005em;
+  }
+  .door-card-sub {
+    font-size: 8pt;
+    color: #8A8A8A;
+    margin-top: 2px;
+  }
+  .door-card-spec {
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+  .door-card-spec b { color: #2A2A2E; font-weight: 600; }
+  .door-card-image {
+    margin-top: auto;
+    padding-top: 10px;
+    background: transparent;
+  }
+  .door-card-image img {
+    width: 100%;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    display: block;
+  }
+  .door-card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* 도어 제품 사진 (위쪽 큰 사진) */
+  .door-card-photo {
+    aspect-ratio: 4 / 3;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .door-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* 도어 특징 불릿 (왜 다른지 설명) */
+  .door-features {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    line-height: 1.45;
+  }
+  .door-features li {
+    padding-left: 12px;
+    position: relative;
+  }
+  .door-features li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 4px;
+    height: 4px;
+    background: #2A2A2E;
+    border-radius: 50%;
+  }
+  .door-features li strong { color: #2A2A2E; font-weight: 700; }
+  .door-features li small { color: #6A6A6A; font-size: 7.5pt; margin-left: 2px; }
+
+  /* ─────────────────────────────────────────
+     PAGE 8 · 한샘 vs 컬렉트 가격 비교 표 (v2-3 추가)
+     ───────────────────────────────────────── */
+  table.price-cmp {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 8.5pt;
+    margin: 12px 0 14px;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  table.price-cmp thead th {
+    background: #F5F5F5;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 8pt;
+    color: #2A2A2E;
+    border-bottom: 1px solid #DDDDDD;
+    text-align: center;
+    letter-spacing: -0.005em;
+  }
+  table.price-cmp thead th.iloom-th {
+    background: #2A2A2E;
+    color: #FFFFFF;
+  }
+  table.price-cmp thead th.hansam-th {
+    background: #ECECEC;
+    color: #2A2A2E;
+  }
+  table.price-cmp tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #F0F0F0;
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    text-align: center;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+  }
+  table.price-cmp tbody tr:last-child td { border-bottom: none; }
+  table.price-cmp tbody td.config {
+    text-align: left;
+    font-size: 8pt;
+    color: #2A2A2E;
+  }
+  table.price-cmp tbody td.size-cell {
+    font-size: 8pt;
+    color: #5A5A5A;
+    font-weight: 500;
+  }
+  table.price-cmp tbody td.size-cell strong { color: #2A2A2E; font-weight: 700; }
+  table.price-cmp tbody td.iloom-cell {
+    background: #FAFAFA;
+    font-weight: 700;
+    color: #2A2A2E;
+  }
+  /* 정가 → 할인가 표시 (셀 안에 두 줄) */
+  table.price-cmp .price-strike {
+    display: block;
+    text-decoration: line-through;
+    color: #B0B0B0;
+    font-size: 7pt;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 1px;
+  }
+  /* 한샘 라인 라벨 (셀 위) */
+  table.price-cmp .hansam-line {
+    display: block;
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #8A8A8A;
+    letter-spacing: 0.02em;
+    margin-bottom: 3px;
+    line-height: 1.1;
+  }
+  table.price-cmp .hansam-line.gaseongbi { color: #B85540; }
+  table.price-cmp .hansam-line.premium { color: #5A5A5A; }
+  table.price-cmp tr.category-row td {
+    background: #2A2A2E;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 8pt;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 6px 12px;
+  }
+
+  /* 프로모션 안내 박스 */
+  .promo-notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .promo-note {
+    padding: 10px 14px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: #2A2A2E;
+  }
+  .promo-note .promo-label {
+    display: block;
+    font-size: 7pt;
+    font-weight: 700;
+    color: #8A8A8A;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .promo-note strong { color: #2A2A2E; font-weight: 700; }
+
+  /* 핵심 메시지 박스 */
+  .price-key-msg {
+    padding: 14px 18px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 4px;
+    font-size: 10pt;
+    line-height: 1.5;
+    text-align: center;
+    font-weight: 500;
+  }
+  .price-key-msg strong { color: #FFFFFF; font-weight: 700; }
+
+  .install-box {
+    padding: 14px 18px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .install-box-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    letter-spacing: -0.005em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2A2A2E;
+  }
+  .install-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+  }
+  .install-section { display: block; }
+  .install-section + .install-section { margin-top: 0; }
+  .install-section-h {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #6B6B6B;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .install-list { list-style: none; padding: 0; margin: 0; }
+  .install-list li {
+    font-size: 8.5pt;
+    color: #2A2A2E;
+    padding: 4px 0 4px 12px;
+    line-height: 1.7;
+    position: relative;
+  }
+  .install-list li::before {
+    content: '·';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    color: #6B6B6B;
+    font-weight: 700;
+  }
+  .install-list li b { color: #2A2A2E; font-weight: 600; }
+  .install-section.full { grid-column: 1 / -1; }
+
+  /* 사이즈 규격 ·통계 카드 4개 */
+  .spec-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .spec-stat {
+    border: 1px solid #EAEAEA;
+    background: #FFFFFF;
+    border-radius: 4px;
+    padding: 12px 8px 10px;
+    text-align: center;
+  }
+  .spec-stat-num {
+    font-size: 17pt;
+    font-weight: 800;
+    color: #2A2A2E;
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  .spec-stat-unit {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #2A2A2E;
+    margin-left: 1px;
+  }
+  .spec-stat-label {
+    font-size: 7.5pt;
+    font-weight: 500;
+    color: #6B6B6B;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+  }
+  .spec-note {
+    font-size: 8pt;
+    color: #FFFFFF;
+    background: #D32F2F;
+    border: 1px solid #D32F2F;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    line-height: 1.55;
+  }
+  .spec-note + .spec-note {
+    margin-top: -10px;
+  }
+  .spec-note b { color: #FFFFFF; font-weight: 700; }
+  .spec-note .note-tag {
+    display: inline-block;
+    background: #FFFFFF;
+    color: #D32F2F;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-right: 8px;
+    text-transform: uppercase;
+    vertical-align: 1px;
+  }
+
+  /* 고객 사전 확인 ·번호 체크리스트 */
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .check-item {
+    border: 1px solid #EAEAEA;
+    background: #FFFFFF;
+    border-radius: 4px;
+    padding: 11px 14px;
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+  .check-num {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #2A2A2E;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    padding-top: 1px;
+  }
+  .check-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 3px;
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+  }
+  .check-desc {
+    font-size: 8pt;
+    color: #6B6B6B;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  /* Q&A */
+  .qa-section { margin-bottom: 14px; }
+  .qa-item {
+    margin-bottom: 12px;
+    padding: 14px 16px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 4px;
+  }
+  .qa-q {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    margin-bottom: 6px;
+    letter-spacing: -0.005em;
+  }
+  .qa-q::before {
+    content: 'Q. ';
+    color: #2A2A2E;
+    font-weight: 700;
+  }
+
+  /* ─────────────────────────────────────────
+     교육용 Q&A 구조 (Part 4 — v2-3 교육자료)
+     ───────────────────────────────────────── */
+  .qa-training {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border: 1px solid #E5E5E5;
+    border-radius: 4px;
+    background: #FFFFFF;
+  }
+  .qa-training:last-child { margin-bottom: 0; }
+  .qa-training .qa-question {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #2A2A2E;
+    letter-spacing: -0.01em;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #EEEEEE;
+    margin-bottom: 10px;
+  }
+  .qa-training .qa-question::before {
+    content: 'Q. ';
+    color: #5A5A5A;
+    font-weight: 600;
+  }
+  .qa-training .qa-block { margin-bottom: 8px; }
+  .qa-training .qa-block:last-child { margin-bottom: 0; }
+  .qa-training .qa-label {
+    display: block;
+    font-size: 6.5pt;
+    font-weight: 700;
+    color: #8A8A8A;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .qa-training .qa-core {
+    padding: 8px 12px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 3px;
+    font-size: 9pt;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+  .qa-training .qa-core strong { color: #FFFFFF; font-weight: 700; }
+  .qa-training .qa-script {
+    padding: 8px 12px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 3px;
+    font-size: 8.5pt;
+    line-height: 1.55;
+    color: #2A2A2E;
+  }
+  .qa-training .qa-script::before { content: '"'; color: #5A5A5A; }
+  .qa-training .qa-script::after { content: '"'; color: #5A5A5A; }
+  .qa-training .qa-script strong { color: #2A2A2E; font-weight: 700; }
+  .qa-training .qa-facts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    font-size: 8pt;
+  }
+  .qa-training .qa-facts li {
+    padding: 3px 9px;
+    background: #F2F2F2;
+    border-radius: 9999px;
+    line-height: 1.3;
+    color: #2A2A2E;
+  }
+  .qa-training .qa-facts li strong { color: #2A2A2E; font-weight: 700; }
+  .qa-training .qa-warning {
+    padding: 7px 12px;
+    background: #FAFAFA;
+    border: 1px solid #EAEAEA;
+    border-radius: 3px;
+    font-size: 8pt;
+    line-height: 1.5;
+    color: #5A5A5A;
+  }
+  .qa-training .qa-warning ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .qa-training .qa-warning li {
+    padding-left: 14px;
+    position: relative;
+  }
+  .qa-training .qa-warning li::before {
+    content: '×';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #B85540;
+    font-weight: 700;
+  }
+
+  .qa-a {
+    font-size: 9pt;
+    font-weight: 400;
+    color: #2A2A2E;
+    line-height: 1.7;
+  }
+  .qa-a::before {
+    content: 'A. ';
+    color: #6B6B6B;
+    font-weight: 700;
+  }
+  .qa-a strong {
+    color: #2A2A2E;
+    font-weight: 600;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 마무리 멘트 박스 */
+  .closing-pitch {
+    margin-top: 14px;
+    padding: 18px 22px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .closing-pitch-label {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #B8B8B8;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .closing-pitch-label:empty { display: none; }
+  .closing-pitch { margin-top: 0; padding: 10px 22px; }
+  .qa-training:has(+ .closing-pitch) { margin-bottom: 0; padding-bottom: 8px; }
+  .closing-pitch-body {
+    font-size: 11pt;
+    font-weight: 600;
+    line-height: 1.55;
+    letter-spacing: -0.015em;
+  }
+  .closing-pitch-body em {
+    font-style: normal;
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+
+  /* 인쇄 컨트롤 (웹 전용) */
+  .print-controls {
+    position: fixed;
+    top: 16px; right: 16px;
+    background: #2A2A2E;
+    color: #FFFFFF;
+    padding: 10px 14px;
+    border-radius: 4px;
+    z-index: 9999;
+    font-size: 10pt;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .print-controls:hover { background: #333333; }
+  @media print { .print-controls { display: none; } }
+</style>
+</head>
+<body>
+
+<button type="button" id="printBtn" class="print-controls">PDF로 저장 / 인쇄</button>
+<script>
+  document.getElementById('printBtn').addEventListener('click', function() {
+    try {
+      if (window.top && window.top !== window) {
+        try { window.top.print(); return; } catch (e) { /* cross-origin, fall through */ }
+      }
+      window.print();
+    } catch (err) {
+      alert('인쇄 다이얼로그가 차단되었습니다.\n\nCtrl + P 키를 직접 눌러서 인쇄해주세요.');
+    }
+  });
+</script>
+
+<!-- ============================================================
+     PAGE 1 ·표지
+     ============================================================ -->
+<div class="page cover">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="cover-rule"></div>
+    <div class="hero-title">
+      타사 VS 컬렉트 키큰옷장<br>
+      스펙 및 가격 비교
+    </div>
+  </div>
+
+  <div class="cover-toc">
+    <div class="cover-toc-label">목차 · CONTENTS</div>
+    <ul class="cover-toc-list">
+      <li class="cover-toc-item">
+        <span class="cover-toc-num">한눈에</span>
+        <span class="cover-toc-title">핵심 사양 + 입주박람회 견적 비교</span>
+        <span class="cover-toc-page">02</span>
+      </li>
+      <li class="cover-toc-item">
+        <span class="cover-toc-num">Part 1.</span>
+        <span class="cover-toc-title">몸통의 차이 <small>표면재</small></span>
+        <span class="cover-toc-page">03</span>
+      </li>
+      <li class="cover-toc-item">
+        <span class="cover-toc-num">Part 2.</span>
+        <span class="cover-toc-title">부품의 차이 <small>Hettich · Salice · 알루미늄</small></span>
+        <span class="cover-toc-page">04</span>
+      </li>
+      <li class="cover-toc-item">
+        <span class="cover-toc-num">Part 3.</span>
+        <span class="cover-toc-title">제품 구성 <small>모듈 6종 · 도어 · 시공</small></span>
+        <span class="cover-toc-page">05</span>
+      </li>
+      <li class="cover-toc-item">
+        <span class="cover-toc-num">Part 4.</span>
+        <span class="cover-toc-title">타사 vs 컬렉트 가격 비교</span>
+        <span class="cover-toc-page">07</span>
+      </li>
+      <li class="cover-toc-item appendix">
+        <span class="cover-toc-num">부록</span>
+        <span class="cover-toc-title">타사 비교 응대 시나리오 <small>영업 내부 교육용</small></span>
+        <span class="cover-toc-page">08</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 입주박람회 비교 가이드</span>
+    <span>Page 1 / 9 · 표지</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2 ·한눈에 비교 (스펙 + 견적 표) + 결론
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="cmp-section">
+    <div class="cmp-section-title">핵심 사양 한눈에 비교</div>
+    <table class="cmp">
+      <colgroup>
+        <col style="width:22%;">
+        <col style="width:26%;">
+        <col style="width:26%;">
+        <col style="width:26%;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-label">비교 항목</th>
+          <th class="col-hansem-basic">타사 가성비 라인</th>
+          <th class="col-hansem-prem">타사 프리미엄 라인</th>
+          <th class="col-iloom">컬렉트 키큰옷장</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>주요 마감재</th>
+          <td>CPR(코팅페이퍼)<br><small>(종이+비닐)</small></td>
+          <td>PP / LPM</td>
+          <td class="iloom"><strong>LPM</strong></td>
+        </tr>
+        <tr>
+          <th>윗판/바닥판 두께</th>
+          <td>18mm PB</td>
+          <td>18mm PB</td>
+          <td class="iloom"><strong>18.5mm</strong> PB</td>
+        </tr>
+        <tr>
+          <th>옆판 두께</th>
+          <td>18mm PB</td>
+          <td>15mm PB</td>
+          <td class="iloom"><strong>15.5mm</strong> PB</td>
+        </tr>
+        <tr>
+          <th>서랍 레일</th>
+          <td>Timing (중국)</td>
+          <td>Hettich<br><small>(독일 137년)</small></td>
+          <td class="iloom"><strong>Hettich</strong><br><small>(독일 137년)</small></td>
+        </tr>
+        <tr>
+          <th>여닫이 도어 힌지</th>
+          <td><span class="x">미명시</span></td>
+          <td>Hettich<br><small>(독일 137년)</small></td>
+          <td class="iloom"><strong>Salice</strong><br><small>(이탈리아 90년)</small></td>
+        </tr>
+        <tr>
+          <th>옷걸이봉</th>
+          <td>스틸봉</td>
+          <td>알루미늄 + 아노다이징</td>
+          <td class="iloom"><strong>알루미늄</strong> + 아노다이징<br><small>+ iloom 각인 소켓</small></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cmp-section">
+    <div class="cmp-section-title" style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;">
+      <span>입주박람회 견적 비교 ·붙박이장 3통 반 (기본장3 + 하프장1 + 서라운딩)</span>
+      <span style="font-size: 9pt; font-weight: 500; color: #6B6B6B; letter-spacing: 0;">서라운딩 포함 가격 · 폭</span>
+    </div>
+
+    <div class="config-visual">
+      <div class="config-body">
+      <div class="config-modules">
+        <div class="config-modules-inner">
+          <div class="config-side">서라운딩</div>
+          <div class="config-module">
+            <div class="config-module-img-wrap">
+              <img class="config-module-img" src="../사용 이미지본/기본장.png" alt="기본장">
+            </div>
+            <div class="config-module-label">
+              <div class="config-module-name">기본장</div>
+              <div class="config-module-spec">900폭</div>
+            </div>
+          </div>
+          <div class="config-module">
+            <div class="config-module-img-wrap">
+              <img class="config-module-img" src="../사용 이미지본/기본장.png" alt="기본장">
+            </div>
+            <div class="config-module-label">
+              <div class="config-module-name">기본장</div>
+              <div class="config-module-spec">900폭</div>
+            </div>
+          </div>
+          <div class="config-module">
+            <div class="config-module-img-wrap">
+              <img class="config-module-img" src="../사용 이미지본/기본장.png" alt="기본장">
+            </div>
+            <div class="config-module-label">
+              <div class="config-module-name">기본장</div>
+              <div class="config-module-spec">900폭</div>
+            </div>
+          </div>
+          <div class="config-module">
+            <div class="config-module-img-wrap">
+              <img class="config-module-img" src="../사용 이미지본/하부선반 하프장.jpg" alt="하프장">
+            </div>
+            <div class="config-module-label">
+              <div class="config-module-name">하프장</div>
+              <div class="config-module-spec">450폭</div>
+            </div>
+          </div>
+          <div class="config-side">서라운딩</div>
+        </div>
+      </div>
+      <div class="config-summary">
+        <div>
+          <div class="config-summary-label">총 폭</div>
+          <div class="config-summary-value">약 3,250mm</div>
+          <div class="config-summary-note">(900×3 + 450 + 서라운딩)</div>
+        </div>
+        <div>
+          <div class="config-summary-label">적합 평형 / 자리</div>
+          <div class="config-summary-value">30평형대 안방 옷장</div>
+          <div class="config-summary-note">(벽 길이 3.3m+ 필요)</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="price-compare">
+      <div class="price-compare-card">
+        <div class="price-compare-vendor-line"><strong>타사 프리미엄 라인</strong></div>
+        <div class="price-compare-flow">
+          <span class="price-compare-old">2,082,518원</span>
+          <span style="font-size: 9.5pt; color: #6B6B6B; margin-left: -4px;">(정가)</span>
+          <span class="price-compare-arrow">→</span>
+          <span class="price-compare-new">1,933,350원</span>
+        </div>
+      </div>
+
+      <div class="price-compare-card iloom">
+        <div class="price-compare-vendor-line"><strong>컬렉트 키큰옷장</strong> · (리디 도어 매칭시)</div>
+        <div class="price-compare-flow">
+          <span class="price-compare-old">2,033,000원</span>
+          <span style="font-size: 9.5pt; color: #6B6B6B; margin-left: -4px;">(정가)</span>
+          <span class="price-compare-arrow">→</span>
+          <span class="price-compare-new">1,933,000원</span>
+        </div>
+        <div class="price-compare-alt">스톤W 도어 <span class="strike-alt">2,064,000원</span> (정가) → 1,964,000원</div>
+      </div>
+    </div>
+
+    <div class="price-summary" style="grid-template-columns: 1fr; text-align: center; padding: 16px 20px;">
+      <div class="price-summary-text" style="font-size: 11pt; line-height: 1.6;">
+        <strong>비슷한 금액에 더 좋은 퀄리티와 마감, 소재</strong><br>
+        타사가 명시조차 안 하는 <strong>Hettich 서랍레일 · Salice 도어힌지 · LPM 마감 · 18.5mm 도어 두께</strong>가 컬렉트는 전부 기본 구성입니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 입주박람회 비교 가이드</span>
+    <span>Page 2 / 9 · 한눈에 비교</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3 ·몸통의 차이 (Part 1)
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 1 ·몸통의 차이</div>
+    <div class="page-title">옷장 표면이 5년 후에도 처음 그대로인 이유.</div>
+    <div class="page-intro">
+      옷장은 <strong>매일 옷이 스치고, 옷걸이 후크가 닿고, 손으로 만지는 가구</strong>입니다.<br>
+      표면재가 단단할수록 5년·10년 후에도 <strong>처음과 같은 모습</strong>을 유지해요.
+    </div>
+  </div>
+
+  <!-- 차별 포인트 1: 표면재 -->
+  <div class="diff-card solo">
+    <div class="diff-card-head">
+      <div class="diff-num">1</div>
+      <div class="diff-titleblock">
+        <div class="diff-category">표면재</div>
+        <div class="diff-title">LPM vs 코팅페이퍼</div>
+      </div>
+    </div>
+
+    <div class="aligned-564">
+    <table class="diff-spec">
+      <colgroup><col style="width:22%;"><col style="width:26%;"><col style="width:26%;"><col style="width:26%;"></colgroup>
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>타사 가성비 라인</th>
+          <th>타사 프리미엄 라인</th>
+          <th class="iloom-col">컬렉트 키큰옷장</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>주요 마감재</th>
+          <td>CPR(코팅페이퍼)<br><small>(종이+비닐)</small></td>
+          <td>PP / LPM</td>
+          <td class="iloom-cell"><strong>LPM</strong></td>
+        </tr>
+        <tr>
+          <th>제조 방식</th>
+          <td>본드 부착</td>
+          <td>필름 라미네이팅</td>
+          <td class="iloom-cell">고온·고압 압착</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="material-flow">
+      <div class="flow-side">
+        <div class="flow-img-wrap">
+          <img src="../사용 이미지본/PET.png" alt="PET 단면 — 냉압 본드 부착">
+        </div>
+        <div class="flow-body">
+          <div class="flow-side-name">코팅페이퍼·PET</div>
+          <ul class="flow-list">
+            <li>인쇄된 종이/필름을 <strong>본드로 부착</strong></li>
+            <li>본드가 약해지면 결국 <strong>들뜸</strong> (시간 문제)</li>
+            <li>옷걸이 후크 스침에 미세 흠집 누적</li>
+            <li><strong>5년쯤 가장자리 들뜸·누렇게 변색</strong>, 물에 부풀음</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-side flow-iloom">
+        <div class="flow-img-wrap">
+          <img src="../사용 이미지본/LPM.png" alt="LPM 단면 — 열압 일체화">
+        </div>
+        <div class="flow-body">
+          <div class="flow-side-name">LPM</div>
+          <ul class="flow-list">
+            <li><strong>고온·고압 직접 압착</strong></li>
+            <li>표면이 사실상 <strong>단단한 플라스틱</strong>처럼 일체화</li>
+            <li>손톱으로 긁어도 흠집 없음, 물걸레 OK</li>
+            <li><strong>10년 후에도 처음과 같은 색</strong> 그대로 유지</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="pitch-line">
+      "타사 가성비 라인은 <em>종이 위에 비닐 코팅</em>이에요. 옷장은 매일 옷걸이가 스치는 곳이라 5년 정도면 가장자리가 들뜨고 변색돼요. 우리는 표면이 사실상 <em>플라스틱처럼 단단</em>해서 흠집도 안 나고 색도 안 변합니다."
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 몸통의 차이 (표면재)</span>
+    <span>Page 3 / 9 · Part 1 · 표면재</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4 ·부품의 차이: Hettich + Salice + 알루미늄
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 2 ·부품의 차이</div>
+    <div class="page-title">타사 프리미엄 가격은 부담스럽고, 가성비 라인은 못 미더우신가요?</div>
+    <div class="page-intro">
+      가구 가격의 30% 이상은 <strong>보이지 않는 부품(레일·힌지·금속)</strong>에 들어갑니다.
+      타사 가성비 라인은 부품 브랜드를 미명시하거나 저가 부품을 쓰고, 프리미엄 라인은 우리와 비슷한 수준의 프리미엄 부품을 쓰지만 가격이 크게 올라갑니다.
+      <strong>컬렉트는 가성비 라인 가격대에 BMW·벤츠 인테리어에 들어가는 독일·이탈리아 프리미엄 부품을 기본 적용합니다.</strong>
+    </div>
+  </div>
+
+  <!-- 차별 포인트 3: Hettich (압축, 표 + 사진 + 태그) -->
+  <div class="diff-card-compact">
+    <div class="compact-head">
+      <div class="diff-num">3</div>
+      <div class="compact-logo"><img src="../사용 이미지본/hettich.jpg" alt="Hettich"></div>
+      <div class="compact-title-block">
+        <div class="compact-category">서랍 레일</div>
+        <div class="compact-title">Hettich <span style="display:inline-block; font-size:8pt; padding:2px 9px; border-radius:9999px; background:#2A2A2E; color:#fff; font-weight:600; margin-left:6px; vertical-align:middle; letter-spacing:0;">가성비 가격대</span></div>
+      </div>
+    </div>
+    <div class="compact-body">
+      <table class="diff-spec">
+        <colgroup><col style="width:18%;"><col style="width:14%;"><col style="width:32%;"><col style="width:36%;"></colgroup>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>타사 가성비</th>
+            <th>타사 프리미엄</th>
+            <th class="iloom-col">컬렉트</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>부품 브랜드</th>
+            <td>Timing (중국)</td>
+            <td>Hettich (독일 137년)</td>
+            <td class="iloom-cell"><strong>Hettich</strong> (독일 137년)</td>
+          </tr>
+          <tr>
+            <th style="font-weight: 400;">제조사 자체 검증 데이터</th>
+            <td><span class="x-cell">미명시</span></td>
+            <td style="line-height: 1.75 !important;">
+              <small style="color: #2A2A2E;">
+                · 50,000회 슬라이드 개폐 테스트<br>
+                · 적용처: BMW·벤츠 인테리어 표준 부품
+              </small>
+            </td>
+            <td class="iloom-cell" style="line-height: 1.75 !important;">
+              <small style="color: #2A2A2E;">
+                · 50,000회 슬라이드 개폐 테스트<br>
+                · 적용처: BMW·벤츠 인테리어 표준 부품
+              </small>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="compact-pills">
+      <span class="pills-label">핵심 강점</span>
+      <li><strong>강철 슬라이드 + 볼베어링</strong></li>
+      <li><strong>풀 익스텐션</strong> (서랍 100%)</li>
+      <li><strong>댐핑 클로징</strong> 자동 감속</li>
+    </ul>
+    <div class="compact-impact">
+      <div class="impact-side impact-bad">
+        5년이면 <strong>헐거워지고 삐걱거림</strong>
+      </div>
+      <div class="vs-arrow">→</div>
+      <div class="impact-side impact-good">
+        15년 매일 써도 <strong>처음 그대로</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- 차별 포인트 4: Salice (압축, 표 + 사진 + 태그) -->
+  <div class="diff-card-compact">
+    <div class="compact-head">
+      <div class="diff-num">4</div>
+      <div class="compact-logo"><img src="../사용 이미지본/salice.jpg" alt="Salice"></div>
+      <div class="compact-title-block">
+        <div class="compact-category">여닫이 도어 힌지</div>
+        <div class="compact-title">Salice <span style="display:inline-block; font-size:8pt; padding:2px 9px; border-radius:9999px; background:#2A2A2E; color:#fff; font-weight:600; margin-left:6px; vertical-align:middle; letter-spacing:0;">컬렉트 단독</span></div>
+      </div>
+    </div>
+    <div class="compact-body">
+      <table class="diff-spec">
+        <colgroup><col style="width:18%;"><col style="width:14%;"><col style="width:32%;"><col style="width:36%;"></colgroup>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>타사 가성비</th>
+            <th>타사 프리미엄</th>
+            <th class="iloom-col">컬렉트</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>부품 브랜드</th>
+            <td><span class="x-cell">미명시</span></td>
+            <td>Hettich (독일 137년)</td>
+            <td class="iloom-cell"><strong>Salice</strong> (이탈리아 90년)</td>
+          </tr>
+          <tr>
+            <th style="font-weight: 400;">제조사 자체 검증 데이터</th>
+            <td><span class="x-cell">미명시</span></td>
+            <td style="line-height: 1.75 !important;">
+              <small style="color: #2A2A2E;">
+                · 80,000회 개폐 테스트<br>
+                · 적용처: 유럽 가구 표준 부품
+              </small>
+            </td>
+            <td class="iloom-cell" style="line-height: 1.75 !important;">
+              <small style="color: #2A2A2E;">
+                · <strong>200,000회</strong> 개폐 테스트<br>
+                · 적용처: 유럽 고가 키친·옷장 표준 부품
+              </small>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="compact-pills">
+      <span class="pills-label">핵심 강점</span>
+      <li><strong>댐핑(soft-close)</strong> 마지막 5cm 자동 감속</li>
+      <li><strong>3D 정밀 조절</strong> (좌우·상하·앞뒤)</li>
+      <li>시공 후 <strong>처짐 보정</strong> 가능</li>
+    </ul>
+    <div class="compact-impact">
+      <div class="impact-side impact-bad">
+        1~2년이면 <strong>도어가 기울고 틈이 벌어짐</strong>
+      </div>
+      <div class="vs-arrow">→</div>
+      <div class="impact-side impact-good">
+        18년 사용해도 <strong>도어 라인 그대로</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- 차별 포인트 5: 알루미늄 옷걸이봉 (압축, 표 + 사진 + 태그) -->
+  <div class="diff-card-compact">
+    <div class="compact-head no-logo">
+      <div class="diff-num">5</div>
+      <div class="compact-title-block">
+        <div class="compact-category">옷걸이봉</div>
+        <div class="compact-title">알루미늄 100% <span style="display:inline-block; font-size:8pt; padding:2px 9px; border-radius:9999px; background:#2A2A2E; color:#fff; font-weight:600; margin-left:6px; vertical-align:middle; letter-spacing:0;">iloom 각인 정품</span></div>
+      </div>
+    </div>
+    <div class="compact-body">
+      <table class="diff-spec">
+        <colgroup><col style="width:18%;"><col style="width:14%;"><col style="width:32%;"><col style="width:36%;"></colgroup>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>타사 가성비</th>
+            <th>타사 프리미엄</th>
+            <th class="iloom-col">컬렉트</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>소재</th>
+            <td>스틸봉</td>
+            <td>알루미늄 + 아노다이징</td>
+            <td class="iloom-cell"><strong>알루미늄</strong> + 아노다이징<br><strong style="color:#2A2A2E;">+ iloom 각인 소켓</strong> <small style="color:#6B6B6B;">(정품 보증)</small></td>
+          </tr>
+          <tr>
+            <th>녹</th>
+            <td>녹 발생 가능</td>
+            <td>녹 자체가 없음</td>
+            <td class="iloom-cell">녹 자체가 없음</td>
+          </tr>
+          <tr>
+            <th>표면</th>
+            <td>거칠음<br><small>옷걸이 긁힘</small></td>
+            <td>매끈<br><small>옷걸이를 봉에서 부드럽게 뺄 수 있음</small></td>
+            <td class="iloom-cell">매끈<br><small>옷걸이를 봉에서 부드럽게 뺄 수 있음</small></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="compact-pills">
+      <span class="pills-label">핵심 강점</span>
+      <li><strong>비철금속</strong> · 녹 자체 발생 X</li>
+      <li>표면 <strong>균일·매끈</strong> · 옷 후크 안 긁힘</li>
+      <li>알루미늄에 <strong>iloom 로고 각인</strong></li>
+    </ul>
+    <div class="compact-impact">
+      <div class="impact-side impact-bad">
+        페인트 벗겨지면 <strong>옷에 갈색 녹 자국</strong>
+      </div>
+      <div class="vs-arrow">→</div>
+      <div class="impact-side impact-good">
+        고급 의류·코트·정장 <strong>안심하고 걸기</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 부품의 차이 (Hettich + Salice + 알루미늄)</span>
+    <span>Page 4 / 9 · Part 2</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5 ·모듈 + 도어 + 시공 + 한샘 응대 시나리오
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 3 ·제품 구성</div>
+    <div class="page-title">키큰옷장은 이렇게 구성됩니다.</div>
+  </div>
+
+  <h3 style="font-size:11pt; font-weight:600; color:#2A2A2E; margin-bottom:8px; letter-spacing:-0.005em;">모듈 6종 ·900/1000폭 4종 + 450/500폭 2종</h3>
+  <div class="module-grid">
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0040A-BRC-1.jpg" alt="기본장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">기본장</div>
+        <div class="module-desc">옷걸이 2단 · 긴 옷 + 짧은 옷</div>
+        <div class="module-code">900폭 IFW0040A · 1000폭 IFW0041A</div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0042A-BRC-1.jpg" alt="긴장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">긴장</div>
+        <div class="module-desc">옷걸이 1단 · 코트·패딩·원피스 전용</div>
+        <div class="module-code">900폭 IFW0042A · 1000폭 IFW0043A</div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0044A-BRC-1.jpg" alt="속서랍 옷장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">속서랍 옷장</div>
+        <div class="module-desc">옷걸이 1단 + 속서랍 2단</div>
+        <div class="module-code">900폭 IFW0044A · 1000폭 IFW0045A</div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0046A-BRC-1.jpg" alt="서랍 옷장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">서랍 옷장</div>
+        <div class="module-desc">옷걸이 1단 + 외부 서랍 3단</div>
+        <div class="module-code">900폭 IFW0046A · 1000폭 IFW0047A</div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0048A-BRC-1.jpg" alt="하부선반 하프장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">하부선반 하프장</div>
+        <div class="module-desc">옷걸이 1단 + 하부 수납 선반</div>
+        <div class="module-code">450폭 IFW0048A · 500폭 IFW0049A</div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-img-wrap">
+        <img class="module-img" src="https://iloomproduct.fursys.com/wp-content/uploads/2026/01/IFW0050A-BRC-3.jpg" alt="멀티선반 하프장">
+      </div>
+      <div class="module-info">
+        <div class="module-name">멀티선반 하프장</div>
+        <div class="module-desc">선반 8단 · 옷걸이 없음 (수납 전용)</div>
+        <div class="module-code">450폭 IFW0050A · 500폭 IFW0051A</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 제품 구성 (모듈 6종)</span>
+    <span>Page 5 / 9 · 제품 구성 — 모듈</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6 ·도어 옵션 + 시공 안내
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 3 ·제품 구성</div>
+    <div class="page-title">도어 옵션과 시공 안내.</div>
+  </div>
+
+  <h3 style="font-size:11pt; font-weight:600; color:#2A2A2E; margin-bottom:8px; letter-spacing:-0.005em;">도어 옵션 ·2종 여닫이 전용</h3>
+  <div class="doors">
+    <div class="door-card">
+      <div class="door-card-head">
+        <div class="door-chip spp"></div>
+        <div>
+          <div class="door-card-name">리디 도어 (SPP)</div>
+          <div class="door-card-sub">심플리 화이트 · 무광 새틴</div>
+        </div>
+      </div>
+      <div class="door-card-photo">
+        <img src="../사용 이미지본/리디도어 핸드리스.jpg" alt="리디 도어">
+      </div>
+      <ul class="door-features">
+        <li><strong>디자인</strong> · 핸드리스 + 곡면 커팅 손잡이부 (손이 닿는 부분이 곡면으로 마감되어 오래 사용해도 편안)</li>
+        <li><strong>색상</strong> · 따뜻한 화이트 톤 (옅은 회색빛을 은은하게 머금은 화이트)</li>
+        <li><strong>질감 및 마감</strong> · 무광 새틴 (차분하고 고급스러운 표면에 부드러운 새틴 감촉)</li>
+        <li><strong>소재</strong> · MDF + PP + LPM 18.5t</li>
+      </ul>
+    </div>
+    <div class="door-card">
+      <div class="door-card-head">
+        <div class="door-chip ngys"></div>
+        <div>
+          <div class="door-card-name">스톤W 도어 (NGYS)</div>
+          <div class="door-card-sub">뉴트럴 그레이 · 스톤 질감</div>
+        </div>
+      </div>
+      <div class="door-card-photo">
+        <img src="../사용 이미지본/스톤w도어.jpg" alt="스톤W 도어">
+      </div>
+      <ul class="door-features">
+        <li><strong>디자인</strong> · 알루미늄 손잡이 (메탈 포인트로 모던한 느낌)</li>
+        <li><strong>색상</strong> · 뉴트럴 그레이 톤 (화사하면서도 차분한 회색)</li>
+        <li><strong>질감 및 마감</strong> · 스톤 질감 (자연 소재 같은 표면감과 은은한 고급스러움)</li>
+        <li><strong>소재</strong> · PB + LPM 18.5t</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="install-box">
+    <div class="install-box-title">시공 전 꼭 확인할 점</div>
+
+    <div class="install-section-h"></div>
+    <div class="spec-stats">
+      <div class="spec-stat">
+        <div><span class="spec-stat-num">2,272</span><span class="spec-stat-unit">mm</span></div>
+        <div class="spec-stat-label">몸통 높이<br>(기존 +96mm)</div>
+      </div>
+      <div class="spec-stat">
+        <div><span class="spec-stat-num">600</span><span class="spec-stat-unit">mm</span></div>
+        <div class="spec-stat-label">전체 깊이<br>공통</div>
+      </div>
+      <div class="spec-stat">
+        <div><span class="spec-stat-num">2,350</span><span class="spec-stat-unit">mm</span></div>
+        <div class="spec-stat-label">설치 가능<br>최소 천장높이</div>
+      </div>
+      <div class="spec-stat">
+        <div><span class="spec-stat-num">2,562</span><span class="spec-stat-unit">mm</span></div>
+        <div class="spec-stat-label">서라운딩 마감가능<br>최대 천장높이</div>
+      </div>
+    </div>
+    <div class="spec-note" style="display: flex; align-items: flex-start;">
+      <span class="note-tag" style="flex-shrink: 0;">주의</span>
+      <div>
+        천장 높이가 <b>2,522mm</b>를 초과하면 서라운딩 마감이 어려울 수 있어요.<br>
+        시공 전 천장 높이를 꼭 확인하시고, 초과될 경우 시공팀에 미리 특이사항을 전달해 주세요. <span style="color: #FFD9D9; font-size: 7.5pt; font-weight: 500;">(발통 최저 시 기준)</span>
+      </div>
+    </div>
+
+    <div class="install-section-h">고객 사전 확인 (실측 권장)</div>
+    <div class="check-grid">
+      <div class="check-item">
+        <div class="check-num">01</div>
+        <div>
+          <div class="check-title">천장 높이 실측</div>
+          <div class="check-desc">도면값과 실측값 차이 가능 · 몰딩·우물천장 주의</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">02</div>
+        <div>
+          <div class="check-title">도어 개방 동선</div>
+          <div class="check-desc">여닫이 전용 ·슬라이딩 옵션 없음</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">03</div>
+        <div>
+          <div class="check-title">콘센트 · 스위치 · 인터폰</div>
+          <div class="check-desc">위치 간섭 여부 사전 확인</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-num">04</div>
+        <div>
+          <div class="check-title">운반 동선</div>
+          <div class="check-desc">엘리베이터 · 계단 너비 · 현관 폭</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 도어 옵션 + 시공 안내</span>
+    <span>Page 6 / 9 · 제품 구성 — 도어 + 시공</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7 ·한샘 vs 컬렉트 가격 비교 표
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 4 ·가격 비교</div>
+    <div class="page-title">타사 vs 컬렉트, 가격은 거의 같습니다.</div>
+    <div class="page-intro">
+      입주박람회 견적 기준 6개 구성을 비교했습니다. <strong>가격이 비슷하다면</strong>, 보이지 않는 부품·표면재에서 한 단계 위인 컬렉트가 정답입니다.
+    </div>
+  </div>
+
+  <table class="price-cmp">
+    <colgroup>
+      <col style="width:13%">
+      <col style="width:27%">
+      <col style="width:15%">
+      <col style="width:15%">
+      <col style="width:30%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th rowspan="2">폭 · 통수</th>
+        <th rowspan="2">구성</th>
+        <th colspan="2" class="iloom-th">컬렉트 키큰옷장 (적용가)</th>
+        <th rowspan="2" class="hansam-th">타사<br><small style="font-weight:500; color:#5A5A5A;">정가 → 최대 할인</small></th>
+      </tr>
+      <tr>
+        <th class="iloom-th">리디</th>
+        <th class="iloom-th">스톤W</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="category-row">
+        <td colspan="5">붙박이장</td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>3통반</strong><br>3,600폭</td>
+        <td class="config">기본장3 + 하프장1 + 서라운딩</td>
+        <td class="iloom-cell"><span class="price-strike">2,033,000</span>1,933,000</td>
+        <td class="iloom-cell"><span class="price-strike">2,064,000</span>1,964,000</td>
+        <td>
+          <span class="hansam-line premium">타사 프리미엄 라인</span>
+          <span class="price-strike">2,082,518</span>
+          <strong>1,933,350</strong>
+        </td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>1통반</strong><br>1,800폭</td>
+        <td class="config">기본장1 + 하프장1 + 엔드측판 서라운딩</td>
+        <td class="iloom-cell">1,216,000</td>
+        <td class="iloom-cell">1,229,000</td>
+        <td>
+          <span class="hansam-line premium">타사 프리미엄 라인</span>
+          <span class="price-strike">1,106,595</span>
+          <strong>1,003,900</strong>
+        </td>
+      </tr>
+      <tr class="category-row">
+        <td colspan="5">옷장</td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>3통</strong><br>3,000폭</td>
+        <td class="config">기본장 + 긴장 + 2단 속서랍</td>
+        <td class="iloom-cell">1,600,000</td>
+        <td class="iloom-cell">1,630,000</td>
+        <td>
+          <span class="hansam-line gaseongbi">타사 가성비 라인</span>
+          <span class="price-strike">1,810,600</span>
+          <strong>1,629,540</strong>
+        </td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>3통</strong><br>3,000폭</td>
+        <td class="config">기본장 + 긴장 + 3단 서랍</td>
+        <td class="iloom-cell">1,721,000</td>
+        <td class="iloom-cell">1,711,000</td>
+        <td>
+          <span class="hansam-line gaseongbi">타사 가성비 라인</span>
+          <span class="price-strike">1,908,500</span>
+          <strong>1,717,650</strong>
+        </td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>2통</strong><br>2,800폭</td>
+        <td class="config">기본장 + 2단 속서랍</td>
+        <td class="iloom-cell">1,115,000</td>
+        <td class="iloom-cell">1,133,000</td>
+        <td>
+          <span class="hansam-line premium">타사 프리미엄 라인</span>
+          <span class="price-strike">1,305,700</span>
+          <strong>1,175,130</strong>
+        </td>
+      </tr>
+      <tr>
+        <td class="size-cell"><strong>2통</strong><br>2,800폭</td>
+        <td class="config">기본장 + 3단 서랍</td>
+        <td class="iloom-cell">1,229,000</td>
+        <td class="iloom-cell">1,212,000</td>
+        <td>
+          <span class="hansam-line premium">타사 프리미엄 라인</span>
+          <span class="price-strike">1,380,500</span>
+          <strong>1,242,450</strong>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="font-size:7.5pt; color:#8A8A8A; margin: 4px 0 14px; padding: 0 4px;">
+    * 일룸 입주 프로모션 200만 원 이상 -10만 원 · 타사 입주 프로모션 정가 → 최대 할인(100만 단위 + 옷장 5% 등) 자동 반영
+  </div>
+
+  <div class="price-key-msg">
+    "<strong>타사 가성비 라인 가격</strong>에 <strong>타사 프리미엄 라인 내구성</strong> — Hettich · Salice · LPM이 기본으로 들어갑니다."
+  </div>
+
+  <div class="page-footer">
+    <span>iloom COLLECT 키큰옷장 · 타사 vs 컬렉트 가격 비교</span>
+    <span>Page 7 / 9 · 가격 비교</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8 ·경쟁사 비교 응대 시나리오 + 마무리 멘트
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 4 ·영업 시나리오 (내부 교육자료)</div>
+    <div class="page-title">제품·가격 응대 시나리오</div>
+    <div class="page-intro">
+      ※ 본 페이지는 <strong>영업 직군 내부 교육 자료</strong>입니다 (고객 비공개). 한샘 비교 질문에 일관된 메시지로 응대하기 위한 가이드입니다.
+    </div>
+  </div>
+
+  <h3 style="font-size:11pt; font-weight:600; color:#2A2A2E; margin:0 0 8px; letter-spacing:-0.005em;">제품 · 가격 비교 응대</h3>
+
+  <!-- Q1 -->
+  <div class="qa-training">
+    <div class="qa-question">한샘이랑 비교해서 뭐가 달라요?</div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 메시지</span>
+      <div class="qa-core">한샘 가성비 라인이 <strong>카탈로그에 명시조차 안 하는 부품·표면재</strong>가 컬렉트는 전부 기본 구성입니다.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">응대 스크립트</span>
+      <div class="qa-script">겉모습은 비슷해 보여도 안에 들어가는 게 달라요. 한샘 가성비 라인은 카탈로그에 도어힌지 브랜드를 명시조차 안 해요. 컬렉트는 BMW·벤츠 표준 <strong>Hettich</strong>, 200,000회 검증된 <strong>Salice</strong>, 직접 압착 <strong>LPM 표면</strong>, <strong>알루미늄 옷걸이봉</strong>까지 전부 기본 구성이에요.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 숫자 · 근거</span>
+      <ul class="qa-facts">
+        <li>Hettich 서랍레일 <strong>50,000회</strong> 개폐 검증 (독일 137년 · BMW·벤츠 표준)</li>
+        <li>Salice 도어힌지 <strong>200,000회</strong> 개폐 검증 (이탈리아 90년)</li>
+        <li>컬렉트 LPM (고온·고압 직접 압착) / 한샘 가성비 CPR (종이+본드 부착)</li>
+        <li>윗판·바닥판 <strong>18.5mm</strong>, 옆판 <strong>15.5mm</strong> (한샘 18/15mm 대비 두꺼움)</li>
+      </ul>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">피해야 할 멘트</span>
+      <div class="qa-warning">
+        <ul>
+          <li>"한샘이 안 좋다" 식의 직접 비방 (사실 기반 비교만)</li>
+          <li>Hettich가 뭔지부터 길게 풀이 (이름 + BMW 표준만 짧게)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qa-training">
+    <div class="qa-question">한샘 1통반은 좀 더 저렴한 것 같던데요?</div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 메시지</span>
+      <div class="qa-core">1통반 단독은 그래요. 다만 1통반은 보통 <strong>자녀방·학생방용</strong>이라, 학생방 가구 통합 견적으로 보시면 객단가가 달라집니다.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">응대 스크립트</span>
+      <div class="qa-script">1통반만 단독으로 비교하면 한샘이 약 20만 원 정도 저렴한 게 맞아요. 다만 1통반은 보통 안방용이 아니라 <strong>자녀방·학생방용</strong>이라 책상·침대·옷장을 함께 보시는 경우가 많아요. 학생방 통합 패키지로 함께 보시면 일룸이 더 유리해져요. 그리고 안방에 많이 쓰시는 <strong>3통반</strong>은 한샘 프리미엄 라인과 350원 차이로 거의 같아요. 컬렉트 1,933,000원 / 한샘 1,933,350원이에요.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 숫자 · 근거</span>
+      <ul class="qa-facts">
+        <li>1통반: 한샘 프리미엄 <strong>1,003,900</strong> / 컬렉트 1,216,000 (한샘이 약 21만 저렴)</li>
+        <li>3통반: 한샘 프리미엄 <strong>1,933,350</strong> / 컬렉트 리디 <strong>1,933,000</strong> (350원 차)</li>
+        <li>2통(2,800폭) 속서랍: 한샘 프리미엄 1,175,130 / 컬렉트 <strong>1,115,000</strong> (컬렉트 6만 저렴)</li>
+      </ul>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">피해야 할 멘트</span>
+      <div class="qa-warning">
+        <ul>
+          <li>"사실은 비슷하다"고 우기기 (1통반은 한샘이 저렴한 게 사실)</li>
+          <li>1통반을 단독으로 계속 비교 (학생방 통합 패키지로 자연스럽게 전환)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>※ 본 자료는 영업 직군 내부 교육용입니다 (고객 비공개)</span>
+    <span>Page 8 / 9 · 영업 시나리오 — 비교·가격</span>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9 ·영업 시나리오 (계속) — 내구성·표면재
+     ============================================================ -->
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <div class="brand-tag">키큰옷장 ·입주박람회 영업 가이드</div>
+    </div>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title-eyebrow">Part 4 ·영업 시나리오 (내부 교육자료)</div>
+    <div class="page-title">내구성·표면재 응대 시나리오</div>
+  </div>
+
+  <h3 style="font-size:11pt; font-weight:600; color:#2A2A2E; margin:0 0 8px; letter-spacing:-0.005em;">내구성 · 표면재 응대</h3>
+
+  <!-- Q3 -->
+  <div class="qa-training">
+    <div class="qa-question">5년·10년 쓰면 어떻게 달라져요?</div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 메시지</span>
+      <div class="qa-core">한샘 가성비 라인은 <strong>5년쯤 가장자리 들뜸·변색</strong>이 시작되고, 컬렉트는 <strong>10년 후에도 처음 그대로</strong>예요.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">응대 스크립트</span>
+      <div class="qa-script">옷장은 매일 옷걸이가 스치고 도어가 열리고 서랍이 빠지잖아요. 한샘 가성비 라인의 <strong>코팅페이퍼는 종이를 본드로 붙인 것</strong>이라, 시간이 지나면 본드가 약해지면서 가장자리 들뜸·변색이 시작돼요. 컬렉트 LPM은 <strong>고온·고압으로 직접 압착</strong>한 마감이라 손톱으로 긁어도 흠집이 안 나고 물걸레로 닦아도 괜찮아요. 부품도 <strong>Hettich 50,000회</strong>, <strong>Salice 200,000회</strong> 개폐 테스트를 통과한 거라 매일 여닫아도 부드러움이 유지됩니다.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 숫자 · 근거</span>
+      <ul class="qa-facts">
+        <li>코팅페이퍼 = 종이+본드 → 5년쯤 가장자리 들뜸·변색</li>
+        <li>LPM = 고온·고압 직접 압착 → 10년 후에도 처음 색 유지</li>
+        <li>Hettich <strong>50,000회</strong> / Salice <strong>200,000회</strong> 개폐 검증</li>
+      </ul>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">피해야 할 멘트</span>
+      <div class="qa-warning">
+        <ul>
+          <li>"5년이면 망가진다" 같은 과장 (들뜸·처짐이 시작된다는 게 정확)</li>
+          <li>"오래 쓸 수 있어요" 같은 추상적 멘트 (코팅페이퍼 vs LPM, 50,000회 같은 구체로)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="qa-training">
+    <div class="qa-question">한샘도 PP우드/LPM 쓴다던데, 컬렉트랑 뭐가 달라요?</div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 메시지</span>
+      <div class="qa-core">한샘 프리미엄 라인은 <strong>PP/LPM 혼합</strong> 구성, 컬렉트는 LPM을 <strong>고온·고압으로 직접 압착</strong>한 마감이에요.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">응대 스크립트</span>
+      <div class="qa-script">PP우드도 좋은 마감이에요. 다만 한샘 프리미엄 라인은 부위별로 <strong>PP와 LPM이 혼합</strong>돼 있어요. 컬렉트는 LPM을 <strong>고온·고압으로 직접 압착</strong>해서 표면이 단단한 플라스틱처럼 강해지고, 도어 두께도 <strong>18.5mm</strong>로 두툼해요. 한샘 가성비 라인의 코팅페이퍼처럼 종이를 본드로 붙인 게 아니라서 시간이 지나도 가장자리 들뜸이 잘 생기지 않아요.</div>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">핵심 숫자 · 근거</span>
+      <ul class="qa-facts">
+        <li>한샘 가성비: 코팅페이퍼(종이+본드 부착)</li>
+        <li>한샘 프리미엄: PP/LPM 혼합 구성</li>
+        <li>컬렉트: 고온·고압 직접 압착 LPM, 도어 두께 <strong>18.5mm</strong></li>
+      </ul>
+    </div>
+    <div class="qa-block">
+      <span class="qa-label">피해야 할 멘트</span>
+      <div class="qa-warning">
+        <ul>
+          <li>"PP우드가 안 좋다" (한샘 자랑 포인트라 정면 부정 비추천)</li>
+          <li>너무 기술 용어만 (고온·고압 직접 압착이라는 핵심만 짧게)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing-pitch">
+    <div class="closing-pitch-label"></div>
+    <div class="closing-pitch-body">
+      "고객님, 옷장은 <em>5년·10년 쓰는 가구</em>잖아요.<br>
+      컬렉트 키큰옷장은 <em>BMW·벤츠 표준의 Hettich 서랍레일</em>,<br>
+      <em>200,000회 개폐 검증된 Salice 도어힌지</em>, <em>고온·고압으로 직접 압착한 LPM 마감</em>까지<br>
+      전부 기본 구성입니다."
+    </div>
+  </div>
+
+  <div class="page-footer" style="margin-top: 12px;">
+    <span>※ 본 자료는 영업 직군 내부 교육용입니다 (고객 비공개) · 2026.04 v2.0</span>
+    <span>Page 9 / 9</span>
+  </div>
+</div>
+
+
+</body>
+</html>
