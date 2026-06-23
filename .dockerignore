@@ -1,0 +1,7 @@
+.env*
+node_modules
+.git
+.next
+.omc
+scripts/textbook/output
+*.log

@@ -1,0 +1,184 @@
+[engine] scanning D:/ai-workspace/workclone/iloom-lsa ...
+[engine] verdict=caution critical=0 high=11 medium=0 low=0
+{
+  "schemaVersion": 1,
+  "target": {
+    "path": "D:\\ai-workspace\\workclone\\iloom-lsa",
+    "repo": "https://github.com/fursys-group-hub/iloom-lsa.git",
+    "framework": "next"
+  },
+  "verdict": "caution",
+  "summary": {
+    "critical": 0,
+    "high": 11,
+    "medium": 0,
+    "low": 0
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "rule": "High-Entropy String",
+      "file": ".omc/project-memory.json",
+      "line": 4,
+      "message": "암호처럼 보이는 무작위 문자열이 코드에 직접 들어 있어요. 실제 비밀번호·키라면 환경변수로 옮겨 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": ".omc/project-memory.json:4의 하드코딩된 \"High-Entropy String\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "app/my/notes/page.tsx",
+      "line": 199,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "app/my/notes/page.tsx:199의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "lib/batch-context.tsx",
+      "line": 27,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "lib/batch-context.tsx:27의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/analyze-sub-pages.mjs",
+      "line": 11,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/analyze-sub-pages.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/check-product-guide.mjs",
+      "line": 11,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/check-product-guide.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/debug-page-structure.mjs",
+      "line": 8,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/debug-page-structure.mjs:8의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/download-images.mjs",
+      "line": 22,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/download-images.mjs:22의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/fetch-all-product-guides.mjs",
+      "line": 20,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/fetch-all-product-guides.mjs:20의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/fetch-catalog.mjs",
+      "line": 13,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/fetch-catalog.mjs:13의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/fetch-product-guide.mjs",
+      "line": 11,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/fetch-product-guide.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    },
+    {
+      "severity": "high",
+      "rule": "Suspicious Var Name + Long Literal",
+      "file": "scripts/textbook/fetch-sub-pages.mjs",
+      "line": 19,
+      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
+      "inGitHistory": false,
+      "aiPrompt": "scripts/textbook/fetch-sub-pages.mjs:19의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
+    }
+  ],
+  "envVars": [
+    {
+      "name": "ADMIN_NAME",
+      "class": "runtime"
+    },
+    {
+      "name": "ADMIN_NAME_2",
+      "class": "runtime"
+    },
+    {
+      "name": "ADMIN_PASSWORD",
+      "class": "locked"
+    },
+    {
+      "name": "ADMIN_PASSWORD_2",
+      "class": "locked"
+    },
+    {
+      "name": "APP_BASE_URL",
+      "class": "runtime"
+    },
+    {
+      "name": "CRON_SECRET",
+      "class": "locked"
+    },
+    {
+      "name": "GEMINI_API_KEY",
+      "class": "locked"
+    },
+    {
+      "name": "GOOGLE_SHEETS_API_KEY",
+      "class": "locked"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "class": "build"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_URL",
+      "class": "build"
+    },
+    {
+      "name": "NOTION_PARENT_PAGE_ID",
+      "class": "runtime"
+    },
+    {
+      "name": "NOTION_TOKEN",
+      "class": "locked"
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "class": "locked"
+    },
+    {
+      "name": "TIMEINOUT_EMAIL",
+      "class": "runtime"
+    },
+    {
+      "name": "TIMEINOUT_PW",
+      "class": "runtime"
+    },
+    {
+      "name": "TIMEINOUT_WORKPLACE",
+      "class": "runtime"
+    }
+  ]
+}

@@ -33,8 +33,11 @@ const page = await ctx.newPage();
 
 const LOGIN_URL = 'https://iloomproduct.fursys.com/wp-login.php';
 await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
-await page.fill('#user_login', 'seoyeon_lee');
-await page.fill('#user_pass', 'iloomguide2020');
+const GUIDE_ID = process.env.ILOOM_GUIDE_ID;
+const GUIDE_PW = process.env.ILOOM_GUIDE_PW;
+if (!GUIDE_ID || !GUIDE_PW) throw new Error('ILOOM_GUIDE_ID, ILOOM_GUIDE_PW 환경변수를 설정해주세요.');
+await page.fill('#user_login', GUIDE_ID);
+await page.fill('#user_pass', GUIDE_PW);
 await page.click('#wp-submit');
 await page.waitForLoadState('networkidle');
 console.log('로그인 완료');

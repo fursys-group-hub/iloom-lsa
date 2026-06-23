@@ -7,8 +7,9 @@ import path from 'path';
 
 const LOGIN_URL = 'https://iloomproduct.fursys.com/wp-login.php';
 const TARGET_URL = 'https://iloomproduct.fursys.com/?p=21977';
-const ID = 'seoyeon_lee';
-const PW = 'iloomguide2020';
+const ID = process.env.ILOOM_GUIDE_ID;
+const PW = process.env.ILOOM_GUIDE_PW;
+if (!ID || !PW) throw new Error('ILOOM_GUIDE_ID, ILOOM_GUIDE_PW 환경변수를 설정해주세요.');
 
 const OUT_DIR = path.resolve('scripts/textbook/output');
 

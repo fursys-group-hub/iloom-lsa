@@ -1,0 +1,77 @@
+@@@FDH:META_PATH@@@
+<div class="meta-item"><dt>대상 폴더</dt><dd><code>D:\ai-workspace\workclone\iloom-lsa</code></dd></div>
+<div class="meta-item"><dt>저장소</dt><dd><code>https://github.com/fursys-group-hub/iloom-lsa.git</code></dd></div>
+<div class="meta-item"><dt>프레임워크</dt><dd><code>Next.js</code></dd></div>
+<div class="meta-item"><dt>검사 일시</dt><dd>2026-06-23 11:04</dd></div>
+@@@FDH:SECURITY_BADGE@@@
+<div class="status-badge caution"><span class="tag">보안</span> 주의</div>
+@@@FDH:DEPLOY_BADGE@@@
+<div class="status-badge notready"><span class="tag">배포 준비</span> 불가</div>
+@@@FDH:FINAL_LINE@@@
+❌ 배포 불가 — Dockerfile이 없어 사내 서버에 올릴 수 없어요.
+@@@FDH:SUMMARY_CARDS@@@
+<div class="count-card critical"><div class="n">1</div><div class="l">치명</div></div>
+<div class="count-card high"><div class="n">11</div><div class="l">높음</div></div>
+<div class="count-card medium"><div class="n">1</div><div class="l">중간</div></div>
+<div class="count-card low"><div class="n">0</div><div class="l">낮음</div></div>
+@@@FDH:SECURITY_FINDINGS_ROWS@@@
+<tr><td><span class="badge badge-high">높음</span></td><td><code>.omc/project-memory.json:4</code></td><td>무작위 문자열 (추정)</td><td>AI 도구 메모리 파일 내 타임스탬프로 추정돼요. 실제 비밀키가 아닐 수 있어요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>app/my/notes/page.tsx:199</code></td><td>비밀처럼 보이는 변수 (추정)</td><td>'DRAFT_KEY' 변수가 'iloom-note-draft-v2' 값을 가지고 있어요. 실제로는 브라우저 로컬 저장소 키로 추정돼요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>lib/batch-context.tsx:27</code></td><td>비밀처럼 보이는 변수 (추정)</td><td>'STORAGE_KEY' 변수가 'iloom-selected-batch' 값을 가지고 있어요. 실제로는 브라우저 로컬 저장소 키로 추정돼요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/analyze-sub-pages.mjs:11</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/check-product-guide.mjs:11</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/debug-page-structure.mjs:8</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/download-images.mjs:22</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/fetch-all-product-guides.mjs:20</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/fetch-catalog.mjs:13</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호(iloomguide2020)가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/fetch-product-guide.mjs:11</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-high">높음</span></td><td><code>scripts/textbook/fetch-sub-pages.mjs:19</code></td><td>하드코딩된 비밀번호</td><td>일룸 제품 가이드 사이트(iloomproduct.fursys.com) 로그인 비밀번호가 코드에 직접 적혀 있어요. 환경변수로 옮기고 코드에서 제거하세요.</td></tr>
+<tr><td><span class="badge badge-medium">중간</span></td><td><code>app/api/auth/route.ts</code></td><td>평문 비밀번호 비교</td><td>매장 관리자·교육생의 비밀번호를 DB에서 평문으로 꺼내 직접 비교하고 있어요. bcrypt 같은 암호화 방식으로 저장하고 검증하는 것이 좋아요.</td></tr>
+@@@FDH:SECURITY_PROMPTS@@@
+<div class="prompt-card"><div class="ph"><span class="badge badge-medium">중간</span><h3>평문 비밀번호 암호화 (app/api/auth/route.ts)</h3></div><p class="desc">아래 글을 그대로 복사해 AI 도구에 붙여넣으면 고쳐줍니다.</p><pre>app/api/auth/route.ts 파일을 열어보면 매장 관리자(manager)와 교육생(student)의 비밀번호를 DB에서 꺼내 평문으로 바로 비교하고 있어요.
+
+개선 방법:
+1. bcryptjs 패키지를 설치해주세요 (npm install bcryptjs)
+2. 비밀번호 비교 시 bcrypt.compare(입력비밀번호, DB해시값) 를 사용하세요
+3. 기존 평문 비밀번호는 마이그레이션 스크립트로 해시로 변환해야 해요
+
+단, 이 앱이 사내 내부 교육 관리 앱임을 감안해 우선순위는 중간이에요.</pre><p class="prompt-hint">복사 → AI 도구에 붙여넣기</p></div>
+@@@FDH:DEPLOY_CHECK_ROWS@@@
+<tr><td>Dockerfile</td><td><span class="check-no">❌</span></td><td>Dockerfile이 없어요. 사내 서버는 Dockerfile로만 배포할 수 있어요. 아래 복붙 프롬프트로 만드세요.</td></tr>
+<tr><td>포트 일치</td><td><span class="check-skip">➖</span></td><td>Dockerfile이 없어 확인할 수 없어요.</td></tr>
+<tr><td>시작 방법</td><td><span class="check-ok">✅</span></td><td>package.json에 'next start' 명령이 있어요.</td></tr>
+<tr><td>필수 설정값</td><td><span class="check-ok">✅</span></td><td>16개 설정값이 확인됐어요. Dockerfile 생성 후 사내 서버에 등록해야 해요.</td></tr>
+<tr><td>상태 점검(HEALTHCHECK)</td><td><span class="check-skip">➖</span></td><td>Dockerfile이 없어 확인할 수 없어요. 권장 항목이라 배포를 막지 않아요.</td></tr>
+@@@FDH:DEPLOY_PROMPTS@@@
+<div class="prompt-card"><div class="ph"><span class="badge badge-critical">치명</span><h3>Dockerfile 생성 (Next.js용)</h3></div><p class="desc">아래 글을 그대로 복사해 AI 도구에 붙여넣으면 Dockerfile을 만들어줍니다.</p><pre>이 프로젝트는 Next.js 앱입니다. 사내 서버(Coolify, 단일 컨테이너)에 배포할 수 있는 Dockerfile을 만들어주세요.
+
+요구사항:
+- Node.js 20 Alpine 기반
+- 멀티스테이지 빌드 (빌드 → 실행 분리)
+- next.config.ts에 output: 'standalone' 추가 (standalone 빌드 사용)
+- EXPOSE 3000
+- ENV PORT=3000, HOSTNAME=0.0.0.0
+- .dockerignore 파일도 함께 만들어주세요 (.env*, node_modules, .git, .next 제외)
+- HEALTHCHECK: CMD wget -qO- http://localhost:3000/ || exit 1 (30s 간격)
+
+현재 package.json scripts:
+- build: next build
+- start: next start</pre><p class="prompt-hint">복사 → AI 도구에 붙여넣기</p></div>
+@@@FDH:ENV_ROWS@@@
+<tr><td><code>ADMIN_NAME</code></td><td>서버에서만 쓰는 일반 값</td><td>슈퍼관리자 이름 — 직접 입력</td></tr>
+<tr><td><code>ADMIN_NAME_2</code></td><td>서버에서만 쓰는 일반 값</td><td>슈퍼관리자 2번째 이름 — 직접 입력 (없으면 비워도 됨)</td></tr>
+<tr><td><code>ADMIN_PASSWORD</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>슈퍼관리자 비밀번호 — 직접 입력</td></tr>
+<tr><td><code>ADMIN_PASSWORD_2</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>슈퍼관리자 2번째 비밀번호 — 직접 입력 (없으면 비워도 됨)</td></tr>
+<tr><td><code>APP_BASE_URL</code></td><td>서버에서만 쓰는 일반 값</td><td>앱이 배포될 주소 — 배포 후 주소 입력</td></tr>
+<tr><td><code>CRON_SECRET</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>자동 동기화 보안키 — 난수로 자동 생성</td></tr>
+<tr><td><code>GEMINI_API_KEY</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>Google Gemini AI 키 — Google Cloud에서 발급</td></tr>
+<tr><td><code>GOOGLE_SHEETS_API_KEY</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>구글 시트 API 키 — Google Cloud에서 발급</td></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>화면(브라우저)에 포함될 수 있음 → 비밀번호·키 넣지 말 것</td><td>Supabase 공개 키 — Supabase 대시보드에서 복사</td></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td>화면(브라우저)에 포함될 수 있음 → 비밀번호·키 넣지 말 것</td><td>Supabase 주소 — Supabase 대시보드에서 복사</td></tr>
+<tr><td><code>NOTION_PARENT_PAGE_ID</code></td><td>서버에서만 쓰는 일반 값</td><td>노션 상위 페이지 ID — 노션에서 확인</td></tr>
+<tr><td><code>NOTION_TOKEN</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>노션 API 토큰 — 노션 인테그레이션에서 발급</td></tr>
+<tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>비밀번호·키 → 안전하게 잠가서 보관(화면 노출 금지)</td><td>Supabase 관리자 키 — Supabase 대시보드에서 복사. 절대 화면에 노출 금지</td></tr>
+<tr><td><code>TIMEINOUT_EMAIL</code></td><td>서버에서만 쓰는 일반 값</td><td>타임인아웃 로그인 이메일</td></tr>
+<tr><td><code>TIMEINOUT_PW</code></td><td>서버에서만 쓰는 일반 값</td><td>타임인아웃 로그인 비밀번호</td></tr>
+<tr><td><code>TIMEINOUT_WORKPLACE</code></td><td>서버에서만 쓰는 일반 값</td><td>타임인아웃 사업장명</td></tr>
+@@@FDH:END@@@

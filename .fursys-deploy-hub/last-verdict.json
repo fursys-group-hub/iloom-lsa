@@ -1,0 +1,28 @@
+{
+  "commit": "8988de946cbd9f3e879e5c2bf06903f08047566a",
+  "branch": "main",
+  "security": "caution",
+  "deployable": false,
+  "final": "blocked",
+  "report": ".fursys-deploy-hub/security-report-20260623-1104.html",
+  "report_url": "",
+  "generated_at": "2026-06-23 11:04",
+  "env_plan": [
+    { "name": "ADMIN_NAME", "class": "runtime", "note": "ask" },
+    { "name": "ADMIN_NAME_2", "class": "runtime", "note": "ask" },
+    { "name": "ADMIN_PASSWORD", "class": "locked", "note": "ask" },
+    { "name": "ADMIN_PASSWORD_2", "class": "locked", "note": "ask" },
+    { "name": "APP_BASE_URL", "class": "runtime", "note": "public-url" },
+    { "name": "CRON_SECRET", "class": "locked", "note": "secret-gen" },
+    { "name": "GEMINI_API_KEY", "class": "locked", "note": "ask" },
+    { "name": "GOOGLE_SHEETS_API_KEY", "class": "locked", "note": "ask" },
+    { "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY", "class": "build", "note": "ask" },
+    { "name": "NEXT_PUBLIC_SUPABASE_URL", "class": "build", "note": "public-url" },
+    { "name": "NOTION_PARENT_PAGE_ID", "class": "runtime", "note": "ask" },
+    { "name": "NOTION_TOKEN", "class": "locked", "note": "ask" },
+    { "name": "SUPABASE_SERVICE_ROLE_KEY", "class": "locked", "note": "ask" },
+    { "name": "TIMEINOUT_EMAIL", "class": "runtime", "note": "ask" },
+    { "name": "TIMEINOUT_PW", "class": "runtime", "note": "ask" },
+    { "name": "TIMEINOUT_WORKPLACE", "class": "runtime", "note": "ask" }
+  ]
+}
