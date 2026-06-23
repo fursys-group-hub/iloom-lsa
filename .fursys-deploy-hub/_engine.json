@@ -1,5 +1,3 @@
-[engine] scanning D:/ai-workspace/workclone/iloom-lsa ...
-[engine] verdict=caution critical=0 high=11 medium=0 low=0
 {
   "schemaVersion": 1,
   "target": {
@@ -10,7 +8,7 @@
   "verdict": "caution",
   "summary": {
     "critical": 0,
-    "high": 11,
+    "high": 3,
     "medium": 0,
     "low": 0
   },
@@ -41,78 +39,6 @@
       "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
       "inGitHistory": false,
       "aiPrompt": "lib/batch-context.tsx:27의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/analyze-sub-pages.mjs",
-      "line": 11,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/analyze-sub-pages.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/check-product-guide.mjs",
-      "line": 11,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/check-product-guide.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/debug-page-structure.mjs",
-      "line": 8,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/debug-page-structure.mjs:8의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/download-images.mjs",
-      "line": 22,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/download-images.mjs:22의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/fetch-all-product-guides.mjs",
-      "line": 20,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/fetch-all-product-guides.mjs:20의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/fetch-catalog.mjs",
-      "line": 13,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/fetch-catalog.mjs:13의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/fetch-product-guide.mjs",
-      "line": 11,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/fetch-product-guide.mjs:11의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
-    },
-    {
-      "severity": "high",
-      "rule": "Suspicious Var Name + Long Literal",
-      "file": "scripts/textbook/fetch-sub-pages.mjs",
-      "line": 19,
-      "message": "비밀로 보이는 변수에 실제 값이 코드에 직접 적혀 있어요. 환경변수로 분리해 주세요.",
-      "inGitHistory": false,
-      "aiPrompt": "scripts/textbook/fetch-sub-pages.mjs:19의 하드코딩된 \"Suspicious Var Name + Long Literal\"을(를) 환경변수로 옮기고, 코드에서 제거한 뒤 .gitignore와 배포 환경변수 설정을 점검해줘."
     }
   ],
   "envVars": [
@@ -147,6 +73,14 @@
     {
       "name": "GOOGLE_SHEETS_API_KEY",
       "class": "locked"
+    },
+    {
+      "name": "ILOOM_GUIDE_ID",
+      "class": "runtime"
+    },
+    {
+      "name": "ILOOM_GUIDE_PW",
+      "class": "runtime"
     },
     {
       "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
