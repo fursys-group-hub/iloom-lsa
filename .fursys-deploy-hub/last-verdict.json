@@ -1,12 +1,12 @@
 {
-  "commit": "3e3b304f07a4288b908a838d51491e72e610ac92",
+  "commit": "f47bf9d47b26e6f9f937a36f4418194973c3d928",
   "branch": "main",
   "security": "caution",
   "deployable": true,
   "final": "ok",
   "report": ".fursys-deploy-hub/security-report-20260623-1146.html",
   "report_url": "",
-  "generated_at": "2026-06-23 12:29",
+  "generated_at": "2026-06-23 12:37",
   "env_plan": [
     { "name": "ADMIN_NAME", "class": "runtime", "note": "ask" },
     { "name": "ADMIN_NAME_2", "class": "runtime", "note": "ask" },
